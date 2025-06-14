@@ -13,7 +13,9 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
     billingDate: '',
     loginEmail: '',
     password: '',
-    category: 'Software'
+    category: 'Software',
+    status: 'active',
+    currency: 'USD'
   });
 
   const handleSubmit = (e) => {
@@ -34,7 +36,9 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
       billingDate: '',
       loginEmail: '',
       password: '',
-      category: 'Software'
+      category: 'Software',
+      status: 'active',
+      currency: 'USD'
     });
   };
 
@@ -82,6 +86,22 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
               />
             </div>
             <div>
+              <Label htmlFor="sub-currency">Currency</Label>
+              <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USD">US Dollar ($)</SelectItem>
+                  <SelectItem value="EUR">Euro (€)</SelectItem>
+                  <SelectItem value="RON">Romanian Lei (RON)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
               <Label htmlFor="sub-category">Category</Label>
               <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
                 <SelectTrigger>
@@ -93,6 +113,19 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
                       {category}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="sub-status">Status</Label>
+              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="paused">Paused</SelectItem>
+                  <SelectItem value="canceled">Canceled</SelectItem>
                 </SelectContent>
               </Select>
             </div>

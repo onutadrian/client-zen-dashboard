@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,8 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
     documents: [],
     links: [],
     people: [],
-    invoices: []
+    invoices: [],
+    currency: 'USD'
   });
 
   const [newDocument, setNewDocument] = useState('');
@@ -47,7 +47,8 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
       documents: [],
       links: [],
       people: [],
-      invoices: []
+      invoices: [],
+      currency: 'USD'
     });
     setNewDocument('');
     setNewLink('');
@@ -141,7 +142,7 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
           </div>
 
           {/* Pricing */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="client-price">Price *</Label>
               <Input
@@ -166,6 +167,19 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
                   <SelectItem value="week">Per Week</SelectItem>
                   <SelectItem value="month">Per Month</SelectItem>
                   <SelectItem value="project">Per Project</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="client-currency">Currency</Label>
+              <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USD">US Dollar ($)</SelectItem>
+                  <SelectItem value="EUR">Euro (€)</SelectItem>
+                  <SelectItem value="RON">Romanian Lei (RON)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

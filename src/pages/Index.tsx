@@ -3,6 +3,7 @@ import { Plus, Users, CreditCard, DollarSign, Clock, FileText, TrendingUp } from
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ClientCard from '@/components/ClientCard';
 import SubscriptionCard from '@/components/SubscriptionCard';
 import AddClientModal from '@/components/AddClientModal';
@@ -11,6 +12,8 @@ import AnalyticsSection from '@/components/AnalyticsSection';
 import EditSubscriptionModal from '@/components/EditSubscriptionModal';
 
 const Index = () => {
+  const [displayCurrency, setDisplayCurrency] = useState('USD');
+  
   const [clients, setClients] = useState([
     {
       id: 1,
@@ -30,7 +33,8 @@ const Index = () => {
         { id: 1, amount: 6750, date: "2024-06-01", status: "paid" },
         { id: 2, amount: 4500, date: "2024-05-01", status: "pending" }
       ],
-      hourEntries: []
+      hourEntries: [],
+      currency: "USD"
     }
   ]);
 
@@ -44,7 +48,9 @@ const Index = () => {
       loginEmail: "work@example.com",
       password: "••••••••",
       category: "Design",
-      totalPaid: 1200
+      totalPaid: 1200,
+      status: "active",
+      currency: "USD"
     },
     {
       id: 2,
@@ -55,7 +61,9 @@ const Index = () => {
       loginEmail: "work@example.com",
       password: "••••••••",
       category: "Design",
-      totalPaid: 600
+      totalPaid: 600,
+      status: "active",
+      currency: "USD"
     }
   ]);
 
@@ -63,6 +71,23 @@ const Index = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState(null);
+
+  const exchangeRates = {
+    USD: { USD: 1, EUR: 0.85, RON: 4.5 },
+    EUR: { USD: 1.18, EUR: 1, RON: 5.3 },
+    RON: { USD: 0.22, EUR: 0.19, RON: 1 }
+  };
+
+  const convertCurrency = (amount, fromCurrency, toCurrency) => {
+    if (fromCurrency === toCurrency) return amount;
+    return amount * exchangeRates[fromCurrency][toCurrency];
+  };
+
+  const formatCurrency = (amount, currency) => {
+    const symbols = { USD: '$', EUR: '€', RON: 'RON ' };
+    const symbol = symbols[currency] || '$';
+    return currency === 'RON' ? `${symbol}${amount.toFixed(2)}` : `${symbol}${amount.toFixed(2)}`;
+  };
 
   const addClient = (newClient: any) => {
     setClients([...clients, { ...newClient, id: Date.now(), hourEntries: [] }]);
@@ -89,16 +114,26 @@ const Index = () => {
     setShowEditSubscriptionModal(true);
   };
 
-  // Calculate analytics
+  // Calculate analytics with currency conversion
   const totalClients = clients.length;
   const activeClients = clients.filter(c => c.status === 'active').length;
   const totalHours = clients.reduce((sum, client) => sum + (client.totalHours || 0), 0);
+  
   const totalRevenue = clients.reduce((sum, client) => {
-    return sum + (client.invoices || []).reduce((invoiceSum, invoice) => {
-      return invoice.status === 'paid' ? invoiceSum + invoice.amount : invoiceSum;
+    const clientRevenue = (client.invoices || []).reduce((invoiceSum, invoice) => {
+      if (invoice.status === 'paid') {
+        const convertedAmount = convertCurrency(invoice.amount, client.currency || 'USD', displayCurrency);
+        return invoiceSum + convertedAmount;
+      }
+      return invoiceSum;
     }, 0);
+    return sum + clientRevenue;
   }, 0);
-  const monthlySubscriptionCost = subscriptions.reduce((sum, sub) => sum + (sub.price * (sub.seats || 1)), 0);
+  
+  const monthlySubscriptionCost = subscriptions.reduce((sum, sub) => {
+    const convertedPrice = convertCurrency(sub.price * (sub.seats || 1), sub.currency || 'USD', displayCurrency);
+    return sum + convertedPrice;
+  }, 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
@@ -109,7 +144,20 @@ const Index = () => {
             <h1 className="text-4xl font-bold text-slate-900 mb-2">Client Dashboard</h1>
             <p className="text-slate-600">Manage your clients, track work, and monitor revenue</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-600">Currency:</span>
+              <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USD">US Dollar ($)</SelectItem>
+                  <SelectItem value="EUR">Euro (€)</SelectItem>
+                  <SelectItem value="RON">Romanian Lei (RON)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Button onClick={() => setShowClientModal(true)} className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
               Add Client
@@ -129,6 +177,9 @@ const Index = () => {
           totalRevenue={totalRevenue}
           monthlySubscriptionCost={monthlySubscriptionCost}
           clients={clients}
+          displayCurrency={displayCurrency}
+          convertCurrency={convertCurrency}
+          formatCurrency={formatCurrency}
         />
 
         {/* Main Content Grid */}
@@ -176,7 +227,7 @@ const Index = () => {
                 Subscriptions
               </h2>
               <Badge variant="secondary" className="text-green-700 bg-green-100">
-                ${monthlySubscriptionCost.toFixed(2)}/mo
+                {formatCurrency(monthlySubscriptionCost, displayCurrency)}/mo
               </Badge>
             </div>
             

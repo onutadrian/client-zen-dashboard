@@ -9,7 +9,10 @@ const AnalyticsSection = ({
   totalHours, 
   totalRevenue, 
   monthlySubscriptionCost,
-  clients 
+  clients,
+  displayCurrency,
+  convertCurrency,
+  formatCurrency
 }) => {
   // Calculate time breakdown by client and type
   const getTimeBreakdownByClient = () => {
@@ -40,11 +43,15 @@ const AnalyticsSection = ({
     }).filter(client => client.hasTime);
   };
 
-  // Calculate revenue breakdown by client
+  // Calculate revenue breakdown by client with currency conversion
   const getRevenueBreakdownByClient = () => {
     return clients.map(client => {
       const paidAmount = client.invoices?.reduce((sum, invoice) => {
-        return invoice.status === 'paid' ? sum + invoice.amount : sum;
+        if (invoice.status === 'paid') {
+          const convertedAmount = convertCurrency(invoice.amount, client.currency || 'USD', displayCurrency);
+          return sum + convertedAmount;
+        }
+        return sum;
       }, 0) || 0;
       
       return {
@@ -80,7 +87,7 @@ const AnalyticsSection = ({
     },
     {
       title: "Total Revenue",
-      value: `$${totalRevenue.toLocaleString()}`,
+      value: formatCurrency(totalRevenue, displayCurrency),
       icon: DollarSign,
       color: "text-green-600",
       bgColor: "bg-green-100",
@@ -89,7 +96,7 @@ const AnalyticsSection = ({
     },
     {
       title: "Monthly Costs",
-      value: `$${monthlySubscriptionCost.toFixed(2)}`,
+      value: formatCurrency(monthlySubscriptionCost, displayCurrency),
       icon: CreditCard,
       color: "text-red-600",
       bgColor: "bg-red-100",
@@ -98,7 +105,7 @@ const AnalyticsSection = ({
     },
     {
       title: "Net Profit",
-      value: `$${netProfitAnnual.toLocaleString()}`,
+      value: formatCurrency(netProfitAnnual, displayCurrency),
       icon: TrendingUp,
       color: "text-emerald-600",
       bgColor: "bg-emerald-100",
@@ -160,7 +167,7 @@ const AnalyticsSection = ({
                         <div className="space-y-1">
                           {stat.details.slice(0, 2).map((client, idx) => (
                             <p key={idx} className="text-xs text-slate-600 truncate">
-                              ${client.value.toLocaleString()} from {client.name}
+                              {formatCurrency(client.value, displayCurrency)} from {client.name}
                             </p>
                           ))}
                           {stat.details.length > 2 && (
@@ -175,7 +182,7 @@ const AnalyticsSection = ({
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </div>
         );
       })}
     </div>

@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, Eye, EyeOff } from 'lucide-react';
 
 const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
@@ -15,7 +16,9 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
     loginEmail: '',
     password: '',
     category: '',
-    totalPaid: 0
+    totalPaid: 0,
+    status: 'active',
+    currency: 'USD'
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -29,7 +32,9 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
         loginEmail: subscription.loginEmail || '',
         password: subscription.password || '',
         category: subscription.category || '',
-        totalPaid: subscription.totalPaid || 0
+        totalPaid: subscription.totalPaid || 0,
+        status: subscription.status || 'active',
+        currency: subscription.currency || 'USD'
       });
     }
   }, [subscription]);
@@ -75,6 +80,35 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
                 onChange={(e) => handleChange('category', e.target.value)}
                 required
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="status">Status</Label>
+              <Select value={formData.status} onValueChange={(value) => handleChange('status', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="paused">Paused</SelectItem>
+                  <SelectItem value="canceled">Canceled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="currency">Currency</Label>
+              <Select value={formData.currency} onValueChange={(value) => handleChange('currency', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USD">US Dollar ($)</SelectItem>
+                  <SelectItem value="EUR">Euro (€)</SelectItem>
+                  <SelectItem value="RON">Romanian Lei (RON)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
