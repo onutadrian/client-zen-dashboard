@@ -41,8 +41,8 @@ const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
   };
 
   const handleCompleteTask = () => {
-    if (isHourlyClient && task.estimatedHours && !task.actualHours) {
-      // Use estimated hours as actual hours for hourly clients
+    if (isHourlyClient && task.estimatedHours) {
+      // Always use estimated hours as actual hours for hourly clients when completing
       onUpdateStatus(task.id, 'completed', task.estimatedHours);
     } else {
       onUpdateStatus(task.id, 'completed');

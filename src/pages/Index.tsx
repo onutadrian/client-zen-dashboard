@@ -163,26 +163,33 @@ const Index = () => {
         
         if (status === 'completed') {
           updatedTask.completedDate = new Date().toISOString();
-          if (actualHours) {
-            updatedTask.actualHours = actualHours;
+          
+          // If actual hours are provided or estimated hours exist, log them to the client
+          const hoursToLog = actualHours || task.estimatedHours;
+          if (hoursToLog) {
+            updatedTask.actualHours = hoursToLog;
             
-            // If it's an hourly client, add the hours to the client
             const client = clients.find(c => c.id === task.clientId);
-            if (client && client.priceType === 'hour') {
+            if (client) {
               const newHourEntry = {
                 id: Date.now(),
-                hours: actualHours,
+                hours: hoursToLog,
                 description: `Completed task: ${task.title}`,
                 date: new Date().toISOString(),
+                billed: false
               };
               
+              const updatedHourEntries = [...(client.hourEntries || []), newHourEntry];
               const updatedClient = {
                 ...client,
-                totalHours: (client.totalHours || 0) + actualHours,
-                hourEntries: [...(client.hourEntries || []), newHourEntry]
+                totalHours: updatedHourEntries.reduce((sum, entry) => sum + entry.hours, 0),
+                hourEntries: updatedHourEntries
               };
               
-              updateClient(client.id, updatedClient);
+              // Update the client immediately
+              setClients(prevClients => 
+                prevClients.map(c => c.id === client.id ? updatedClient : c)
+              );
             }
           }
         }
