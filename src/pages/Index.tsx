@@ -8,6 +8,7 @@ import SubscriptionCard from '@/components/SubscriptionCard';
 import AddClientModal from '@/components/AddClientModal';
 import AddSubscriptionModal from '@/components/AddSubscriptionModal';
 import AnalyticsSection from '@/components/AnalyticsSection';
+import EditSubscriptionModal from '@/components/EditSubscriptionModal';
 
 const Index = () => {
   const [clients, setClients] = useState([
@@ -38,37 +39,54 @@ const Index = () => {
       id: 1,
       name: "Adobe Creative Suite",
       price: 52.99,
+      seats: 2,
       billingDate: "2024-06-15",
       loginEmail: "work@example.com",
       password: "••••••••",
-      category: "Design"
+      category: "Design",
+      totalPaid: 1200
     },
     {
       id: 2,
       name: "Figma Pro",
       price: 12.00,
+      seats: 3,
       billingDate: "2024-06-20",
       loginEmail: "work@example.com",
       password: "••••••••",
-      category: "Design"
+      category: "Design",
+      totalPaid: 600
     }
   ]);
 
   const [showClientModal, setShowClientModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showEditSubscriptionModal, setShowEditSubscriptionModal] = useState(false);
+  const [selectedSubscription, setSelectedSubscription] = useState(null);
 
   const addClient = (newClient: any) => {
     setClients([...clients, { ...newClient, id: Date.now(), hourEntries: [] }]);
   };
 
   const addSubscription = (newSubscription: any) => {
-    setSubscriptions([...subscriptions, { ...newSubscription, id: Date.now() }]);
+    setSubscriptions([...subscriptions, { ...newSubscription, id: Date.now(), seats: newSubscription.seats || 1, totalPaid: 0 }]);
   };
 
   const updateClient = (clientId: number, updatedClient: any) => {
     setClients(clients.map(client => 
       client.id === clientId ? updatedClient : client
     ));
+  };
+
+  const updateSubscription = (subscriptionId: number, updatedSubscription: any) => {
+    setSubscriptions(subscriptions.map(sub => 
+      sub.id === subscriptionId ? updatedSubscription : sub
+    ));
+  };
+
+  const handleEditSubscription = (subscription: any) => {
+    setSelectedSubscription(subscription);
+    setShowEditSubscriptionModal(true);
   };
 
   // Calculate analytics
@@ -80,7 +98,7 @@ const Index = () => {
       return invoice.status === 'paid' ? invoiceSum + invoice.amount : invoiceSum;
     }, 0);
   }, 0);
-  const monthlySubscriptionCost = subscriptions.reduce((sum, sub) => sum + sub.price, 0);
+  const monthlySubscriptionCost = subscriptions.reduce((sum, sub) => sum + (sub.price * (sub.seats || 1)), 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
@@ -164,7 +182,11 @@ const Index = () => {
             
             <div className="space-y-3">
               {subscriptions.map((subscription) => (
-                <SubscriptionCard key={subscription.id} subscription={subscription} />
+                <SubscriptionCard 
+                  key={subscription.id} 
+                  subscription={subscription} 
+                  onEdit={handleEditSubscription}
+                />
               ))}
               
               {subscriptions.length === 0 && (
@@ -198,6 +220,16 @@ const Index = () => {
           isOpen={showSubscriptionModal}
           onClose={() => setShowSubscriptionModal(false)}
           onAdd={addSubscription}
+        />
+        
+        <EditSubscriptionModal 
+          subscription={selectedSubscription}
+          isOpen={showEditSubscriptionModal}
+          onClose={() => {
+            setShowEditSubscriptionModal(false);
+            setSelectedSubscription(null);
+          }}
+          onUpdate={updateSubscription}
         />
       </div>
     </div>

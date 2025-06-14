@@ -3,10 +3,10 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Eye, EyeOff, Mail, CreditCard } from 'lucide-react';
+import { Calendar, Eye, EyeOff, Mail, CreditCard, Edit, Users } from 'lucide-react';
 import { useState } from 'react';
 
-const SubscriptionCard = ({ subscription }) => {
+const SubscriptionCard = ({ subscription, onEdit }) => {
   const [showPassword, setShowPassword] = useState(false);
   
   const getDaysUntilBilling = () => {
@@ -28,6 +28,9 @@ const SubscriptionCard = ({ subscription }) => {
   };
 
   const billingStatus = getBillingStatus();
+  const totalPaid = subscription.totalPaid || 0;
+  const seats = subscription.seats || 1;
+  const totalPrice = subscription.price * seats;
 
   return (
     <Card className={`hover:shadow-md transition-all duration-200 ${isOverdue ? 'border-red-200 bg-red-50' : ''}`}>
@@ -35,13 +38,39 @@ const SubscriptionCard = ({ subscription }) => {
         <div className="space-y-3">
           {/* Header */}
           <div className="flex items-start justify-between">
-            <div>
-              <h4 className="font-semibold text-slate-800">{subscription.name}</h4>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="font-semibold text-slate-800">{subscription.name}</h4>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onEdit(subscription)}
+                  className="h-6 w-6 p-0 opacity-60 hover:opacity-100"
+                >
+                  <Edit className="w-3 h-3" />
+                </Button>
+              </div>
               <p className="text-sm text-slate-600">{subscription.category}</p>
             </div>
-            <div className="text-right">
-              <div className="text-lg font-bold text-slate-800">${subscription.price}</div>
+            <div className="text-right ml-4">
+              <div className="text-lg font-bold text-slate-800">${totalPrice.toFixed(2)}</div>
               <div className="text-xs text-slate-500">per month</div>
+              {seats > 1 && (
+                <div className="text-xs text-slate-600 flex items-center justify-end mt-1">
+                  <Users className="w-3 h-3 mr-1" />
+                  {seats} seats
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Total Paid */}
+          <div className="flex items-center justify-between py-2 px-3 bg-blue-50 rounded-lg">
+            <div className="text-sm text-slate-600">
+              <span className="font-medium">Total Paid:</span>
+            </div>
+            <div className="text-sm font-semibold text-blue-800">
+              ${totalPaid.toLocaleString()}
             </div>
           </div>
 
