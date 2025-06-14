@@ -26,11 +26,37 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
   const [newDocument, setNewDocument] = useState({ name: '', url: '', type: 'upload' });
   const [newLink, setNewLink] = useState('');
   const [newPerson, setNewPerson] = useState({ name: '', email: '', title: '' });
-  const [newInvoice, setNewInvoice] = useState({ amount: '', date: '', status: 'pending', url: '' });
+  const [newInvoice, setNewInvoice] = useState({ amount: '', date: '', status: 'pending', url: '', currency: 'USD' });
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+    
+    if (!formData.name?.trim()) {
+      newErrors.name = 'Client name is required';
+    }
+    
+    if (!formData.price || formData.price <= 0) {
+      newErrors.price = 'Price must be greater than 0';
+    }
+    
+    if (!formData.priceType) {
+      newErrors.priceType = 'Price type is required';
+    }
+    
+    if (!formData.status) {
+      newErrors.status = 'Status is required';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSave = () => {
-    onSave(formData);
-    onClose();
+    if (validateForm()) {
+      onSave(formData);
+      onClose();
+    }
   };
 
   const addDocument = () => {
@@ -69,11 +95,18 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
 
   const addPerson = () => {
     if (newPerson.name.trim() && newPerson.email.trim()) {
+      if (!/\S+@\S+\.\S+/.test(newPerson.email)) {
+        setErrors({...errors, personEmail: 'Please enter a valid email address'});
+        return;
+      }
       setFormData({
         ...formData,
         people: [...formData.people, { ...newPerson, id: Date.now() }]
       });
       setNewPerson({ name: '', email: '', title: '' });
+      const newErrors = {...errors};
+      delete newErrors.personEmail;
+      setErrors(newErrors);
     }
   };
 
@@ -86,6 +119,10 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
 
   const addInvoice = () => {
     if (newInvoice.amount && newInvoice.date) {
+      if (parseFloat(newInvoice.amount) <= 0) {
+        setErrors({...errors, invoiceAmount: 'Amount must be greater than 0'});
+        return;
+      }
       setFormData({
         ...formData,
         invoices: [...formData.invoices, { 
@@ -94,7 +131,10 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
           id: Date.now() 
         }]
       });
-      setNewInvoice({ amount: '', date: '', status: 'pending', url: '' });
+      setNewInvoice({ amount: '', date: '', status: 'pending', url: '', currency: 'USD' });
+      const newErrors = {...errors};
+      delete newErrors.invoiceAmount;
+      setErrors(newErrors);
     }
   };
 
@@ -119,6 +159,83 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Basic Info */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="name">Client Name *</Label>
+              <Input
+                id="name"
+                value={formData.name || ''}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Client name"
+                className={errors.name ? 'border-red-500' : ''}
+              />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+            </div>
+            <div>
+              <Label htmlFor="status">Status *</Label>
+              <select
+                id="status"
+                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ${errors.status ? 'border-red-500' : ''}`}
+                value={formData.status || ''}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              >
+                <option value="">Select status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="pending">Pending</option>
+              </select>
+              {errors.status && <p className="text-red-500 text-sm mt-1">{errors.status}</p>}
+            </div>
+          </div>
+
+          {/* Rate Information */}
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="price">Rate *</Label>
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.price || ''}
+                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                placeholder="Rate amount"
+                className={errors.price ? 'border-red-500' : ''}
+              />
+              {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+            </div>
+            <div>
+              <Label htmlFor="priceType">Rate Type *</Label>
+              <select
+                id="priceType"
+                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ${errors.priceType ? 'border-red-500' : ''}`}
+                value={formData.priceType || ''}
+                onChange={(e) => setFormData({ ...formData, priceType: e.target.value })}
+              >
+                <option value="">Select type</option>
+                <option value="hour">Per Hour</option>
+                <option value="day">Per Day</option>
+                <option value="week">Per Week</option>
+                <option value="month">Per Month</option>
+              </select>
+              {errors.priceType && <p className="text-red-500 text-sm mt-1">{errors.priceType}</p>}
+            </div>
+            <div>
+              <Label htmlFor="currency">Currency</Label>
+              <select
+                id="currency"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={formData.currency || 'USD'}
+                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+              >
+                <option value="USD">US Dollar ($)</option>
+                <option value="EUR">Euro (€)</option>
+                <option value="RON">Romanian Lei (RON)</option>
+              </select>
+            </div>
+          </div>
+
           {/* Notes */}
           <div>
             <Label htmlFor="notes">Notes</Label>
@@ -228,6 +345,7 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
                   value={newPerson.email}
                   onChange={(e) => setNewPerson({ ...newPerson, email: e.target.value })}
                   placeholder="Email"
+                  className={errors.personEmail ? 'border-red-500' : ''}
                 />
                 <Input
                   value={newPerson.title}
@@ -238,6 +356,7 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
+              {errors.personEmail && <p className="text-red-500 text-sm">{errors.personEmail}</p>}
               {formData.people.map((person: any, index: number) => (
                 <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
                   <div>
@@ -262,13 +381,15 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
           <div>
             <Label>Invoices</Label>
             <div className="space-y-3">
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-6 gap-2">
                 <Input
                   type="number"
                   step="0.01"
+                  min="0"
                   placeholder="Amount"
                   value={newInvoice.amount}
                   onChange={(e) => setNewInvoice({ ...newInvoice, amount: e.target.value })}
+                  className={errors.invoiceAmount ? 'border-red-500' : ''}
                 />
                 <Input
                   type="date"
@@ -284,6 +405,15 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
                   <option value="paid">Paid</option>
                   <option value="overdue">Overdue</option>
                 </select>
+                <select
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={newInvoice.currency}
+                  onChange={(e) => setNewInvoice({ ...newInvoice, currency: e.target.value })}
+                >
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="RON">RON</option>
+                </select>
                 <Input
                   placeholder="Invoice URL"
                   value={newInvoice.url}
@@ -293,11 +423,13 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
+              {errors.invoiceAmount && <p className="text-red-500 text-sm">{errors.invoiceAmount}</p>}
               {formData.invoices.map((invoice: any, index: number) => (
-                <div key={index} className="grid grid-cols-5 gap-2 items-center bg-slate-50 p-3 rounded-lg">
+                <div key={index} className="grid grid-cols-6 gap-2 items-center bg-slate-50 p-3 rounded-lg">
                   <Input
                     type="number"
                     step="0.01"
+                    min="0"
                     value={invoice.amount}
                     onChange={(e) => updateInvoice(index, 'amount', parseFloat(e.target.value))}
                   />
@@ -314,6 +446,15 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
                     <option value="pending">Pending</option>
                     <option value="paid">Paid</option>
                     <option value="overdue">Overdue</option>
+                  </select>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    value={invoice.currency || 'USD'}
+                    onChange={(e) => updateInvoice(index, 'currency', e.target.value)}
+                  >
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="RON">RON</option>
                   </select>
                   <div className="flex items-center space-x-2">
                     <Input
