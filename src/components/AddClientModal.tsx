@@ -4,10 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { X, Plus } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Plus, X } from 'lucide-react';
 
 const AddClientModal = ({ isOpen, onClose, onAdd }) => {
   const [formData, setFormData] = useState({
@@ -16,12 +15,12 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
     priceType: 'hour',
     status: 'active',
     notes: '',
-    totalHours: 0
+    documents: [],
+    links: [],
+    people: [],
+    invoices: []
   });
 
-  const [documents, setDocuments] = useState([]);
-  const [links, setLinks] = useState([]);
-  const [people, setPeople] = useState([]);
   const [newDocument, setNewDocument] = useState('');
   const [newLink, setNewLink] = useState('');
   const [newPerson, setNewPerson] = useState({ name: '', email: '', title: '' });
@@ -31,11 +30,7 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
     const clientData = {
       ...formData,
       price: parseFloat(formData.price) || 0,
-      totalHours: parseInt(formData.totalHours) || 0,
-      documents,
-      links,
-      people,
-      invoices: []
+      totalHours: 0
     };
     onAdd(clientData);
     resetForm();
@@ -49,11 +44,11 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
       priceType: 'hour',
       status: 'active',
       notes: '',
-      totalHours: 0
+      documents: [],
+      links: [],
+      people: [],
+      invoices: []
     });
-    setDocuments([]);
-    setLinks([]);
-    setPeople([]);
     setNewDocument('');
     setNewLink('');
     setNewPerson({ name: '', email: '', title: '' });
@@ -61,35 +56,53 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
 
   const addDocument = () => {
     if (newDocument.trim()) {
-      setDocuments([...documents, newDocument.trim()]);
+      setFormData({
+        ...formData,
+        documents: [...formData.documents, newDocument.trim()]
+      });
       setNewDocument('');
     }
   };
 
+  const removeDocument = (index) => {
+    setFormData({
+      ...formData,
+      documents: formData.documents.filter((_, i) => i !== index)
+    });
+  };
+
   const addLink = () => {
     if (newLink.trim()) {
-      setLinks([...links, newLink.trim()]);
+      setFormData({
+        ...formData,
+        links: [...formData.links, newLink.trim()]
+      });
       setNewLink('');
     }
   };
 
+  const removeLink = (index) => {
+    setFormData({
+      ...formData,
+      links: formData.links.filter((_, i) => i !== index)
+    });
+  };
+
   const addPerson = () => {
-    if (newPerson.name && newPerson.email) {
-      setPeople([...people, { ...newPerson }]);
+    if (newPerson.name.trim() && newPerson.email.trim()) {
+      setFormData({
+        ...formData,
+        people: [...formData.people, { ...newPerson }]
+      });
       setNewPerson({ name: '', email: '', title: '' });
     }
   };
 
-  const removeDocument = (index) => {
-    setDocuments(documents.filter((_, i) => i !== index));
-  };
-
-  const removeLink = (index) => {
-    setLinks(links.filter((_, i) => i !== index));
-  };
-
   const removePerson = (index) => {
-    setPeople(people.filter((_, i) => i !== index));
+    setFormData({
+      ...formData,
+      people: formData.people.filter((_, i) => i !== index)
+    });
   };
 
   return (
@@ -101,18 +114,19 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">Client Name *</Label>
+              <Label htmlFor="client-name">Client Name *</Label>
               <Input
-                id="name"
+                id="client-name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Enter client name"
                 required
               />
             </div>
             <div>
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="client-status">Status</Label>
               <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
                 <SelectTrigger>
                   <SelectValue />
@@ -129,18 +143,19 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
           {/* Pricing */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="price">Price *</Label>
+              <Label htmlFor="client-price">Price *</Label>
               <Input
-                id="price"
+                id="client-price"
                 type="number"
                 step="0.01"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                placeholder="0.00"
                 required
               />
             </div>
             <div>
-              <Label htmlFor="priceType">Price Type</Label>
+              <Label htmlFor="price-type">Price Type</Label>
               <Select value={formData.priceType} onValueChange={(value) => setFormData({ ...formData, priceType: value })}>
                 <SelectTrigger>
                   <SelectValue />
@@ -150,42 +165,38 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
                   <SelectItem value="day">Per Day</SelectItem>
                   <SelectItem value="week">Per Week</SelectItem>
                   <SelectItem value="month">Per Month</SelectItem>
+                  <SelectItem value="project">Per Project</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Total Hours */}
-          <div>
-            <Label htmlFor="totalHours">Total Hours Worked</Label>
-            <Input
-              id="totalHours"
-              type="number"
-              value={formData.totalHours}
-              onChange={(e) => setFormData({ ...formData, totalHours: e.target.value })}
-            />
-          </div>
-
           {/* Documents */}
           <div>
             <Label>Documents</Label>
-            <div className="flex gap-2 mb-2">
-              <Input
-                placeholder="Document name (e.g. Contract.pdf)"
-                value={newDocument}
-                onChange={(e) => setNewDocument(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addDocument())}
-              />
-              <Button type="button" onClick={addDocument} size="sm">
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {documents.map((doc, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                  {doc}
-                  <X className="w-3 h-3 cursor-pointer" onClick={() => removeDocument(index)} />
-                </Badge>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  value={newDocument}
+                  onChange={(e) => setNewDocument(e.target.value)}
+                  placeholder="Add document name or link"
+                />
+                <Button type="button" onClick={addDocument} size="sm">
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              {formData.documents.map((doc, index) => (
+                <div key={index} className="flex items-center justify-between bg-slate-50 p-2 rounded">
+                  <span className="text-sm">{doc}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeDocument(index)}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
               ))}
             </div>
           </div>
@@ -193,62 +204,74 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
           {/* Links */}
           <div>
             <Label>Relevant Links</Label>
-            <div className="flex gap-2 mb-2">
-              <Input
-                placeholder="https://example.com"
-                value={newLink}
-                onChange={(e) => setNewLink(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addLink())}
-              />
-              <Button type="button" onClick={addLink} size="sm">
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {links.map((link, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                  {link}
-                  <X className="w-3 h-3 cursor-pointer" onClick={() => removeLink(index)} />
-                </Badge>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  value={newLink}
+                  onChange={(e) => setNewLink(e.target.value)}
+                  placeholder="Add relevant link"
+                />
+                <Button type="button" onClick={addLink} size="sm">
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              {formData.links.map((link, index) => (
+                <div key={index} className="flex items-center justify-between bg-slate-50 p-2 rounded">
+                  <span className="text-sm truncate">{link}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeLink(index)}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
               ))}
             </div>
           </div>
 
           {/* People */}
           <div>
-            <Label>Team Members</Label>
-            <div className="grid grid-cols-3 gap-2 mb-2">
-              <Input
-                placeholder="Name"
-                value={newPerson.name}
-                onChange={(e) => setNewPerson({ ...newPerson, name: e.target.value })}
-              />
-              <Input
-                placeholder="Email"
-                type="email"
-                value={newPerson.email}
-                onChange={(e) => setNewPerson({ ...newPerson, email: e.target.value })}
-              />
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Title"
-                  value={newPerson.title}
-                  onChange={(e) => setNewPerson({ ...newPerson, title: e.target.value })}
-                />
-                <Button type="button" onClick={addPerson} size="sm">
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+            <Label>People</Label>
             <div className="space-y-2">
-              {people.map((person, index) => (
+              <div className="grid grid-cols-3 gap-2">
+                <Input
+                  value={newPerson.name}
+                  onChange={(e) => setNewPerson({ ...newPerson, name: e.target.value })}
+                  placeholder="Name"
+                />
+                <Input
+                  value={newPerson.email}
+                  onChange={(e) => setNewPerson({ ...newPerson, email: e.target.value })}
+                  placeholder="Email"
+                />
+                <div className="flex gap-2">
+                  <Input
+                    value={newPerson.title}
+                    onChange={(e) => setNewPerson({ ...newPerson, title: e.target.value })}
+                    placeholder="Title"
+                  />
+                  <Button type="button" onClick={addPerson} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              {formData.people.map((person, index) => (
                 <div key={index} className="flex items-center justify-between bg-slate-50 p-2 rounded">
-                  <div>
+                  <div className="text-sm">
                     <span className="font-medium">{person.name}</span>
                     {person.title && <span className="text-slate-600"> - {person.title}</span>}
-                    <div className="text-sm text-slate-500">{person.email}</div>
+                    <div className="text-xs text-slate-500">{person.email}</div>
                   </div>
-                  <X className="w-4 h-4 cursor-pointer text-slate-400 hover:text-slate-600" onClick={() => removePerson(index)} />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removePerson(index)}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -256,17 +279,16 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
 
           {/* Notes */}
           <div>
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="client-notes">Notes</Label>
             <Textarea
-              id="notes"
+              id="client-notes"
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Any additional notes about this client..."
+              placeholder="Add any relevant notes about this client"
               rows={3}
             />
           </div>
 
-          {/* Actions */}
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
