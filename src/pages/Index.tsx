@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Users, CreditCard, DollarSign, Clock, FileText, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +28,8 @@ const Index = () => {
       invoices: [
         { id: 1, amount: 6750, date: "2024-06-01", status: "paid" },
         { id: 2, amount: 4500, date: "2024-05-01", status: "pending" }
-      ]
+      ],
+      hourEntries: []
     }
   ]);
 
@@ -57,12 +57,18 @@ const Index = () => {
   const [showClientModal, setShowClientModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
-  const addClient = (newClient) => {
-    setClients([...clients, { ...newClient, id: Date.now() }]);
+  const addClient = (newClient: any) => {
+    setClients([...clients, { ...newClient, id: Date.now(), hourEntries: [] }]);
   };
 
-  const addSubscription = (newSubscription) => {
+  const addSubscription = (newSubscription: any) => {
     setSubscriptions([...subscriptions, { ...newSubscription, id: Date.now() }]);
+  };
+
+  const updateClient = (clientId: number, updatedClient: any) => {
+    setClients(clients.map(client => 
+      client.id === clientId ? updatedClient : client
+    ));
   };
 
   // Calculate analytics
@@ -120,7 +126,11 @@ const Index = () => {
             
             <div className="space-y-4">
               {clients.map((client) => (
-                <ClientCard key={client.id} client={client} />
+                <ClientCard 
+                  key={client.id} 
+                  client={client} 
+                  onUpdateClient={updateClient}
+                />
               ))}
               
               {clients.length === 0 && (
