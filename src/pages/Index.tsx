@@ -169,28 +169,29 @@ const Index = () => {
           if (hoursToLog) {
             updatedTask.actualHours = hoursToLog;
             
-            const client = clients.find(c => c.id === task.clientId);
-            if (client) {
-              const newHourEntry = {
-                id: Date.now(),
-                hours: hoursToLog,
-                description: `Completed task: ${task.title}`,
-                date: new Date().toISOString(),
-                billed: false
-              };
-              
-              const updatedHourEntries = [...(client.hourEntries || []), newHourEntry];
-              const updatedClient = {
-                ...client,
-                totalHours: updatedHourEntries.reduce((sum, entry) => sum + entry.hours, 0),
-                hourEntries: updatedHourEntries
-              };
-              
-              // Update the client immediately
-              setClients(prevClients => 
-                prevClients.map(c => c.id === client.id ? updatedClient : c)
-              );
-            }
+            // Find and update the client
+            setClients(prevClients => 
+              prevClients.map(client => {
+                if (client.id === task.clientId) {
+                  const newHourEntry = {
+                    id: Date.now(),
+                    hours: hoursToLog,
+                    description: `Completed task: ${task.title}`,
+                    date: new Date().toISOString(),
+                    billed: false
+                  };
+                  
+                  const updatedHourEntries = [...(client.hourEntries || []), newHourEntry];
+                  
+                  return {
+                    ...client,
+                    totalHours: updatedHourEntries.reduce((sum, entry) => sum + entry.hours, 0),
+                    hourEntries: updatedHourEntries
+                  };
+                }
+                return client;
+              })
+            );
           }
         }
         
