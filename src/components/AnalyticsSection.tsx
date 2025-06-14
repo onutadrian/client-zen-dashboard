@@ -182,7 +182,7 @@ const AnalyticsSection = ({
                 </div>
               </div>
             </CardContent>
-          </div>
+          </Card>
         );
       })}
     </div>
