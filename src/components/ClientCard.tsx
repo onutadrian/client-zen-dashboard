@@ -1,9 +1,8 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
 import { 
   DollarSign, 
@@ -49,6 +48,12 @@ const ClientCard = ({
   const [showEditModal, setShowEditModal] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [hourEntries, setHourEntries] = useState<HourEntry[]>(client.hourEntries || []);
+
+  // Update hour entries when client data changes
+  useEffect(() => {
+    console.log('Client hour entries updated:', client.hourEntries);
+    setHourEntries(client.hourEntries || []);
+  }, [client.hourEntries]);
   
   const getPriceDisplay = () => {
     const typeMap = {
@@ -235,6 +240,9 @@ const ClientCard = ({
         <SheetContent className="w-[600px] sm:w-[800px] overflow-y-auto">
           <SheetHeader>
             <SheetTitle>{client.name} - Details</SheetTitle>
+            <SheetDescription>
+              View and manage client information, logged hours, and project details.
+            </SheetDescription>
           </SheetHeader>
           <div className="mt-6 space-y-6">
             {/* Hour Entries */}
