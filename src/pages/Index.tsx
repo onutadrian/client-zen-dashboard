@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Plus, Users, CreditCard, DollarSign, Clock, FileText, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +11,22 @@ import AddClientModal from '@/components/AddClientModal';
 import AddSubscriptionModal from '@/components/AddSubscriptionModal';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import EditSubscriptionModal from '@/components/EditSubscriptionModal';
+import TasksSection from '@/components/TasksSection';
+
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  clientId: number;
+  clientName: string;
+  estimatedHours?: number;
+  actualHours?: number;
+  status: 'pending' | 'in-progress' | 'completed';
+  notes: string;
+  assets: string[];
+  createdDate: string;
+  completedDate?: string;
+}
 
 const Index = () => {
   const [displayCurrency, setDisplayCurrency] = useState('USD');
@@ -67,6 +84,21 @@ const Index = () => {
     }
   ]);
 
+  const [tasks, setTasks] = useState<Task[]>([
+    {
+      id: 1,
+      title: "Website Redesign",
+      description: "Complete overhaul of the company website with modern design",
+      clientId: 1,
+      clientName: "Acme Corporation",
+      estimatedHours: 40,
+      status: "in-progress",
+      notes: "Focus on mobile responsiveness and SEO optimization",
+      assets: ["https://figma.com/design-file", "Brand guidelines.pdf"],
+      createdDate: "2024-06-01",
+    }
+  ]);
+
   const [showClientModal, setShowClientModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = useState(false);
@@ -112,6 +144,53 @@ const Index = () => {
   const handleEditSubscription = (subscription: any) => {
     setSelectedSubscription(subscription);
     setShowEditSubscriptionModal(true);
+  };
+
+  const addTask = (newTask: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => {
+    const task: Task = {
+      ...newTask,
+      id: Date.now(),
+      status: 'pending',
+      createdDate: new Date().toISOString(),
+    };
+    setTasks([...tasks, task]);
+  };
+
+  const updateTask = (taskId: number, status: Task['status'], actualHours?: number) => {
+    setTasks(tasks.map(task => {
+      if (task.id === taskId) {
+        const updatedTask = { ...task, status };
+        
+        if (status === 'completed') {
+          updatedTask.completedDate = new Date().toISOString();
+          if (actualHours) {
+            updatedTask.actualHours = actualHours;
+            
+            // If it's an hourly client, add the hours to the client
+            const client = clients.find(c => c.id === task.clientId);
+            if (client && client.priceType === 'hour') {
+              const newHourEntry = {
+                id: Date.now(),
+                hours: actualHours,
+                description: `Completed task: ${task.title}`,
+                date: new Date().toISOString(),
+              };
+              
+              const updatedClient = {
+                ...client,
+                totalHours: (client.totalHours || 0) + actualHours,
+                hourEntries: [...(client.hourEntries || []), newHourEntry]
+              };
+              
+              updateClient(client.id, updatedClient);
+            }
+          }
+        }
+        
+        return updatedTask;
+      }
+      return task;
+    }));
   };
 
   // Calculate analytics with currency conversion
@@ -180,6 +259,14 @@ const Index = () => {
           displayCurrency={displayCurrency}
           convertCurrency={convertCurrency}
           formatCurrency={formatCurrency}
+        />
+
+        {/* Tasks Section */}
+        <TasksSection 
+          tasks={tasks}
+          clients={clients}
+          onAddTask={addTask}
+          onUpdateTask={updateTask}
         />
 
         {/* Main Content Grid */}

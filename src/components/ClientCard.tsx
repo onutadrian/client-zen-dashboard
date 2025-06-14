@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { 
   DollarSign, 
   Clock, 
@@ -10,13 +11,12 @@ import {
   Link as LinkIcon, 
   Users, 
   FileCheck, 
-  ChevronDown,
-  ChevronUp,
   Mail,
   ExternalLink,
   Plus,
   Edit,
-  Upload
+  Upload,
+  Eye
 } from 'lucide-react';
 import LogHoursModal from './LogHoursModal';
 import EditClientModal from './EditClientModal';
@@ -43,7 +43,6 @@ const ClientCard = ({
   convertCurrency,
   formatCurrency
 }: ClientCardProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [showLogHoursModal, setShowLogHoursModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [hourEntries, setHourEntries] = useState<HourEntry[]>(client.hourEntries || []);
@@ -148,13 +147,162 @@ const ClientCard = ({
               >
                 <Edit className="w-4 h-4" />
               </Button>
-              <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-                <CollapsibleTrigger asChild>
+              <Sheet>
+                <SheetTrigger asChild>
                   <Button variant="ghost" size="sm">
-                    {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    <Eye className="w-4 h-4" />
                   </Button>
-                </CollapsibleTrigger>
-              </Collapsible>
+                </SheetTrigger>
+                <SheetContent className="w-[600px] sm:w-[800px] overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>{client.name} - Details</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-6">
+                    {/* Hour Entries */}
+                    {hourEntries.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-slate-700 mb-3 flex items-center">
+                          <Clock className="w-4 h-4 mr-2" />
+                          Logged Hours ({hourEntries.length} entries)
+                        </h4>
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                          {hourEntries.map((entry) => (
+                            <div key={entry.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                              <div>
+                                <div className="font-medium text-slate-800">{entry.hours} hours</div>
+                                <div className="text-sm text-slate-600">{new Date(entry.date).toLocaleDateString()}</div>
+                                {entry.description && (
+                                  <div className="text-sm text-slate-500 mt-1">{entry.description}</div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Notes */}
+                    {client.notes && (
+                      <div>
+                        <h4 className="font-medium text-slate-700 mb-2 flex items-center">
+                          <FileText className="w-4 h-4 mr-2" />
+                          Notes
+                        </h4>
+                        <p className="text-slate-600 text-sm bg-slate-50 p-3 rounded-lg">{client.notes}</p>
+                      </div>
+                    )}
+
+                    {/* People */}
+                    {client.people && client.people.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-slate-700 mb-3 flex items-center">
+                          <Users className="w-4 h-4 mr-2" />
+                          Team ({client.people.length})
+                        </h4>
+                        <div className="space-y-2">
+                          {client.people.map((person: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                              <div>
+                                <div className="font-medium text-slate-800">{person.name}</div>
+                                <div className="text-sm text-slate-600">{person.title}</div>
+                              </div>
+                              <div className="flex items-center text-slate-500">
+                                <Mail className="w-4 h-4 mr-1" />
+                                <span className="text-sm">{person.email}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Documents */}
+                    {client.documents && client.documents.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-slate-700 mb-3 flex items-center">
+                          <FileText className="w-4 h-4 mr-2" />
+                          Documents ({client.documents.length})
+                        </h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          {client.documents.map((doc: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-2 bg-slate-50 rounded text-sm">
+                              <div className="flex items-center">
+                                {doc.type === 'upload' ? <Upload className="w-4 h-4 mr-2 text-slate-500" /> : <LinkIcon className="w-4 h-4 mr-2 text-slate-500" />}
+                                <span className="truncate">{doc.name || doc}</span>
+                              </div>
+                              {doc.url && (
+                                <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Links */}
+                    {client.links && client.links.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-slate-700 mb-3 flex items-center">
+                          <LinkIcon className="w-4 h-4 mr-2" />
+                          Relevant Links ({client.links.length})
+                        </h4>
+                        <div className="space-y-2">
+                          {client.links.map((link: string, index: number) => (
+                            <a 
+                              key={index}
+                              href={link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center p-2 bg-slate-50 rounded text-sm hover:bg-slate-100 transition-colors"
+                            >
+                              <ExternalLink className="w-4 h-4 mr-2 text-slate-500" />
+                              <span className="text-blue-600 hover:text-blue-800">{link}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Invoices */}
+                    {client.invoices && client.invoices.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-slate-700 mb-3 flex items-center">
+                          <FileCheck className="w-4 h-4 mr-2" />
+                          Invoices ({client.invoices.length})
+                        </h4>
+                        <div className="space-y-2">
+                          {client.invoices.map((invoice: any) => {
+                            const displayAmount = convertCurrency && formatCurrency 
+                              ? formatCurrency(convertCurrency(invoice.amount, invoice.currency || client.currency || 'USD', displayCurrency), displayCurrency)
+                              : `$${invoice.amount.toLocaleString()}`;
+                            
+                            return (
+                              <div key={invoice.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                                <div>
+                                  <div className="font-medium text-slate-800">{displayAmount}</div>
+                                  <div className="text-sm text-slate-600">{new Date(invoice.date).toLocaleDateString()}</div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <Badge className={invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                                    {invoice.status}
+                                  </Badge>
+                                  {invoice.url && (
+                                    <a href={invoice.url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
+                                      <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
           
@@ -184,155 +332,6 @@ const ClientCard = ({
             </Button>
           </div>
         </CardHeader>
-
-        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-          <CollapsibleContent>
-            <CardContent className="pt-0 space-y-6">
-              {/* Hour Entries */}
-              {hourEntries.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-slate-700 mb-3 flex items-center">
-                    <Clock className="w-4 h-4 mr-2" />
-                    Logged Hours ({hourEntries.length} entries)
-                  </h4>
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {hourEntries.map((entry) => (
-                      <div key={entry.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
-                        <div>
-                          <div className="font-medium text-slate-800">{entry.hours} hours</div>
-                          <div className="text-sm text-slate-600">{new Date(entry.date).toLocaleDateString()}</div>
-                          {entry.description && (
-                            <div className="text-sm text-slate-500 mt-1">{entry.description}</div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Notes */}
-              {client.notes && (
-                <div>
-                  <h4 className="font-medium text-slate-700 mb-2 flex items-center">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Notes
-                  </h4>
-                  <p className="text-slate-600 text-sm bg-slate-50 p-3 rounded-lg">{client.notes}</p>
-                </div>
-              )}
-
-              {/* People */}
-              {client.people && client.people.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-slate-700 mb-3 flex items-center">
-                    <Users className="w-4 h-4 mr-2" />
-                    Team ({client.people.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {client.people.map((person: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
-                        <div>
-                          <div className="font-medium text-slate-800">{person.name}</div>
-                          <div className="text-sm text-slate-600">{person.title}</div>
-                        </div>
-                        <div className="flex items-center text-slate-500">
-                          <Mail className="w-4 h-4 mr-1" />
-                          <span className="text-sm">{person.email}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Documents */}
-              {client.documents && client.documents.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-slate-700 mb-3 flex items-center">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Documents ({client.documents.length})
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {client.documents.map((doc: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-slate-50 rounded text-sm">
-                        <div className="flex items-center">
-                          {doc.type === 'upload' ? <Upload className="w-4 h-4 mr-2 text-slate-500" /> : <LinkIcon className="w-4 h-4 mr-2 text-slate-500" />}
-                          <span className="truncate">{doc.name || doc}</span>
-                        </div>
-                        {doc.url && (
-                          <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Links */}
-              {client.links && client.links.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-slate-700 mb-3 flex items-center">
-                    <LinkIcon className="w-4 h-4 mr-2" />
-                    Relevant Links ({client.links.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {client.links.map((link: string, index: number) => (
-                      <a 
-                        key={index}
-                        href={link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center p-2 bg-slate-50 rounded text-sm hover:bg-slate-100 transition-colors"
-                      >
-                        <ExternalLink className="w-4 h-4 mr-2 text-slate-500" />
-                        <span className="text-blue-600 hover:text-blue-800">{link}</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Invoices */}
-              {client.invoices && client.invoices.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-slate-700 mb-3 flex items-center">
-                    <FileCheck className="w-4 h-4 mr-2" />
-                    Invoices ({client.invoices.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {client.invoices.map((invoice: any) => {
-                      const displayAmount = convertCurrency && formatCurrency 
-                        ? formatCurrency(convertCurrency(invoice.amount, invoice.currency || client.currency || 'USD', displayCurrency), displayCurrency)
-                        : `$${invoice.amount.toLocaleString()}`;
-                      
-                      return (
-                        <div key={invoice.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
-                          <div>
-                            <div className="font-medium text-slate-800">{displayAmount}</div>
-                            <div className="text-sm text-slate-600">{new Date(invoice.date).toLocaleDateString()}</div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Badge className={invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                              {invoice.status}
-                            </Badge>
-                            {invoice.url && (
-                              <a href={invoice.url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
-                                <ExternalLink className="w-3 h-3" />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </CollapsibleContent>
-        </Collapsible>
       </Card>
 
       <LogHoursModal
