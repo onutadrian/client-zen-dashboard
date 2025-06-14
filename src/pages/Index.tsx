@@ -110,6 +110,7 @@ const Index = () => {
           totalHours={totalHours}
           totalRevenue={totalRevenue}
           monthlySubscriptionCost={monthlySubscriptionCost}
+          clients={clients}
         />
 
         {/* Main Content Grid */}
