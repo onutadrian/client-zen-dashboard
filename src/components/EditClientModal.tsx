@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -118,11 +117,27 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
   };
 
   const addInvoice = () => {
-    if (newInvoice.amount && newInvoice.date) {
-      if (parseFloat(newInvoice.amount) <= 0) {
-        setErrors({...errors, invoiceAmount: 'Amount must be greater than 0'});
-        return;
-      }
+    const newErrors = {...errors};
+    let hasErrors = false;
+
+    // Validate required fields
+    if (!newInvoice.amount || parseFloat(newInvoice.amount) <= 0) {
+      newErrors.invoiceAmount = 'Amount must be greater than 0';
+      hasErrors = true;
+    } else {
+      delete newErrors.invoiceAmount;
+    }
+
+    if (!newInvoice.date) {
+      newErrors.invoiceDate = 'Date is required';
+      hasErrors = true;
+    } else {
+      delete newErrors.invoiceDate;
+    }
+
+    setErrors(newErrors);
+
+    if (!hasErrors) {
       setFormData({
         ...formData,
         invoices: [...formData.invoices, { 
@@ -132,9 +147,6 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
         }]
       });
       setNewInvoice({ amount: '', date: '', status: 'pending', url: '', currency: 'USD' });
-      const newErrors = {...errors};
-      delete newErrors.invoiceAmount;
-      setErrors(newErrors);
     }
   };
 
@@ -395,6 +407,7 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
                   type="date"
                   value={newInvoice.date}
                   onChange={(e) => setNewInvoice({ ...newInvoice, date: e.target.value })}
+                  className={errors.invoiceDate ? 'border-red-500' : ''}
                 />
                 <select
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -423,7 +436,11 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
+              {/* Error messages */}
               {errors.invoiceAmount && <p className="text-red-500 text-sm">{errors.invoiceAmount}</p>}
+              {errors.invoiceDate && <p className="text-red-500 text-sm">{errors.invoiceDate}</p>}
+              
+              {/* Existing invoices */}
               {formData.invoices.map((invoice: any, index: number) => (
                 <div key={index} className="grid grid-cols-6 gap-2 items-center bg-slate-50 p-3 rounded-lg">
                   <Input

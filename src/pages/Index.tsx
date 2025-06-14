@@ -200,6 +200,9 @@ const Index = () => {
                   key={client.id} 
                   client={client} 
                   onUpdateClient={updateClient}
+                  displayCurrency={displayCurrency}
+                  convertCurrency={convertCurrency}
+                  formatCurrency={formatCurrency}
                 />
               ))}
               

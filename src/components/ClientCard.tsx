@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,9 +31,18 @@ interface HourEntry {
 interface ClientCardProps {
   client: any;
   onUpdateClient?: (clientId: number, updatedClient: any) => void;
+  displayCurrency?: string;
+  convertCurrency?: (amount: number, fromCurrency: string, toCurrency: string) => number;
+  formatCurrency?: (amount: number, currency: string) => string;
 }
 
-const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
+const ClientCard = ({ 
+  client, 
+  onUpdateClient, 
+  displayCurrency = 'USD',
+  convertCurrency,
+  formatCurrency
+}: ClientCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showLogHoursModal, setShowLogHoursModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -47,6 +55,13 @@ const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
       week: '/week',
       month: '/month'
     };
+    
+    if (convertCurrency && formatCurrency) {
+      const convertedPrice = convertCurrency(client.price, client.currency || 'USD', displayCurrency);
+      return `${formatCurrency(convertedPrice, displayCurrency)}${typeMap[client.priceType] || ''}`;
+    }
+    
+    // Fallback to original behavior
     return `$${client.price}${typeMap[client.priceType] || ''}`;
   };
 
@@ -93,10 +108,22 @@ const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
     }
   };
 
-  const totalInvoiceAmount = client.invoices?.reduce((sum: number, inv: any) => sum + inv.amount, 0) || 0;
+  const totalInvoiceAmount = client.invoices?.reduce((sum: number, inv: any) => {
+    if (convertCurrency) {
+      return sum + convertCurrency(inv.amount, inv.currency || client.currency || 'USD', displayCurrency);
+    }
+    return sum + inv.amount;
+  }, 0) || 0;
   const paidInvoices = client.invoices?.filter((inv: any) => inv.status === 'paid').length || 0;
   const totalInvoices = client.invoices?.length || 0;
   const totalHours = hourEntries.reduce((sum, entry) => sum + entry.hours, 0);
+
+  const formatDisplayAmount = (amount: number) => {
+    if (formatCurrency) {
+      return formatCurrency(amount, displayCurrency);
+    }
+    return `$${amount.toLocaleString()}`;
+  };
 
   return (
     <>
@@ -144,7 +171,7 @@ const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
               </div>
               <div className="flex items-center text-green-600">
                 <DollarSign className="w-4 h-4 mr-1" />
-                <span className="text-sm font-medium">${totalInvoiceAmount.toLocaleString()}</span>
+                <span className="text-sm font-medium">{formatDisplayAmount(totalInvoiceAmount)}</span>
               </div>
             </div>
             <Button 
@@ -276,24 +303,30 @@ const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
                     Invoices ({client.invoices.length})
                   </h4>
                   <div className="space-y-2">
-                    {client.invoices.map((invoice: any) => (
-                      <div key={invoice.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
-                        <div>
-                          <div className="font-medium text-slate-800">${invoice.amount.toLocaleString()}</div>
-                          <div className="text-sm text-slate-600">{new Date(invoice.date).toLocaleDateString()}</div>
+                    {client.invoices.map((invoice: any) => {
+                      const displayAmount = convertCurrency && formatCurrency 
+                        ? formatCurrency(convertCurrency(invoice.amount, invoice.currency || client.currency || 'USD', displayCurrency), displayCurrency)
+                        : `$${invoice.amount.toLocaleString()}`;
+                      
+                      return (
+                        <div key={invoice.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                          <div>
+                            <div className="font-medium text-slate-800">{displayAmount}</div>
+                            <div className="text-sm text-slate-600">{new Date(invoice.date).toLocaleDateString()}</div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge className={invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                              {invoice.status}
+                            </Badge>
+                            {invoice.url && (
+                              <a href={invoice.url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge className={invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                            {invoice.status}
-                          </Badge>
-                          {invoice.url && (
-                            <a href={invoice.url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
-                              <ExternalLink className="w-3 h-3" />
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
