@@ -12,21 +12,114 @@ interface LogHoursModalProps {
   onClose: () => void;
   onLogHours: (hours: number, description: string, date: string) => void;
   clientName: string;
+  priceType: 'hour' | 'day' | 'week' | 'month';
 }
 
-const LogHoursModal = ({ isOpen, onClose, onLogHours, clientName }: LogHoursModalProps) => {
-  const [hours, setHours] = useState('');
+const LogHoursModal = ({ isOpen, onClose, onLogHours, clientName, priceType }: LogHoursModalProps) => {
+  const [timeValue, setTimeValue] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
+  const getTimeLabel = () => {
+    switch (priceType) {
+      case 'hour':
+        return 'Hours Worked';
+      case 'day':
+        return 'Days Worked';
+      case 'week':
+        return 'Weeks Worked';
+      case 'month':
+        return 'Months Worked';
+      default:
+        return 'Time Worked';
+    }
+  };
+
+  const getTimeUnit = () => {
+    switch (priceType) {
+      case 'hour':
+        return 'hours';
+      case 'day':
+        return 'days';
+      case 'week':
+        return 'weeks';
+      case 'month':
+        return 'months';
+      default:
+        return 'units';
+    }
+  };
+
+  const getStepValue = () => {
+    switch (priceType) {
+      case 'hour':
+        return '0.25';
+      case 'day':
+        return '0.5';
+      case 'week':
+        return '0.25';
+      case 'month':
+        return '0.1';
+      default:
+        return '0.1';
+    }
+  };
+
+  const getMinValue = () => {
+    switch (priceType) {
+      case 'hour':
+        return '0.25';
+      case 'day':
+        return '0.5';
+      case 'week':
+        return '0.25';
+      case 'month':
+        return '0.1';
+      default:
+        return '0.1';
+    }
+  };
+
+  const getPlaceholder = () => {
+    switch (priceType) {
+      case 'hour':
+        return 'e.g., 2.5';
+      case 'day':
+        return 'e.g., 1.5';
+      case 'week':
+        return 'e.g., 0.5';
+      case 'month':
+        return 'e.g., 0.3';
+      default:
+        return 'e.g., 1';
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!hours || isNaN(Number(hours)) || Number(hours) <= 0) {
+    if (!timeValue || isNaN(Number(timeValue)) || Number(timeValue) <= 0) {
       return;
     }
     
-    onLogHours(Number(hours), description, date);
-    setHours('');
+    // Convert everything to hours for consistent storage
+    const convertToHours = (value: number, type: string) => {
+      switch (type) {
+        case 'hour':
+          return value;
+        case 'day':
+          return value * 8; // 8 hours per day
+        case 'week':
+          return value * 40; // 40 hours per week
+        case 'month':
+          return value * 160; // ~160 hours per month (4 weeks)
+        default:
+          return value;
+      }
+    };
+
+    const hoursEquivalent = convertToHours(Number(timeValue), priceType);
+    onLogHours(hoursEquivalent, description, date);
+    setTimeValue('');
     setDescription('');
     setDate(new Date().toISOString().split('T')[0]);
     onClose();
@@ -38,23 +131,24 @@ const LogHoursModal = ({ isOpen, onClose, onLogHours, clientName }: LogHoursModa
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Clock className="w-5 h-5 mr-2" />
-            Log Hours for {clientName}
+            Log Time for {clientName}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="hours">Hours Worked</Label>
+              <Label htmlFor="timeValue">{getTimeLabel()}</Label>
               <Input
-                id="hours"
+                id="timeValue"
                 type="number"
-                step="0.25"
-                min="0.25"
-                placeholder="e.g., 2.5"
-                value={hours}
-                onChange={(e) => setHours(e.target.value)}
+                step={getStepValue()}
+                min={getMinValue()}
+                placeholder={getPlaceholder()}
+                value={timeValue}
+                onChange={(e) => setTimeValue(e.target.value)}
                 required
               />
+              <p className="text-xs text-gray-500 mt-1">In {getTimeUnit()}</p>
             </div>
             <div>
               <Label htmlFor="date">Date</Label>
@@ -83,7 +177,7 @@ const LogHoursModal = ({ isOpen, onClose, onLogHours, clientName }: LogHoursModa
             </Button>
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
               <Save className="w-4 h-4 mr-2" />
-              Log Hours
+              Log Time
             </Button>
           </div>
         </form>

@@ -135,7 +135,7 @@ const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
               className="bg-blue-600 hover:bg-blue-700"
             >
               <Plus className="w-3 h-3 mr-1" />
-              Log Hours
+              Log Time
             </Button>
           </div>
         </CardHeader>
@@ -275,6 +275,7 @@ const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
         onClose={() => setShowLogHoursModal(false)}
         onLogHours={handleLogHours}
         clientName={client.name}
+        priceType={client.priceType}
       />
     </>
   );
