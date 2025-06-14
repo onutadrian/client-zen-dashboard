@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,9 +15,12 @@ import {
   ChevronUp,
   Mail,
   ExternalLink,
-  Plus
+  Plus,
+  Edit,
+  Upload
 } from 'lucide-react';
 import LogHoursModal from './LogHoursModal';
+import EditClientModal from './EditClientModal';
 
 interface HourEntry {
   id: number;
@@ -33,6 +37,7 @@ interface ClientCardProps {
 const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showLogHoursModal, setShowLogHoursModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [hourEntries, setHourEntries] = useState<HourEntry[]>(client.hourEntries || []);
   
   const getPriceDisplay = () => {
@@ -82,6 +87,12 @@ const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
     }
   };
 
+  const handleEditClient = (updatedClient: any) => {
+    if (onUpdateClient) {
+      onUpdateClient(client.id, updatedClient);
+    }
+  };
+
   const totalInvoiceAmount = client.invoices?.reduce((sum: number, inv: any) => sum + inv.amount, 0) || 0;
   const paidInvoices = client.invoices?.filter((inv: any) => inv.status === 'paid').length || 0;
   const totalInvoices = client.invoices?.length || 0;
@@ -103,6 +114,13 @@ const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
                 <div className="text-2xl font-bold text-green-600">{getPriceDisplay()}</div>
                 <div className="text-sm text-slate-500">Rate</div>
               </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowEditModal(true)}
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
               <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" size="sm">
@@ -209,10 +227,17 @@ const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
                     Documents ({client.documents.length})
                   </h4>
                   <div className="grid grid-cols-2 gap-2">
-                    {client.documents.map((doc: string, index: number) => (
-                      <div key={index} className="flex items-center p-2 bg-slate-50 rounded text-sm">
-                        <FileText className="w-4 h-4 mr-2 text-slate-500" />
-                        <span className="truncate">{doc}</span>
+                    {client.documents.map((doc: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-slate-50 rounded text-sm">
+                        <div className="flex items-center">
+                          {doc.type === 'upload' ? <Upload className="w-4 h-4 mr-2 text-slate-500" /> : <LinkIcon className="w-4 h-4 mr-2 text-slate-500" />}
+                          <span className="truncate">{doc.name || doc}</span>
+                        </div>
+                        {doc.url && (
+                          <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -257,9 +282,16 @@ const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
                           <div className="font-medium text-slate-800">${invoice.amount.toLocaleString()}</div>
                           <div className="text-sm text-slate-600">{new Date(invoice.date).toLocaleDateString()}</div>
                         </div>
-                        <Badge className={invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                          {invoice.status}
-                        </Badge>
+                        <div className="flex items-center space-x-2">
+                          <Badge className={invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                            {invoice.status}
+                          </Badge>
+                          {invoice.url && (
+                            <a href={invoice.url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -276,6 +308,13 @@ const ClientCard = ({ client, onUpdateClient }: ClientCardProps) => {
         onLogHours={handleLogHours}
         clientName={client.name}
         priceType={client.priceType}
+      />
+
+      <EditClientModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        client={client}
+        onSave={handleEditClient}
       />
     </>
   );
