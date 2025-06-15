@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,15 +26,15 @@ const SubscriptionCard = ({
   const getBillingStatus = () => {
     if (isOverdue) return {
       text: 'Overdue',
-      color: 'bg-red-100 text-red-800'
+      color: 'bg-red-100 text-red-800 hover:bg-red-100'
     };
     if (isUpcoming) return {
       text: `${daysUntilBilling} days`,
-      color: 'bg-yellow-100 text-yellow-800'
+      color: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
     };
     return {
       text: `${daysUntilBilling} days`,
-      color: 'bg-green-100 text-green-800'
+      color: 'bg-green-100 text-green-800 hover:bg-green-100'
     };
   };
   
@@ -43,13 +42,13 @@ const SubscriptionCard = ({
     const status = subscription.status || 'active';
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 hover:bg-green-100';
       case 'paused':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
       case 'canceled':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 hover:bg-red-100';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
     }
   };
   
