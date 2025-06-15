@@ -39,6 +39,7 @@ const ClientCard = ({
     console.log('Client hour entries updated:', client.hourEntries);
     setHourEntries(client.hourEntries || []);
   }, [client.hourEntries]);
+
   const getPriceDisplay = () => {
     const typeMap = {
       hour: '/hr',
@@ -54,6 +55,7 @@ const ClientCard = ({
     // Fallback to original behavior
     return `$${client.price}${typeMap[client.priceType] || ''}`;
   };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -66,6 +68,20 @@ const ClientCard = ({
         return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100';
     }
   };
+
+  const getBorderColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'border-l-green-500 before:bg-green-500';
+      case 'inactive':
+        return 'border-l-gray-400 before:bg-gray-400';
+      case 'pending':
+        return 'border-l-yellow-500 before:bg-yellow-500';
+      default:
+        return 'border-l-gray-400 before:bg-gray-400';
+    }
+  };
+
   const handleLogHours = (hours: number, description: string, date: string) => {
     const newEntry: HourEntry = {
       id: Date.now(),
@@ -115,6 +131,7 @@ const ClientCard = ({
     }
     setIsSheetOpen(true);
   };
+
   const totalInvoiceAmount = client.invoices?.reduce((sum: number, inv: any) => {
     if (convertCurrency) {
       return sum + convertCurrency(inv.amount, inv.currency || client.currency || 'USD', displayCurrency);
@@ -133,7 +150,16 @@ const ClientCard = ({
     return `$${amount.toLocaleString()}`;
   };
   return <>
-      <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 cursor-pointer" onClick={handleCardClick}>
+      <Card 
+        className={`
+          hover:shadow-lg transition-all duration-300 border-l-4 cursor-pointer relative overflow-hidden
+          ${getBorderColor(client.status)}
+          before:content-[''] before:absolute before:top-0 before:right-0 before:h-full before:w-0 
+          before:transition-all before:duration-300 before:ease-in-out before:opacity-20
+          hover:before:w-full hover:before:right-0 hover:before:left-0
+        `} 
+        onClick={handleCardClick}
+      >
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
