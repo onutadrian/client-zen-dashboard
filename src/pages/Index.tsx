@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Users, CreditCard, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -137,13 +136,13 @@ const Index = () => {
                 
                 Subscriptions
               </h2>
-              <div className="text-right">
-                <Badge variant="secondary" className="text-green-700 bg-green-100">
+              <div className="flex items-center space-x-2">
+                <Badge variant="secondary" className="text-red-700 bg-red-100">
                   {formatCurrency(analytics.monthlySubscriptionCost, displayCurrency)}/mo
                 </Badge>
-                <div className="text-xs text-slate-500 mt-1">
-                  Total paid: {formatCurrency(totalPaidToDate, displayCurrency)}
-                </div>
+                <Badge variant="secondary" className="text-red-700 bg-red-100">
+                  {formatCurrency(totalPaidToDate, displayCurrency)} total
+                </Badge>
               </div>
             </div>
             
