@@ -27,15 +27,15 @@ const SubscriptionCard = ({
   const getBillingStatus = () => {
     if (isOverdue) return {
       text: 'Overdue',
-      color: 'bg-red-100 text-red-800'
+      color: 'bg-destructive text-destructive-foreground'
     };
     if (isUpcoming) return {
       text: `${daysUntilBilling} days`,
-      color: 'bg-yellow-100 text-yellow-800'
+      color: 'bg-secondary text-secondary-foreground'
     };
     return {
       text: `${daysUntilBilling} days`,
-      color: 'bg-green-100 text-green-800'
+      color: 'bg-primary text-primary-foreground'
     };
   };
   
@@ -43,13 +43,13 @@ const SubscriptionCard = ({
     const status = subscription.status || 'active';
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'bg-primary text-primary-foreground';
       case 'paused':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-secondary text-secondary-foreground';
       case 'canceled':
-        return 'bg-red-100 text-red-800';
+        return 'bg-destructive text-destructive-foreground';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-muted text-muted-foreground';
     }
   };
   
@@ -65,48 +65,51 @@ const SubscriptionCard = ({
     return currency === 'RON' ? `${symbol}${amount.toFixed(2)}` : `${symbol}${amount.toFixed(2)}`;
   };
 
-  return <Card className={`hover:shadow-md transition-all duration-200 ${isOverdue ? 'border-red-200 bg-red-50' : ''}`}>
+  return (
+    <Card className={`hover:shadow-md transition-all duration-200 ${isOverdue ? 'border-destructive bg-destructive/10' : ''}`}>
       <CardContent className="p-4">
         <div className="space-y-3">
           {/* Header */}
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
-                <h4 className="font-semibold text-slate-800">{subscription.name}</h4>
+                <h4 className="font-semibold text-foreground">{subscription.name}</h4>
                 <Button variant="ghost" size="sm" onClick={() => onEdit(subscription)} className="h-6 w-6 p-0 opacity-60 hover:opacity-100">
                   <Edit className="w-3 h-3" />
                 </Button>
               </div>
               <div className="flex items-center gap-2 mb-1">
-                <p className="text-sm text-slate-600">{subscription.category}</p>
+                <p className="text-sm text-muted-foreground">{subscription.category}</p>
                 <Badge className={getStatusBadge()}>
                   {(subscription.status || 'active').charAt(0).toUpperCase() + (subscription.status || 'active').slice(1)}
                 </Badge>
               </div>
             </div>
             <div className="text-right ml-4">
-              <div className="text-lg font-bold text-slate-800">{formatCurrency(totalPrice)}</div>
-              <div className="text-xs text-slate-500">per month</div>
-              {seats > 1 && <div className="text-xs text-slate-600 flex items-center justify-end mt-1">
+              <div className="text-lg font-bold text-foreground">{formatCurrency(totalPrice)}</div>
+              <div className="text-xs text-muted-foreground">per month</div>
+              {seats > 1 && (
+                <div className="text-xs text-muted-foreground flex items-center justify-end mt-1">
                   <Users className="w-3 h-3 mr-1" />
                   {seats} seats
-                </div>}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Total Paid */}
-          <div className="flex items-center justify-between py-2 px-3 bg-blue-50 rounded-lg">
-            <div className="text-sm text-slate-600">
+          <div className="flex items-center justify-between py-2 px-3 bg-muted rounded-lg">
+            <div className="text-sm text-muted-foreground">
               <span className="font-medium">Total paid to date:</span>
             </div>
-            <div className="text-sm font-semibold text-blue-800">
+            <div className="text-sm font-semibold text-foreground">
               {formatCurrency(totalPaid)}
             </div>
           </div>
 
           {/* Billing Info */}
-          <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
-            <div className="flex items-center text-sm text-slate-600">
+          <div className="flex items-center justify-between py-2 px-3 bg-secondary/50 rounded-lg">
+            <div className="flex items-center text-sm text-muted-foreground">
               <Calendar className="w-4 h-4 mr-2" />
               <span>{new Date(subscription.billingDate).toLocaleDateString()}</span>
             </div>
@@ -117,12 +120,12 @@ const SubscriptionCard = ({
 
           {/* Login Credentials */}
           <div className="space-y-2">
-            <div className="flex items-center text-sm text-slate-600">
+            <div className="flex items-center text-sm text-muted-foreground">
               <Mail className="w-4 h-4 mr-2" />
               <span className="font-mono text-xs">{subscription.loginEmail}</span>
             </div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center text-sm text-slate-600">
+              <div className="flex items-center text-sm text-muted-foreground">
                 <CreditCard className="w-4 h-4 mr-2" />
                 <span className="font-mono text-xs">
                   {showPassword ? subscription.password : '••••••••'}
@@ -135,7 +138,8 @@ const SubscriptionCard = ({
           </div>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
 
 export default SubscriptionCard;
