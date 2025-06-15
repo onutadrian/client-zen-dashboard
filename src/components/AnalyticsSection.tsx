@@ -76,36 +76,57 @@ const AnalyticsSection = ({
   const revenueBreakdown = getRevenueBreakdownByClient();
   const netProfitAnnual = totalRevenue - monthlySubscriptionCost * 12;
   const inactiveClients = totalClients - activeClients;
+  const pendingClients = clients.filter(c => c.status === 'pending').length;
+
+  // Get client status rows with proper formatting
+  const getClientStatusRows = () => {
+    const rows = [];
+    if (activeClients > 0) {
+      rows.push(`${activeClients} active`);
+    }
+    if (inactiveClients > 0) {
+      rows.push(`${inactiveClients} inactive`);
+    }
+    if (pendingClients > 0) {
+      rows.push(`${pendingClients} pending`);
+    }
+    return rows;
+  };
 
   const stats = [
     {
       title: "Total Clients",
       value: totalClients,
-      subtitle: `${activeClients} active, ${inactiveClients} inactive`,
+      subtitle: "tracked hours",
+      statusRows: getClientStatusRows(),
       details: clients.map(client => client.name)
     },
     {
       title: "Total Time",
       value: totalHours,
       subtitle: "tracked hours",
+      statusRows: [],
       details: timeBreakdown
     },
     {
       title: "Total Revenue",
       value: formatCurrency(totalRevenue, displayCurrency),
       subtitle: "earned this period",
+      statusRows: [],
       details: revenueBreakdown
     },
     {
       title: "Monthly Costs",
       value: formatCurrency(monthlySubscriptionCost, displayCurrency),
       subtitle: "subscription expenses",
+      statusRows: [],
       details: null
     },
     {
       title: "Net Profit",
       value: formatCurrency(netProfitAnnual, displayCurrency),
       subtitle: "annual estimate",
+      statusRows: [],
       details: revenueBreakdown
     }
   ];
@@ -122,7 +143,16 @@ const AnalyticsSection = ({
               {/* Section 1: Top content */}
               <div className="space-y-3">
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-slate-600">{stat.title}</h3>
+                  <h3 
+                    className="font-satoshi font-normal"
+                    style={{
+                      color: 'var(--Dark-color, #081735)',
+                      fontSize: '1.375rem',
+                      lineHeight: '1.5rem'
+                    }}
+                  >
+                    {stat.title}
+                  </h3>
                   
                   <div className="flex items-center space-x-2">
                     <Badge 
@@ -139,21 +169,46 @@ const AnalyticsSection = ({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500">{stat.subtitle}</span>
-                  {stat.details && stat.details.length > 0 && (
-                    <span className="text-xs text-slate-600 truncate max-w-20">
-                      {stat.title === "Total Clients" && stat.details[0]}
-                      {stat.title === "Total Time" && stat.details[0]?.name}
-                      {(stat.title === "Total Revenue" || stat.title === "Net Profit") && stat.details[0]?.name}
-                    </span>
+                <div className="space-y-1">
+                  {stat.statusRows.map((statusRow, rowIndex) => (
+                    <div key={rowIndex} className="flex items-center justify-between">
+                      <span className="text-xs text-slate-500">{statusRow}</span>
+                      {stat.details && stat.details.length > 0 && rowIndex === 0 && (
+                        <span className="text-xs text-slate-600 truncate max-w-20">
+                          {stat.title === "Total Clients" && stat.details[0]}
+                          {stat.title === "Total Time" && stat.details[0]?.name}
+                          {(stat.title === "Total Revenue" || stat.title === "Net Profit") && stat.details[0]?.name}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                  {stat.statusRows.length === 0 && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-slate-500">{stat.subtitle}</span>
+                      {stat.details && stat.details.length > 0 && (
+                        <span className="text-xs text-slate-600 truncate max-w-20">
+                          {stat.title === "Total Clients" && stat.details[0]}
+                          {stat.title === "Total Time" && stat.details[0]?.name}
+                          {(stat.title === "Total Revenue" || stat.title === "Net Profit") && stat.details[0]?.name}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
 
               {/* Section 2: Bottom metric */}
               <div className="mt-4">
-                <p className="font-bold text-slate-900 text-2xl">{stat.value}</p>
+                <p 
+                  className="font-satoshi font-normal"
+                  style={{
+                    color: 'var(--Dark-color, #081735)',
+                    fontSize: '3rem',
+                    lineHeight: '2.5rem'
+                  }}
+                >
+                  {stat.value}
+                </p>
               </div>
             </CardContent>
           </Card>
