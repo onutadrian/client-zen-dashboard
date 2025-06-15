@@ -33,6 +33,12 @@ const Index = () => {
   // Get analytics data
   const analytics = useAnalytics(clients, subscriptions, displayCurrency);
 
+  // Calculate total paid to date for all subscriptions
+  const totalPaidToDate = subscriptions.reduce((sum, sub) => {
+    const convertedTotal = convertCurrency(sub.totalPaid || 0, sub.currency || 'USD', displayCurrency);
+    return sum + convertedTotal;
+  }, 0);
+
   const handleEditSubscription = (subscription: any) => {
     setSelectedSubscription(subscription);
     setShowEditSubscriptionModal(true);
@@ -147,9 +153,14 @@ const Index = () => {
                 <CreditCard className="w-6 h-6 mr-2 text-green-600" />
                 Subscriptions
               </h2>
-              <Badge variant="secondary" className="text-green-700 bg-green-100">
-                {formatCurrency(analytics.monthlySubscriptionCost, displayCurrency)}/mo
-              </Badge>
+              <div className="text-right">
+                <Badge variant="secondary" className="text-green-700 bg-green-100">
+                  {formatCurrency(analytics.monthlySubscriptionCost, displayCurrency)}/mo
+                </Badge>
+                <div className="text-xs text-slate-500 mt-1">
+                  Total paid: {formatCurrency(totalPaidToDate, displayCurrency)}
+                </div>
+              </div>
             </div>
             
             <div className="space-y-3">

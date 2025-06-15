@@ -65,9 +65,14 @@ const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
                 <span>{task.clientName}</span>
               </div>
               {task.estimatedHours && (
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-1" />
-                  <span>{task.estimatedHours}h estimated</span>
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center">
+                    <Clock className="w-4 h-4 mr-1" />
+                    <span>{task.estimatedHours}h estimated</span>
+                  </div>
+                  <Badge className={getStatusColor(task.status)}>
+                    {task.status.replace('-', ' ')}
+                  </Badge>
                 </div>
               )}
               {task.actualHours && (
@@ -79,9 +84,11 @@ const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <Badge className={getStatusColor(task.status)}>
-              {task.status.replace('-', ' ')}
-            </Badge>
+            {!task.estimatedHours && (
+              <Badge className={getStatusColor(task.status)}>
+                {task.status.replace('-', ' ')}
+              </Badge>
+            )}
             {task.status === 'pending' && (
               <Button size="sm" variant="outline" onClick={handleStartTask}>
                 <Play className="w-3 h-3 mr-1" />
@@ -146,7 +153,7 @@ const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
             <>
               {' • '}
               Completed: {new Date(task.completedDate).toLocaleDateString()}
-            </>
+            </div>
           )}
         </div>
       </CardContent>
