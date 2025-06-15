@@ -1,9 +1,9 @@
+
 import React, { useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
-import SubscriptionMetrics from '@/components/SubscriptionMetrics';
 import ModalsContainer from '@/components/ModalsContainer';
 import { useClients } from '@/hooks/useClients';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
@@ -12,6 +12,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useMilestones } from '@/hooks/useMilestones';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
+
 const Index = () => {
   const [displayCurrency, setDisplayCurrency] = useState('USD');
 
@@ -53,10 +54,18 @@ const Index = () => {
 
   // Get analytics data
   const analytics = useAnalytics(clients, subscriptions, displayCurrency);
+  
+  // Calculate total paid to date for subscriptions
+  const totalPaidToDate = subscriptions.reduce((total, subscription) => {
+    const convertedCost = convertCurrency(subscription.totalPaid || 0, subscription.currency, displayCurrency);
+    return total + convertedCost;
+  }, 0);
+
   const handleEditSubscription = (subscription: any) => {
     setSelectedSubscription(subscription);
     setShowEditSubscriptionModal(true);
   };
+
   const handleTaskUpdate = async (taskId: number, status: any, actualHours?: number) => {
     const result = await updateTask(taskId, status, actualHours);
 
@@ -85,36 +94,68 @@ const Index = () => {
       }
     }
   };
-  return <div className="min-h-screen p-6" style={{
-    backgroundColor: '#F3F3F2'
-  }}>
+
+  return (
+    <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center space-x-4">
-          
+          <SidebarTrigger />
           <div className="flex-1">
-            <DashboardHeader displayCurrency={displayCurrency} onCurrencyChange={setDisplayCurrency} onAddClient={() => setShowClientModal(true)} onAddSubscription={() => setShowSubscriptionModal(true)} />
+            <DashboardHeader 
+              displayCurrency={displayCurrency} 
+              onCurrencyChange={setDisplayCurrency} 
+              onAddClient={() => setShowClientModal(true)} 
+              onAddSubscription={() => setShowSubscriptionModal(true)} 
+            />
           </div>
         </div>
 
         {/* Analytics Overview */}
-        <AnalyticsSection totalClients={analytics.totalClients} activeClients={analytics.activeClients} totalHours={analytics.totalHours} totalRevenue={analytics.totalRevenue} monthlySubscriptionCost={analytics.monthlySubscriptionCost} clients={clients} displayCurrency={displayCurrency} convertCurrency={convertCurrency} formatCurrency={formatCurrency} />
-
-        {/* Subscription Metrics */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Subscription Overview</h2>
-          <SubscriptionMetrics subscriptions={subscriptions} displayCurrency={displayCurrency} />
-        </div>
+        <AnalyticsSection 
+          totalClients={analytics.totalClients} 
+          activeClients={analytics.activeClients} 
+          totalHours={analytics.totalHours} 
+          totalRevenue={analytics.totalRevenue} 
+          monthlySubscriptionCost={analytics.monthlySubscriptionCost}
+          totalPaidToDate={totalPaidToDate}
+          clients={clients} 
+          displayCurrency={displayCurrency} 
+          convertCurrency={convertCurrency} 
+          formatCurrency={formatCurrency} 
+        />
 
         {/* Merged Tasks and Timeline Section */}
-        <DashboardTasksTimeline projects={projects} tasks={tasks} milestones={milestones} clients={clients} onAddTask={addTask} onUpdateTask={handleTaskUpdate} onDeleteTask={deleteTask} onEditTask={editTask} />
+        <DashboardTasksTimeline 
+          projects={projects} 
+          tasks={tasks} 
+          milestones={milestones} 
+          clients={clients} 
+          onAddTask={addTask} 
+          onUpdateTask={handleTaskUpdate} 
+          onDeleteTask={deleteTask} 
+          onEditTask={editTask} 
+        />
 
         {/* Modals */}
-        <ModalsContainer showClientModal={showClientModal} onCloseClientModal={() => setShowClientModal(false)} onAddClient={addClient} showSubscriptionModal={showSubscriptionModal} onCloseSubscriptionModal={() => setShowSubscriptionModal(false)} onAddSubscription={addSubscription} showEditSubscriptionModal={showEditSubscriptionModal} onCloseEditSubscriptionModal={() => {
-        setShowEditSubscriptionModal(false);
-        setSelectedSubscription(null);
-      }} selectedSubscription={selectedSubscription} onUpdateSubscription={updateSubscription} />
+        <ModalsContainer 
+          showClientModal={showClientModal} 
+          onCloseClientModal={() => setShowClientModal(false)} 
+          onAddClient={addClient} 
+          showSubscriptionModal={showSubscriptionModal} 
+          onCloseSubscriptionModal={() => setShowSubscriptionModal(false)} 
+          onAddSubscription={addSubscription} 
+          showEditSubscriptionModal={showEditSubscriptionModal} 
+          onCloseEditSubscriptionModal={() => {
+            setShowEditSubscriptionModal(false);
+            setSelectedSubscription(null);
+          }} 
+          selectedSubscription={selectedSubscription} 
+          onUpdateSubscription={updateSubscription} 
+        />
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;

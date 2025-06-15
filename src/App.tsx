@@ -13,18 +13,16 @@ function App() {
   return (
     <Router>
       <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <SidebarInset className="flex-1">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/projects" element={<ProjectsPage />} />
-              <Route path="/clients" element={<ClientsPage />} />
-              <Route path="/subscriptions" element={<SubscriptionsPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </SidebarInset>
-        </div>
+        <AppSidebar />
+        <SidebarInset>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/clients" element={<ClientsPage />} />
+            <Route path="/subscriptions" element={<SubscriptionsPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </SidebarInset>
       </SidebarProvider>
     </Router>
   );
