@@ -1,268 +1,91 @@
 
 import React, { useState } from 'react';
-import { Plus, Users, CreditCard, DollarSign, Clock, FileText, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, CreditCard, Plus } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ClientCard from '@/components/ClientCard';
 import SubscriptionCard from '@/components/SubscriptionCard';
-import AddClientModal from '@/components/AddClientModal';
-import AddSubscriptionModal from '@/components/AddSubscriptionModal';
 import AnalyticsSection from '@/components/AnalyticsSection';
-import EditSubscriptionModal from '@/components/EditSubscriptionModal';
 import TasksSection from '@/components/TasksSection';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  clientId: number;
-  clientName: string;
-  estimatedHours?: number;
-  actualHours?: number;
-  status: 'pending' | 'in-progress' | 'completed';
-  notes: string;
-  assets: string[];
-  createdDate: string;
-  completedDate?: string;
-}
+import DashboardHeader from '@/components/DashboardHeader';
+import ModalsContainer from '@/components/ModalsContainer';
+import { useClients } from '@/hooks/useClients';
+import { useSubscriptions } from '@/hooks/useSubscriptions';
+import { useTasks } from '@/hooks/useTasks';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { convertCurrency, formatCurrency } from '@/lib/currency';
 
 const Index = () => {
   const [displayCurrency, setDisplayCurrency] = useState('USD');
   
-  const [clients, setClients] = useState([
-    {
-      id: 1,
-      name: "Acme Corporation",
-      price: 150,
-      priceType: "hour",
-      status: "active",
-      totalHours: 45,
-      documents: ["Contract.pdf", "Project Brief.docx"],
-      links: ["https://acme.com", "https://acme-staging.com"],
-      notes: "Primary contact prefers email communication. Weekly standups on Mondays.",
-      people: [
-        { name: "John Smith", email: "john@acme.com", title: "Project Manager" },
-        { name: "Sarah Wilson", email: "sarah@acme.com", title: "Technical Lead" }
-      ],
-      invoices: [
-        { id: 1, amount: 6750, date: "2024-06-01", status: "paid" },
-        { id: 2, amount: 4500, date: "2024-05-01", status: "pending" }
-      ],
-      hourEntries: [],
-      currency: "USD"
-    }
-  ]);
-
-  const [subscriptions, setSubscriptions] = useState([
-    {
-      id: 1,
-      name: "Adobe Creative Suite",
-      price: 52.99,
-      seats: 2,
-      billingDate: "2024-06-15",
-      loginEmail: "work@example.com",
-      password: "••••••••",
-      category: "Design",
-      totalPaid: 1200,
-      status: "active",
-      currency: "USD"
-    },
-    {
-      id: 2,
-      name: "Figma Pro",
-      price: 12.00,
-      seats: 3,
-      billingDate: "2024-06-20",
-      loginEmail: "work@example.com",
-      password: "••••••••",
-      category: "Design",
-      totalPaid: 600,
-      status: "active",
-      currency: "USD"
-    }
-  ]);
-
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: 1,
-      title: "Website Redesign",
-      description: "Complete overhaul of the company website with modern design",
-      clientId: 1,
-      clientName: "Acme Corporation",
-      estimatedHours: 40,
-      status: "in-progress",
-      notes: "Focus on mobile responsiveness and SEO optimization",
-      assets: ["https://figma.com/design-file", "Brand guidelines.pdf"],
-      createdDate: "2024-06-01",
-    }
-  ]);
-
+  // Use custom hooks for state management
+  const { clients, addClient, updateClient } = useClients();
+  const { subscriptions, addSubscription, updateSubscription } = useSubscriptions();
+  const { tasks, addTask, updateTask } = useTasks();
+  
+  // Modal states
   const [showClientModal, setShowClientModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState(null);
 
-  const exchangeRates = {
-    USD: { USD: 1, EUR: 0.85, RON: 4.5 },
-    EUR: { USD: 1.18, EUR: 1, RON: 5.3 },
-    RON: { USD: 0.22, EUR: 0.19, RON: 1 }
-  };
-
-  const convertCurrency = (amount, fromCurrency, toCurrency) => {
-    if (fromCurrency === toCurrency) return amount;
-    return amount * exchangeRates[fromCurrency][toCurrency];
-  };
-
-  const formatCurrency = (amount, currency) => {
-    const symbols = { USD: '$', EUR: '€', RON: 'RON ' };
-    const symbol = symbols[currency] || '$';
-    return currency === 'RON' ? `${symbol}${amount.toFixed(2)}` : `${symbol}${amount.toFixed(2)}`;
-  };
-
-  const addClient = (newClient: any) => {
-    setClients([...clients, { ...newClient, id: Date.now(), hourEntries: [] }]);
-  };
-
-  const addSubscription = (newSubscription: any) => {
-    setSubscriptions([...subscriptions, { ...newSubscription, id: Date.now(), seats: newSubscription.seats || 1, totalPaid: 0 }]);
-  };
-
-  const updateClient = (clientId: number, updatedClient: any) => {
-    setClients(clients.map(client => 
-      client.id === clientId ? updatedClient : client
-    ));
-  };
-
-  const updateSubscription = (subscriptionId: number, updatedSubscription: any) => {
-    setSubscriptions(subscriptions.map(sub => 
-      sub.id === subscriptionId ? updatedSubscription : sub
-    ));
-  };
+  // Get analytics data
+  const analytics = useAnalytics(clients, subscriptions, displayCurrency);
 
   const handleEditSubscription = (subscription: any) => {
     setSelectedSubscription(subscription);
     setShowEditSubscriptionModal(true);
   };
 
-  const addTask = (newTask: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => {
-    const task: Task = {
-      ...newTask,
-      id: Date.now(),
-      status: 'pending',
-      createdDate: new Date().toISOString(),
-    };
-    setTasks([...tasks, task]);
-  };
-
-  const updateTask = (taskId: number, status: Task['status'], actualHours?: number) => {
-    setTasks(tasks.map(task => {
-      if (task.id === taskId) {
-        const updatedTask = { ...task, status };
+  const handleTaskUpdate = (taskId: number, status: any, actualHours?: number) => {
+    const result = updateTask(taskId, status, actualHours);
+    
+    // If task was completed and has hours, log them to the client
+    if (result && result.hoursToLog) {
+      const { task, hoursToLog } = result;
+      const client = clients.find(c => c.id === task.clientId);
+      
+      if (client) {
+        const newHourEntry = {
+          id: Date.now(),
+          hours: hoursToLog,
+          description: `Completed task: ${task.title}`,
+          date: new Date().toISOString(),
+          billed: false
+        };
         
-        if (status === 'completed') {
-          updatedTask.completedDate = new Date().toISOString();
-          
-          // If actual hours are provided or estimated hours exist, log them to the client
-          const hoursToLog = actualHours || task.estimatedHours;
-          if (hoursToLog) {
-            updatedTask.actualHours = hoursToLog;
-            
-            // Find and update the client
-            setClients(prevClients => 
-              prevClients.map(client => {
-                if (client.id === task.clientId) {
-                  const newHourEntry = {
-                    id: Date.now(),
-                    hours: hoursToLog,
-                    description: `Completed task: ${task.title}`,
-                    date: new Date().toISOString(),
-                    billed: false
-                  };
-                  
-                  const updatedHourEntries = [...(client.hourEntries || []), newHourEntry];
-                  
-                  return {
-                    ...client,
-                    totalHours: updatedHourEntries.reduce((sum, entry) => sum + entry.hours, 0),
-                    hourEntries: updatedHourEntries
-                  };
-                }
-                return client;
-              })
-            );
-          }
-        }
+        const updatedHourEntries = [...(client.hourEntries || []), newHourEntry];
         
-        return updatedTask;
+        const updatedClient = {
+          ...client,
+          totalHours: updatedHourEntries.reduce((sum, entry) => sum + entry.hours, 0),
+          hourEntries: updatedHourEntries
+        };
+        
+        updateClient(client.id, updatedClient);
       }
-      return task;
-    }));
+    }
   };
-
-  // Calculate analytics with currency conversion
-  const totalClients = clients.length;
-  const activeClients = clients.filter(c => c.status === 'active').length;
-  const totalHours = clients.reduce((sum, client) => sum + (client.totalHours || 0), 0);
-  
-  const totalRevenue = clients.reduce((sum, client) => {
-    const clientRevenue = (client.invoices || []).reduce((invoiceSum, invoice) => {
-      if (invoice.status === 'paid') {
-        const convertedAmount = convertCurrency(invoice.amount, client.currency || 'USD', displayCurrency);
-        return invoiceSum + convertedAmount;
-      }
-      return invoiceSum;
-    }, 0);
-    return sum + clientRevenue;
-  }, 0);
-  
-  const monthlySubscriptionCost = subscriptions.reduce((sum, sub) => {
-    const convertedPrice = convertCurrency(sub.price * (sub.seats || 1), sub.currency || 'USD', displayCurrency);
-    return sum + convertedPrice;
-  }, 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">Client Dashboard</h1>
-            <p className="text-slate-600">Manage your clients, track work, and monitor revenue</p>
-          </div>
-          <div className="flex gap-3 items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-600">Currency:</span>
-              <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="USD">US Dollar ($)</SelectItem>
-                  <SelectItem value="EUR">Euro (€)</SelectItem>
-                  <SelectItem value="RON">Romanian Lei (RON)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={() => setShowClientModal(true)} className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Client
-            </Button>
-            <Button onClick={() => setShowSubscriptionModal(true)} variant="outline">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Subscription
-            </Button>
-          </div>
-        </div>
+        <DashboardHeader 
+          displayCurrency={displayCurrency}
+          onCurrencyChange={setDisplayCurrency}
+          onAddClient={() => setShowClientModal(true)}
+          onAddSubscription={() => setShowSubscriptionModal(true)}
+        />
 
         {/* Analytics Overview */}
         <AnalyticsSection 
-          totalClients={totalClients}
-          activeClients={activeClients}
-          totalHours={totalHours}
-          totalRevenue={totalRevenue}
-          monthlySubscriptionCost={monthlySubscriptionCost}
+          totalClients={analytics.totalClients}
+          activeClients={analytics.activeClients}
+          totalHours={analytics.totalHours}
+          totalRevenue={analytics.totalRevenue}
+          monthlySubscriptionCost={analytics.monthlySubscriptionCost}
           clients={clients}
           displayCurrency={displayCurrency}
           convertCurrency={convertCurrency}
@@ -274,7 +97,7 @@ const Index = () => {
           tasks={tasks}
           clients={clients}
           onAddTask={addTask}
-          onUpdateTask={updateTask}
+          onUpdateTask={handleTaskUpdate}
         />
 
         {/* Main Content Grid */}
@@ -286,7 +109,7 @@ const Index = () => {
                 <Users className="w-6 h-6 mr-2 text-blue-600" />
                 Clients ({clients.length})
               </h2>
-              <Badge variant="secondary">{activeClients} Active</Badge>
+              <Badge variant="secondary">{analytics.activeClients} Active</Badge>
             </div>
             
             <div className="space-y-4">
@@ -325,7 +148,7 @@ const Index = () => {
                 Subscriptions
               </h2>
               <Badge variant="secondary" className="text-green-700 bg-green-100">
-                {formatCurrency(monthlySubscriptionCost, displayCurrency)}/mo
+                {formatCurrency(analytics.monthlySubscriptionCost, displayCurrency)}/mo
               </Badge>
             </div>
             
@@ -359,26 +182,20 @@ const Index = () => {
         </div>
 
         {/* Modals */}
-        <AddClientModal 
-          isOpen={showClientModal}
-          onClose={() => setShowClientModal(false)}
-          onAdd={addClient}
-        />
-        
-        <AddSubscriptionModal 
-          isOpen={showSubscriptionModal}
-          onClose={() => setShowSubscriptionModal(false)}
-          onAdd={addSubscription}
-        />
-        
-        <EditSubscriptionModal 
-          subscription={selectedSubscription}
-          isOpen={showEditSubscriptionModal}
-          onClose={() => {
+        <ModalsContainer 
+          showClientModal={showClientModal}
+          onCloseClientModal={() => setShowClientModal(false)}
+          onAddClient={addClient}
+          showSubscriptionModal={showSubscriptionModal}
+          onCloseSubscriptionModal={() => setShowSubscriptionModal(false)}
+          onAddSubscription={addSubscription}
+          showEditSubscriptionModal={showEditSubscriptionModal}
+          onCloseEditSubscriptionModal={() => {
             setShowEditSubscriptionModal(false);
             setSelectedSubscription(null);
           }}
-          onUpdate={updateSubscription}
+          selectedSubscription={selectedSubscription}
+          onUpdateSubscription={updateSubscription}
         />
       </div>
     </div>
