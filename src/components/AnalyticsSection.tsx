@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, Clock, Users, TrendingUp, CreditCard } from 'lucide-react';
+
 const AnalyticsSection = ({
   totalClients,
   activeClients,
@@ -30,6 +32,7 @@ const AnalyticsSection = ({
         displayValue = Math.round(totalHours / 160 * 10) / 10; // 160 hours = 1 month
         unit = 'months';
       }
+
       return {
         name: client.name,
         value: displayValue,
@@ -49,6 +52,7 @@ const AnalyticsSection = ({
         }
         return sum;
       }, 0) || 0;
+
       return {
         name: client.name,
         value: paidAmount,
@@ -56,54 +60,65 @@ const AnalyticsSection = ({
       };
     }).filter(client => client.hasRevenue);
   };
+
   const timeBreakdown = getTimeBreakdownByClient();
   const revenueBreakdown = getRevenueBreakdownByClient();
   const netProfitAnnual = totalRevenue - monthlySubscriptionCost * 12;
-  const stats = [{
-    title: "Total Clients",
-    value: totalClients,
-    icon: Users,
-    color: "text-blue-600",
-    bgColor: "bg-blue-100",
-    subtitle: `${activeClients} active`,
-    details: clients.map(client => client.name)
-  }, {
-    title: "Total Time",
-    value: totalHours,
-    icon: Clock,
-    color: "text-purple-600",
-    bgColor: "bg-purple-100",
-    subtitle: "tracked",
-    details: timeBreakdown
-  }, {
-    title: "Total Revenue",
-    value: formatCurrency(totalRevenue, displayCurrency),
-    icon: DollarSign,
-    color: "text-green-600",
-    bgColor: "bg-green-100",
-    subtitle: "earned",
-    details: revenueBreakdown
-  }, {
-    title: "Monthly Costs",
-    value: formatCurrency(monthlySubscriptionCost, displayCurrency),
-    icon: CreditCard,
-    color: "text-red-600",
-    bgColor: "bg-red-100",
-    subtitle: "subscriptions",
-    details: null
-  }, {
-    title: "Net Profit",
-    value: formatCurrency(netProfitAnnual, displayCurrency),
-    icon: TrendingUp,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-100",
-    subtitle: "annual estimate",
-    details: revenueBreakdown
-  }];
-  return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+
+  const stats = [
+    {
+      title: "Total Clients",
+      value: totalClients,
+      icon: Users,
+      color: "text-slate-700",
+      bgColor: "bg-slate-100",
+      subtitle: `${activeClients} active`,
+      details: clients.map(client => client.name)
+    },
+    {
+      title: "Total Time",
+      value: totalHours,
+      icon: Clock,
+      color: "text-slate-700",
+      bgColor: "bg-slate-200",
+      subtitle: "tracked",
+      details: timeBreakdown
+    },
+    {
+      title: "Total Revenue",
+      value: formatCurrency(totalRevenue, displayCurrency),
+      icon: DollarSign,
+      color: "text-slate-800",
+      bgColor: "bg-slate-300",
+      subtitle: "earned",
+      details: revenueBreakdown
+    },
+    {
+      title: "Monthly Costs",
+      value: formatCurrency(monthlySubscriptionCost, displayCurrency),
+      icon: CreditCard,
+      color: "text-slate-600",
+      bgColor: "bg-slate-150",
+      subtitle: "subscriptions",
+      details: null
+    },
+    {
+      title: "Net Profit",
+      value: formatCurrency(netProfitAnnual, displayCurrency),
+      icon: TrendingUp,
+      color: "text-slate-800",
+      bgColor: "bg-slate-400",
+      subtitle: "annual estimate",
+      details: revenueBreakdown
+    }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
       {stats.map((stat, index) => {
-      const Icon = stat.icon;
-      return <Card key={index} className="hover:shadow-lg transition-all duration-200">
+        const Icon = stat.icon;
+        return (
+          <Card key={index} className="hover:shadow-lg transition-all duration-200">
             <CardContent className="p-6 rounded-sm">
               <div className="flex items-start space-x-4">
                 <div className={`p-3 rounded-full ${stat.bgColor} flex-shrink-0`}>
@@ -115,39 +130,62 @@ const AnalyticsSection = ({
                   <p className="text-xs text-slate-500 mb-2">{stat.subtitle}</p>
                   
                   {/* Details section */}
-                  {stat.details && stat.details.length > 0 && <div className="space-y-1">
-                      {stat.title === "Total Clients" && <div className="space-y-1">
-                          {stat.details.slice(0, 3).map((clientName, idx) => <p key={idx} className="text-xs text-slate-600 truncate">
+                  {stat.details && stat.details.length > 0 && (
+                    <div className="space-y-1">
+                      {stat.title === "Total Clients" && (
+                        <div className="space-y-1">
+                          {stat.details.slice(0, 3).map((clientName, idx) => (
+                            <p key={idx} className="text-xs text-slate-600 truncate">
                               {clientName}
-                            </p>)}
-                          {stat.details.length > 3 && <p className="text-xs text-slate-500">
+                            </p>
+                          ))}
+                          {stat.details.length > 3 && (
+                            <p className="text-xs text-slate-500">
                               +{stat.details.length - 3} more
-                            </p>}
-                        </div>}
+                            </p>
+                          )}
+                        </div>
+                      )}
                       
-                      {stat.title === "Total Time" && <div className="space-y-1">
-                          {stat.details.slice(0, 2).map((client, idx) => <p key={idx} className="text-xs text-slate-600 truncate">
+                      {stat.title === "Total Time" && (
+                        <div className="space-y-1">
+                          {stat.details.slice(0, 2).map((client, idx) => (
+                            <p key={idx} className="text-xs text-slate-600 truncate">
                               {client.value} {client.unit} for {client.name}
-                            </p>)}
-                          {stat.details.length > 2 && <p className="text-xs text-slate-500">
+                            </p>
+                          ))}
+                          {stat.details.length > 2 && (
+                            <p className="text-xs text-slate-500">
                               +{stat.details.length - 2} more
-                            </p>}
-                        </div>}
+                            </p>
+                          )}
+                        </div>
+                      )}
                       
-                      {(stat.title === "Total Revenue" || stat.title === "Net Profit") && <div className="space-y-1">
-                          {stat.details.slice(0, 2).map((client, idx) => <p key={idx} className="text-xs text-slate-600 truncate">
+                      {(stat.title === "Total Revenue" || stat.title === "Net Profit") && (
+                        <div className="space-y-1">
+                          {stat.details.slice(0, 2).map((client, idx) => (
+                            <p key={idx} className="text-xs text-slate-600 truncate">
                               {formatCurrency(client.value, displayCurrency)} from {client.name}
-                            </p>)}
-                          {stat.details.length > 2 && <p className="text-xs text-slate-500">
+                            </p>
+                          ))}
+                          {stat.details.length > 2 && (
+                            <p className="text-xs text-slate-500">
                               +{stat.details.length - 2} more
-                            </p>}
-                        </div>}
-                    </div>}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
-          </Card>;
-    })}
-    </div>;
+          </Card>
+        );
+      })}
+    </div>
+  );
 };
+
 export default AnalyticsSection;
