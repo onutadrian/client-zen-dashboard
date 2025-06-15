@@ -3,16 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CreditCard } from 'lucide-react';
 import { formatCurrency, convertCurrency } from '@/lib/currency';
-
-interface Subscription {
-  id: number;
-  name: string;
-  cost: number;
-  currency: string;
-  billingCycle: string;
-  startDate: string;
-  status: string;
-}
+import { Subscription } from '@/hooks/useSubscriptions';
 
 interface SubscriptionMetricsProps {
   subscriptions: Subscription[];
@@ -23,28 +14,14 @@ const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMet
   const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
   
   const monthlyTotal = activeSubscriptions.reduce((total, subscription) => {
-    const convertedCost = convertCurrency(subscription.cost, subscription.currency, displayCurrency);
-    if (subscription.billingCycle === 'monthly') {
-      return total + convertedCost;
-    } else if (subscription.billingCycle === 'yearly') {
-      return total + (convertedCost / 12);
-    }
-    return total;
+    const convertedCost = convertCurrency(subscription.price, subscription.currency, displayCurrency);
+    const totalSeats = subscription.seats || 1;
+    return total + (convertedCost * totalSeats);
   }, 0);
 
   const totalPaidToDate = subscriptions.reduce((total, subscription) => {
-    const convertedCost = convertCurrency(subscription.cost, subscription.currency, displayCurrency);
-    const startDate = new Date(subscription.startDate);
-    const now = new Date();
-    const monthsActive = Math.max(0, Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)));
-    
-    if (subscription.billingCycle === 'monthly') {
-      return total + (convertedCost * monthsActive);
-    } else if (subscription.billingCycle === 'yearly') {
-      const yearsActive = Math.floor(monthsActive / 12);
-      return total + (convertedCost * yearsActive);
-    }
-    return total;
+    const convertedCost = convertCurrency(subscription.totalPaid || 0, subscription.currency, displayCurrency);
+    return total + convertedCost;
   }, 0);
 
   return (
