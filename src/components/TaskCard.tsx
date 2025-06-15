@@ -153,7 +153,7 @@ const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
             <>
               {' • '}
               Completed: {new Date(task.completedDate).toLocaleDateString()}
-            </div>
+            </>
           )}
         </div>
       </CardContent>
