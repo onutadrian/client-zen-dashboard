@@ -37,7 +37,7 @@ export const useMilestones = () => {
         title: milestone.title,
         description: milestone.description || undefined,
         targetDate: milestone.target_date,
-        status: milestone.status,
+        status: milestone.status as 'pending' | 'completed' | 'overdue',
         createdAt: milestone.created_at,
         updatedAt: milestone.updated_at
       }));
@@ -75,7 +75,7 @@ export const useMilestones = () => {
         title: data.title,
         description: data.description || undefined,
         targetDate: data.target_date,
-        status: data.status,
+        status: data.status as 'pending' | 'completed' | 'overdue',
         createdAt: data.created_at,
         updatedAt: data.updated_at
       };
