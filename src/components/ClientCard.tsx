@@ -72,13 +72,13 @@ const ClientCard = ({
   const getBorderColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'border-l-green-500 before:bg-green-500';
+        return 'border-l-gray-300 hover:border-l-green-500';
       case 'inactive':
-        return 'border-l-gray-400 before:bg-gray-400';
+        return 'border-l-gray-300 hover:border-l-gray-500';
       case 'pending':
-        return 'border-l-yellow-500 before:bg-yellow-500';
+        return 'border-l-gray-300 hover:border-l-yellow-500';
       default:
-        return 'border-l-gray-400 before:bg-gray-400';
+        return 'border-l-gray-300 hover:border-l-gray-500';
     }
   };
 
@@ -152,11 +152,8 @@ const ClientCard = ({
   return <>
       <Card 
         className={`
-          hover:shadow-lg transition-all duration-300 border-l-4 cursor-pointer relative overflow-hidden
+          hover:shadow-lg transition-all duration-300 border-l-4 cursor-pointer
           ${getBorderColor(client.status)}
-          before:content-[''] before:absolute before:top-0 before:right-0 before:h-full before:w-0 
-          before:transition-all before:duration-300 before:ease-in-out before:opacity-20
-          hover:before:w-full hover:before:right-0 hover:before:left-0
         `} 
         onClick={handleCardClick}
       >
