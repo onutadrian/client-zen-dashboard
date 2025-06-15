@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Users, CreditCard, Plus } from 'lucide-react';
+import { Users, CreditCard, Plus, FolderOpen } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,11 +8,13 @@ import ClientCard from '@/components/ClientCard';
 import SubscriptionCard from '@/components/SubscriptionCard';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import TasksSection from '@/components/TasksSection';
+import ProjectsSection from '@/components/ProjectsSection';
 import DashboardHeader from '@/components/DashboardHeader';
 import ModalsContainer from '@/components/ModalsContainer';
 import { useClients } from '@/hooks/useClients';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useTasks } from '@/hooks/useTasks';
+import { useProjects } from '@/hooks/useProjects';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
 
@@ -37,6 +39,12 @@ const Index = () => {
     deleteTask,
     editTask
   } = useTasks();
+  const {
+    projects,
+    addProject,
+    updateProject,
+    deleteProject
+  } = useProjects();
 
   // Modal states
   const [showClientModal, setShowClientModal] = useState(false);
@@ -106,6 +114,15 @@ const Index = () => {
           displayCurrency={displayCurrency} 
           convertCurrency={convertCurrency} 
           formatCurrency={formatCurrency} 
+        />
+
+        {/* Projects Section */}
+        <ProjectsSection 
+          projects={projects}
+          clients={clients}
+          onAddProject={addProject}
+          onUpdateProject={updateProject}
+          onDeleteProject={deleteProject}
         />
 
         {/* Tasks Section */}
