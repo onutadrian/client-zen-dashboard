@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { DollarSign, Clock, FileText, Link as LinkIcon, Users, FileCheck, Mail, ExternalLink, Plus, Edit, Upload, Eye } from 'lucide-react';
 import LogHoursModal from './LogHoursModal';
 import EditClientModal from './EditClientModal';
+
 interface HourEntry {
   id: number;
   hours: number;
