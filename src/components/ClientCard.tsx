@@ -176,7 +176,7 @@ const ClientCard = ({
             <Button size="sm" onClick={e => {
             e.stopPropagation();
             setShowLogHoursModal(true);
-          }} className="bg-blue-600 hover:bg-blue-700">
+          }} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
               <Plus className="w-3 h-3 mr-1" />
               Log Time
             </Button>
