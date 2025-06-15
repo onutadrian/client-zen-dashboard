@@ -12,7 +12,7 @@ import './App.css';
 function App() {
   return (
     <Router>
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={true}>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
           <SidebarInset className="flex-1">

@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
@@ -15,6 +14,7 @@ import { convertCurrency, formatCurrency } from '@/lib/currency';
 
 const Index = () => {
   const [displayCurrency, setDisplayCurrency] = useState('USD');
+  const { isMobile } = useSidebar();
 
   // Use custom hooks for state management
   const {
@@ -100,7 +100,7 @@ const Index = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center space-x-4">
-          <SidebarTrigger />
+          {isMobile && <SidebarTrigger />}
           <div className="flex-1">
             <DashboardHeader 
               displayCurrency={displayCurrency} 

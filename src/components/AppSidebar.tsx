@@ -11,7 +11,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
-  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { BarChart3, Users, FolderOpen, CreditCard } from 'lucide-react';
 
@@ -43,9 +42,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="p-4 flex flex-row items-center justify-between">
+      <SidebarHeader className="p-4">
         <h2 className="text-lg font-semibold text-slate-800 group-data-[collapsible=icon]:hidden">Dashboard</h2>
-        <SidebarTrigger className="ml-auto" />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
