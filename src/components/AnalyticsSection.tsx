@@ -1,6 +1,9 @@
+
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign, Clock, Users, TrendingUp, CreditCard } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { TrendingUp, TrendingDown } from 'lucide-react';
+
 const AnalyticsSection = ({
   totalClients,
   activeClients,
@@ -12,6 +15,18 @@ const AnalyticsSection = ({
   convertCurrency,
   formatCurrency
 }) => {
+  // Mock trend data for 30-day comparison (in a real app, this would come from historical data)
+  const getTrendData = (metric: string) => {
+    const trends = {
+      'Total Clients': { change: 15, isIncrease: true },
+      'Total Time': { change: 23, isIncrease: true },
+      'Total Revenue': { change: 8, isIncrease: true },
+      'Monthly Costs': { change: 12, isIncrease: false }, // decrease is good for costs
+      'Net Profit': { change: 18, isIncrease: true }
+    };
+    return trends[metric] || { change: 0, isIncrease: true };
+  };
+
   // Calculate time breakdown by client and type
   const getTimeBreakdownByClient = () => {
     return clients.map(client => {
@@ -56,98 +71,96 @@ const AnalyticsSection = ({
       };
     }).filter(client => client.hasRevenue);
   };
+
   const timeBreakdown = getTimeBreakdownByClient();
   const revenueBreakdown = getRevenueBreakdownByClient();
   const netProfitAnnual = totalRevenue - monthlySubscriptionCost * 12;
-  const stats = [{
-    title: "Total Clients",
-    value: totalClients,
-    icon: Users,
-    color: "text-blue-600",
-    bgColor: "bg-blue-100",
-    subtitle: `${activeClients} active`,
-    details: clients.map(client => client.name)
-  }, {
-    title: "Total Time",
-    value: totalHours,
-    icon: Clock,
-    color: "text-purple-600",
-    bgColor: "bg-purple-100",
-    subtitle: "tracked",
-    details: timeBreakdown
-  }, {
-    title: "Total Revenue",
-    value: formatCurrency(totalRevenue, displayCurrency),
-    icon: DollarSign,
-    color: "text-green-600",
-    bgColor: "bg-green-100",
-    subtitle: "earned",
-    details: revenueBreakdown
-  }, {
-    title: "Monthly Costs",
-    value: formatCurrency(monthlySubscriptionCost, displayCurrency),
-    icon: CreditCard,
-    color: "text-red-600",
-    bgColor: "bg-red-100",
-    subtitle: "subscriptions",
-    details: null
-  }, {
-    title: "Net Profit",
-    value: formatCurrency(netProfitAnnual, displayCurrency),
-    icon: TrendingUp,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-100",
-    subtitle: "annual estimate",
-    details: revenueBreakdown
-  }];
-  return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+  const inactiveClients = totalClients - activeClients;
+
+  const stats = [
+    {
+      title: "Total Clients",
+      value: totalClients,
+      subtitle: `${activeClients} active, ${inactiveClients} inactive`,
+      details: clients.map(client => client.name)
+    },
+    {
+      title: "Total Time",
+      value: totalHours,
+      subtitle: "tracked hours",
+      details: timeBreakdown
+    },
+    {
+      title: "Total Revenue",
+      value: formatCurrency(totalRevenue, displayCurrency),
+      subtitle: "earned this period",
+      details: revenueBreakdown
+    },
+    {
+      title: "Monthly Costs",
+      value: formatCurrency(monthlySubscriptionCost, displayCurrency),
+      subtitle: "subscription expenses",
+      details: null
+    },
+    {
+      title: "Net Profit",
+      value: formatCurrency(netProfitAnnual, displayCurrency),
+      subtitle: "annual estimate",
+      details: revenueBreakdown
+    }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
       {stats.map((stat, index) => {
-      const Icon = stat.icon;
-      return <Card key={index} className="hover:shadow-lg transition-all duration-200">
-            <CardContent className="p-6 rounded-sm">
-              <div className="flex items-start space-x-4">
-                <div className={`p-3 rounded-full ${stat.bgColor} flex-shrink-0`}>
-                  <Icon className={`w-6 h-6 ${stat.color}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-600 mb-1">{stat.title}</p>
-                  <p className="font-bold text-slate-900 mb-1 text-2xl">{stat.value}</p>
-                  <p className="text-xs text-slate-500 mb-2">{stat.subtitle}</p>
+        const trend = getTrendData(stat.title);
+        const TrendIcon = trend.isIncrease ? TrendingUp : TrendingDown;
+        
+        return (
+          <Card key={index} className="hover:shadow-lg transition-all duration-200" style={{ width: '14.4375rem' }}>
+            <CardContent className="p-6 flex flex-col justify-between h-full">
+              {/* Section 1: Top content */}
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-slate-600">{stat.title}</h3>
                   
-                  {/* Details section */}
-                  {stat.details && stat.details.length > 0 && <div className="space-y-1">
-                      {stat.title === "Total Clients" && <div className="space-y-1">
-                          {stat.details.slice(0, 3).map((clientName, idx) => <p key={idx} className="text-xs text-slate-600 truncate">
-                              {clientName}
-                            </p>)}
-                          {stat.details.length > 3 && <p className="text-xs text-slate-500">
-                              +{stat.details.length - 3} more
-                            </p>}
-                        </div>}
-                      
-                      {stat.title === "Total Time" && <div className="space-y-1">
-                          {stat.details.slice(0, 2).map((client, idx) => <p key={idx} className="text-xs text-slate-600 truncate">
-                              {client.value} {client.unit} for {client.name}
-                            </p>)}
-                          {stat.details.length > 2 && <p className="text-xs text-slate-500">
-                              +{stat.details.length - 2} more
-                            </p>}
-                        </div>}
-                      
-                      {(stat.title === "Total Revenue" || stat.title === "Net Profit") && <div className="space-y-1">
-                          {stat.details.slice(0, 2).map((client, idx) => <p key={idx} className="text-xs text-slate-600 truncate">
-                              {formatCurrency(client.value, displayCurrency)} from {client.name}
-                            </p>)}
-                          {stat.details.length > 2 && <p className="text-xs text-slate-500">
-                              +{stat.details.length - 2} more
-                            </p>}
-                        </div>}
-                    </div>}
+                  <div className="flex items-center space-x-2">
+                    <Badge 
+                      className={`text-xs px-2 py-1 flex items-center space-x-1 ${
+                        trend.isIncrease 
+                          ? 'bg-green-100 text-green-800 hover:bg-green-100' 
+                          : 'bg-red-100 text-red-800 hover:bg-red-100'
+                      }`}
+                    >
+                      <TrendIcon className="w-3 h-3" />
+                      <span>{trend.change}%</span>
+                    </Badge>
+                    <span className="text-xs text-slate-500">vs prev 30d</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500">{stat.subtitle}</span>
+                  {stat.details && stat.details.length > 0 && (
+                    <span className="text-xs text-slate-600 truncate max-w-20">
+                      {stat.title === "Total Clients" && stat.details[0]}
+                      {stat.title === "Total Time" && stat.details[0]?.name}
+                      {(stat.title === "Total Revenue" || stat.title === "Net Profit") && stat.details[0]?.name}
+                    </span>
+                  )}
                 </div>
               </div>
+
+              {/* Section 2: Bottom metric */}
+              <div className="mt-4">
+                <p className="font-bold text-slate-900 text-2xl">{stat.value}</p>
+              </div>
             </CardContent>
-          </Card>;
-    })}
-    </div>;
+          </Card>
+        );
+      })}
+    </div>
+  );
 };
+
 export default AnalyticsSection;
