@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Users, CreditCard, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +15,7 @@ import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useTasks } from '@/hooks/useTasks';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
+
 const Index = () => {
   const [displayCurrency, setDisplayCurrency] = useState('USD');
 
@@ -50,19 +52,18 @@ const Index = () => {
     const convertedTotal = convertCurrency(sub.totalPaid || 0, sub.currency || 'USD', displayCurrency);
     return sum + convertedTotal;
   }, 0);
+
   const handleEditSubscription = (subscription: any) => {
     setSelectedSubscription(subscription);
     setShowEditSubscriptionModal(true);
   };
-  const handleTaskUpdate = (taskId: number, status: any, actualHours?: number) => {
-    const result = updateTask(taskId, status, actualHours);
+
+  const handleTaskUpdate = async (taskId: number, status: any, actualHours?: number) => {
+    const result = await updateTask(taskId, status, actualHours);
 
     // If task was completed and has hours, log them to the client
     if (result && result.hoursToLog) {
-      const {
-        task,
-        hoursToLog
-      } = result;
+      const { task, hoursToLog } = result;
       const client = clients.find(c => c.id === task.clientId);
       if (client) {
         const newHourEntry = {
@@ -82,13 +83,30 @@ const Index = () => {
       }
     }
   };
-  return <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
+
+  return (
+    <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <DashboardHeader displayCurrency={displayCurrency} onCurrencyChange={setDisplayCurrency} onAddClient={() => setShowClientModal(true)} onAddSubscription={() => setShowSubscriptionModal(true)} />
+        <DashboardHeader 
+          displayCurrency={displayCurrency} 
+          onCurrencyChange={setDisplayCurrency} 
+          onAddClient={() => setShowClientModal(true)} 
+          onAddSubscription={() => setShowSubscriptionModal(true)} 
+        />
 
         {/* Analytics Overview */}
-        <AnalyticsSection totalClients={analytics.totalClients} activeClients={analytics.activeClients} totalHours={analytics.totalHours} totalRevenue={analytics.totalRevenue} monthlySubscriptionCost={analytics.monthlySubscriptionCost} clients={clients} displayCurrency={displayCurrency} convertCurrency={convertCurrency} formatCurrency={formatCurrency} />
+        <AnalyticsSection 
+          totalClients={analytics.totalClients} 
+          activeClients={analytics.activeClients} 
+          totalHours={analytics.totalHours} 
+          totalRevenue={analytics.totalRevenue} 
+          monthlySubscriptionCost={analytics.monthlySubscriptionCost} 
+          clients={clients} 
+          displayCurrency={displayCurrency} 
+          convertCurrency={convertCurrency} 
+          formatCurrency={formatCurrency} 
+        />
 
         {/* Tasks Section */}
         <TasksSection 
@@ -106,16 +124,25 @@ const Index = () => {
           <div className="xl:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold text-slate-800 flex items-center">
-                
                 Clients ({clients.length})
               </h2>
               <Badge variant="secondary">{analytics.activeClients} Active</Badge>
             </div>
             
             <div className="space-y-4">
-              {clients.map(client => <ClientCard key={client.id} client={client} onUpdateClient={updateClient} displayCurrency={displayCurrency} convertCurrency={convertCurrency} formatCurrency={formatCurrency} />)}
+              {clients.map(client => (
+                <ClientCard 
+                  key={client.id} 
+                  client={client} 
+                  onUpdateClient={updateClient} 
+                  displayCurrency={displayCurrency} 
+                  convertCurrency={convertCurrency} 
+                  formatCurrency={formatCurrency} 
+                />
+              ))}
               
-              {clients.length === 0 && <Card className="border-dashed border-2 border-slate-300">
+              {clients.length === 0 && (
+                <Card className="border-dashed border-2 border-slate-300">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Users className="w-12 h-12 text-slate-400 mb-4" />
                     <h3 className="text-lg font-medium text-slate-600 mb-2">No clients yet</h3>
@@ -125,7 +152,8 @@ const Index = () => {
                       Add First Client
                     </Button>
                   </CardContent>
-                </Card>}
+                </Card>
+              )}
             </div>
           </div>
 
@@ -133,7 +161,6 @@ const Index = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold text-slate-800 flex items-center">
-                
                 Subscriptions
               </h2>
               <div className="flex items-center space-x-2">
@@ -147,9 +174,16 @@ const Index = () => {
             </div>
             
             <div className="space-y-3">
-              {subscriptions.map(subscription => <SubscriptionCard key={subscription.id} subscription={subscription} onEdit={handleEditSubscription} />)}
+              {subscriptions.map(subscription => (
+                <SubscriptionCard 
+                  key={subscription.id} 
+                  subscription={subscription} 
+                  onEdit={handleEditSubscription} 
+                />
+              ))}
               
-              {subscriptions.length === 0 && <Card className="border-dashed border-2 border-slate-300">
+              {subscriptions.length === 0 && (
+                <Card className="border-dashed border-2 border-slate-300">
                   <CardContent className="flex flex-col items-center justify-center py-8">
                     <CreditCard className="w-8 h-8 text-slate-400 mb-3" />
                     <p className="text-slate-500 text-center text-sm mb-3">No subscriptions tracked</p>
@@ -158,17 +192,31 @@ const Index = () => {
                       Add Subscription
                     </Button>
                   </CardContent>
-                </Card>}
+                </Card>
+              )}
             </div>
           </div>
         </div>
 
         {/* Modals */}
-        <ModalsContainer showClientModal={showClientModal} onCloseClientModal={() => setShowClientModal(false)} onAddClient={addClient} showSubscriptionModal={showSubscriptionModal} onCloseSubscriptionModal={() => setShowSubscriptionModal(false)} onAddSubscription={addSubscription} showEditSubscriptionModal={showEditSubscriptionModal} onCloseEditSubscriptionModal={() => {
-        setShowEditSubscriptionModal(false);
-        setSelectedSubscription(null);
-      }} selectedSubscription={selectedSubscription} onUpdateSubscription={updateSubscription} />
+        <ModalsContainer 
+          showClientModal={showClientModal} 
+          onCloseClientModal={() => setShowClientModal(false)} 
+          onAddClient={addClient} 
+          showSubscriptionModal={showSubscriptionModal} 
+          onCloseSubscriptionModal={() => setShowSubscriptionModal(false)} 
+          onAddSubscription={addSubscription} 
+          showEditSubscriptionModal={showEditSubscriptionModal} 
+          onCloseEditSubscriptionModal={() => {
+            setShowEditSubscriptionModal(false);
+            setSelectedSubscription(null);
+          }} 
+          selectedSubscription={selectedSubscription} 
+          onUpdateSubscription={updateSubscription} 
+        />
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;

@@ -57,9 +57,9 @@ export const useClients = () => {
         documents: client.documents || [],
         links: client.links || [],
         notes: client.notes || '',
-        people: client.people || [],
-        invoices: client.invoices || [],
-        hourEntries: client.hour_entries || [],
+        people: (client.people as any[]) || [],
+        invoices: (client.invoices as any[]) || [],
+        hourEntries: (client.hour_entries as any[]) || [],
         currency: client.currency || 'USD'
       }));
 
@@ -111,9 +111,9 @@ export const useClients = () => {
         documents: data.documents || [],
         links: data.links || [],
         notes: data.notes || '',
-        people: data.people || [],
-        invoices: data.invoices || [],
-        hourEntries: data.hour_entries || [],
+        people: (data.people as any[]) || [],
+        invoices: (data.invoices as any[]) || [],
+        hourEntries: (data.hour_entries as any[]) || [],
         currency: data.currency || 'USD'
       };
 
