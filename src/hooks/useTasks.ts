@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -9,6 +8,7 @@ export interface Task {
   description: string;
   clientId: number;
   clientName: string;
+  projectId?: string;
   estimatedHours?: number;
   actualHours?: number;
   status: 'pending' | 'in-progress' | 'completed';
@@ -16,6 +16,8 @@ export interface Task {
   assets: string[];
   createdDate: string;
   completedDate?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const useTasks = () => {
@@ -43,13 +45,16 @@ export const useTasks = () => {
         description: task.description || '',
         clientId: task.client_id,
         clientName: task.client_name,
+        projectId: task.project_id,
         estimatedHours: task.estimated_hours,
         actualHours: task.actual_hours,
         status: task.status as 'pending' | 'in-progress' | 'completed',
         notes: task.notes || '',
         assets: task.assets || [],
         createdDate: task.created_date,
-        completedDate: task.completed_date || undefined
+        completedDate: task.completed_date || undefined,
+        startDate: task.start_date || undefined,
+        endDate: task.end_date || undefined
       }));
 
       setTasks(transformedTasks);
@@ -65,19 +70,21 @@ export const useTasks = () => {
 
   const addTask = async (newTask: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => {
     try {
-      // Generate a temporary project_id (UUID) - in a real app you'd select an existing project
-      const tempProjectId = '00000000-0000-0000-0000-000000000000';
+      // Use the provided project_id or generate a temporary one
+      const projectId = newTask.projectId || '00000000-0000-0000-0000-000000000000';
 
       const supabaseTask = {
         title: newTask.title,
         description: newTask.description,
         client_id: newTask.clientId,
         client_name: newTask.clientName,
+        project_id: projectId,
         estimated_hours: newTask.estimatedHours,
         status: 'pending',
         notes: newTask.notes,
         assets: newTask.assets,
-        project_id: tempProjectId
+        start_date: newTask.startDate,
+        end_date: newTask.endDate
       };
 
       const { data, error } = await supabase
@@ -94,13 +101,16 @@ export const useTasks = () => {
         description: data.description || '',
         clientId: data.client_id,
         clientName: data.client_name,
+        projectId: data.project_id,
         estimatedHours: data.estimated_hours,
         actualHours: data.actual_hours,
         status: data.status as 'pending' | 'in-progress' | 'completed',
         notes: data.notes || '',
         assets: data.assets || [],
         createdDate: data.created_date,
-        completedDate: data.completed_date || undefined
+        completedDate: data.completed_date || undefined,
+        startDate: data.start_date || undefined,
+        endDate: data.end_date || undefined
       };
 
       setTasks(prev => [...prev, transformedTask]);
@@ -212,9 +222,12 @@ export const useTasks = () => {
       if (updatedTask.description !== undefined) supabaseUpdate.description = updatedTask.description;
       if (updatedTask.clientId) supabaseUpdate.client_id = updatedTask.clientId;
       if (updatedTask.clientName) supabaseUpdate.client_name = updatedTask.clientName;
+      if (updatedTask.projectId) supabaseUpdate.project_id = updatedTask.projectId;
       if (updatedTask.estimatedHours !== undefined) supabaseUpdate.estimated_hours = updatedTask.estimatedHours;
       if (updatedTask.notes !== undefined) supabaseUpdate.notes = updatedTask.notes;
       if (updatedTask.assets) supabaseUpdate.assets = updatedTask.assets;
+      if (updatedTask.startDate !== undefined) supabaseUpdate.start_date = updatedTask.startDate;
+      if (updatedTask.endDate !== undefined) supabaseUpdate.end_date = updatedTask.endDate;
 
       const { error } = await supabase
         .from('tasks')

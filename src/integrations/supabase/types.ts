@@ -63,6 +63,47 @@ export type Database = {
         }
         Relationships: []
       }
+      milestones: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          project_id: string
+          status: string
+          target_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          project_id: string
+          status?: string
+          target_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          project_id?: string
+          status?: string
+          target_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           client_id: number
@@ -125,10 +166,12 @@ export type Database = {
           completed_date: string | null
           created_date: string
           description: string | null
+          end_date: string | null
           estimated_hours: number | null
           id: number
           notes: string | null
           project_id: string
+          start_date: string | null
           status: string
           title: string
         }
@@ -140,10 +183,12 @@ export type Database = {
           completed_date?: string | null
           created_date?: string
           description?: string | null
+          end_date?: string | null
           estimated_hours?: number | null
           id?: number
           notes?: string | null
           project_id: string
+          start_date?: string | null
           status?: string
           title: string
         }
@@ -155,10 +200,12 @@ export type Database = {
           completed_date?: string | null
           created_date?: string
           description?: string | null
+          end_date?: string | null
           estimated_hours?: number | null
           id?: number
           notes?: string | null
           project_id?: string
+          start_date?: string | null
           status?: string
           title?: string
         }

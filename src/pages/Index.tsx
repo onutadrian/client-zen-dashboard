@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import ProjectsSection from '@/components/ProjectsSection';
+import ProjectTimeline from '@/components/ProjectTimeline';
 import TasksSection from '@/components/TasksSection';
 import MainContentGrid from '@/components/MainContentGrid';
 import ModalsContainer from '@/components/ModalsContainer';
@@ -10,6 +11,7 @@ import { useClients } from '@/hooks/useClients';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useTasks } from '@/hooks/useTasks';
 import { useProjects } from '@/hooks/useProjects';
+import { useMilestones } from '@/hooks/useMilestones';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
 
@@ -40,6 +42,11 @@ const Index = () => {
     updateProject,
     deleteProject
   } = useProjects();
+  const {
+    milestones,
+    addMilestone,
+    updateMilestone
+  } = useMilestones();
 
   // Modal states
   const [showClientModal, setShowClientModal] = useState(false);
@@ -120,10 +127,19 @@ const Index = () => {
           onDeleteProject={deleteProject}
         />
 
+        {/* Project Timeline */}
+        <ProjectTimeline 
+          projects={projects}
+          tasks={tasks}
+          milestones={milestones}
+          clients={clients}
+        />
+
         {/* Tasks Section */}
         <TasksSection 
           tasks={tasks} 
           clients={clients} 
+          projects={projects}
           onAddTask={addTask} 
           onUpdateTask={handleTaskUpdate} 
           onDeleteTask={deleteTask}

@@ -14,12 +14,19 @@ interface Client {
   priceType: string;
 }
 
+interface Project {
+  id: string;
+  name: string;
+  clientId: number;
+}
+
 interface Task {
   id: number;
   title: string;
   description: string;
   clientId: number;
   clientName: string;
+  projectId?: string;
   estimatedHours?: number;
   actualHours?: number;
   status: 'pending' | 'in-progress' | 'completed';
@@ -27,6 +34,8 @@ interface Task {
   assets: string[];
   createdDate: string;
   completedDate?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface AddTaskModalProps {
@@ -34,16 +43,20 @@ interface AddTaskModalProps {
   onClose: () => void;
   onAdd: (task: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => void;
   clients: Client[];
+  projects: Project[];
   task?: Task | null;
 }
 
-const AddTaskModal = ({ isOpen, onClose, onAdd, clients, task }: AddTaskModalProps) => {
+const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTaskModalProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [clientId, setClientId] = useState<number | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
   const [estimatedHours, setEstimatedHours] = useState<number | undefined>(undefined);
   const [notes, setNotes] = useState('');
   const [assetsInput, setAssetsInput] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   // Populate form when editing
   useEffect(() => {
@@ -51,21 +64,28 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, task }: AddTaskModalPro
       setTitle(task.title);
       setDescription(task.description);
       setClientId(task.clientId);
+      setProjectId(task.projectId || null);
       setEstimatedHours(task.estimatedHours);
       setNotes(task.notes);
       setAssetsInput(task.assets.join('\n'));
+      setStartDate(task.startDate || '');
+      setEndDate(task.endDate || '');
     } else {
       // Reset form for new task
       setTitle('');
       setDescription('');
       setClientId(null);
+      setProjectId(null);
       setEstimatedHours(undefined);
       setNotes('');
       setAssetsInput('');
+      setStartDate('');
+      setEndDate('');
     }
   }, [task]);
 
   const selectedClient = clients.find(c => c.id === clientId);
+  const availableProjects = projects.filter(p => !clientId || p.clientId === clientId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,6 +100,11 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, task }: AddTaskModalPro
       return;
     }
 
+    if (!projectId) {
+      toast.error('Please select a project');
+      return;
+    }
+
     const assets = assetsInput
       .split('\n')
       .map(asset => asset.trim())
@@ -90,18 +115,24 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, task }: AddTaskModalPro
       description: description.trim(),
       clientId,
       clientName: selectedClient?.name || '',
+      projectId,
       estimatedHours,
       notes: notes.trim(),
       assets,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
     });
 
     // Reset form
     setTitle('');
     setDescription('');
     setClientId(null);
+    setProjectId(null);
     setEstimatedHours(undefined);
     setNotes('');
     setAssetsInput('');
+    setStartDate('');
+    setEndDate('');
     
     onClose();
     toast.success(task ? 'Task updated successfully' : 'Task added successfully');
@@ -111,9 +142,12 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, task }: AddTaskModalPro
     setTitle('');
     setDescription('');
     setClientId(null);
+    setProjectId(null);
     setEstimatedHours(undefined);
     setNotes('');
     setAssetsInput('');
+    setStartDate('');
+    setEndDate('');
     onClose();
   };
 
@@ -147,20 +181,64 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, task }: AddTaskModalPro
             />
           </div>
 
-          <div>
-            <Label htmlFor="client">Client *</Label>
-            <Select value={clientId?.toString()} onValueChange={(value) => setClientId(Number(value))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a client" />
-              </SelectTrigger>
-              <SelectContent>
-                {clients.map((client) => (
-                  <SelectItem key={client.id} value={client.id.toString()}>
-                    {client.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="client">Client *</Label>
+              <Select value={clientId?.toString()} onValueChange={(value) => {
+                setClientId(Number(value));
+                setProjectId(null); // Reset project when client changes
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id.toString()}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="project">Project *</Label>
+              <Select value={projectId || ''} onValueChange={setProjectId} disabled={!clientId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableProjects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="endDate">End Date</Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                min={startDate || undefined}
+              />
+            </div>
           </div>
 
           {selectedClient?.priceType === 'hour' && (

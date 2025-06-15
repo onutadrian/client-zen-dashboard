@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,7 @@ interface Task {
   description: string;
   clientId: number;
   clientName: string;
+  projectId?: string;
   estimatedHours?: number;
   actualHours?: number;
   status: 'pending' | 'in-progress' | 'completed';
@@ -22,23 +22,36 @@ interface Task {
   assets: string[];
   createdDate: string;
   completedDate?: string;
+  startDate?: string;
+  endDate?: string;
 }
+
 interface Client {
   id: number;
   name: string;
   priceType: string;
 }
+
+interface Project {
+  id: string;
+  name: string;
+  clientId: number;
+}
+
 interface TasksSectionProps {
   tasks: Task[];
   clients: Client[];
+  projects: Project[];
   onAddTask: (task: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => void;
   onUpdateTask: (taskId: number, status: Task['status'], actualHours?: number) => void;
   onDeleteTask: (taskId: number) => void;
   onEditTask: (taskId: number, updatedTask: Partial<Task>) => void;
 }
+
 const TasksSection = ({
   tasks,
   clients,
+  projects,
   onAddTask,
   onUpdateTask,
   onDeleteTask,
@@ -47,6 +60,7 @@ const TasksSection = ({
   const [showAddModal, setShowAddModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | Task['status']>('all');
   const [clientFilter, setClientFilter] = useState<'all' | string>('all');
+  const [projectFilter, setProjectFilter] = useState<'all' | string>('all');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -54,7 +68,8 @@ const TasksSection = ({
   const filteredTasks = tasks.filter(task => {
     const statusMatch = statusFilter === 'all' || task.status === statusFilter;
     const clientMatch = clientFilter === 'all' || task.clientId.toString() === clientFilter;
-    return statusMatch && clientMatch;
+    const projectMatch = projectFilter === 'all' || task.projectId === projectFilter;
+    return statusMatch && clientMatch && projectMatch;
   });
 
   const taskStats = {
@@ -151,6 +166,23 @@ const TasksSection = ({
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-slate-600">Project:</span>
+              <Select value={projectFilter} onValueChange={setProjectFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Projects</SelectItem>
+                  {projects.map(project => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardHeader>
 
@@ -184,6 +216,7 @@ const TasksSection = ({
           onClose={handleModalClose} 
           onAdd={handleTaskSubmit} 
           clients={clients}
+          projects={projects}
           task={editingTask}
         />
       </Card>
