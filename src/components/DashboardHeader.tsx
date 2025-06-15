@@ -1,26 +1,22 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus } from 'lucide-react';
-
 interface DashboardHeaderProps {
   displayCurrency: string;
   onCurrencyChange: (currency: string) => void;
   onAddClient: () => void;
   onAddSubscription: () => void;
 }
-
-const DashboardHeader = ({ 
-  displayCurrency, 
-  onCurrencyChange, 
-  onAddClient, 
-  onAddSubscription 
+const DashboardHeader = ({
+  displayCurrency,
+  onCurrencyChange,
+  onAddClient,
+  onAddSubscription
 }: DashboardHeaderProps) => {
-  return (
-    <div className="flex items-center justify-between">
+  return <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">Client Dashboard</h1>
+        <h1 className="text-4xl text-slate-900 mb-2 font-extrabold">DASHBOARD</h1>
         <p className="text-slate-600">Manage your clients, track work, and monitor revenue</p>
       </div>
       <div className="flex gap-3 items-center">
@@ -46,8 +42,6 @@ const DashboardHeader = ({
           Add Subscription
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default DashboardHeader;
