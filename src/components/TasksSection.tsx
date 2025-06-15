@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, CheckSquare } from 'lucide-react';
 import TaskCard from './TaskCard';
 import AddTaskModal from './AddTaskModal';
+
 interface Task {
   id: number;
   title: string;
@@ -20,17 +22,20 @@ interface Task {
   createdDate: string;
   completedDate?: string;
 }
+
 interface Client {
   id: number;
   name: string;
   priceType: string;
 }
+
 interface TasksSectionProps {
   tasks: Task[];
   clients: Client[];
   onAddTask: (task: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => void;
   onUpdateTask: (taskId: number, status: Task['status'], actualHours?: number) => void;
 }
+
 const TasksSection = ({
   tasks,
   clients,
@@ -40,25 +45,32 @@ const TasksSection = ({
   const [showAddModal, setShowAddModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | Task['status']>('all');
   const [clientFilter, setClientFilter] = useState<'all' | string>('all');
+
   const filteredTasks = tasks.filter(task => {
     const statusMatch = statusFilter === 'all' || task.status === statusFilter;
     const clientMatch = clientFilter === 'all' || task.clientId.toString() === clientFilter;
     return statusMatch && clientMatch;
   });
+
   const taskStats = {
     total: tasks.length,
     pending: tasks.filter(t => t.status === 'pending').length,
     inProgress: tasks.filter(t => t.status === 'in-progress').length,
     completed: tasks.filter(t => t.status === 'completed').length
   };
-  return <Card>
+
+  return (
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center">
             <CheckSquare className="w-6 h-6 mr-2 text-purple-600" />
             Tasks ({taskStats.total})
           </CardTitle>
-          <Button onClick={() => setShowAddModal(true)} className="bg-yellow-500 hover:bg-yellow-400 text-neutral-900 rounded-sm">
+          <Button 
+            onClick={() => setShowAddModal(true)} 
+            className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 rounded-sm transition-colors"
+          >
             <Plus className="w-4 h-4 mr-2" />
             Add Task
           </Button>
@@ -66,9 +78,9 @@ const TasksSection = ({
 
         {/* Stats */}
         <div className="flex items-center space-x-4 pt-2">
-          <Badge variant="secondary">{taskStats.pending} Pending</Badge>
-          <Badge className="bg-blue-100 text-blue-800">{taskStats.inProgress} In Progress</Badge>
-          <Badge className="bg-green-100 text-green-800">{taskStats.completed} Completed</Badge>
+          <Badge variant="secondary" className="hover:bg-secondary">{taskStats.pending} Pending</Badge>
+          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">{taskStats.inProgress} In Progress</Badge>
+          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{taskStats.completed} Completed</Badge>
         </div>
 
         {/* Filters */}
@@ -96,9 +108,11 @@ const TasksSection = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Clients</SelectItem>
-                {clients.map(client => <SelectItem key={client.id} value={client.id.toString()}>
+                {clients.map(client => (
+                  <SelectItem key={client.id} value={client.id.toString()}>
                     {client.name}
-                  </SelectItem>)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -106,25 +120,46 @@ const TasksSection = ({
       </CardHeader>
 
       <CardContent>
-        {filteredTasks.length === 0 ? <div className="text-center py-8">
+        {filteredTasks.length === 0 ? (
+          <div className="text-center py-8">
             <CheckSquare className="w-12 h-12 text-slate-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-slate-600 mb-2">No tasks found</h3>
             <p className="text-slate-500 mb-4">
               {tasks.length === 0 ? "Create your first task to get started" : "Try adjusting your filters or create a new task"}
             </p>
-            <Button onClick={() => setShowAddModal(true)} className="bg-purple-600 hover:bg-purple-700">
+            <Button 
+              onClick={() => setShowAddModal(true)} 
+              className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Add Task
             </Button>
-          </div> : <div className="space-y-4">
+          </div>
+        ) : (
+          <div className="space-y-4">
             {filteredTasks.map(task => {
-          const client = clients.find(c => c.id === task.clientId);
-          return <TaskCard key={task.id} task={task} onUpdateStatus={onUpdateTask} isHourlyClient={client?.priceType === 'hour'} />;
-        })}
-          </div>}
+              const client = clients.find(c => c.id === task.clientId);
+              return (
+                <TaskCard 
+                  key={task.id} 
+                  task={task} 
+                  onUpdateStatus={onUpdateTask} 
+                  isHourlyClient={client?.priceType === 'hour'} 
+                />
+              );
+            })}
+          </div>
+        )}
       </CardContent>
 
-      <AddTaskModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onAdd={onAddTask} clients={clients} />
-    </Card>;
+      <AddTaskModal 
+        isOpen={showAddModal} 
+        onClose={() => setShowAddModal(false)} 
+        onAdd={onAddTask} 
+        clients={clients} 
+      />
+    </Card>
+  );
 };
+
 export default TasksSection;

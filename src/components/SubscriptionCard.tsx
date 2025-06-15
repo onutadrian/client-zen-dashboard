@@ -27,15 +27,15 @@ const SubscriptionCard = ({
   const getBillingStatus = () => {
     if (isOverdue) return {
       text: 'Overdue',
-      color: 'bg-red-100 text-red-800'
+      color: 'bg-red-100 text-red-800 hover:bg-red-100'
     };
     if (isUpcoming) return {
       text: `${daysUntilBilling} days`,
-      color: 'bg-yellow-100 text-yellow-800'
+      color: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
     };
     return {
       text: `${daysUntilBilling} days`,
-      color: 'bg-green-100 text-green-800'
+      color: 'bg-green-100 text-green-800 hover:bg-green-100'
     };
   };
   
@@ -43,13 +43,13 @@ const SubscriptionCard = ({
     const status = subscription.status || 'active';
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 hover:bg-green-100';
       case 'paused':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
       case 'canceled':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 hover:bg-red-100';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
     }
   };
   
@@ -65,7 +65,8 @@ const SubscriptionCard = ({
     return currency === 'RON' ? `${symbol}${amount.toFixed(2)}` : `${symbol}${amount.toFixed(2)}`;
   };
 
-  return <Card className={`hover:shadow-md transition-all duration-200 ${isOverdue ? 'border-red-200 bg-red-50' : ''}`}>
+  return (
+    <Card className={`hover:shadow-md transition-all duration-200 ${isOverdue ? 'border-red-200 bg-red-50' : ''}`}>
       <CardContent className="p-4">
         <div className="space-y-3">
           {/* Header */}
@@ -87,10 +88,12 @@ const SubscriptionCard = ({
             <div className="text-right ml-4">
               <div className="text-lg font-bold text-slate-800">{formatCurrency(totalPrice)}</div>
               <div className="text-xs text-slate-500">per month</div>
-              {seats > 1 && <div className="text-xs text-slate-600 flex items-center justify-end mt-1">
+              {seats > 1 && (
+                <div className="text-xs text-slate-600 flex items-center justify-end mt-1">
                   <Users className="w-3 h-3 mr-1" />
                   {seats} seats
-                </div>}
+                </div>
+              )}
             </div>
           </div>
 
@@ -135,7 +138,8 @@ const SubscriptionCard = ({
           </div>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
 
 export default SubscriptionCard;
