@@ -141,10 +141,7 @@ const TaskTable = ({
                     onValueChange={(value: Task['status']) => onUpdateTask(task.id, value)}
                   >
                     <SelectTrigger className="w-32">
-                      <div className="flex items-center space-x-2">
-                        {getStatusIcon(task.status)}
-                        <SelectValue />
-                      </div>
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="pending">
