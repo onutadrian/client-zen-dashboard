@@ -1,6 +1,8 @@
 
 import React from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import ClientsSection from '@/components/ClientsSection';
 import ModalsContainer from '@/components/ModalsContainer';
 import { useClients } from '@/hooks/useClients';
@@ -15,13 +17,20 @@ const ClientsPage = () => {
   const { clients, addClient, updateClient } = useClients();
   const { subscriptions } = useSubscriptions();
   const analytics = useAnalytics(clients, subscriptions, displayCurrency);
+  const { isMobile } = useSidebar();
 
   return (
     <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center space-x-4">
-          <SidebarTrigger />
-          <h1 className="text-3xl font-bold text-slate-800">Clients</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            {isMobile && <SidebarTrigger />}
+            <h1 className="text-3xl font-bold text-slate-800">Clients</h1>
+          </div>
+          <Button onClick={() => setShowClientModal(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Client
+          </Button>
         </div>
         
         <ClientsSection 

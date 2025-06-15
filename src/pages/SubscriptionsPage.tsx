@@ -1,14 +1,15 @@
 
 import React from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Plus, CreditCard, TrendingUp } from 'lucide-react';
 import SubscriptionsSection from '@/components/SubscriptionsSection';
 import ModalsContainer from '@/components/ModalsContainer';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useClients } from '@/hooks/useClients';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
-import { CreditCard, TrendingUp } from 'lucide-react';
 
 const SubscriptionsPage = () => {
   const [displayCurrency, setDisplayCurrency] = React.useState('USD');
@@ -19,6 +20,7 @@ const SubscriptionsPage = () => {
   const { subscriptions, addSubscription, updateSubscription } = useSubscriptions();
   const { clients } = useClients();
   const analytics = useAnalytics(clients, subscriptions, displayCurrency);
+  const { isMobile } = useSidebar();
 
   // Calculate total paid to date for all subscriptions
   const totalPaidToDate = subscriptions.reduce((sum, sub) => {
@@ -34,9 +36,15 @@ const SubscriptionsPage = () => {
   return (
     <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center space-x-4">
-          <SidebarTrigger />
-          <h1 className="text-3xl font-bold text-slate-800">Subscriptions</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            {isMobile && <SidebarTrigger />}
+            <h1 className="text-3xl font-bold text-slate-800">Subscriptions</h1>
+          </div>
+          <Button onClick={() => setShowSubscriptionModal(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Subscription
+          </Button>
         </div>
         
         {/* Metrics Cards */}
