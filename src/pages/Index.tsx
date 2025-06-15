@@ -141,7 +141,7 @@ const Index = () => {
                   {formatCurrency(analytics.monthlySubscriptionCost, displayCurrency)}/mo
                 </Badge>
                 <Badge variant="secondary" className="text-red-700 bg-red-100">
-                  {formatCurrency(totalPaidToDate, displayCurrency)} total
+                  {formatCurrency(totalPaidToDate, displayCurrency)}/to date
                 </Badge>
               </div>
             </div>
