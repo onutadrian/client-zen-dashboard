@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -65,7 +66,7 @@ const SubscriptionCard = ({
   };
 
   return (
-    <Card className={`hover:shadow-md transition-all duration-200 ${isOverdue ? 'border-red-200 bg-red-50' : ''}`}>
+    <Card className={`transition-all duration-200 ${isOverdue ? 'border-red-200 bg-red-50' : ''}`}>
       <CardContent className="p-4">
         <div className="space-y-3">
           {/* Header */}
