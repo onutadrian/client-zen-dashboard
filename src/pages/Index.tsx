@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
+import SubscriptionMetrics from '@/components/SubscriptionMetrics';
 import ModalsContainer from '@/components/ModalsContainer';
 import { useClients } from '@/hooks/useClients';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
@@ -114,6 +114,15 @@ const Index = () => {
           convertCurrency={convertCurrency} 
           formatCurrency={formatCurrency} 
         />
+
+        {/* Subscription Metrics */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Subscription Overview</h2>
+          <SubscriptionMetrics 
+            subscriptions={subscriptions}
+            displayCurrency={displayCurrency}
+          />
+        </div>
 
         {/* Merged Tasks and Timeline Section */}
         <DashboardTasksTimeline 

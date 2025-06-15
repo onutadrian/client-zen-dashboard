@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { BarChart3, Users, FolderOpen, CreditCard } from 'lucide-react';
 
@@ -41,9 +42,10 @@ export function AppSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4">
-        <h2 className="text-lg font-semibold text-slate-800">Dashboard</h2>
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="p-4 flex flex-row items-center justify-between">
+        <h2 className="text-lg font-semibold text-slate-800 group-data-[collapsible=icon]:hidden">Dashboard</h2>
+        <SidebarTrigger className="ml-auto" />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -52,7 +54,11 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={location.pathname === item.url}
+                    tooltip={item.title}
+                  >
                     <Link to={item.url}>
                       <item.icon className="w-4 h-4" />
                       <span>{item.title}</span>
