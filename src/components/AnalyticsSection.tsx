@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -184,7 +185,7 @@ const AnalyticsSection = ({
             (typeof stat.value === 'string' && parseFloat(stat.value.replace(/[^0-9.-]/g, '')) >= 1000);
           
           return (
-            <Card key={index} className="hover:shadow-lg transition-all duration-200" style={{ width: '14.4375rem' }}>
+            <Card key={index} className="hover:shadow-none transition-all duration-200 shadow-none" style={{ width: '14.4375rem', height: '14.4375rem' }}>
               <CardContent className="p-6 flex flex-col justify-between h-full">
                 {/* Section 1: Top content */}
                 <div className="space-y-3">

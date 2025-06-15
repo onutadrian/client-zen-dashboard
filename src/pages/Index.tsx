@@ -80,7 +80,7 @@ const Index = () => {
       }
     }
   };
-  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+  return <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <DashboardHeader displayCurrency={displayCurrency} onCurrencyChange={setDisplayCurrency} onAddClient={() => setShowClientModal(true)} onAddSubscription={() => setShowSubscriptionModal(true)} />
