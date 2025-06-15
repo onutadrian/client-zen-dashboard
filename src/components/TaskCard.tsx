@@ -30,11 +30,11 @@ const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-slate-300 text-slate-900 border-slate-400';
+        return 'bg-green-100 text-green-800 border-green-200';
       case 'in-progress':
-        return 'bg-slate-200 text-slate-900 border-slate-300';
+        return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'pending':
-        return 'bg-slate-100 text-slate-800 border-slate-200';
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -83,13 +83,13 @@ const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
               {task.status.replace('-', ' ')}
             </Badge>
             {task.status === 'pending' && (
-              <Button size="sm" variant="outline" onClick={handleStartTask} className="border-slate-300 text-slate-700 hover:bg-slate-100">
+              <Button size="sm" variant="outline" onClick={handleStartTask}>
                 <Play className="w-3 h-3 mr-1" />
                 Start
               </Button>
             )}
             {task.status === 'in-progress' && (
-              <Button size="sm" className="bg-slate-800 hover:bg-slate-900 text-white" onClick={handleCompleteTask}>
+              <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleCompleteTask}>
                 <CheckCircle className="w-3 h-3 mr-1" />
                 Complete
               </Button>
@@ -127,7 +127,7 @@ const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
                       href={asset} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-slate-800 hover:text-slate-900 hover:underline font-medium"
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
                     >
                       {asset}
                     </a>
