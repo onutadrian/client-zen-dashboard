@@ -37,8 +37,8 @@ interface TaskTableProps {
   clients: Client[];
   onTaskClick: (task: Task) => void;
   onUpdateTask: (taskId: number, status: Task['status'], actualHours?: number) => void;
-  onDeleteTask?: (taskId: number) => void;
-  onEditTask?: (task: Task) => void;
+  onDeleteTask: (taskId: number) => void;
+  onEditTask: (task: Task) => void;
 }
 
 const TaskTable = ({ tasks, clients, onTaskClick, onUpdateTask, onDeleteTask, onEditTask }: TaskTableProps) => {
@@ -111,25 +111,21 @@ const TaskTable = ({ tasks, clients, onTaskClick, onUpdateTask, onDeleteTask, on
                       Complete
                     </DropdownMenuItem>
                   )}
-                  {onEditTask && (
-                    <DropdownMenuItem onClick={(e) => {
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    onEditTask(task);
+                  }}>
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={(e) => {
                       e.stopPropagation();
-                      onEditTask(task);
-                    }}>
-                      Edit
-                    </DropdownMenuItem>
-                  )}
-                  {onDeleteTask && (
-                    <DropdownMenuItem 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteTask(task.id);
-                      }}
-                      className="text-red-600"
-                    >
-                      Delete
-                    </DropdownMenuItem>
-                  )}
+                      onDeleteTask(task.id);
+                    }}
+                    className="text-red-600"
+                  >
+                    Delete
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>

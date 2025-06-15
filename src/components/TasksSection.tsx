@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -66,6 +67,16 @@ const TasksSection = ({
   const handleCloseSheet = () => {
     setIsSheetOpen(false);
     setSelectedTask(null);
+  };
+
+  const handleDeleteTask = (taskId: number) => {
+    console.log('Delete task:', taskId);
+    // TODO: Implement delete functionality
+  };
+
+  const handleEditTask = (task: Task) => {
+    console.log('Edit task:', task);
+    // TODO: Implement edit functionality
   };
 
   return (
@@ -144,6 +155,8 @@ const TasksSection = ({
               clients={clients}
               onTaskClick={handleTaskClick}
               onUpdateTask={onUpdateTask}
+              onDeleteTask={handleDeleteTask}
+              onEditTask={handleEditTask}
             />
           )}
         </CardContent>
