@@ -20,6 +20,27 @@ export interface Task {
   endDate?: string;
 }
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const retryOperation = async <T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  delayMs: number = 1000
+): Promise<T> => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      console.log(`Attempt ${attempt} failed:`, error);
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      await delay(delayMs * attempt);
+    }
+  }
+  throw new Error('Max retries exceeded');
+};
+
 export const useTasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const { toast } = useToast();
@@ -31,15 +52,18 @@ export const useTasks = () => {
 
   const loadTasks = async () => {
     try {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .order('created_date', { ascending: false });
+      const result = await retryOperation(async () => {
+        const { data, error } = await supabase
+          .from('tasks')
+          .select('*')
+          .order('created_date', { ascending: false });
 
-      if (error) throw error;
+        if (error) throw error;
+        return data;
+      });
 
       // Transform Supabase data to match our Task interface
-      const transformedTasks: Task[] = data.map(task => ({
+      const transformedTasks: Task[] = result.map(task => ({
         id: task.id,
         title: task.title,
         description: task.description || '',
@@ -61,8 +85,8 @@ export const useTasks = () => {
     } catch (error) {
       console.error('Error loading tasks:', error);
       toast({
-        title: "Error",
-        description: "Failed to load tasks",
+        title: "Connection Error",
+        description: "Failed to load tasks. Please check your connection and try again.",
         variant: "destructive"
       });
     }
@@ -87,30 +111,33 @@ export const useTasks = () => {
         end_date: newTask.endDate
       };
 
-      const { data, error } = await supabase
-        .from('tasks')
-        .insert([supabaseTask])
-        .select()
-        .single();
+      const result = await retryOperation(async () => {
+        const { data, error } = await supabase
+          .from('tasks')
+          .insert([supabaseTask])
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
+        return data;
+      });
 
       const transformedTask: Task = {
-        id: data.id,
-        title: data.title,
-        description: data.description || '',
-        clientId: data.client_id,
-        clientName: data.client_name,
-        projectId: data.project_id,
-        estimatedHours: data.estimated_hours,
-        actualHours: data.actual_hours,
-        status: data.status as 'pending' | 'in-progress' | 'completed',
-        notes: data.notes || '',
-        assets: data.assets || [],
-        createdDate: data.created_date,
-        completedDate: data.completed_date || undefined,
-        startDate: data.start_date || undefined,
-        endDate: data.end_date || undefined
+        id: result.id,
+        title: result.title,
+        description: result.description || '',
+        clientId: result.client_id,
+        clientName: result.client_name,
+        projectId: result.project_id,
+        estimatedHours: result.estimated_hours,
+        actualHours: result.actual_hours,
+        status: result.status as 'pending' | 'in-progress' | 'completed',
+        notes: result.notes || '',
+        assets: result.assets || [],
+        createdDate: result.created_date,
+        completedDate: result.completed_date || undefined,
+        startDate: result.start_date || undefined,
+        endDate: result.end_date || undefined
       };
 
       setTasks(prev => [...prev, transformedTask]);
@@ -123,7 +150,7 @@ export const useTasks = () => {
       console.error('Error adding task:', error);
       toast({
         title: "Error",
-        description: "Failed to add task",
+        description: "Failed to add task. Please try again.",
         variant: "destructive"
       });
     }

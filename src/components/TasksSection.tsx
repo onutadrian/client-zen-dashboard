@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -203,6 +204,7 @@ const TasksSection = ({
             <TaskTable
               tasks={filteredTasks}
               clients={clients}
+              projects={projects}
               onTaskClick={handleTaskClick}
               onUpdateTask={onUpdateTask}
               onDeleteTask={handleDeleteTask}
