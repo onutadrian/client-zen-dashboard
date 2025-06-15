@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Users, CreditCard, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -31,7 +32,9 @@ const Index = () => {
   const {
     tasks,
     addTask,
-    updateTask
+    updateTask,
+    deleteTask,
+    editTask
   } = useTasks();
 
   // Modal states
@@ -89,7 +92,14 @@ const Index = () => {
         <AnalyticsSection totalClients={analytics.totalClients} activeClients={analytics.activeClients} totalHours={analytics.totalHours} totalRevenue={analytics.totalRevenue} monthlySubscriptionCost={analytics.monthlySubscriptionCost} clients={clients} displayCurrency={displayCurrency} convertCurrency={convertCurrency} formatCurrency={formatCurrency} />
 
         {/* Tasks Section */}
-        <TasksSection tasks={tasks} clients={clients} onAddTask={addTask} onUpdateTask={handleTaskUpdate} />
+        <TasksSection 
+          tasks={tasks} 
+          clients={clients} 
+          onAddTask={addTask} 
+          onUpdateTask={handleTaskUpdate} 
+          onDeleteTask={deleteTask}
+          onEditTask={editTask}
+        />
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,15 +34,36 @@ interface AddTaskModalProps {
   onClose: () => void;
   onAdd: (task: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => void;
   clients: Client[];
+  task?: Task | null;
 }
 
-const AddTaskModal = ({ isOpen, onClose, onAdd, clients }: AddTaskModalProps) => {
+const AddTaskModal = ({ isOpen, onClose, onAdd, clients, task }: AddTaskModalProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [clientId, setClientId] = useState<number | null>(null);
   const [estimatedHours, setEstimatedHours] = useState<number | undefined>(undefined);
   const [notes, setNotes] = useState('');
   const [assetsInput, setAssetsInput] = useState('');
+
+  // Populate form when editing
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title);
+      setDescription(task.description);
+      setClientId(task.clientId);
+      setEstimatedHours(task.estimatedHours);
+      setNotes(task.notes);
+      setAssetsInput(task.assets.join('\n'));
+    } else {
+      // Reset form for new task
+      setTitle('');
+      setDescription('');
+      setClientId(null);
+      setEstimatedHours(undefined);
+      setNotes('');
+      setAssetsInput('');
+    }
+  }, [task]);
 
   const selectedClient = clients.find(c => c.id === clientId);
 
@@ -83,7 +104,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients }: AddTaskModalProps) =>
     setAssetsInput('');
     
     onClose();
-    toast.success('Task added successfully');
+    toast.success(task ? 'Task updated successfully' : 'Task added successfully');
   };
 
   const handleClose = () => {
@@ -100,7 +121,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients }: AddTaskModalProps) =>
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Task</DialogTitle>
+          <DialogTitle>{task ? 'Edit Task' : 'Add New Task'}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -187,7 +208,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients }: AddTaskModalProps) =>
               Cancel
             </Button>
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-              Add Task
+              {task ? 'Update Task' : 'Add Task'}
             </Button>
           </div>
         </form>
