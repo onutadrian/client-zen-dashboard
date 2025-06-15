@@ -1,15 +1,10 @@
 
 import React, { useState } from 'react';
-import { Users, CreditCard, Plus, FolderOpen } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import ClientCard from '@/components/ClientCard';
-import SubscriptionCard from '@/components/SubscriptionCard';
-import AnalyticsSection from '@/components/AnalyticsSection';
-import TasksSection from '@/components/TasksSection';
-import ProjectsSection from '@/components/ProjectsSection';
 import DashboardHeader from '@/components/DashboardHeader';
+import AnalyticsSection from '@/components/AnalyticsSection';
+import ProjectsSection from '@/components/ProjectsSection';
+import TasksSection from '@/components/TasksSection';
+import MainContentGrid from '@/components/MainContentGrid';
 import ModalsContainer from '@/components/ModalsContainer';
 import { useClients } from '@/hooks/useClients';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
@@ -136,84 +131,19 @@ const Index = () => {
         />
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Clients Section */}
-          <div className="xl:col-span-2 space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold text-slate-800 flex items-center">
-                Clients ({clients.length})
-              </h2>
-              <Badge variant="secondary">{analytics.activeClients} Active</Badge>
-            </div>
-            
-            <div className="space-y-4">
-              {clients.map(client => (
-                <ClientCard 
-                  key={client.id} 
-                  client={client} 
-                  onUpdateClient={updateClient} 
-                  displayCurrency={displayCurrency} 
-                  convertCurrency={convertCurrency} 
-                  formatCurrency={formatCurrency} 
-                />
-              ))}
-              
-              {clients.length === 0 && (
-                <Card className="border-dashed border-2 border-slate-300">
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <Users className="w-12 h-12 text-slate-400 mb-4" />
-                    <h3 className="text-lg font-medium text-slate-600 mb-2">No clients yet</h3>
-                    <p className="text-slate-500 text-center mb-4">Add your first client to get started with project management</p>
-                    <Button onClick={() => setShowClientModal(true)} className="bg-blue-600 hover:bg-blue-700">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add First Client
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
-
-          {/* Subscriptions Sidebar */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold text-slate-800 flex items-center">
-                Subscriptions
-              </h2>
-              <div className="flex items-center space-x-2">
-                <Badge variant="secondary" className="text-red-700 bg-red-100">
-                  {formatCurrency(analytics.monthlySubscriptionCost, displayCurrency)}/mo
-                </Badge>
-                <Badge variant="secondary" className="text-red-700 bg-red-100">
-                  {formatCurrency(totalPaidToDate, displayCurrency)}/to date
-                </Badge>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              {subscriptions.map(subscription => (
-                <SubscriptionCard 
-                  key={subscription.id} 
-                  subscription={subscription} 
-                  onEdit={handleEditSubscription} 
-                />
-              ))}
-              
-              {subscriptions.length === 0 && (
-                <Card className="border-dashed border-2 border-slate-300">
-                  <CardContent className="flex flex-col items-center justify-center py-8">
-                    <CreditCard className="w-8 h-8 text-slate-400 mb-3" />
-                    <p className="text-slate-500 text-center text-sm mb-3">No subscriptions tracked</p>
-                    <Button onClick={() => setShowSubscriptionModal(true)} size="sm" variant="outline">
-                      <Plus className="w-3 h-3 mr-1" />
-                      Add Subscription
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
-        </div>
+        <MainContentGrid
+          clients={clients}
+          subscriptions={subscriptions}
+          analytics={analytics}
+          displayCurrency={displayCurrency}
+          convertCurrency={convertCurrency}
+          formatCurrency={formatCurrency}
+          updateClient={updateClient}
+          handleEditSubscription={handleEditSubscription}
+          setShowClientModal={setShowClientModal}
+          setShowSubscriptionModal={setShowSubscriptionModal}
+          totalPaidToDate={totalPaidToDate}
+        />
 
         {/* Modals */}
         <ModalsContainer 
