@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,14 +7,10 @@ import { Calendar, Clock, ZoomIn, ZoomOut, Flag, CheckSquare, Plus } from 'lucid
 import { Project } from '@/hooks/useProjects';
 import { Task } from '@/hooks/useTasks';
 import { Milestone } from '@/hooks/useMilestones';
+import { Client } from '@/hooks/useClients';
 import TaskTable from './TaskTable';
 import TaskDetailsSheet from './TaskDetailsSheet';
 import AddTaskModal from './AddTaskModal';
-
-interface Client {
-  id: number;
-  name: string;
-}
 
 interface DashboardTasksTimelineProps {
   projects: Project[];
