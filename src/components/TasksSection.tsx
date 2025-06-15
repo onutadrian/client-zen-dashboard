@@ -33,18 +33,23 @@ interface TasksSectionProps {
   clients: Client[];
   onAddTask: (task: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => void;
   onUpdateTask: (taskId: number, status: Task['status'], actualHours?: number) => void;
+  onDeleteTask: (taskId: number) => void;
+  onEditTask: (taskId: number, updatedTask: Partial<Task>) => void;
 }
 const TasksSection = ({
   tasks,
   clients,
   onAddTask,
-  onUpdateTask
+  onUpdateTask,
+  onDeleteTask,
+  onEditTask
 }: TasksSectionProps) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | Task['status']>('all');
   const [clientFilter, setClientFilter] = useState<'all' | string>('all');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const filteredTasks = tasks.filter(task => {
     const statusMatch = statusFilter === 'all' || task.status === statusFilter;
@@ -70,13 +75,26 @@ const TasksSection = ({
   };
 
   const handleDeleteTask = (taskId: number) => {
-    console.log('Delete task:', taskId);
-    // TODO: Implement delete functionality
+    onDeleteTask(taskId);
   };
 
   const handleEditTask = (task: Task) => {
-    console.log('Edit task:', task);
-    // TODO: Implement edit functionality
+    setEditingTask(task);
+    setShowAddModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowAddModal(false);
+    setEditingTask(null);
+  };
+
+  const handleTaskSubmit = (taskData: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => {
+    if (editingTask) {
+      onEditTask(editingTask.id, taskData);
+    } else {
+      onAddTask(taskData);
+    }
+    handleModalClose();
   };
 
   return (
@@ -163,9 +181,10 @@ const TasksSection = ({
 
         <AddTaskModal 
           isOpen={showAddModal} 
-          onClose={() => setShowAddModal(false)} 
-          onAdd={onAddTask} 
-          clients={clients} 
+          onClose={handleModalClose} 
+          onAdd={handleTaskSubmit} 
+          clients={clients}
+          task={editingTask}
         />
       </Card>
 

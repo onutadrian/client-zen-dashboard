@@ -70,9 +70,21 @@ export const useTasks = () => {
     return null;
   };
 
+  const deleteTask = (taskId: number) => {
+    setTasks(tasks.filter(task => task.id !== taskId));
+  };
+
+  const editTask = (taskId: number, updatedTask: Partial<Task>) => {
+    setTasks(tasks.map(task => 
+      task.id === taskId ? { ...task, ...updatedTask } : task
+    ));
+  };
+
   return {
     tasks,
     addTask,
-    updateTask
+    updateTask,
+    deleteTask,
+    editTask
   };
 };
