@@ -152,7 +152,7 @@ const ClientCard = ({
   return <>
       <Card 
         className={`
-          hover:shadow-lg transition-all duration-300 border-l-4 cursor-pointer
+          transition-all duration-300 border-l-4 cursor-pointer
           ${getBorderColor(client.status)}
         `} 
         onClick={handleCardClick}
