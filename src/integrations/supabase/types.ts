@@ -9,7 +9,176 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      clients: {
+        Row: {
+          created_at: string
+          currency: string | null
+          documents: string[] | null
+          hour_entries: Json[] | null
+          id: number
+          invoices: Json[] | null
+          links: string[] | null
+          name: string
+          notes: string | null
+          people: Json[] | null
+          price: number
+          price_type: string
+          status: string
+          total_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          documents?: string[] | null
+          hour_entries?: Json[] | null
+          id?: number
+          invoices?: Json[] | null
+          links?: string[] | null
+          name: string
+          notes?: string | null
+          people?: Json[] | null
+          price: number
+          price_type: string
+          status?: string
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          documents?: string[] | null
+          hour_entries?: Json[] | null
+          id?: number
+          invoices?: Json[] | null
+          links?: string[] | null
+          name?: string
+          notes?: string | null
+          people?: Json[] | null
+          price?: number
+          price_type?: string
+          status?: string
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          client_id: number
+          created_at: string
+          documents: string[] | null
+          end_date: string | null
+          estimated_end_date: string
+          id: string
+          name: string
+          notes: string | null
+          start_date: string
+          status: string
+          team: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: number
+          created_at?: string
+          documents?: string[] | null
+          end_date?: string | null
+          estimated_end_date: string
+          id?: string
+          name: string
+          notes?: string | null
+          start_date: string
+          status?: string
+          team?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: number
+          created_at?: string
+          documents?: string[] | null
+          end_date?: string | null
+          estimated_end_date?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          start_date?: string
+          status?: string
+          team?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          actual_hours: number | null
+          assets: string[] | null
+          client_id: number
+          client_name: string
+          completed_date: string | null
+          created_date: string
+          description: string | null
+          estimated_hours: number | null
+          id: number
+          notes: string | null
+          project_id: string
+          status: string
+          title: string
+        }
+        Insert: {
+          actual_hours?: number | null
+          assets?: string[] | null
+          client_id: number
+          client_name: string
+          completed_date?: string | null
+          created_date?: string
+          description?: string | null
+          estimated_hours?: number | null
+          id?: number
+          notes?: string | null
+          project_id: string
+          status?: string
+          title: string
+        }
+        Update: {
+          actual_hours?: number | null
+          assets?: string[] | null
+          client_id?: number
+          client_name?: string
+          completed_date?: string | null
+          created_date?: string
+          description?: string | null
+          estimated_hours?: number | null
+          id?: number
+          notes?: string | null
+          project_id?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

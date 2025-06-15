@@ -1,5 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Task {
   id: number;
@@ -17,67 +19,226 @@ export interface Task {
 }
 
 export const useTasks = () => {
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: 1,
-      title: "Website Redesign",
-      description: "Complete overhaul of the company website with modern design",
-      clientId: 1,
-      clientName: "Acme Corporation",
-      estimatedHours: 40,
-      status: "in-progress",
-      notes: "Focus on mobile responsiveness and SEO optimization",
-      assets: ["https://figma.com/design-file", "Brand guidelines.pdf"],
-      createdDate: "2024-06-01",
-    }
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const { toast } = useToast();
 
-  const addTask = (newTask: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => {
-    const task: Task = {
-      ...newTask,
-      id: Date.now(),
-      status: 'pending',
-      createdDate: new Date().toISOString(),
-    };
-    setTasks([...tasks, task]);
+  // Load tasks from Supabase on mount
+  useEffect(() => {
+    loadTasks();
+  }, []);
+
+  const loadTasks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .order('created_date', { ascending: false });
+
+      if (error) throw error;
+
+      // Transform Supabase data to match our Task interface
+      const transformedTasks: Task[] = data.map(task => ({
+        id: task.id,
+        title: task.title,
+        description: task.description || '',
+        clientId: task.client_id,
+        clientName: task.client_name,
+        estimatedHours: task.estimated_hours,
+        actualHours: task.actual_hours,
+        status: task.status as 'pending' | 'in-progress' | 'completed',
+        notes: task.notes || '',
+        assets: task.assets || [],
+        createdDate: task.created_date,
+        completedDate: task.completed_date || undefined
+      }));
+
+      setTasks(transformedTasks);
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load tasks",
+        variant: "destructive"
+      });
+    }
   };
 
-  const updateTask = (taskId: number, status: Task['status'], actualHours?: number) => {
-    setTasks(tasks.map(task => {
-      if (task.id === taskId) {
-        const updatedTask = { ...task, status };
-        
-        if (status === 'completed') {
-          updatedTask.completedDate = new Date().toISOString();
-          
-          const hoursToLog = actualHours || task.estimatedHours;
-          if (hoursToLog) {
-            updatedTask.actualHours = hoursToLog;
-          }
+  const addTask = async (newTask: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => {
+    try {
+      // Generate a temporary project_id (UUID) - in a real app you'd select an existing project
+      const tempProjectId = '00000000-0000-0000-0000-000000000000';
+
+      const supabaseTask = {
+        title: newTask.title,
+        description: newTask.description,
+        client_id: newTask.clientId,
+        client_name: newTask.clientName,
+        estimated_hours: newTask.estimatedHours,
+        status: 'pending',
+        notes: newTask.notes,
+        assets: newTask.assets,
+        project_id: tempProjectId
+      };
+
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert([supabaseTask])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const transformedTask: Task = {
+        id: data.id,
+        title: data.title,
+        description: data.description || '',
+        clientId: data.client_id,
+        clientName: data.client_name,
+        estimatedHours: data.estimated_hours,
+        actualHours: data.actual_hours,
+        status: data.status as 'pending' | 'in-progress' | 'completed',
+        notes: data.notes || '',
+        assets: data.assets || [],
+        createdDate: data.created_date,
+        completedDate: data.completed_date || undefined
+      };
+
+      setTasks(prev => [...prev, transformedTask]);
+      
+      toast({
+        title: "Success",
+        description: "Task added successfully"
+      });
+    } catch (error) {
+      console.error('Error adding task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add task",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const updateTask = async (taskId: number, status: Task['status'], actualHours?: number) => {
+    try {
+      const updateData: any = { status };
+      
+      if (status === 'completed') {
+        updateData.completed_date = new Date().toISOString();
+        if (actualHours) {
+          updateData.actual_hours = actualHours;
         }
-        
-        return updatedTask;
       }
-      return task;
-    }));
 
-    // Return the task and hours for client update
-    const completedTask = tasks.find(t => t.id === taskId);
-    if (status === 'completed' && completedTask) {
-      const hoursToLog = actualHours || completedTask.estimatedHours;
-      return { task: completedTask, hoursToLog };
+      const { error } = await supabase
+        .from('tasks')
+        .update(updateData)
+        .eq('id', taskId);
+
+      if (error) throw error;
+
+      // Update local state
+      setTasks(prev => prev.map(task => {
+        if (task.id === taskId) {
+          const updatedTask = { ...task, status };
+          
+          if (status === 'completed') {
+            updatedTask.completedDate = new Date().toISOString();
+            
+            const hoursToLog = actualHours || task.estimatedHours;
+            if (hoursToLog) {
+              updatedTask.actualHours = hoursToLog;
+            }
+          }
+          
+          return updatedTask;
+        }
+        return task;
+      }));
+
+      toast({
+        title: "Success",
+        description: "Task updated successfully"
+      });
+
+      // Return the task and hours for client update
+      const completedTask = tasks.find(t => t.id === taskId);
+      if (status === 'completed' && completedTask) {
+        const hoursToLog = actualHours || completedTask.estimatedHours;
+        return { task: completedTask, hoursToLog };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update task",
+        variant: "destructive"
+      });
+      return null;
     }
-    return null;
   };
 
-  const deleteTask = (taskId: number) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
+  const deleteTask = async (taskId: number) => {
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', taskId);
+
+      if (error) throw error;
+
+      setTasks(prev => prev.filter(task => task.id !== taskId));
+      
+      toast({
+        title: "Success",
+        description: "Task deleted successfully"
+      });
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete task",
+        variant: "destructive"
+      });
+    }
   };
 
-  const editTask = (taskId: number, updatedTask: Partial<Task>) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, ...updatedTask } : task
-    ));
+  const editTask = async (taskId: number, updatedTask: Partial<Task>) => {
+    try {
+      const supabaseUpdate: any = {};
+      
+      if (updatedTask.title) supabaseUpdate.title = updatedTask.title;
+      if (updatedTask.description !== undefined) supabaseUpdate.description = updatedTask.description;
+      if (updatedTask.clientId) supabaseUpdate.client_id = updatedTask.clientId;
+      if (updatedTask.clientName) supabaseUpdate.client_name = updatedTask.clientName;
+      if (updatedTask.estimatedHours !== undefined) supabaseUpdate.estimated_hours = updatedTask.estimatedHours;
+      if (updatedTask.notes !== undefined) supabaseUpdate.notes = updatedTask.notes;
+      if (updatedTask.assets) supabaseUpdate.assets = updatedTask.assets;
+
+      const { error } = await supabase
+        .from('tasks')
+        .update(supabaseUpdate)
+        .eq('id', taskId);
+
+      if (error) throw error;
+
+      setTasks(prev => prev.map(task => 
+        task.id === taskId ? { ...task, ...updatedTask } : task
+      ));
+
+      toast({
+        title: "Success",
+        description: "Task updated successfully"
+      });
+    } catch (error) {
+      console.error('Error editing task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to edit task",
+        variant: "destructive"
+      });
+    }
   };
 
   return {
