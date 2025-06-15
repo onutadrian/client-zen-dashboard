@@ -227,6 +227,7 @@ const TasksSection = ({
         task={selectedTask}
         isOpen={isSheetOpen}
         onClose={handleCloseSheet}
+        projects={projects}
       />
     </>
   );

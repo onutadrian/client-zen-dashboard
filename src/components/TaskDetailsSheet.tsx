@@ -8,7 +8,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { Clock, User, FileText, Link as LinkIcon, Calendar } from 'lucide-react';
+import { Clock, User, FileText, Link as LinkIcon, Calendar, FolderOpen } from 'lucide-react';
 
 interface Task {
   id: number;
@@ -16,6 +16,7 @@ interface Task {
   description: string;
   clientId: number;
   clientName: string;
+  projectId?: string;
   estimatedHours?: number;
   actualHours?: number;
   status: 'pending' | 'in-progress' | 'completed';
@@ -25,13 +26,20 @@ interface Task {
   completedDate?: string;
 }
 
+interface Project {
+  id: string;
+  name: string;
+  clientId: number;
+}
+
 interface TaskDetailsSheetProps {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
+  projects?: Project[];
 }
 
-const TaskDetailsSheet = ({ task, isOpen, onClose }: TaskDetailsSheetProps) => {
+const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsSheetProps) => {
   if (!task) return null;
 
   const getStatusColor = (status: string) => {
@@ -45,6 +53,12 @@ const TaskDetailsSheet = ({ task, isOpen, onClose }: TaskDetailsSheetProps) => {
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100';
     }
+  };
+
+  const getProjectName = (projectId?: string) => {
+    if (!projectId) return 'No Project';
+    const project = projects.find(p => p.id === projectId);
+    return project ? project.name : 'Unknown Project';
   };
 
   return (
@@ -68,6 +82,12 @@ const TaskDetailsSheet = ({ task, isOpen, onClose }: TaskDetailsSheetProps) => {
               <User className="w-4 h-4 text-slate-500" />
               <span className="text-sm font-medium">Client:</span>
               <span className="text-sm text-slate-600">{task.clientName}</span>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <FolderOpen className="w-4 h-4 text-slate-500" />
+              <span className="text-sm font-medium">Project:</span>
+              <span className="text-sm text-slate-600">{getProjectName(task.projectId)}</span>
             </div>
           </div>
 
