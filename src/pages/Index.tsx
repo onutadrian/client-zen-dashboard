@@ -1,11 +1,9 @@
 
 import React, { useState } from 'react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
-import ProjectsSection from '@/components/ProjectsSection';
-import ProjectTimeline from '@/components/ProjectTimeline';
-import TasksSection from '@/components/TasksSection';
-import MainContentGrid from '@/components/MainContentGrid';
+import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
 import ModalsContainer from '@/components/ModalsContainer';
 import { useClients } from '@/hooks/useClients';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
@@ -57,12 +55,6 @@ const Index = () => {
   // Get analytics data
   const analytics = useAnalytics(clients, subscriptions, displayCurrency);
 
-  // Calculate total paid to date for all subscriptions
-  const totalPaidToDate = subscriptions.reduce((sum, sub) => {
-    const convertedTotal = convertCurrency(sub.totalPaid || 0, sub.currency || 'USD', displayCurrency);
-    return sum + convertedTotal;
-  }, 0);
-
   const handleEditSubscription = (subscription: any) => {
     setSelectedSubscription(subscription);
     setShowEditSubscriptionModal(true);
@@ -98,12 +90,17 @@ const Index = () => {
     <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <DashboardHeader 
-          displayCurrency={displayCurrency} 
-          onCurrencyChange={setDisplayCurrency} 
-          onAddClient={() => setShowClientModal(true)} 
-          onAddSubscription={() => setShowSubscriptionModal(true)} 
-        />
+        <div className="flex items-center space-x-4">
+          <SidebarTrigger />
+          <div className="flex-1">
+            <DashboardHeader 
+              displayCurrency={displayCurrency} 
+              onCurrencyChange={setDisplayCurrency} 
+              onAddClient={() => setShowClientModal(true)} 
+              onAddSubscription={() => setShowSubscriptionModal(true)} 
+            />
+          </div>
+        </div>
 
         {/* Analytics Overview */}
         <AnalyticsSection 
@@ -118,47 +115,16 @@ const Index = () => {
           formatCurrency={formatCurrency} 
         />
 
-        {/* Projects Section */}
-        <ProjectsSection 
-          projects={projects}
-          clients={clients}
-          onAddProject={addProject}
-          onUpdateProject={updateProject}
-          onDeleteProject={deleteProject}
-        />
-
-        {/* Project Timeline */}
-        <ProjectTimeline 
+        {/* Merged Tasks and Timeline Section */}
+        <DashboardTasksTimeline 
           projects={projects}
           tasks={tasks}
           milestones={milestones}
           clients={clients}
-        />
-
-        {/* Tasks Section */}
-        <TasksSection 
-          tasks={tasks} 
-          clients={clients} 
-          projects={projects}
           onAddTask={addTask} 
           onUpdateTask={handleTaskUpdate} 
           onDeleteTask={deleteTask}
           onEditTask={editTask}
-        />
-
-        {/* Main Content Grid */}
-        <MainContentGrid
-          clients={clients}
-          subscriptions={subscriptions}
-          analytics={analytics}
-          displayCurrency={displayCurrency}
-          convertCurrency={convertCurrency}
-          formatCurrency={formatCurrency}
-          updateClient={updateClient}
-          handleEditSubscription={handleEditSubscription}
-          setShowClientModal={setShowClientModal}
-          setShowSubscriptionModal={setShowSubscriptionModal}
-          totalPaidToDate={totalPaidToDate}
         />
 
         {/* Modals */}
