@@ -96,12 +96,12 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="flex flex-col h-full w-full" style={{ backgroundColor: '#F3F3F2' }}>
+      <div className="flex-1 p-4 lg:p-6 space-y-6 lg:space-y-8 overflow-auto">
         {/* Header */}
         <div className="flex items-center space-x-4">
           <SidebarTrigger />
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <DashboardHeader 
               displayCurrency={displayCurrency} 
               onCurrencyChange={setDisplayCurrency} 
