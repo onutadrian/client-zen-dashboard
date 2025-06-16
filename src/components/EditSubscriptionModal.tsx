@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, Eye, EyeOff } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({
@@ -21,6 +21,8 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
     currency: 'USD'
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (subscription) {
@@ -39,23 +41,45 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
     }
   }, [subscription]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const updateData = {
-      ...subscription,
-      name: formData.name,
-      price: formData.price,
-      seats: formData.seats,
-      billing_date: formData.billing_date,
-      login_email: formData.login_email,
-      password: formData.password,
-      category: formData.category,
-      total_paid: formData.total_paid,
-      status: formData.status,
-      currency: formData.currency
-    };
-    onUpdate(subscription.id, updateData);
-    onClose();
+    
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      console.log('Submitting updated subscription:', formData);
+      
+      await onUpdate(subscription.id, {
+        name: formData.name,
+        price: formData.price,
+        seats: formData.seats,
+        billing_date: formData.billing_date,
+        login_email: formData.login_email,
+        password: formData.password,
+        category: formData.category,
+        total_paid: formData.total_paid,
+        status: formData.status,
+        currency: formData.currency
+      });
+      
+      toast({
+        title: "Success",
+        description: "Subscription updated successfully",
+      });
+      
+      onClose();
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update subscription",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (field: string, value: string | number) => {
@@ -211,11 +235,11 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1" disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" className="flex-1">
-              Update Subscription
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? 'Updating...' : 'Update Subscription'}
             </Button>
           </div>
         </form>

@@ -25,6 +25,7 @@ export const useSubscriptions = () => {
   // Fetch subscriptions from database
   const fetchSubscriptions = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('subscriptions')
         .select('*')
@@ -35,6 +36,7 @@ export const useSubscriptions = () => {
         return;
       }
 
+      console.log('Fetched subscriptions:', data);
       if (data) {
         setSubscriptions(data);
       }
@@ -48,6 +50,8 @@ export const useSubscriptions = () => {
   // Add new subscription
   const addSubscription = async (newSubscription: Omit<Subscription, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      console.log('Adding subscription:', newSubscription);
+      
       const subscriptionData = {
         name: newSubscription.name,
         price: newSubscription.price,
@@ -69,20 +73,24 @@ export const useSubscriptions = () => {
 
       if (error) {
         console.error('Error adding subscription:', error);
-        return;
+        throw error;
       }
 
+      console.log('Added subscription:', data);
       if (data) {
         setSubscriptions(prev => [data, ...prev]);
       }
     } catch (error) {
       console.error('Error adding subscription:', error);
+      throw error;
     }
   };
 
   // Update existing subscription
   const updateSubscription = async (subscriptionId: number, updatedSubscription: Partial<Subscription>) => {
     try {
+      console.log('Updating subscription:', subscriptionId, updatedSubscription);
+      
       const updateData = {
         name: updatedSubscription.name,
         price: updatedSubscription.price,
@@ -97,6 +105,13 @@ export const useSubscriptions = () => {
         updated_at: new Date().toISOString()
       };
 
+      // Remove undefined values
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined) {
+          delete updateData[key];
+        }
+      });
+
       const { data, error } = await supabase
         .from('subscriptions')
         .update(updateData)
@@ -106,9 +121,10 @@ export const useSubscriptions = () => {
 
       if (error) {
         console.error('Error updating subscription:', error);
-        return;
+        throw error;
       }
 
+      console.log('Updated subscription:', data);
       if (data) {
         setSubscriptions(prev => 
           prev.map(sub => 
@@ -118,6 +134,30 @@ export const useSubscriptions = () => {
       }
     } catch (error) {
       console.error('Error updating subscription:', error);
+      throw error;
+    }
+  };
+
+  // Delete subscription
+  const deleteSubscription = async (subscriptionId: number) => {
+    try {
+      console.log('Deleting subscription:', subscriptionId);
+      
+      const { error } = await supabase
+        .from('subscriptions')
+        .delete()
+        .eq('id', subscriptionId);
+
+      if (error) {
+        console.error('Error deleting subscription:', error);
+        throw error;
+      }
+
+      console.log('Deleted subscription:', subscriptionId);
+      setSubscriptions(prev => prev.filter(sub => sub.id !== subscriptionId));
+    } catch (error) {
+      console.error('Error deleting subscription:', error);
+      throw error;
     }
   };
 
@@ -131,6 +171,7 @@ export const useSubscriptions = () => {
     loading,
     addSubscription,
     updateSubscription,
+    deleteSubscription,
     refreshSubscriptions: fetchSubscriptions
   };
 };
