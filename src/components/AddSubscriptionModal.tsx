@@ -10,8 +10,8 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    billingDate: '',
-    loginEmail: '',
+    billing_date: '',
+    login_email: '',
     password: '',
     category: 'Software',
     status: 'active',
@@ -24,14 +24,14 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
     const subscriptionData = {
       name: formData.name,
       price: parseFloat(formData.price) || 0,
-      billingDate: formData.billingDate,
-      loginEmail: formData.loginEmail,
+      billing_date: formData.billing_date,
+      login_email: formData.login_email,
       password: formData.password,
       category: formData.category,
       status: formData.status,
       currency: formData.currency,
       seats: parseInt(formData.seats) || 1,
-      totalPaid: 0
+      total_paid: 0
     };
     
     onAdd(subscriptionData);
@@ -43,8 +43,8 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
     setFormData({
       name: '',
       price: '',
-      billingDate: '',
-      loginEmail: '',
+      billing_date: '',
+      login_email: '',
       password: '',
       category: 'Software',
       status: 'active',
@@ -159,8 +159,8 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
             <Input
               id="sub-billing-date"
               type="date"
-              value={formData.billingDate}
-              onChange={(e) => setFormData({ ...formData, billingDate: e.target.value })}
+              value={formData.billing_date}
+              onChange={(e) => setFormData({ ...formData, billing_date: e.target.value })}
               required
             />
           </div>
@@ -170,8 +170,8 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
             <Input
               id="sub-email"
               type="email"
-              value={formData.loginEmail}
-              onChange={(e) => setFormData({ ...formData, loginEmail: e.target.value })}
+              value={formData.login_email}
+              onChange={(e) => setFormData({ ...formData, login_email: e.target.value })}
               placeholder="your@email.com"
             />
           </div>

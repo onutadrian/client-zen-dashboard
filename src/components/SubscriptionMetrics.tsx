@@ -20,7 +20,7 @@ const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMet
   }, 0);
 
   const totalPaidToDate = subscriptions.reduce((total, subscription) => {
-    const convertedCost = convertCurrency(subscription.totalPaid || 0, subscription.currency, displayCurrency);
+    const convertedCost = convertCurrency(subscription.total_paid || 0, subscription.currency, displayCurrency);
     return total + convertedCost;
   }, 0);
 

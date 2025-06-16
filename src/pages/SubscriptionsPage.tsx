@@ -24,7 +24,7 @@ const SubscriptionsPage = () => {
 
   // Calculate total paid to date for all subscriptions
   const totalPaidToDate = subscriptions.reduce((sum, sub) => {
-    const totalPaid = sub.totalPaid || sub.total_paid || 0;
+    const totalPaid = sub.total_paid || 0;
     const convertedTotal = convertCurrency(totalPaid, sub.currency || 'USD', displayCurrency);
     return sum + convertedTotal;
   }, 0);

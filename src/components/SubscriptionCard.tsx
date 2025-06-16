@@ -13,7 +13,7 @@ const SubscriptionCard = ({
   const [showPassword, setShowPassword] = useState(false);
   
   const getDaysUntilBilling = () => {
-    const billingDate = new Date(subscription.billingDate || subscription.billing_date);
+    const billingDate = new Date(subscription.billing_date);
     const today = new Date();
     const diffTime = billingDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -54,12 +54,12 @@ const SubscriptionCard = ({
   };
   
   const billingStatus = getBillingStatus();
-  const totalPaid = subscription.totalPaid || subscription.total_paid || 0;
+  const totalPaid = subscription.total_paid || 0;
   const seats = subscription.seats || 1;
   const totalPrice = subscription.price * seats;
   const currency = subscription.currency || 'USD';
-  const loginEmail = subscription.loginEmail || subscription.login_email || '';
-  const billingDate = subscription.billingDate || subscription.billing_date;
+  const loginEmail = subscription.login_email || '';
+  const billingDate = subscription.billing_date;
   
   const formatCurrency = (amount) => {
     const symbols = { USD: '$', EUR: '€', RON: 'RON ' };

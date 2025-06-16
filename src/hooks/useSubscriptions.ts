@@ -36,12 +36,7 @@ export const useSubscriptions = () => {
       }
 
       if (data) {
-        const formattedData = data.map(sub => ({
-          ...sub,
-          billing_date: sub.billing_date,
-          billingDate: sub.billing_date // Keep both for compatibility
-        }));
-        setSubscriptions(formattedData);
+        setSubscriptions(data);
       }
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
@@ -57,11 +52,11 @@ export const useSubscriptions = () => {
         name: newSubscription.name,
         price: newSubscription.price,
         seats: newSubscription.seats || 1,
-        billing_date: newSubscription.billingDate || newSubscription.billing_date,
-        login_email: newSubscription.loginEmail || newSubscription.login_email || '',
+        billing_date: newSubscription.billing_date,
+        login_email: newSubscription.login_email || '',
         password: newSubscription.password || '',
         category: newSubscription.category || 'Software',
-        total_paid: newSubscription.totalPaid || newSubscription.total_paid || 0,
+        total_paid: newSubscription.total_paid || 0,
         status: newSubscription.status || 'active',
         currency: newSubscription.currency || 'USD'
       };
@@ -78,11 +73,7 @@ export const useSubscriptions = () => {
       }
 
       if (data) {
-        const formattedData = {
-          ...data,
-          billingDate: data.billing_date // Add compatibility field
-        };
-        setSubscriptions(prev => [formattedData, ...prev]);
+        setSubscriptions(prev => [data, ...prev]);
       }
     } catch (error) {
       console.error('Error adding subscription:', error);
@@ -96,11 +87,11 @@ export const useSubscriptions = () => {
         name: updatedSubscription.name,
         price: updatedSubscription.price,
         seats: updatedSubscription.seats,
-        billing_date: updatedSubscription.billingDate || updatedSubscription.billing_date,
-        login_email: updatedSubscription.loginEmail || updatedSubscription.login_email,
+        billing_date: updatedSubscription.billing_date,
+        login_email: updatedSubscription.login_email,
         password: updatedSubscription.password,
         category: updatedSubscription.category,
-        total_paid: updatedSubscription.totalPaid || updatedSubscription.total_paid,
+        total_paid: updatedSubscription.total_paid,
         status: updatedSubscription.status,
         currency: updatedSubscription.currency,
         updated_at: new Date().toISOString()
@@ -119,13 +110,9 @@ export const useSubscriptions = () => {
       }
 
       if (data) {
-        const formattedData = {
-          ...data,
-          billingDate: data.billing_date // Add compatibility field
-        };
         setSubscriptions(prev => 
           prev.map(sub => 
-            sub.id === subscriptionId ? formattedData : sub
+            sub.id === subscriptionId ? data : sub
           )
         );
       }

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import DashboardHeader from '@/components/DashboardHeader';
@@ -57,7 +58,7 @@ const Index = () => {
   
   // Calculate total paid to date for subscriptions
   const totalPaidToDate = subscriptions.reduce((total, subscription) => {
-    const convertedCost = convertCurrency(subscription.totalPaid || 0, subscription.currency, displayCurrency);
+    const convertedCost = convertCurrency(subscription.total_paid || 0, subscription.currency, displayCurrency);
     return total + convertedCost;
   }, 0);
 

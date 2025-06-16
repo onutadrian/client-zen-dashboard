@@ -12,11 +12,11 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
     name: '',
     price: 0,
     seats: 1,
-    billingDate: '',
-    loginEmail: '',
+    billing_date: '',
+    login_email: '',
     password: '',
     category: '',
-    totalPaid: 0,
+    total_paid: 0,
     status: 'active',
     currency: 'USD'
   });
@@ -28,11 +28,11 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
         name: subscription.name || '',
         price: subscription.price || 0,
         seats: subscription.seats || 1,
-        billingDate: subscription.billingDate || subscription.billing_date || '',
-        loginEmail: subscription.loginEmail || subscription.login_email || '',
+        billing_date: subscription.billing_date || '',
+        login_email: subscription.login_email || '',
         password: subscription.password || '',
         category: subscription.category || '',
-        totalPaid: subscription.totalPaid || subscription.total_paid || 0,
+        total_paid: subscription.total_paid || 0,
         status: subscription.status || 'active',
         currency: subscription.currency || 'USD'
       });
@@ -46,11 +46,11 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
       name: formData.name,
       price: formData.price,
       seats: formData.seats,
-      billingDate: formData.billingDate,
-      loginEmail: formData.loginEmail,
+      billing_date: formData.billing_date,
+      login_email: formData.login_email,
       password: formData.password,
       category: formData.category,
-      totalPaid: formData.totalPaid,
+      total_paid: formData.total_paid,
       status: formData.status,
       currency: formData.currency
     };
@@ -151,25 +151,25 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
           </div>
 
           <div>
-            <Label htmlFor="totalPaid">Total Paid to Date</Label>
+            <Label htmlFor="total_paid">Total Paid to Date</Label>
             <Input
-              id="totalPaid"
+              id="total_paid"
               type="number"
               step="0.01"
-              value={formData.totalPaid}
-              onChange={(e) => handleChange('totalPaid', parseFloat(e.target.value) || 0)}
+              value={formData.total_paid}
+              onChange={(e) => handleChange('total_paid', parseFloat(e.target.value) || 0)}
             />
           </div>
 
           <div>
-            <Label htmlFor="billingDate">Next Billing Date</Label>
+            <Label htmlFor="billing_date">Next Billing Date</Label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                id="billingDate"
+                id="billing_date"
                 type="date"
-                value={formData.billingDate}
-                onChange={(e) => handleChange('billingDate', e.target.value)}
+                value={formData.billing_date}
+                onChange={(e) => handleChange('billing_date', e.target.value)}
                 className="pl-10"
                 required
               />
@@ -177,12 +177,12 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
           </div>
 
           <div>
-            <Label htmlFor="loginEmail">Login Email</Label>
+            <Label htmlFor="login_email">Login Email</Label>
             <Input
-              id="loginEmail"
+              id="login_email"
               type="email"
-              value={formData.loginEmail}
-              onChange={(e) => handleChange('loginEmail', e.target.value)}
+              value={formData.login_email}
+              onChange={(e) => handleChange('login_email', e.target.value)}
               required
             />
           </div>
