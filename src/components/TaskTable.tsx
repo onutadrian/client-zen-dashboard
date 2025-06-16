@@ -28,6 +28,13 @@ interface Client {
   id: number;
   name: string;
   priceType: string;
+  hourEntries?: Array<{
+    id: number;
+    hours: number;
+    description: string;
+    date: string;
+    billed?: boolean;
+  }>;
 }
 
 interface Project {
@@ -93,9 +100,17 @@ const TaskTable = ({
   };
 
   const isBilled = (task: Task) => {
-    // For now, we'll consider a task billed if it's completed and has actual hours
-    // This can be enhanced later with proper billing tracking
-    return task.status === 'completed' && task.actualHours;
+    // Find the client for this task
+    const client = clients.find(c => c.id === task.clientId);
+    if (!client || !client.hourEntries) return false;
+
+    // Check if there's a billed hour entry for this specific task
+    const taskDescription = `Completed task: ${task.title}`;
+    const taskHourEntry = client.hourEntries.find(entry => 
+      entry.description === taskDescription && entry.billed === true
+    );
+
+    return !!taskHourEntry;
   };
 
   return (
