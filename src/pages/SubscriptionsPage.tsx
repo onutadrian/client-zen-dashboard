@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, CreditCard, TrendingUp } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import SubscriptionsSection from '@/components/SubscriptionsSection';
+import SubscriptionMetrics from '@/components/SubscriptionMetrics';
 import ModalsContainer from '@/components/ModalsContainer';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -67,37 +67,10 @@ const SubscriptionsPage = () => {
         </div>
         
         {/* Metrics Cards */}
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Subscription Cost</CardTitle>
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {formatCurrency(analytics.monthlySubscriptionCost, displayCurrency)}/mo
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Total monthly recurring costs
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Paid to Date</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {formatCurrency(totalPaidToDate, displayCurrency)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Total amount paid across all subscriptions
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <SubscriptionMetrics 
+          subscriptions={subscriptions}
+          displayCurrency={displayCurrency}
+        />
         
         <SubscriptionsSection 
           subscriptions={subscriptions}
