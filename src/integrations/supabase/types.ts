@@ -157,6 +157,54 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          billing_date: string
+          category: string
+          created_at: string
+          currency: string
+          id: number
+          login_email: string | null
+          name: string
+          password: string | null
+          price: number
+          seats: number
+          status: string
+          total_paid: number
+          updated_at: string
+        }
+        Insert: {
+          billing_date: string
+          category?: string
+          created_at?: string
+          currency?: string
+          id?: number
+          login_email?: string | null
+          name: string
+          password?: string | null
+          price?: number
+          seats?: number
+          status?: string
+          total_paid?: number
+          updated_at?: string
+        }
+        Update: {
+          billing_date?: string
+          category?: string
+          created_at?: string
+          currency?: string
+          id?: number
+          login_email?: string | null
+          name?: string
+          password?: string | null
+          price?: number
+          seats?: number
+          status?: string
+          total_paid?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           actual_hours: number | null

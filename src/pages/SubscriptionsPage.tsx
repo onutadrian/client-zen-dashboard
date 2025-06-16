@@ -17,14 +17,15 @@ const SubscriptionsPage = () => {
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = React.useState(false);
   const [selectedSubscription, setSelectedSubscription] = React.useState(null);
   
-  const { subscriptions, addSubscription, updateSubscription } = useSubscriptions();
+  const { subscriptions, loading, addSubscription, updateSubscription } = useSubscriptions();
   const { clients } = useClients();
   const analytics = useAnalytics(clients, subscriptions, displayCurrency);
   const { isMobile } = useSidebar();
 
   // Calculate total paid to date for all subscriptions
   const totalPaidToDate = subscriptions.reduce((sum, sub) => {
-    const convertedTotal = convertCurrency(sub.totalPaid || 0, sub.currency || 'USD', displayCurrency);
+    const totalPaid = sub.totalPaid || sub.total_paid || 0;
+    const convertedTotal = convertCurrency(totalPaid, sub.currency || 'USD', displayCurrency);
     return sum + convertedTotal;
   }, 0);
 
@@ -32,6 +33,24 @@ const SubscriptionsPage = () => {
     setSelectedSubscription(subscription);
     setShowEditSubscriptionModal(true);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              {isMobile && <SidebarTrigger />}
+              <h1 className="text-3xl font-bold text-slate-800">Subscriptions</h1>
+            </div>
+          </div>
+          <div className="text-center py-8">
+            <p className="text-slate-600">Loading subscriptions...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>

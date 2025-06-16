@@ -15,15 +15,25 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
     password: '',
     category: 'Software',
     status: 'active',
-    currency: 'USD'
+    currency: 'USD',
+    seats: '1'
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const subscriptionData = {
-      ...formData,
-      price: parseFloat(formData.price) || 0
+      name: formData.name,
+      price: parseFloat(formData.price) || 0,
+      billingDate: formData.billingDate,
+      loginEmail: formData.loginEmail,
+      password: formData.password,
+      category: formData.category,
+      status: formData.status,
+      currency: formData.currency,
+      seats: parseInt(formData.seats) || 1,
+      totalPaid: 0
     };
+    
     onAdd(subscriptionData);
     resetForm();
     onClose();
@@ -38,7 +48,8 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
       password: '',
       category: 'Software',
       status: 'active',
-      currency: 'USD'
+      currency: 'USD',
+      seats: '1'
     });
   };
 
@@ -86,6 +97,20 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
               />
             </div>
             <div>
+              <Label htmlFor="sub-seats">Seats</Label>
+              <Input
+                id="sub-seats"
+                type="number"
+                min="1"
+                value={formData.seats}
+                onChange={(e) => setFormData({ ...formData, seats: e.target.value })}
+                placeholder="1"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
               <Label htmlFor="sub-currency">Currency</Label>
               <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
                 <SelectTrigger>
@@ -98,9 +123,6 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="sub-category">Category</Label>
               <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
@@ -116,19 +138,20 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="sub-status">Status</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="paused">Paused</SelectItem>
-                  <SelectItem value="canceled">Canceled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="sub-status">Status</Label>
+            <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="paused">Paused</SelectItem>
+                <SelectItem value="canceled">Canceled</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

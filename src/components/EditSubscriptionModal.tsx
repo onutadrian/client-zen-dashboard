@@ -28,11 +28,11 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
         name: subscription.name || '',
         price: subscription.price || 0,
         seats: subscription.seats || 1,
-        billingDate: subscription.billingDate || '',
-        loginEmail: subscription.loginEmail || '',
+        billingDate: subscription.billingDate || subscription.billing_date || '',
+        loginEmail: subscription.loginEmail || subscription.login_email || '',
         password: subscription.password || '',
         category: subscription.category || '',
-        totalPaid: subscription.totalPaid || 0,
+        totalPaid: subscription.totalPaid || subscription.total_paid || 0,
         status: subscription.status || 'active',
         currency: subscription.currency || 'USD'
       });
@@ -41,7 +41,20 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdate(subscription.id, { ...subscription, ...formData });
+    const updateData = {
+      ...subscription,
+      name: formData.name,
+      price: formData.price,
+      seats: formData.seats,
+      billingDate: formData.billingDate,
+      loginEmail: formData.loginEmail,
+      password: formData.password,
+      category: formData.category,
+      totalPaid: formData.totalPaid,
+      status: formData.status,
+      currency: formData.currency
+    };
+    onUpdate(subscription.id, updateData);
     onClose();
   };
 

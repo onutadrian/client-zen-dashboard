@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +13,7 @@ const SubscriptionCard = ({
   const [showPassword, setShowPassword] = useState(false);
   
   const getDaysUntilBilling = () => {
-    const billingDate = new Date(subscription.billingDate);
+    const billingDate = new Date(subscription.billingDate || subscription.billing_date);
     const today = new Date();
     const diffTime = billingDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -53,10 +54,12 @@ const SubscriptionCard = ({
   };
   
   const billingStatus = getBillingStatus();
-  const totalPaid = subscription.totalPaid || 0;
+  const totalPaid = subscription.totalPaid || subscription.total_paid || 0;
   const seats = subscription.seats || 1;
   const totalPrice = subscription.price * seats;
   const currency = subscription.currency || 'USD';
+  const loginEmail = subscription.loginEmail || subscription.login_email || '';
+  const billingDate = subscription.billingDate || subscription.billing_date;
   
   const formatCurrency = (amount) => {
     const symbols = { USD: '$', EUR: '€', RON: 'RON ' };
@@ -110,7 +113,7 @@ const SubscriptionCard = ({
           <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
             <div className="flex items-center text-sm text-slate-600">
               <Calendar className="w-4 h-4 mr-2" />
-              <span>{new Date(subscription.billingDate).toLocaleDateString()}</span>
+              <span>{new Date(billingDate).toLocaleDateString()}</span>
             </div>
             <Badge className={billingStatus.color}>
               {billingStatus.text}
@@ -121,7 +124,7 @@ const SubscriptionCard = ({
           <div className="space-y-2">
             <div className="flex items-center text-sm text-slate-600">
               <Mail className="w-4 h-4 mr-2" />
-              <span className="font-mono text-xs">{subscription.loginEmail}</span>
+              <span className="font-mono text-xs">{loginEmail}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center text-sm text-slate-600">
