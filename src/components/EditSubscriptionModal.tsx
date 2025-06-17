@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Eye, EyeOff } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
@@ -14,13 +16,12 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
     seats: 1,
     billing_date: '',
     login_email: '',
-    password: '',
+    secure_notes: '',
     category: '',
     total_paid: 0,
     status: 'active',
     currency: 'USD'
   });
-  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -32,7 +33,7 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
         seats: subscription.seats || 1,
         billing_date: subscription.billing_date || '',
         login_email: subscription.login_email || '',
-        password: subscription.password || '',
+        secure_notes: subscription.secure_notes || '',
         category: subscription.category || '',
         total_paid: subscription.total_paid || 0,
         status: subscription.status || 'active',
@@ -57,7 +58,7 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
         seats: formData.seats,
         billing_date: formData.billing_date,
         login_email: formData.login_email,
-        password: formData.password,
+        secure_notes: formData.secure_notes,
         category: formData.category,
         total_paid: formData.total_paid,
         status: formData.status,
@@ -212,26 +213,17 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
           </div>
 
           <div>
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                value={formData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                className="pr-10"
-                required
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-              >
-                {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-              </Button>
-            </div>
+            <Label htmlFor="secure_notes">Secure Notes</Label>
+            <Textarea
+              id="secure_notes"
+              value={formData.secure_notes}
+              onChange={(e) => handleChange('secure_notes', e.target.value)}
+              placeholder="Store passwords, API keys, or other sensitive information here..."
+              className="min-h-[80px]"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              This field is encrypted and secure. Use it to store passwords, API keys, or other sensitive information.
+            </p>
           </div>
 
           <div className="flex gap-3 pt-4">

@@ -26,6 +26,7 @@ export type Database = {
           status: string
           total_hours: number | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -43,6 +44,7 @@ export type Database = {
           status?: string
           total_hours?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -60,6 +62,7 @@ export type Database = {
           status?: string
           total_hours?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -73,6 +76,7 @@ export type Database = {
           target_date: string
           title: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -83,6 +87,7 @@ export type Database = {
           target_date: string
           title: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -93,6 +98,7 @@ export type Database = {
           target_date?: string
           title?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -103,6 +109,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       projects: {
         Row: {
@@ -118,6 +148,7 @@ export type Database = {
           status: string
           team: string[] | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           client_id: number
@@ -132,6 +163,7 @@ export type Database = {
           status?: string
           team?: string[] | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           client_id?: number
@@ -146,6 +178,7 @@ export type Database = {
           status?: string
           team?: string[] | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -166,12 +199,13 @@ export type Database = {
           id: number
           login_email: string | null
           name: string
-          password: string | null
           price: number
           seats: number
+          secure_notes: string | null
           status: string
           total_paid: number
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           billing_date: string
@@ -181,12 +215,13 @@ export type Database = {
           id?: number
           login_email?: string | null
           name: string
-          password?: string | null
           price?: number
           seats?: number
+          secure_notes?: string | null
           status?: string
           total_paid?: number
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           billing_date?: string
@@ -196,12 +231,13 @@ export type Database = {
           id?: number
           login_email?: string | null
           name?: string
-          password?: string | null
           price?: number
           seats?: number
+          secure_notes?: string | null
           status?: string
           total_paid?: number
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -222,6 +258,7 @@ export type Database = {
           start_date: string | null
           status: string
           title: string
+          user_id: string | null
         }
         Insert: {
           actual_hours?: number | null
@@ -239,6 +276,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           title: string
+          user_id?: string | null
         }
         Update: {
           actual_hours?: number | null
@@ -256,6 +294,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           title?: string
+          user_id?: string | null
         }
         Relationships: [
           {

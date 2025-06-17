@@ -6,6 +6,7 @@ import { Plus } from 'lucide-react';
 import SubscriptionsSection from '@/components/SubscriptionsSection';
 import SubscriptionMetrics from '@/components/SubscriptionMetrics';
 import ModalsContainer from '@/components/ModalsContainer';
+import LogoutButton from '@/components/LogoutButton';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useClients } from '@/hooks/useClients';
@@ -43,6 +44,7 @@ const SubscriptionsPage = () => {
               {isMobile && <SidebarTrigger />}
               <h1 className="text-3xl font-bold text-slate-800">Subscriptions</h1>
             </div>
+            <LogoutButton />
           </div>
           <div className="text-center py-8">
             <p className="text-slate-600">Loading subscriptions...</p>
@@ -60,10 +62,13 @@ const SubscriptionsPage = () => {
             {isMobile && <SidebarTrigger />}
             <h1 className="text-3xl font-bold text-slate-800">Subscriptions</h1>
           </div>
-          <Button onClick={() => setShowSubscriptionModal(true)} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Subscription
-          </Button>
+          <div className="flex items-center space-x-3">
+            <LogoutButton />
+            <Button onClick={() => setShowSubscriptionModal(true)} className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Subscription
+            </Button>
+          </div>
         </div>
         
         {/* Metrics Cards */}

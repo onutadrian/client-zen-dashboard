@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface Subscription {
   id: number;
@@ -9,11 +10,12 @@ export interface Subscription {
   seats: number;
   billing_date: string;
   login_email: string;
-  password: string;
+  secure_notes: string;
   category: string;
   total_paid: number;
   status: string;
   currency: string;
+  user_id?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -21,9 +23,16 @@ export interface Subscription {
 export const useSubscriptions = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   // Fetch subscriptions from database
   const fetchSubscriptions = async () => {
+    if (!user) {
+      setSubscriptions([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -48,7 +57,11 @@ export const useSubscriptions = () => {
   };
 
   // Add new subscription
-  const addSubscription = async (newSubscription: Omit<Subscription, 'id' | 'created_at' | 'updated_at'>) => {
+  const addSubscription = async (newSubscription: Omit<Subscription, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+    if (!user) {
+      throw new Error('User must be authenticated');
+    }
+
     try {
       console.log('Adding subscription:', newSubscription);
       
@@ -58,11 +71,12 @@ export const useSubscriptions = () => {
         seats: newSubscription.seats || 1,
         billing_date: newSubscription.billing_date,
         login_email: newSubscription.login_email || '',
-        password: newSubscription.password || '',
+        secure_notes: newSubscription.secure_notes || '',
         category: newSubscription.category || 'Software',
         total_paid: newSubscription.total_paid || 0,
         status: newSubscription.status || 'active',
-        currency: newSubscription.currency || 'USD'
+        currency: newSubscription.currency || 'USD',
+        user_id: user.id
       };
 
       const { data, error } = await supabase
@@ -88,6 +102,10 @@ export const useSubscriptions = () => {
 
   // Update existing subscription
   const updateSubscription = async (subscriptionId: number, updatedSubscription: Partial<Subscription>) => {
+    if (!user) {
+      throw new Error('User must be authenticated');
+    }
+
     try {
       console.log('Updating subscription:', subscriptionId, updatedSubscription);
       
@@ -97,7 +115,7 @@ export const useSubscriptions = () => {
         seats: updatedSubscription.seats,
         billing_date: updatedSubscription.billing_date,
         login_email: updatedSubscription.login_email,
-        password: updatedSubscription.password,
+        secure_notes: updatedSubscription.secure_notes,
         category: updatedSubscription.category,
         total_paid: updatedSubscription.total_paid,
         status: updatedSubscription.status,
@@ -140,6 +158,10 @@ export const useSubscriptions = () => {
 
   // Delete subscription
   const deleteSubscription = async (subscriptionId: number) => {
+    if (!user) {
+      throw new Error('User must be authenticated');
+    }
+
     try {
       console.log('Deleting subscription:', subscriptionId);
       
@@ -161,10 +183,10 @@ export const useSubscriptions = () => {
     }
   };
 
-  // Fetch data on component mount
+  // Fetch data when user changes
   useEffect(() => {
     fetchSubscriptions();
-  }, []);
+  }, [user]);
 
   return {
     subscriptions,

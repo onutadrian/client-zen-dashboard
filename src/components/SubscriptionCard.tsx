@@ -10,7 +10,7 @@ const SubscriptionCard = ({
   subscription,
   onEdit
 }) => {
-  const [showPassword, setShowPassword] = useState(false);
+  const [showSecureNotes, setShowSecureNotes] = useState(false);
   
   const getDaysUntilBilling = () => {
     const billingDate = new Date(subscription.billing_date);
@@ -60,6 +60,7 @@ const SubscriptionCard = ({
   const currency = subscription.currency || 'USD';
   const loginEmail = subscription.login_email || '';
   const billingDate = subscription.billing_date;
+  const secureNotes = subscription.secure_notes || '';
   
   const formatCurrency = (amount) => {
     const symbols = { USD: '$', EUR: '€', RON: 'RON ' };
@@ -126,17 +127,19 @@ const SubscriptionCard = ({
               <Mail className="w-4 h-4 mr-2" />
               <span className="font-mono text-xs">{loginEmail}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center text-sm text-slate-600">
-                <CreditCard className="w-4 h-4 mr-2" />
-                <span className="font-mono text-xs">
-                  {showPassword ? subscription.password : '••••••••'}
-                </span>
+            {secureNotes && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center text-sm text-slate-600">
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  <span className="font-mono text-xs">
+                    {showSecureNotes ? secureNotes : '••••••••'}
+                  </span>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => setShowSecureNotes(!showSecureNotes)} className="h-6 w-6 p-0">
+                  {showSecureNotes ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                </Button>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setShowPassword(!showPassword)} className="h-6 w-6 p-0">
-                {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-              </Button>
-            </div>
+            )}
           </div>
         </div>
       </CardContent>
