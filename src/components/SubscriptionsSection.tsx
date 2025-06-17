@@ -1,17 +1,14 @@
-
 import React from 'react';
 import { CreditCard, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import SubscriptionCard from '@/components/SubscriptionCard';
-
 interface Subscription {
   id: number;
   totalPaid?: number;
   currency?: string;
 }
-
 interface SubscriptionsSectionProps {
   subscriptions: Subscription[];
   onEditSubscription: (subscription: any) => void;
@@ -21,7 +18,6 @@ interface SubscriptionsSectionProps {
   displayCurrency: string;
   formatCurrency: (amount: number, currency: string) => string;
 }
-
 const SubscriptionsSection = ({
   subscriptions,
   onEditSubscription,
@@ -31,33 +27,21 @@ const SubscriptionsSection = ({
   displayCurrency,
   formatCurrency
 }: SubscriptionsSectionProps) => {
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-slate-800 flex items-center">
           Subscriptions
         </h2>
         <div className="flex items-center space-x-2">
-          <Badge variant="secondary" className="text-red-700 bg-red-100">
-            {formatCurrency(monthlySubscriptionCost, displayCurrency)}/mo
-          </Badge>
-          <Badge variant="secondary" className="text-red-700 bg-red-100">
-            {formatCurrency(totalPaidToDate, displayCurrency)}/to date
-          </Badge>
+          
+          
         </div>
       </div>
       
       <div className="space-y-3">
-        {subscriptions.map(subscription => (
-          <SubscriptionCard 
-            key={subscription.id} 
-            subscription={subscription} 
-            onEdit={onEditSubscription} 
-          />
-        ))}
+        {subscriptions.map(subscription => <SubscriptionCard key={subscription.id} subscription={subscription} onEdit={onEditSubscription} />)}
         
-        {subscriptions.length === 0 && (
-          <Card className="border-dashed border-2 border-slate-300">
+        {subscriptions.length === 0 && <Card className="border-dashed border-2 border-slate-300">
             <CardContent className="flex flex-col items-center justify-center py-8">
               <CreditCard className="w-8 h-8 text-slate-400 mb-3" />
               <p className="text-slate-500 text-center text-sm mb-3">No subscriptions tracked</p>
@@ -66,11 +50,8 @@ const SubscriptionsSection = ({
                 Add Subscription
               </Button>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default SubscriptionsSection;
