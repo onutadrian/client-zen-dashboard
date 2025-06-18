@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -203,7 +202,7 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
                     <Checkbox
                       id="inherit-notes"
                       checked={inheritOptions.notes}
-                      onCheckedChange={(checked) => handleInheritChange('notes',  as boolean)}
+                      onCheckedChange={(checked) => handleInheritChange('notes', checked as boolean)}
                     />
                     <Label htmlFor="inherit-notes" className="text-sm">
                       Client Notes
