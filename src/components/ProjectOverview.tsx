@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -69,18 +68,34 @@ const ProjectOverview = ({
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
   const [showAddInvoiceModal, setShowAddInvoiceModal] = useState(false);
   const [selectedMilestoneForInvoice, setSelectedMilestoneForInvoice] = useState<Milestone | null>(null);
+  const [isCreatingInvoice, setIsCreatingInvoice] = useState<string | null>(null);
 
   const { invoices } = useInvoices();
   const isFixedPrice = project.pricingType === 'fixed';
   const projectInvoices = invoices.filter(i => i.projectId === project.id);
 
   const handleCreateInvoiceForMilestone = (milestone: Milestone) => {
+    // Check if invoice already exists for this milestone
+    const existingInvoice = getMilestoneInvoice(milestone.id);
+    if (existingInvoice) {
+      // Show a warning or toast that invoice already exists
+      console.warn('Invoice already exists for this milestone');
+      return;
+    }
+    
+    setIsCreatingInvoice(milestone.id);
     setSelectedMilestoneForInvoice(milestone);
     setShowAddInvoiceModal(true);
   };
 
   const handleQuickMarkAsPaid = async (milestone: Milestone) => {
     await onUpdateMilestone(milestone.id, { paymentStatus: 'paid' });
+  };
+
+  const handleInvoiceModalClose = () => {
+    setShowAddInvoiceModal(false);
+    setSelectedMilestoneForInvoice(null);
+    setIsCreatingInvoice(null);
   };
 
   // Get invoice for milestone
@@ -149,6 +164,7 @@ const ProjectOverview = ({
             <div className="space-y-4">
               {milestones.map((milestone) => {
                 const milestoneInvoice = getMilestoneInvoice(milestone.id);
+                const isCreatingForThisMilestone = isCreatingInvoice === milestone.id;
                 
                 return (
                   <div key={milestone.id} className="border rounded-lg p-4">
@@ -205,10 +221,11 @@ const ProjectOverview = ({
                             size="sm"
                             variant="outline"
                             onClick={() => handleCreateInvoiceForMilestone(milestone)}
-                            className="text-blue-600 hover:text-blue-700"
+                            disabled={isCreatingForThisMilestone}
+                            className="text-blue-600 hover:text-blue-700 disabled:opacity-50"
                           >
                             <FileText className="w-4 h-4 mr-1" />
-                            Invoice
+                            {isCreatingForThisMilestone ? 'Creating...' : 'Invoice'}
                           </Button>
                         )}
                         {milestone.status === 'completed' && milestone.paymentStatus === 'unpaid' && milestoneInvoice && (
@@ -221,6 +238,11 @@ const ProjectOverview = ({
                             <CheckCircle className="w-4 h-4 mr-1" />
                             Mark Paid
                           </Button>
+                        )}
+                        {milestoneInvoice && (
+                          <div className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                            Invoice exists
+                          </div>
                         )}
                         <Button
                           size="sm"
@@ -341,10 +363,7 @@ const ProjectOverview = ({
       {client && (
         <AddInvoiceModal
           isOpen={showAddInvoiceModal}
-          onClose={() => {
-            setShowAddInvoiceModal(false);
-            setSelectedMilestoneForInvoice(null);
-          }}
+          onClose={handleInvoiceModalClose}
           project={project}
           client={client}
           milestone={selectedMilestoneForInvoice || undefined}
