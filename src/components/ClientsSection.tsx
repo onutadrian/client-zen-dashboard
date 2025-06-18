@@ -10,8 +10,6 @@ interface Client {
   id: number;
   name: string;
   status: string;
-  totalHours: number;
-  hourEntries?: any[];
 }
 
 interface ClientsSectionProps {
