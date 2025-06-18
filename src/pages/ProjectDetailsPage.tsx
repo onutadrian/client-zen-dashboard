@@ -25,7 +25,7 @@ const ProjectDetailsPage = () => {
   const { projects, updateProject, archiveProject, deleteProject } = useProjects();
   const { clients } = useClients();
   const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks();
-  const { milestones, addMilestone, updateMilestone } = useMilestones();
+  const { milestones, addMilestone, updateMilestone, deleteMilestone } = useMilestones();
 
   const project = projects.find(p => p.id === id);
   const client = clients.find(c => c.id === project?.clientId);
@@ -96,6 +96,7 @@ const ProjectDetailsPage = () => {
                   onEditTask={editTask}
                   onAddMilestone={addMilestone}
                   onUpdateMilestone={updateMilestone}
+                  onDeleteMilestone={deleteMilestone}
                   onUpdateProject={updateProject}
                 />
               </TabsContent>
@@ -112,6 +113,7 @@ const ProjectDetailsPage = () => {
                   project={project}
                   client={client}
                   tasks={projectTasks}
+                  milestones={projectMilestones}
                 />
               </TabsContent>
 

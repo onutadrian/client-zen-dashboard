@@ -114,11 +114,82 @@ export type Database = {
           },
         ]
       }
-      milestones: {
+      invoices: {
         Row: {
+          amount: number
+          client_id: number | null
           created_at: string
+          currency: string
+          date: string
           description: string | null
           id: string
+          milestone_id: string | null
+          project_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          client_id?: number | null
+          created_at?: string
+          currency?: string
+          date: string
+          description?: string | null
+          id?: string
+          milestone_id?: string | null
+          project_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          client_id?: number | null
+          created_at?: string
+          currency?: string
+          date?: string
+          description?: string | null
+          id?: string
+          milestone_id?: string | null
+          project_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      milestones: {
+        Row: {
+          amount: number | null
+          completion_percentage: number | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          payment_status: string | null
           project_id: string
           status: string
           target_date: string
@@ -127,9 +198,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          amount?: number | null
+          completion_percentage?: number | null
           created_at?: string
+          currency?: string | null
           description?: string | null
           id?: string
+          payment_status?: string | null
           project_id: string
           status?: string
           target_date: string
@@ -138,9 +213,13 @@ export type Database = {
           user_id: string
         }
         Update: {
+          amount?: number | null
+          completion_percentage?: number | null
           created_at?: string
+          currency?: string | null
           description?: string | null
           id?: string
+          payment_status?: string | null
           project_id?: string
           status?: string
           target_date?: string

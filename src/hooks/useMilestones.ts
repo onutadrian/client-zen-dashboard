@@ -10,6 +10,10 @@ export interface Milestone {
   description?: string;
   targetDate: string;
   status: 'pending' | 'in-progress' | 'completed';
+  amount?: number;
+  currency?: string;
+  completionPercentage: number;
+  paymentStatus: 'unpaid' | 'partial' | 'paid';
   createdAt: string;
   updatedAt: string;
 }
@@ -38,6 +42,10 @@ export const useMilestones = () => {
         description: milestone.description || undefined,
         targetDate: milestone.target_date,
         status: milestone.status as 'pending' | 'in-progress' | 'completed',
+        amount: milestone.amount || undefined,
+        currency: milestone.currency || 'USD',
+        completionPercentage: milestone.completion_percentage || 0,
+        paymentStatus: milestone.payment_status as 'unpaid' | 'partial' | 'paid',
         createdAt: milestone.created_at,
         updatedAt: milestone.updated_at
       }));
@@ -53,9 +61,8 @@ export const useMilestones = () => {
     }
   };
 
-  const addMilestone = async (newMilestone: Omit<Milestone, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addMilestone = async (newMilestone: Omit<Milestone, 'id' | 'createdAt' | 'updatedAt' | 'completionPercentage' | 'paymentStatus'>) => {
     try {
-      // Get user ID for RLS
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
@@ -67,6 +74,8 @@ export const useMilestones = () => {
           description: newMilestone.description,
           target_date: newMilestone.targetDate,
           status: newMilestone.status,
+          amount: newMilestone.amount,
+          currency: newMilestone.currency || 'USD',
           user_id: user.id
         }])
         .select()
@@ -81,6 +90,10 @@ export const useMilestones = () => {
         description: data.description || undefined,
         targetDate: data.target_date,
         status: data.status as 'pending' | 'in-progress' | 'completed',
+        amount: data.amount || undefined,
+        currency: data.currency || 'USD',
+        completionPercentage: data.completion_percentage || 0,
+        paymentStatus: data.payment_status as 'unpaid' | 'partial' | 'paid',
         createdAt: data.created_at,
         updatedAt: data.updated_at
       };
@@ -109,7 +122,10 @@ export const useMilestones = () => {
           title: updates.title,
           description: updates.description,
           target_date: updates.targetDate,
-          status: updates.status
+          status: updates.status,
+          amount: updates.amount,
+          currency: updates.currency,
+          completion_percentage: updates.completionPercentage
         })
         .eq('id', milestoneId);
 
@@ -133,9 +149,35 @@ export const useMilestones = () => {
     }
   };
 
+  const deleteMilestone = async (milestoneId: string) => {
+    try {
+      const { error } = await supabase
+        .from('milestones')
+        .delete()
+        .eq('id', milestoneId);
+
+      if (error) throw error;
+
+      setMilestones(prev => prev.filter(milestone => milestone.id !== milestoneId));
+
+      toast({
+        title: "Success",
+        description: "Milestone deleted successfully"
+      });
+    } catch (error) {
+      console.error('Error deleting milestone:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete milestone",
+        variant: "destructive"
+      });
+    }
+  };
+
   return {
     milestones,
     addMilestone,
-    updateMilestone
+    updateMilestone,
+    deleteMilestone
   };
 };

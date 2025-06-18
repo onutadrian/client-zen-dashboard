@@ -2,45 +2,70 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { DollarSign, TrendingUp, AlertCircle, Target } from 'lucide-react';
+import { DollarSign, TrendingUp, AlertCircle, Target, Calendar, CheckCircle, Clock } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
 import { Task } from '@/hooks/useTasks';
+import { Milestone } from '@/hooks/useMilestones';
+import { Invoice, useInvoices } from '@/hooks/useInvoices';
 
 interface ProjectBudgetTrackingProps {
   project: Project;
   client?: any;
   tasks: Task[];
+  milestones: Milestone[];
 }
 
-const ProjectBudgetTracking = ({ project, client, tasks }: ProjectBudgetTrackingProps) => {
+const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBudgetTrackingProps) => {
+  const { invoices } = useInvoices();
   const isFixedPrice = project.pricingType === 'fixed';
-  const hourlyRate = isFixedPrice ? (client?.price || 0) : (project.hourlyRate || 0);
   
+  // Filter project-specific data
+  const projectMilestones = milestones.filter(m => m.projectId === project.id);
+  const projectInvoices = invoices.filter(i => i.projectId === project.id);
+  
+  // Calculate milestone-based financials
+  const totalMilestoneAmount = projectMilestones.reduce((sum, milestone) => sum + (milestone.amount || 0), 0);
+  const totalInvoiceAmount = projectInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+  const paidInvoices = projectInvoices.filter(i => i.status === 'paid');
+  const totalPaidAmount = paidInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+  
+  // Calculate progress metrics
+  const completedMilestones = projectMilestones.filter(m => m.status === 'completed').length;
+  const milestoneProgress = projectMilestones.length > 0 ? (completedMilestones / projectMilestones.length) * 100 : 0;
+  const averageCompletion = projectMilestones.length > 0 
+    ? projectMilestones.reduce((sum, m) => sum + m.completionPercentage, 0) / projectMilestones.length 
+    : 0;
+  
+  // Task-based metrics for context
   const totalEstimatedHours = tasks.reduce((sum, task) => sum + (task.estimatedHours || 0), 0);
   const totalActualHours = tasks.reduce((sum, task) => sum + (task.actualHours || 0), 0);
-  
-  // Calculate budget based on pricing type
-  let estimatedBudget: number;
-  let actualCost: number;
-  let remainingBudget: number;
-  let budgetProgress: number;
+  const hourlyRate = isFixedPrice ? (client?.price || 0) : (project.hourlyRate || 0);
 
+  // Budget calculations based on project type
+  let budgetMetrics;
   if (isFixedPrice) {
-    estimatedBudget = project.fixedPrice || 0;
-    actualCost = totalActualHours * hourlyRate; // Cost based on actual hours worked
-    remainingBudget = estimatedBudget - actualCost;
-    budgetProgress = estimatedBudget > 0 ? (actualCost / estimatedBudget) * 100 : 0;
+    const fixedBudget = project.fixedPrice || totalMilestoneAmount;
+    const costSoFar = totalActualHours * hourlyRate;
+    budgetMetrics = {
+      totalBudget: fixedBudget,
+      spentAmount: costSoFar,
+      remainingBudget: fixedBudget - costSoFar,
+      budgetProgress: fixedBudget > 0 ? (costSoFar / fixedBudget) * 100 : 0,
+      revenueEarned: totalPaidAmount,
+      revenueProgress: fixedBudget > 0 ? (totalPaidAmount / fixedBudget) * 100 : 0
+    };
   } else {
-    // For hourly projects, use estimated hours for budget calculation
-    const projectEstimatedHours = project.estimatedHours || totalEstimatedHours;
-    estimatedBudget = projectEstimatedHours * hourlyRate;
-    actualCost = totalActualHours * hourlyRate;
-    remainingBudget = estimatedBudget - actualCost;
-    budgetProgress = estimatedBudget > 0 ? (actualCost / estimatedBudget) * 100 : 0;
+    const estimatedBudget = (project.estimatedHours || totalEstimatedHours) * hourlyRate;
+    const actualCost = totalActualHours * hourlyRate;
+    budgetMetrics = {
+      totalBudget: estimatedBudget,
+      spentAmount: actualCost,
+      remainingBudget: estimatedBudget - actualCost,
+      budgetProgress: estimatedBudget > 0 ? (actualCost / estimatedBudget) * 100 : 0,
+      revenueEarned: totalPaidAmount,
+      revenueProgress: estimatedBudget > 0 ? (totalPaidAmount / estimatedBudget) * 100 : 0
+    };
   }
-
-  const completedTasks = tasks.filter(task => task.status === 'completed').length;
-  const projectProgress = tasks.length > 0 ? (completedTasks / tasks.length) * 100 : 0;
 
   return (
     <div className="space-y-6">
@@ -55,7 +80,7 @@ const ProjectBudgetTracking = ({ project, client, tasks }: ProjectBudgetTracking
         </span>
         {isFixedPrice && (
           <span className="text-sm text-slate-600">
-            Budget: ${project.fixedPrice?.toLocaleString()}
+            Budget: ${budgetMetrics.totalBudget.toLocaleString()}
           </span>
         )}
         {!isFixedPrice && (
@@ -65,17 +90,15 @@ const ProjectBudgetTracking = ({ project, client, tasks }: ProjectBudgetTracking
         )}
       </div>
 
-      {/* Budget Overview */}
+      {/* Financial Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-6 text-center">
             <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
             <p className="text-2xl font-bold text-blue-600">
-              ${estimatedBudget.toLocaleString()}
+              ${budgetMetrics.totalBudget.toLocaleString()}
             </p>
-            <p className="text-sm text-slate-600">
-              {isFixedPrice ? 'Fixed Budget' : 'Estimated Budget'}
-            </p>
+            <p className="text-sm text-slate-600">Total Budget</p>
           </CardContent>
         </Card>
 
@@ -83,9 +106,9 @@ const ProjectBudgetTracking = ({ project, client, tasks }: ProjectBudgetTracking
           <CardContent className="p-6 text-center">
             <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-2" />
             <p className="text-2xl font-bold text-green-600">
-              ${actualCost.toLocaleString()}
+              ${budgetMetrics.revenueEarned.toLocaleString()}
             </p>
-            <p className="text-sm text-slate-600">Actual Cost</p>
+            <p className="text-sm text-slate-600">Revenue Earned</p>
           </CardContent>
         </Card>
 
@@ -93,128 +116,158 @@ const ProjectBudgetTracking = ({ project, client, tasks }: ProjectBudgetTracking
           <CardContent className="p-6 text-center">
             <TrendingUp className="w-8 h-8 text-purple-600 mx-auto mb-2" />
             <p className="text-2xl font-bold text-purple-600">
-              ${remainingBudget.toLocaleString()}
+              ${(totalInvoiceAmount - budgetMetrics.revenueEarned).toLocaleString()}
             </p>
-            <p className="text-sm text-slate-600">
-              {isFixedPrice ? 'Remaining Budget' : 'Remaining Estimate'}
-            </p>
+            <p className="text-sm text-slate-600">Pending Revenue</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-6 text-center">
-            <AlertCircle className={`w-8 h-8 mx-auto mb-2 ${budgetProgress > 90 ? 'text-red-600' : 'text-yellow-600'}`} />
-            <p className={`text-2xl font-bold ${budgetProgress > 90 ? 'text-red-600' : 'text-yellow-600'}`}>
-              {budgetProgress.toFixed(1)}%
+            <AlertCircle className={`w-8 h-8 mx-auto mb-2 ${budgetMetrics.budgetProgress > 90 ? 'text-red-600' : 'text-yellow-600'}`} />
+            <p className={`text-2xl font-bold ${budgetMetrics.budgetProgress > 90 ? 'text-red-600' : 'text-yellow-600'}`}>
+              {budgetMetrics.budgetProgress.toFixed(1)}%
             </p>
             <p className="text-sm text-slate-600">Budget Used</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Budget Progress */}
+      {/* Progress Tracking */}
       <Card>
         <CardHeader>
-          <CardTitle>Budget vs Progress</CardTitle>
+          <CardTitle>Progress vs Revenue</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium">Budget Usage</span>
-              <span className="text-sm text-slate-600">{budgetProgress.toFixed(1)}%</span>
+              <span className="text-sm font-medium">Milestone Completion</span>
+              <span className="text-sm text-slate-600">{averageCompletion.toFixed(1)}%</span>
             </div>
-            <Progress value={budgetProgress} className="h-3" />
+            <Progress value={averageCompletion} className="h-3" />
           </div>
 
           <div>
             <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium">Project Progress</span>
-              <span className="text-sm text-slate-600">{projectProgress.toFixed(1)}%</span>
+              <span className="text-sm font-medium">Revenue Progress</span>
+              <span className="text-sm text-slate-600">{budgetMetrics.revenueProgress.toFixed(1)}%</span>
             </div>
-            <Progress value={projectProgress} className="h-3" />
+            <Progress value={budgetMetrics.revenueProgress} className="h-3" />
           </div>
 
-          {budgetProgress > projectProgress + 10 && (
+          <div>
+            <div className="flex justify-between mb-2">
+              <span className="text-sm font-medium">Budget Usage</span>
+              <span className="text-sm text-slate-600">{budgetMetrics.budgetProgress.toFixed(1)}%</span>
+            </div>
+            <Progress value={budgetMetrics.budgetProgress} className="h-3" />
+          </div>
+
+          {budgetMetrics.budgetProgress > averageCompletion + 15 && (
             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800">
-                ⚠️ Budget usage is ahead of project progress. Consider reviewing scope or budget allocation.
+                ⚠️ Budget usage is significantly ahead of milestone completion. Review project scope or budget allocation.
               </p>
             </div>
           )}
 
-          {isFixedPrice && budgetProgress > 80 && (
-            <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-              <p className="text-sm text-orange-800">
-                🔔 Fixed price project is approaching budget limit. Monitor closely to avoid overruns.
+          {budgetMetrics.revenueProgress < averageCompletion - 20 && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                💡 Consider invoicing for completed milestones to improve cash flow.
               </p>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Hours Breakdown */}
+      {/* Milestone Financial Breakdown */}
       <Card>
         <CardHeader>
-          <CardTitle>Hours Breakdown</CardTitle>
+          <CardTitle>Milestone Financial Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-              <span className="font-medium">Estimated Hours</span>
-              <span className="font-bold">
-                {isFixedPrice ? totalEstimatedHours : (project.estimatedHours || totalEstimatedHours)}h
-              </span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-              <span className="font-medium">Actual Hours</span>
-              <span className="font-bold">{totalActualHours}h</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-              <span className="font-medium">Hourly Rate</span>
-              <span className="font-bold">${hourlyRate}/hr</span>
-            </div>
-            {isFixedPrice && (
-              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                <span className="font-medium">Effective Rate</span>
-                <span className="font-bold">
-                  ${totalActualHours > 0 ? (estimatedBudget / totalActualHours).toFixed(2) : '0'}/hr
-                </span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Task Cost Breakdown */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Task Cost Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {tasks.length > 0 ? (
+          {projectMilestones.length > 0 ? (
             <div className="space-y-3">
-              {tasks.map((task) => (
-                <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
+              {projectMilestones.map((milestone) => (
+                <div key={milestone.id} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex-1">
-                    <h4 className="font-medium">{task.title}</h4>
-                    <p className="text-sm text-slate-600">
-                      {task.actualHours || 0}h / {task.estimatedHours || 0}h estimated
-                    </p>
+                    <div className="flex items-center space-x-2">
+                      <h4 className="font-medium">{milestone.title}</h4>
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        milestone.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        milestone.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {milestone.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <p className="text-sm text-slate-600">
+                        <Calendar className="w-3 h-3 inline mr-1" />
+                        Due: {new Date(milestone.targetDate).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        <CheckCircle className="w-3 h-3 inline mr-1" />
+                        {milestone.completionPercentage}% complete
+                      </p>
+                    </div>
                   </div>
                   <div className="text-right">
                     <p className="font-medium">
-                      ${((task.actualHours || 0) * hourlyRate).toLocaleString()}
+                      ${(milestone.amount || 0).toLocaleString()}
                     </p>
-                    <p className="text-sm text-slate-600">
-                      Est: ${((task.estimatedHours || 0) * hourlyRate).toLocaleString()}
+                    <p className={`text-sm ${
+                      milestone.paymentStatus === 'paid' ? 'text-green-600' :
+                      milestone.paymentStatus === 'partial' ? 'text-yellow-600' :
+                      'text-slate-600'
+                    }`}>
+                      {milestone.paymentStatus === 'paid' ? 'Paid' :
+                       milestone.paymentStatus === 'partial' ? 'Partially Paid' :
+                       'Unpaid'}
                     </p>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-slate-500 text-center py-4">No tasks to analyze</p>
+            <p className="text-slate-500 text-center py-4">No milestones to analyze</p>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Hours vs Revenue Analysis */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Time Investment Analysis</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+              <span className="font-medium">Total Hours Worked</span>
+              <span className="font-bold">{totalActualHours}h</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+              <span className="font-medium">Effective Hourly Rate</span>
+              <span className="font-bold">
+                ${totalActualHours > 0 ? (budgetMetrics.revenueEarned / totalActualHours).toFixed(2) : '0'}/hr
+              </span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+              <span className="font-medium">Revenue per Hour</span>
+              <span className="font-bold">
+                ${totalActualHours > 0 ? (totalInvoiceAmount / totalActualHours).toFixed(2) : '0'}/hr
+              </span>
+            </div>
+            {isFixedPrice && (
+              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                <span className="font-medium">Target Hourly Rate</span>
+                <span className="font-bold">
+                  ${totalEstimatedHours > 0 ? (budgetMetrics.totalBudget / totalEstimatedHours).toFixed(2) : '0'}/hr
+                </span>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
