@@ -267,6 +267,7 @@ export type Database = {
           client_id: number
           created_at: string
           currency: string
+          daily_rate: number | null
           documents: string[] | null
           end_date: string | null
           estimated_end_date: string
@@ -289,6 +290,7 @@ export type Database = {
           client_id: number
           created_at?: string
           currency?: string
+          daily_rate?: number | null
           documents?: string[] | null
           end_date?: string | null
           estimated_end_date: string
@@ -311,6 +313,7 @@ export type Database = {
           client_id?: number
           created_at?: string
           currency?: string
+          daily_rate?: number | null
           documents?: string[] | null
           end_date?: string | null
           estimated_end_date?: string

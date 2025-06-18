@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -14,9 +15,10 @@ export interface Project {
   documents: string[];
   team: string[];
   archived: boolean;
-  pricingType: 'fixed' | 'hourly';
+  pricingType: 'fixed' | 'hourly' | 'daily';
   fixedPrice?: number;
   hourlyRate?: number;
+  dailyRate?: number;
   estimatedHours?: number;
   currency: string;
   invoices: Array<{
@@ -60,9 +62,10 @@ export const useProjects = () => {
         documents: project.documents || [],
         team: project.team || [],
         archived: project.archived || false,
-        pricingType: project.pricing_type as 'fixed' | 'hourly',
+        pricingType: project.pricing_type as 'fixed' | 'hourly' | 'daily',
         fixedPrice: project.fixed_price || undefined,
         hourlyRate: project.hourly_rate || undefined,
+        dailyRate: project.daily_rate || undefined,
         estimatedHours: project.estimated_hours || undefined,
         currency: project.currency || 'USD',
         invoices: Array.isArray(project.invoices) ? project.invoices as Array<{
@@ -106,6 +109,7 @@ export const useProjects = () => {
         pricing_type: newProject.pricingType,
         fixed_price: newProject.fixedPrice || null,
         hourly_rate: newProject.hourlyRate || null,
+        daily_rate: newProject.dailyRate || null,
         estimated_hours: newProject.estimatedHours || null,
         currency: newProject.currency || 'USD',
         invoices: newProject.invoices || [],
@@ -133,9 +137,10 @@ export const useProjects = () => {
         documents: data.documents || [],
         team: data.team || [],
         archived: data.archived || false,
-        pricingType: data.pricing_type as 'fixed' | 'hourly',
+        pricingType: data.pricing_type as 'fixed' | 'hourly' | 'daily',
         fixedPrice: data.fixed_price || undefined,
         hourlyRate: data.hourly_rate || undefined,
+        dailyRate: data.daily_rate || undefined,
         estimatedHours: data.estimated_hours || undefined,
         currency: data.currency || 'USD',
         invoices: Array.isArray(data.invoices) ? data.invoices as Array<{
@@ -180,6 +185,7 @@ export const useProjects = () => {
         pricing_type: updatedProject.pricingType,
         fixed_price: updatedProject.fixedPrice || null,
         hourly_rate: updatedProject.hourlyRate || null,
+        daily_rate: updatedProject.dailyRate || null,
         estimated_hours: updatedProject.estimatedHours || null,
         currency: updatedProject.currency || 'USD',
         invoices: updatedProject.invoices || []

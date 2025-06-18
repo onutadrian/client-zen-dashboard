@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,16 @@ const ProjectDetailsPage = () => {
   const client = clients.find(c => c.id === project?.clientId);
   const projectTasks = tasks.filter(task => task.projectId === id);
   const projectMilestones = milestones.filter(milestone => milestone.projectId === id);
+
+  // Hide budget tracking for fixed price projects
+  const showBudgetTracking = project?.pricingType !== 'fixed';
+
+  // Redirect to overview if current tab is budget and it's hidden
+  useEffect(() => {
+    if (activeTab === 'budget' && !showBudgetTracking) {
+      setActiveTab('overview');
+    }
+  }, [activeTab, showBudgetTracking]);
 
   if (!project) {
     return (
@@ -77,10 +87,10 @@ const ProjectDetailsPage = () => {
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className={`grid w-full ${showBudgetTracking ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="team">Team Members</TabsTrigger>
-                <TabsTrigger value="budget">Budget Tracking</TabsTrigger>
+                {showBudgetTracking && <TabsTrigger value="budget">Budget Tracking</TabsTrigger>}
                 <TabsTrigger value="settings">Project Settings</TabsTrigger>
               </TabsList>
 
@@ -108,14 +118,16 @@ const ProjectDetailsPage = () => {
                 />
               </TabsContent>
 
-              <TabsContent value="budget" className="mt-6">
-                <ProjectBudgetTracking 
-                  project={project}
-                  client={client}
-                  tasks={projectTasks}
-                  milestones={projectMilestones}
-                />
-              </TabsContent>
+              {showBudgetTracking && (
+                <TabsContent value="budget" className="mt-6">
+                  <ProjectBudgetTracking 
+                    project={project}
+                    client={client}
+                    tasks={projectTasks}
+                    milestones={projectMilestones}
+                  />
+                </TabsContent>
+              )}
 
               <TabsContent value="settings" className="mt-6">
                 <ProjectSettings 

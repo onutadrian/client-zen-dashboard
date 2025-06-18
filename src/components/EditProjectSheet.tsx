@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,15 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
   };
 
   if (!project) return null;
+
+  const getCurrencySymbol = (currency: string) => {
+    switch (currency) {
+      case 'USD': return '$';
+      case 'EUR': return '€';
+      case 'RON': return 'RON';
+      default: return currency;
+    }
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -104,7 +114,7 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
             <Label>Pricing Type</Label>
             <RadioGroup 
               value={formData.pricingType || 'fixed'} 
-              onValueChange={(value: 'fixed' | 'hourly') => handleInputChange('pricingType', value)}
+              onValueChange={(value: 'fixed' | 'hourly' | 'daily') => handleInputChange('pricingType', value)}
               className="flex space-x-6"
             >
               <div className="flex items-center space-x-2">
@@ -115,13 +125,17 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
                 <RadioGroupItem value="hourly" id="edit-hourly" />
                 <Label htmlFor="edit-hourly">Hourly Rate</Label>
               </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="daily" id="edit-daily" />
+                <Label htmlFor="edit-daily">Daily Rate</Label>
+              </div>
             </RadioGroup>
           </div>
 
           {/* Conditional Pricing Fields */}
           {formData.pricingType === 'fixed' ? (
             <div className="space-y-2">
-              <Label htmlFor="fixedPrice">Fixed Price ({formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : 'RON'})</Label>
+              <Label htmlFor="fixedPrice">Fixed Price ({getCurrencySymbol(formData.currency || 'USD')})</Label>
               <Input
                 id="fixedPrice"
                 type="number"
@@ -131,10 +145,10 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
                 placeholder="Enter fixed price"
               />
             </div>
-          ) : (
+          ) : formData.pricingType === 'hourly' ? (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="hourlyRate">Hourly Rate ({formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : 'RON'})</Label>
+                <Label htmlFor="hourlyRate">Hourly Rate ({getCurrencySymbol(formData.currency || 'USD')})</Label>
                 <Input
                   id="hourlyRate"
                   type="number"
@@ -142,6 +156,30 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
                   value={formData.hourlyRate || ''}
                   onChange={(e) => handleInputChange('hourlyRate', e.target.value ? parseFloat(e.target.value) : undefined)}
                   placeholder="Rate per hour"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="estimatedHours">Estimated Hours</Label>
+                <Input
+                  id="estimatedHours"
+                  type="number"
+                  value={formData.estimatedHours || ''}
+                  onChange={(e) => handleInputChange('estimatedHours', e.target.value ? parseInt(e.target.value) : undefined)}
+                  placeholder="Estimated hours"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="dailyRate">Daily Rate ({getCurrencySymbol(formData.currency || 'USD')})</Label>
+                <Input
+                  id="dailyRate"
+                  type="number"
+                  step="0.01"
+                  value={formData.dailyRate || ''}
+                  onChange={(e) => handleInputChange('dailyRate', e.target.value ? parseFloat(e.target.value) : undefined)}
+                  placeholder="Rate per day"
                 />
               </div>
               <div className="space-y-2">
