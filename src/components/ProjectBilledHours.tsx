@@ -30,19 +30,19 @@ const ProjectBilledHours = ({
           <div className="text-center p-4 rounded-lg bg-slate-50 py-[16px]">
             
             <p className="text-zinc-950 text-4xl font-normal">{totalHours}</p>
-            <p className="text-sm text-slate-600 py-[24px]">Total Hours</p>
+            <p className="text-slate-600 py-[24px] text-base ">Total Hours</p>
           </div>
 
           <div className="text-center p-4 rounded-lg bg-slate-50">
             
             <p className="text-zinc-950 text-4xl font-normal">{billedHours}</p>
-            <p className="text-sm text-slate-600 py-[24px]">Billed Hours</p>
+            <p className="text-slate-600 py-[24px] text-base">Billed Hours</p>
           </div>
 
           <div className="text-center p-4 rounded-lg bg-slate-50">
             
             <p className="text-zinc-950 text-4xl font-normal">{unbilledHours}</p>
-            <p className="text-sm text-slate-600 py-[24px]">Unbilled Hours</p>
+            <p className="text-slate-600 py-[24px] text-base">Unbilled Hours</p>
           </div>
 
           <div className="text-center p-4 rounded-lg bg-slate-50">
@@ -50,7 +50,7 @@ const ProjectBilledHours = ({
             <p className="text-zinc-950 font-normal text-4xl">
               ${totalRevenue.toLocaleString()}
             </p>
-            <p className="text-sm text-slate-600 py-[24px]">Total Revenue</p>
+            <p className="text-slate-600 py-[24px] text-base">Total Revenue</p>
           </div>
         </div>
 
