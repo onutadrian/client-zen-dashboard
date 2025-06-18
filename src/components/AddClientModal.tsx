@@ -11,7 +11,7 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    priceType: 'hour',
+    priceType: 'hourly',
     status: 'active',
     notes: '',
     documents: [],
@@ -41,7 +41,7 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
     setFormData({
       name: '',
       price: '',
-      priceType: 'hour',
+      priceType: 'hourly',
       status: 'active',
       notes: '',
       documents: [],
@@ -162,10 +162,10 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="hour">Per Hour</SelectItem>
-                  <SelectItem value="day">Per Day</SelectItem>
-                  <SelectItem value="week">Per Week</SelectItem>
-                  <SelectItem value="month">Per Month</SelectItem>
+                  <SelectItem value="hourly">Per Hour</SelectItem>
+                  <SelectItem value="daily">Per Day</SelectItem>
+                  <SelectItem value="weekly">Per Week</SelectItem>
+                  <SelectItem value="monthly">Per Month</SelectItem>
                   <SelectItem value="project">Per Project</SelectItem>
                 </SelectContent>
               </Select>

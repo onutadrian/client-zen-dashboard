@@ -84,11 +84,25 @@ export const useClients = () => {
         throw new Error('User not authenticated');
       }
 
+      // Map frontend price types to database-compatible values
+      const priceTypeMapping = {
+        'hourly': 'hourly',
+        'daily': 'daily', 
+        'weekly': 'weekly',
+        'monthly': 'monthly',
+        'project': 'project',
+        // Legacy mappings for backward compatibility
+        'hour': 'hourly',
+        'day': 'daily',
+        'week': 'weekly',
+        'month': 'monthly'
+      };
+
       // Transform to Supabase format and ensure user_id is set
       const supabaseClient = {
         name: newClient.name,
         price: newClient.price,
-        price_type: newClient.priceType,
+        price_type: priceTypeMapping[newClient.priceType] || 'hourly',
         status: newClient.status || 'active',
         documents: newClient.documents || [],
         links: newClient.links || [],
@@ -145,11 +159,25 @@ export const useClients = () => {
         throw new Error('User not authenticated');
       }
 
+      // Map frontend price types to database-compatible values
+      const priceTypeMapping = {
+        'hourly': 'hourly',
+        'daily': 'daily', 
+        'weekly': 'weekly',
+        'monthly': 'monthly',
+        'project': 'project',
+        // Legacy mappings for backward compatibility
+        'hour': 'hourly',
+        'day': 'daily',
+        'week': 'weekly',
+        'month': 'monthly'
+      };
+
       // Transform to Supabase format
       const supabaseUpdate = {
         name: updatedClient.name,
         price: updatedClient.price,
-        price_type: updatedClient.priceType,
+        price_type: priceTypeMapping[updatedClient.priceType] || 'hourly',
         status: updatedClient.status,
         documents: updatedClient.documents,
         links: updatedClient.links,
