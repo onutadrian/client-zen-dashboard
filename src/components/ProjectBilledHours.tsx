@@ -1,26 +1,26 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, DollarSign, TrendingUp } from 'lucide-react';
+import { Clock, DollarSign } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
+import { Client } from '@/hooks/useClients';
+import { HourEntry, useHourEntries } from '@/hooks/useHourEntries';
 
 interface ProjectBilledHoursProps {
   project: Project;
-  client?: any;
+  client?: Client;
 }
 
 const ProjectBilledHours = ({ project, client }: ProjectBilledHoursProps) => {
-  // Calculate project-specific hours from client's hour entries
-  const projectHours = client?.hourEntries?.filter((entry: any) => {
-    // Check if entry has projectId matching this project, or if description mentions this project
-    return entry.projectId === project.id || 
-           entry.description?.toLowerCase().includes(project.name.toLowerCase());
-  }) || [];
+  const { hourEntries } = useHourEntries();
 
-  const totalHours = projectHours.reduce((sum: number, entry: any) => sum + (entry.hours || 0), 0);
+  // Filter hour entries for this specific project
+  const projectHours = hourEntries.filter(entry => entry.projectId === project.id);
+
+  const totalHours = projectHours.reduce((sum, entry) => sum + entry.hours, 0);
   const billedHours = projectHours
-    .filter((entry: any) => entry.billed)
-    .reduce((sum: number, entry: any) => sum + (entry.hours || 0), 0);
+    .filter(entry => entry.billed)
+    .reduce((sum, entry) => sum + entry.hours, 0);
   const unbilledHours = totalHours - billedHours;
   
   const hourlyRate = client?.price || 0;
@@ -32,23 +32,23 @@ const ProjectBilledHours = ({ project, client }: ProjectBilledHoursProps) => {
       <CardHeader>
         <CardTitle className="flex items-center">
           <Clock className="w-5 h-5 mr-2" />
-          Billed Hours
+          Project Hours
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="text-center p-4 rounded-lg bg-slate-50 py-[16px]">
-            <p className="text-zinc-950 text-4xl font-normal">{totalHours}</p>
+            <p className="text-zinc-950 text-4xl font-normal">{totalHours.toFixed(2)}</p>
             <p className="text-slate-600 py-[24px] text-base">Total Hours</p>
           </div>
 
           <div className="text-center p-4 rounded-lg bg-slate-50">
-            <p className="text-zinc-950 text-4xl font-normal">{billedHours}</p>
+            <p className="text-zinc-950 text-4xl font-normal">{billedHours.toFixed(2)}</p>
             <p className="text-slate-600 py-[24px] text-base">Billed Hours</p>
           </div>
 
           <div className="text-center p-4 rounded-lg bg-slate-50">
-            <p className="text-zinc-950 text-4xl font-normal">{unbilledHours}</p>
+            <p className="text-zinc-950 text-4xl font-normal">{unbilledHours.toFixed(2)}</p>
             <p className="text-slate-600 py-[24px] text-base">Unbilled Hours</p>
           </div>
 
@@ -64,8 +64,8 @@ const ProjectBilledHours = ({ project, client }: ProjectBilledHoursProps) => {
           <div className="mt-6">
             <h4 className="font-medium mb-3">Recent Time Entries</h4>
             <div className="space-y-2">
-              {projectHours.slice(-5).map((entry: any, index: number) => (
-                <div key={index} className="flex items-center justify-between p-2 border rounded">
+              {projectHours.slice(0, 5).map((entry) => (
+                <div key={entry.id} className="flex items-center justify-between p-2 border rounded">
                   <div>
                     <p className="font-medium">{entry.description || 'Time entry'}</p>
                     <p className="text-sm text-slate-600">
@@ -88,7 +88,7 @@ const ProjectBilledHours = ({ project, client }: ProjectBilledHoursProps) => {
           <div className="mt-6 text-center py-4">
             <p className="text-slate-500">No time entries found for this project</p>
             <p className="text-sm text-slate-400 mt-1">
-              Time entries will appear here when tasks are completed or hours are logged manually
+              Time entries will appear here when hours are logged for this project
             </p>
           </div>
         )}

@@ -9,7 +9,6 @@ export interface Client {
   price: number;
   priceType: string;
   status: string;
-  totalHours: number;
   documents: string[];
   links: string[];
   notes: string;
@@ -24,7 +23,6 @@ export interface Client {
     date: string;
     status: string;
   }>;
-  hourEntries: any[];
   currency: string;
 }
 
@@ -53,13 +51,11 @@ export const useClients = () => {
         price: Number(client.price),
         priceType: client.price_type,
         status: client.status,
-        totalHours: client.total_hours || 0,
         documents: client.documents || [],
         links: client.links || [],
         notes: client.notes || '',
         people: (client.people as any[]) || [],
         invoices: (client.invoices as any[]) || [],
-        hourEntries: (client.hour_entries as any[]) || [],
         currency: client.currency || 'USD'
       }));
 
@@ -82,13 +78,11 @@ export const useClients = () => {
         price: newClient.price,
         price_type: newClient.priceType,
         status: newClient.status || 'active',
-        total_hours: 0,
         documents: newClient.documents || [],
         links: newClient.links || [],
         notes: newClient.notes || '',
         people: newClient.people || [],
         invoices: newClient.invoices || [],
-        hour_entries: [],
         currency: newClient.currency || 'USD'
       };
 
@@ -107,13 +101,11 @@ export const useClients = () => {
         price: Number(data.price),
         priceType: data.price_type,
         status: data.status,
-        totalHours: data.total_hours || 0,
         documents: data.documents || [],
         links: data.links || [],
         notes: data.notes || '',
         people: (data.people as any[]) || [],
         invoices: (data.invoices as any[]) || [],
-        hourEntries: (data.hour_entries as any[]) || [],
         currency: data.currency || 'USD'
       };
 
@@ -141,13 +133,11 @@ export const useClients = () => {
         price: updatedClient.price,
         price_type: updatedClient.priceType,
         status: updatedClient.status,
-        total_hours: updatedClient.totalHours,
         documents: updatedClient.documents,
         links: updatedClient.links,
         notes: updatedClient.notes,
         people: updatedClient.people,
         invoices: updatedClient.invoices,
-        hour_entries: updatedClient.hourEntries,
         currency: updatedClient.currency
       };
 

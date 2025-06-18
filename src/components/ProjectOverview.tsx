@@ -1,28 +1,56 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus, FileText, Link, StickyNote, Trash2 } from 'lucide-react';
+import { Plus, Clock } from 'lucide-react';
+import ProjectBilledHours from './ProjectBilledHours';
+import TasksSection from './TasksSection';
+import MilestonesSection from './MilestonesSection';
+import LogProjectHoursModal from './LogProjectHoursModal';
+import AddProjectTaskModal from './AddProjectTaskModal';
+import AddMilestoneModal from './AddMilestoneModal';
 import { Project } from '@/hooks/useProjects';
-import { Task } from '@/hooks/useTasks';
-import { Milestone } from '@/hooks/useMilestones';
-import ProjectBilledHours from '@/components/ProjectBilledHours';
-import AddProjectTaskModal from '@/components/AddProjectTaskModal';
-import AddDocumentModal from '@/components/AddDocumentModal';
+import { Client } from '@/hooks/useClients';
+
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  clientId: number;
+  clientName: string;
+  projectId?: string;
+  estimatedHours?: number;
+  actualHours?: number;
+  status: 'pending' | 'in-progress' | 'completed';
+  notes: string;
+  assets: string[];
+  createdDate: string;
+  completedDate?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+interface Milestone {
+  id: string;
+  projectId: string;
+  title: string;
+  description?: string;
+  targetDate: string;
+  status: 'pending' | 'in-progress' | 'completed';
+}
 
 interface ProjectOverviewProps {
   project: Project;
-  client?: any;
+  client?: Client;
   tasks: Task[];
   milestones: Milestone[];
-  onAddTask: (task: any) => void;
-  onUpdateTask: (taskId: number, status: any, actualHours?: number) => void;
+  onAddTask: (task: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => void;
+  onUpdateTask: (taskId: number, status: Task['status'], actualHours?: number) => void;
   onDeleteTask: (taskId: number) => void;
-  onEditTask: (taskId: number, updatedTask: any) => void;
-  onAddMilestone: (milestone: any) => void;
-  onUpdateMilestone: (milestoneId: string, updates: any) => void;
-  onUpdateProject: (projectId: string, updates: any) => void;
+  onEditTask: (taskId: number, updatedTask: Partial<Task>) => void;
+  onAddMilestone: (milestone: Omit<Milestone, 'id'>) => void;
+  onUpdateMilestone: (milestoneId: string, updatedMilestone: Partial<Milestone>) => void;
+  onUpdateProject: (projectId: string, updatedProject: Partial<Project>) => void;
 }
 
 const ProjectOverview = ({
@@ -38,260 +66,154 @@ const ProjectOverview = ({
   onUpdateMilestone,
   onUpdateProject
 }: ProjectOverviewProps) => {
+  const [showLogHoursModal, setShowLogHoursModal] = useState(false);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
-  const [showAddDocumentModal, setShowAddDocumentModal] = useState(false);
-  const [showAddLinkModal, setShowAddLinkModal] = useState(false);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const handleAddDocument = (document: string) => {
-    const updatedDocuments = [...(project.documents || []), document];
-    onUpdateProject(project.id, {
-      ...project,
-      documents: updatedDocuments
-    });
-  };
-
-  const handleAddLink = (link: string) => {
-    // For now, we'll store links in a links array (we'd need to add this to the project schema)
-    // Since the current schema only has documents, we'll prefix links with "LINK: "
-    const linkWithPrefix = `LINK: ${link}`;
-    const updatedDocuments = [...(project.documents || []), linkWithPrefix];
-    onUpdateProject(project.id, {
-      ...project,
-      documents: updatedDocuments
-    });
-  };
-
-  const handleRemoveDocument = (index: number) => {
-    const updatedDocuments = (project.documents || []).filter((_, i) => i !== index);
-    onUpdateProject(project.id, {
-      ...project,
-      documents: updatedDocuments
-    });
-  };
-
-  const isLink = (doc: string) => doc.startsWith('LINK: ');
-  const getDisplayName = (doc: string) => isLink(doc) ? doc.replace('LINK: ', '') : doc;
+  const [showAddMilestoneModal, setShowAddMilestoneModal] = useState(false);
 
   return (
     <div className="space-y-6">
-      {/* Billed Hours Section */}
+      {/* Project Hours Section */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Time Tracking</h3>
+        {client && (
+          <Button
+            onClick={() => setShowLogHoursModal(true)}
+            className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+          >
+            <Clock className="w-4 h-4 mr-2" />
+            Log Hours
+          </Button>
+        )}
+      </div>
+      
       <ProjectBilledHours project={project} client={client} />
 
       {/* Tasks Section */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Tasks</h3>
+        <Button
+          onClick={() => setShowAddTaskModal(true)}
+          className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Task
+        </Button>
+      </div>
+
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Tasks ({tasks.length})</CardTitle>
-            <Button 
-              onClick={() => setShowAddTaskModal(true)}
-              size="sm" 
-              className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Task
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           {tasks.length === 0 ? (
-            <p className="text-slate-500 text-center py-4">No tasks yet</p>
+            <div className="text-center py-8">
+              <p className="text-slate-500 mb-4">No tasks yet for this project</p>
+              <Button
+                onClick={() => setShowAddTaskModal(true)}
+                className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add First Task
+              </Button>
+            </div>
           ) : (
-            <div className="space-y-3">
-              {tasks.slice(0, 5).map(task => (
-                <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">{task.title}</h4>
-                    <p className="text-sm text-slate-600">{task.description}</p>
+            <div className="space-y-4">
+              {tasks.map((task) => (
+                <div key={task.id} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">{task.title}</h4>
+                      <p className="text-sm text-slate-600">{task.description}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        task.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {task.status}
+                      </span>
+                    </div>
                   </div>
-                  <Badge className={getStatusColor(task.status)}>
-                    {task.status}
-                  </Badge>
                 </div>
               ))}
-              {tasks.length > 5 && (
-                <p className="text-sm text-slate-500 text-center">
-                  And {tasks.length - 5} more tasks...
-                </p>
-              )}
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Timeline Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Project Timeline</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {milestones.length === 0 ? (
-              <p className="text-slate-500 text-center py-4">No milestones yet</p>
-            ) : (
-              milestones.map(milestone => (
-                <div key={milestone.id} className="flex items-center space-x-4 p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">{milestone.title}</h4>
-                    <p className="text-sm text-slate-600">Due: {new Date(milestone.targetDate).toLocaleDateString()}</p>
-                  </div>
-                  <Badge className={getStatusColor(milestone.status)}>
-                    {milestone.status}
-                  </Badge>
-                </div>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Documents & Links */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center">
-                <FileText className="w-5 h-5 mr-2" />
-                Documents
-              </CardTitle>
-              <Button 
-                onClick={() => setShowAddDocumentModal(true)}
-                size="sm" 
-                variant="outline"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {project.documents && project.documents.filter(doc => !isLink(doc)).length > 0 ? (
-              <div className="space-y-2">
-                {project.documents
-                  .filter(doc => !isLink(doc))
-                  .map((doc, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 border rounded">
-                      <p className="text-sm flex-1">{doc}</p>
-                      <Button
-                        onClick={() => handleRemoveDocument(project.documents?.indexOf(doc) || 0)}
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              <p className="text-slate-500 text-center py-4">No documents yet</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center">
-                <Link className="w-5 h-5 mr-2" />
-                Links
-              </CardTitle>
-              <Button 
-                onClick={() => setShowAddLinkModal(true)}
-                size="sm" 
-                variant="outline"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {project.documents && project.documents.filter(doc => isLink(doc)).length > 0 ? (
-              <div className="space-y-2">
-                {project.documents
-                  .filter(doc => isLink(doc))
-                  .map((doc, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 border rounded">
-                      <a 
-                        href={getDisplayName(doc).startsWith('http') ? getDisplayName(doc) : `https://${getDisplayName(doc)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:text-blue-800 flex-1"
-                      >
-                        {getDisplayName(doc)}
-                      </a>
-                      <Button
-                        onClick={() => handleRemoveDocument(project.documents?.indexOf(doc) || 0)}
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              <p className="text-slate-500 text-center py-4">No links yet</p>
-            )}
-          </CardContent>
-        </Card>
+      {/* Milestones Section */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Milestones</h3>
+        <Button
+          onClick={() => setShowAddMilestoneModal(true)}
+          className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Milestone
+        </Button>
       </div>
 
-      {/* Notes Section */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <StickyNote className="w-5 h-5 mr-2" />
-            Notes
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {project.notes ? (
-            <div className="p-3 bg-slate-50 rounded-lg">
-              <p className="text-slate-700">{project.notes}</p>
+        <CardContent className="p-6">
+          {milestones.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-slate-500 mb-4">No milestones yet for this project</p>
+              <Button
+                onClick={() => setShowAddMilestoneModal(true)}
+                className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add First Milestone
+              </Button>
             </div>
           ) : (
-            <p className="text-slate-500 text-center py-4">No notes yet</p>
+            <div className="space-y-4">
+              {milestones.map((milestone) => (
+                <div key={milestone.id} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">{milestone.title}</h4>
+                      <p className="text-sm text-slate-600">{milestone.description}</p>
+                      <p className="text-sm text-slate-500">Due: {new Date(milestone.targetDate).toLocaleDateString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        milestone.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        milestone.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {milestone.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
 
       {/* Modals */}
+      {client && (
+        <LogProjectHoursModal
+          isOpen={showLogHoursModal}
+          onClose={() => setShowLogHoursModal(false)}
+          project={project}
+          client={client}
+        />
+      )}
+
       <AddProjectTaskModal
         isOpen={showAddTaskModal}
         onClose={() => setShowAddTaskModal(false)}
         onAdd={onAddTask}
-        projectId={project.id}
-        clientId={project.clientId}
-        clientName={client?.name || 'Unknown Client'}
+        project={project}
+        client={client}
       />
 
-      <AddDocumentModal
-        isOpen={showAddDocumentModal}
-        onClose={() => setShowAddDocumentModal(false)}
-        onAdd={handleAddDocument}
-        type="document"
-      />
-
-      <AddDocumentModal
-        isOpen={showAddLinkModal}
-        onClose={() => setShowAddLinkModal(false)}
-        onAdd={handleAddLink}
-        type="link"
+      <AddMilestoneModal
+        isOpen={showAddMilestoneModal}
+        onClose={() => setShowAddMilestoneModal(false)}
+        onAdd={onAddMilestone}
+        project={project}
       />
     </div>
   );

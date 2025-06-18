@@ -14,7 +14,6 @@ export type Database = {
           created_at: string
           currency: string | null
           documents: string[] | null
-          hour_entries: Json[] | null
           id: number
           invoices: Json[] | null
           links: string[] | null
@@ -24,7 +23,6 @@ export type Database = {
           price: number
           price_type: string
           status: string
-          total_hours: number | null
           updated_at: string
           user_id: string | null
         }
@@ -32,7 +30,6 @@ export type Database = {
           created_at?: string
           currency?: string | null
           documents?: string[] | null
-          hour_entries?: Json[] | null
           id?: number
           invoices?: Json[] | null
           links?: string[] | null
@@ -42,7 +39,6 @@ export type Database = {
           price: number
           price_type: string
           status?: string
-          total_hours?: number | null
           updated_at?: string
           user_id?: string | null
         }
@@ -50,7 +46,6 @@ export type Database = {
           created_at?: string
           currency?: string | null
           documents?: string[] | null
-          hour_entries?: Json[] | null
           id?: number
           invoices?: Json[] | null
           links?: string[] | null
@@ -60,11 +55,64 @@ export type Database = {
           price?: number
           price_type?: string
           status?: string
-          total_hours?: number | null
           updated_at?: string
           user_id?: string | null
         }
         Relationships: []
+      }
+      hour_entries: {
+        Row: {
+          billed: boolean
+          client_id: number
+          created_at: string
+          date: string
+          description: string | null
+          hours: number
+          id: number
+          project_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          billed?: boolean
+          client_id: number
+          created_at?: string
+          date?: string
+          description?: string | null
+          hours: number
+          id?: number
+          project_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          billed?: boolean
+          client_id?: number
+          created_at?: string
+          date?: string
+          description?: string | null
+          hours?: number
+          id?: number
+          project_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hour_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hour_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       milestones: {
         Row: {
