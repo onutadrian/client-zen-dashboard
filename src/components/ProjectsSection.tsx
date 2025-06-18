@@ -8,6 +8,7 @@ import { Calendar, Users, FileText, Edit, Archive, DollarSign } from 'lucide-rea
 import AddProjectModal from './AddProjectModal';
 import EditProjectSheet from './EditProjectSheet';
 import { Project } from '@/hooks/useProjects';
+import { formatCurrency } from '@/lib/currency';
 
 interface Client {
   id: number;
@@ -60,16 +61,24 @@ const ProjectsSection = ({
     if (project.pricingType === 'fixed') {
       return {
         type: 'Fixed',
-        amount: project.fixedPrice ? `$${project.fixedPrice.toLocaleString()}` : 'TBD',
+        amount: project.fixedPrice ? formatCurrency(project.fixedPrice, project.currency) : 'TBD',
         color: 'bg-blue-100 text-blue-800'
       };
     } else {
       return {
         type: 'Hourly',
-        amount: project.hourlyRate ? `$${project.hourlyRate}/hr` : 'TBD',
+        amount: project.hourlyRate ? `${formatCurrency(project.hourlyRate, project.currency)}/hr` : 'TBD',
         color: 'bg-green-100 text-green-800'
       };
     }
+  };
+
+  const getTotalInvoiced = (project: Project) => {
+    const totalPaid = project.invoices
+      ?.filter(invoice => invoice.status === 'paid')
+      ?.reduce((sum, invoice) => sum + invoice.amount, 0) || 0;
+    
+    return formatCurrency(totalPaid, project.currency);
   };
 
   const handleEditProject = (e: React.MouseEvent, project: Project) => {
@@ -118,6 +127,7 @@ const ProjectsSection = ({
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {projects.map((project) => {
                 const pricingInfo = getPricingDisplay(project);
+                const totalInvoiced = getTotalInvoiced(project);
                 return (
                   <Card 
                     key={project.id} 
@@ -167,6 +177,14 @@ const ProjectsSection = ({
                             {pricingInfo.type}
                           </Badge>
                         </div>
+
+                        {/* Invoice Information */}
+                        {project.invoices && project.invoices.length > 0 && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-slate-600">Invoiced:</span>
+                            <span className="font-medium text-green-600">{totalInvoiced}</span>
+                          </div>
+                        )}
 
                         {project.team && project.team.length > 0 && (
                           <div className="flex items-center text-sm text-slate-600">

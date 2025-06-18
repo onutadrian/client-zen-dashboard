@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 interface Client {
   id: number;
   name: string;
+  currency?: string;
   documents?: string[];
   links?: string[];
   people?: Array<{ name: string; email: string; title: string }>;
@@ -37,7 +37,8 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
     pricingType: 'fixed' as 'fixed' | 'hourly',
     fixedPrice: '',
     hourlyRate: '',
-    estimatedHours: ''
+    estimatedHours: '',
+    currency: 'EUR'
   });
   
   const [inheritOptions, setInheritOptions] = useState({
@@ -48,6 +49,13 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
   });
 
   const selectedClient = clients.find(c => c.id.toString() === formData.clientId);
+
+  // Auto-select client currency when client is selected
+  useEffect(() => {
+    if (selectedClient && selectedClient.currency) {
+      setFormData(prev => ({ ...prev, currency: selectedClient.currency || 'EUR' }));
+    }
+  }, [selectedClient]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +98,9 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
       pricingType: formData.pricingType,
       fixedPrice: formData.pricingType === 'fixed' && formData.fixedPrice ? parseFloat(formData.fixedPrice) : undefined,
       hourlyRate: formData.pricingType === 'hourly' && formData.hourlyRate ? parseFloat(formData.hourlyRate) : undefined,
-      estimatedHours: formData.pricingType === 'hourly' && formData.estimatedHours ? parseInt(formData.estimatedHours) : undefined
+      estimatedHours: formData.pricingType === 'hourly' && formData.estimatedHours ? parseInt(formData.estimatedHours) : undefined,
+      currency: formData.currency,
+      invoices: []
     };
 
     onAdd(projectData);
@@ -107,7 +117,8 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
       pricingType: 'fixed',
       fixedPrice: '',
       hourlyRate: '',
-      estimatedHours: ''
+      estimatedHours: '',
+      currency: 'EUR'
     });
     setInheritOptions({
       documents: false,
@@ -167,6 +178,21 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
             </Select>
           </div>
 
+          {/* Currency Selection */}
+          <div>
+            <Label htmlFor="currency">Currency</Label>
+            <Select value={formData.currency} onValueChange={(value) => handleChange('currency', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="USD">USD ($)</SelectItem>
+                <SelectItem value="EUR">EUR (€)</SelectItem>
+                <SelectItem value="RON">RON</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Pricing Type Selection */}
           <div>
             <Label>Pricing Type</Label>
@@ -189,7 +215,7 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
           {/* Conditional Pricing Fields */}
           {formData.pricingType === 'fixed' ? (
             <div>
-              <Label htmlFor="fixedPrice">Fixed Price ($)</Label>
+              <Label htmlFor="fixedPrice">Fixed Price ({formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : 'RON'})</Label>
               <Input
                 id="fixedPrice"
                 type="number"
@@ -203,7 +229,7 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
           ) : (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="hourlyRate">Hourly Rate ($)</Label>
+                <Label htmlFor="hourlyRate">Hourly Rate ({formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : 'RON'})</Label>
                 <Input
                   id="hourlyRate"
                   type="number"

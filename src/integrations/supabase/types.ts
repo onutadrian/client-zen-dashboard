@@ -124,7 +124,7 @@ export type Database = {
           target_date: string
           title: string
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -135,7 +135,7 @@ export type Database = {
           target_date: string
           title: string
           updated_at?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string
@@ -146,7 +146,7 @@ export type Database = {
           target_date?: string
           title?: string
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -187,6 +187,7 @@ export type Database = {
           archived: boolean | null
           client_id: number
           created_at: string
+          currency: string
           documents: string[] | null
           end_date: string | null
           estimated_end_date: string
@@ -194,6 +195,7 @@ export type Database = {
           fixed_price: number | null
           hourly_rate: number | null
           id: string
+          invoices: Json | null
           name: string
           notes: string | null
           pricing_type: string
@@ -207,6 +209,7 @@ export type Database = {
           archived?: boolean | null
           client_id: number
           created_at?: string
+          currency?: string
           documents?: string[] | null
           end_date?: string | null
           estimated_end_date: string
@@ -214,6 +217,7 @@ export type Database = {
           fixed_price?: number | null
           hourly_rate?: number | null
           id?: string
+          invoices?: Json | null
           name: string
           notes?: string | null
           pricing_type?: string
@@ -227,6 +231,7 @@ export type Database = {
           archived?: boolean | null
           client_id?: number
           created_at?: string
+          currency?: string
           documents?: string[] | null
           end_date?: string | null
           estimated_end_date?: string
@@ -234,6 +239,7 @@ export type Database = {
           fixed_price?: number | null
           hourly_rate?: number | null
           id?: string
+          invoices?: Json | null
           name?: string
           notes?: string | null
           pricing_type?: string

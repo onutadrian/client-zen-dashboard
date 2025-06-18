@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -82,6 +81,24 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
             </Select>
           </div>
 
+          {/* Currency Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="currency">Currency</Label>
+            <Select 
+              value={formData.currency || 'USD'} 
+              onValueChange={(value) => handleInputChange('currency', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="USD">USD ($)</SelectItem>
+                <SelectItem value="EUR">EUR (€)</SelectItem>
+                <SelectItem value="RON">RON</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Pricing Type Selection */}
           <div className="space-y-2">
             <Label>Pricing Type</Label>
@@ -104,7 +121,7 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
           {/* Conditional Pricing Fields */}
           {formData.pricingType === 'fixed' ? (
             <div className="space-y-2">
-              <Label htmlFor="fixedPrice">Fixed Price ($)</Label>
+              <Label htmlFor="fixedPrice">Fixed Price ({formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : 'RON'})</Label>
               <Input
                 id="fixedPrice"
                 type="number"
@@ -117,7 +134,7 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
           ) : (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="hourlyRate">Hourly Rate ($)</Label>
+                <Label htmlFor="hourlyRate">Hourly Rate ({formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : 'RON'})</Label>
                 <Input
                   id="hourlyRate"
                   type="number"

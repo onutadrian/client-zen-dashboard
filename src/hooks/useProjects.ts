@@ -18,6 +18,14 @@ export interface Project {
   fixedPrice?: number;
   hourlyRate?: number;
   estimatedHours?: number;
+  currency: string;
+  invoices: Array<{
+    id: string;
+    amount: number;
+    date: string;
+    status: 'paid' | 'pending' | 'overdue';
+    description?: string;
+  }>;
 }
 
 export const useProjects = () => {
@@ -55,7 +63,9 @@ export const useProjects = () => {
         pricingType: project.pricing_type as 'fixed' | 'hourly',
         fixedPrice: project.fixed_price || undefined,
         hourlyRate: project.hourly_rate || undefined,
-        estimatedHours: project.estimated_hours || undefined
+        estimatedHours: project.estimated_hours || undefined,
+        currency: project.currency || 'USD',
+        invoices: project.invoices || []
       }));
 
       setProjects(transformedProjects);
@@ -71,6 +81,10 @@ export const useProjects = () => {
 
   const addProject = async (newProject: any) => {
     try {
+      // Get user ID for RLS
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       // Transform to Supabase format
       const supabaseProject = {
         name: newProject.name,
@@ -86,7 +100,10 @@ export const useProjects = () => {
         pricing_type: newProject.pricingType,
         fixed_price: newProject.fixedPrice || null,
         hourly_rate: newProject.hourlyRate || null,
-        estimated_hours: newProject.estimatedHours || null
+        estimated_hours: newProject.estimatedHours || null,
+        currency: newProject.currency || 'USD',
+        invoices: newProject.invoices || [],
+        user_id: user.id
       };
 
       const { data, error } = await supabase
@@ -113,7 +130,9 @@ export const useProjects = () => {
         pricingType: data.pricing_type as 'fixed' | 'hourly',
         fixedPrice: data.fixed_price || undefined,
         hourlyRate: data.hourly_rate || undefined,
-        estimatedHours: data.estimated_hours || undefined
+        estimatedHours: data.estimated_hours || undefined,
+        currency: data.currency || 'USD',
+        invoices: data.invoices || []
       };
 
       setProjects(prev => [...prev, transformedProject]);
@@ -149,7 +168,9 @@ export const useProjects = () => {
         pricing_type: updatedProject.pricingType,
         fixed_price: updatedProject.fixedPrice || null,
         hourly_rate: updatedProject.hourlyRate || null,
-        estimated_hours: updatedProject.estimatedHours || null
+        estimated_hours: updatedProject.estimatedHours || null,
+        currency: updatedProject.currency || 'USD',
+        invoices: updatedProject.invoices || []
       };
 
       const { error } = await supabase

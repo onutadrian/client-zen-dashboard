@@ -55,6 +55,10 @@ export const useMilestones = () => {
 
   const addMilestone = async (newMilestone: Omit<Milestone, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
+      // Get user ID for RLS
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data, error } = await supabase
         .from('milestones')
         .insert([{
@@ -62,7 +66,8 @@ export const useMilestones = () => {
           title: newMilestone.title,
           description: newMilestone.description,
           target_date: newMilestone.targetDate,
-          status: newMilestone.status
+          status: newMilestone.status,
+          user_id: user.id
         }])
         .select()
         .single();
