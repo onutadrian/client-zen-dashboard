@@ -22,7 +22,7 @@ const ProjectDetailsPage = () => {
   const { isMobile } = useSidebar();
   const [activeTab, setActiveTab] = useState('overview');
 
-  const { projects, updateProject } = useProjects();
+  const { projects, updateProject, archiveProject, deleteProject } = useProjects();
   const { clients } = useClients();
   const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks();
   const { milestones, addMilestone, updateMilestone } = useMilestones();
@@ -119,6 +119,8 @@ const ProjectDetailsPage = () => {
                 <ProjectSettings 
                   project={project}
                   onUpdateProject={updateProject}
+                  onArchiveProject={archiveProject}
+                  onDeleteProject={deleteProject}
                 />
               </TabsContent>
             </Tabs>

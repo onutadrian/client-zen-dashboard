@@ -14,10 +14,12 @@ export interface Project {
   notes: string;
   documents: string[];
   team: string[];
+  archived: boolean;
 }
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [showArchived, setShowArchived] = useState(false);
   const { toast } = useToast();
 
   // Load projects from Supabase on mount
@@ -45,7 +47,8 @@ export const useProjects = () => {
         status: project.status,
         notes: project.notes || '',
         documents: project.documents || [],
-        team: project.team || []
+        team: project.team || [],
+        archived: project.archived || false
       }));
 
       setProjects(transformedProjects);
@@ -71,7 +74,8 @@ export const useProjects = () => {
         status: newProject.status || 'active',
         notes: newProject.notes || '',
         documents: newProject.documents || [],
-        team: newProject.team || []
+        team: newProject.team || [],
+        archived: false
       };
 
       const { data, error } = await supabase
@@ -93,7 +97,8 @@ export const useProjects = () => {
         status: data.status,
         notes: data.notes || '',
         documents: data.documents || [],
-        team: data.team || []
+        team: data.team || [],
+        archived: data.archived || false
       };
 
       setProjects(prev => [...prev, transformedProject]);
@@ -124,7 +129,8 @@ export const useProjects = () => {
         status: updatedProject.status,
         notes: updatedProject.notes,
         documents: updatedProject.documents,
-        team: updatedProject.team
+        team: updatedProject.team,
+        archived: updatedProject.archived
       };
 
       const { error } = await supabase
@@ -153,6 +159,33 @@ export const useProjects = () => {
     }
   };
 
+  const archiveProject = async (projectId: string) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ archived: true })
+        .eq('id', projectId);
+
+      if (error) throw error;
+
+      setProjects(prev => prev.map(project => 
+        project.id === projectId ? { ...project, archived: true } : project
+      ));
+
+      toast({
+        title: "Success",
+        description: "Project archived successfully"
+      });
+    } catch (error) {
+      console.error('Error archiving project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to archive project",
+        variant: "destructive"
+      });
+    }
+  };
+
   const deleteProject = async (projectId: string) => {
     try {
       const { error } = await supabase
@@ -166,7 +199,7 @@ export const useProjects = () => {
       
       toast({
         title: "Success",
-        description: "Project deleted successfully"
+        description: "Project and all related data deleted successfully"
       });
     } catch (error) {
       console.error('Error deleting project:', error);
@@ -178,10 +211,18 @@ export const useProjects = () => {
     }
   };
 
+  // Filter projects based on archived status
+  const filteredProjects = projects.filter(project => 
+    showArchived ? project.archived : !project.archived
+  );
+
   return {
-    projects,
+    projects: filteredProjects,
+    showArchived,
+    setShowArchived,
     addProject,
     updateProject,
+    archiveProject,
     deleteProject
   };
 };

@@ -136,6 +136,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          archived: boolean | null
           client_id: number
           created_at: string
           documents: string[] | null
@@ -151,6 +152,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          archived?: boolean | null
           client_id: number
           created_at?: string
           documents?: string[] | null
@@ -166,6 +168,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          archived?: boolean | null
           client_id?: number
           created_at?: string
           documents?: string[] | null

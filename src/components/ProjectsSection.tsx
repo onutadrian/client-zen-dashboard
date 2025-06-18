@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Users, FileText, Edit } from 'lucide-react';
+import { Calendar, Users, FileText, Edit, Archive } from 'lucide-react';
 import AddProjectModal from './AddProjectModal';
 import EditProjectSheet from './EditProjectSheet';
 import { Project } from '@/hooks/useProjects';
@@ -19,10 +19,18 @@ interface ProjectsSectionProps {
   clients: Client[];
   onAddProject: (project: any) => void;
   onUpdateProject: (projectId: string, updatedProject: any) => void;
+  onArchiveProject: (projectId: string) => void;
   onDeleteProject: (projectId: string) => void;
 }
 
-const ProjectsSection = ({ projects, clients, onAddProject, onUpdateProject, onDeleteProject }: ProjectsSectionProps) => {
+const ProjectsSection = ({ 
+  projects, 
+  clients, 
+  onAddProject, 
+  onUpdateProject, 
+  onArchiveProject, 
+  onDeleteProject 
+}: ProjectsSectionProps) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
@@ -95,13 +103,18 @@ const ProjectsSection = ({ projects, clients, onAddProject, onUpdateProject, onD
               {projects.map((project) => (
                 <Card 
                   key={project.id} 
-                  className="relative cursor-pointer hover:shadow-md transition-shadow"
+                  className={`relative cursor-pointer hover:shadow-md transition-shadow ${
+                    project.archived ? 'opacity-75 border-slate-300' : ''
+                  }`}
                   onClick={() => handleProjectClick(project.id)}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-lg font-semibold mb-2">{project.name}</CardTitle>
+                        <div className="flex items-center space-x-2">
+                          <CardTitle className="text-lg font-semibold mb-2">{project.name}</CardTitle>
+                          {project.archived && <Archive className="w-4 h-4 text-slate-500" />}
+                        </div>
                         <p className="text-sm text-slate-600">{getClientName(project.clientId)}</p>
                       </div>
                       <div className="flex items-center space-x-2">
