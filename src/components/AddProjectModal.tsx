@@ -6,10 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Client {
   id: number;
   name: string;
+  documents?: string[];
+  links?: string[];
+  people?: Array<{ name: string; email: string; title: string }>;
+  notes?: string;
 }
 
 interface AddProjectModalProps {
@@ -29,22 +34,59 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
     notes: '',
     team: ''
   });
+  
+  const [inheritOptions, setInheritOptions] = useState({
+    documents: false,
+    links: false,
+    team: false,
+    notes: false
+  });
+
+  const selectedClient = clients.find(c => c.id.toString() === formData.clientId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    let projectDocuments: string[] = [];
+    let projectTeam: string[] = formData.team ? formData.team.split(',').map(t => t.trim()) : [];
+    let projectNotes = formData.notes;
+
+    // Inherit data from client if selected
+    if (selectedClient) {
+      if (inheritOptions.documents && selectedClient.documents) {
+        projectDocuments = [...projectDocuments, ...selectedClient.documents];
+      }
+      
+      if (inheritOptions.links && selectedClient.links) {
+        // Add links with LINK: prefix to match our current storage format
+        const linksWithPrefix = selectedClient.links.map(link => `LINK: ${link}`);
+        projectDocuments = [...projectDocuments, ...linksWithPrefix];
+      }
+      
+      if (inheritOptions.team && selectedClient.people) {
+        const clientTeamMembers = selectedClient.people.map(person => person.name);
+        projectTeam = [...new Set([...projectTeam, ...clientTeamMembers])]; // Remove duplicates
+      }
+      
+      if (inheritOptions.notes && selectedClient.notes) {
+        projectNotes = projectNotes ? `${projectNotes}\n\nFrom Client:\n${selectedClient.notes}` : selectedClient.notes;
+      }
+    }
+
     const projectData = {
       name: formData.name,
       clientId: parseInt(formData.clientId),
       startDate: formData.startDate,
       estimatedEndDate: formData.estimatedEndDate,
       status: formData.status,
-      notes: formData.notes,
-      documents: [],
-      team: formData.team ? formData.team.split(',').map(t => t.trim()) : []
+      notes: projectNotes,
+      documents: projectDocuments,
+      team: projectTeam
     };
 
     onAdd(projectData);
+    
+    // Reset form
     setFormData({
       name: '',
       clientId: '',
@@ -53,6 +95,12 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
       status: 'active',
       notes: '',
       team: ''
+    });
+    setInheritOptions({
+      documents: false,
+      links: false,
+      team: false,
+      notes: false
     });
     onClose();
   };
@@ -64,9 +112,16 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
     }));
   };
 
+  const handleInheritChange = (field: string, checked: boolean) => {
+    setInheritOptions(prev => ({
+      ...prev,
+      [field]: checked
+    }));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Project</DialogTitle>
         </DialogHeader>
@@ -98,6 +153,66 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
               </SelectContent>
             </Select>
           </div>
+
+          {/* Inherit Options */}
+          {selectedClient && (
+            <div className="p-4 border rounded-lg bg-slate-50">
+              <h4 className="font-medium mb-3">Inherit from Client</h4>
+              <div className="space-y-2">
+                {selectedClient.documents && selectedClient.documents.length > 0 && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="inherit-documents"
+                      checked={inheritOptions.documents}
+                      onCheckedChange={(checked) => handleInheritChange('documents', checked as boolean)}
+                    />
+                    <Label htmlFor="inherit-documents" className="text-sm">
+                      Documents ({selectedClient.documents.length})
+                    </Label>
+                  </div>
+                )}
+                
+                {selectedClient.links && selectedClient.links.length > 0 && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="inherit-links"
+                      checked={inheritOptions.links}
+                      onCheckedChange={(checked) => handleInheritChange('links', checked as boolean)}
+                    />
+                    <Label htmlFor="inherit-links" className="text-sm">
+                      Links ({selectedClient.links.length})
+                    </Label>
+                  </div>
+                )}
+                
+                {selectedClient.people && selectedClient.people.length > 0 && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="inherit-team"
+                      checked={inheritOptions.team}
+                      onCheckedChange={(checked) => handleInheritChange('team', checked as boolean)}
+                    />
+                    <Label htmlFor="inherit-team" className="text-sm">
+                      Team Members ({selectedClient.people.length})
+                    </Label>
+                  </div>
+                )}
+                
+                {selectedClient.notes && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="inherit-notes"
+                      checked={inheritOptions.notes}
+                      onCheckedChange={(checked) => handleInheritChange('notes',  as boolean)}
+                    />
+                    <Label htmlFor="inherit-notes" className="text-sm">
+                      Client Notes
+                    </Label>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div>

@@ -18,34 +18,11 @@ const Index = () => {
   const { isMobile } = useSidebar();
 
   // Use custom hooks for state management
-  const {
-    clients,
-    addClient,
-    updateClient
-  } = useClients();
-  const {
-    subscriptions,
-    addSubscription,
-    updateSubscription
-  } = useSubscriptions();
-  const {
-    tasks,
-    addTask,
-    updateTask,
-    deleteTask,
-    editTask
-  } = useTasks();
-  const {
-    projects,
-    addProject,
-    updateProject,
-    deleteProject
-  } = useProjects();
-  const {
-    milestones,
-    addMilestone,
-    updateMilestone
-  } = useMilestones();
+  const { clients, addClient, updateClient } = useClients();
+  const { subscriptions, addSubscription, updateSubscription } = useSubscriptions();
+  const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks();
+  const { projects, addProject, updateProject, deleteProject } = useProjects();
+  const { milestones, addMilestone, updateMilestone } = useMilestones();
 
   // Modal states
   const [showClientModal, setShowClientModal] = useState(false);
@@ -70,21 +47,22 @@ const Index = () => {
   const handleTaskUpdate = async (taskId: number, status: any, actualHours?: number) => {
     const result = await updateTask(taskId, status, actualHours);
 
-    // If task was completed and has hours, log them to the client
+    // If task was completed and has hours, log them to the client with projectId
     if (result && result.hoursToLog) {
-      const {
-        task,
-        hoursToLog
-      } = result;
+      const { task, hoursToLog } = result;
       const client = clients.find(c => c.id === task.clientId);
+      const project = projects.find(p => p.id === task.projectId);
+      
       if (client) {
         const newHourEntry = {
           id: Date.now(),
           hours: hoursToLog,
-          description: `Completed task: ${task.title}`,
+          description: `Completed task: ${task.title}${project ? ` (${project.name})` : ''}`,
           date: new Date().toISOString(),
-          billed: false
+          billed: false,
+          projectId: task.projectId // Add projectId to hour entry
         };
+        
         const updatedHourEntries = [...(client.hourEntries || []), newHourEntry];
         const updatedClient = {
           ...client,
