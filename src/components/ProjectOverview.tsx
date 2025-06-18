@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,8 +9,8 @@ import AddProjectTaskModal from './AddProjectTaskModal';
 import AddMilestoneModal from './AddMilestoneModal';
 import EditMilestoneModal from './EditMilestoneModal';
 import AddInvoiceModal from './AddInvoiceModal';
-import MilestoneRevenueTracker from './MilestoneRevenueTracker';
 import InvoiceStatusButton from './InvoiceStatusButton';
+import DuplicateInvoiceWarning from './DuplicateInvoiceWarning';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
 import { Milestone } from '@/hooks/useMilestones';
@@ -105,11 +106,6 @@ const ProjectOverview = ({
 
   return (
     <div className="space-y-6">
-      {/* Revenue Pipeline for Fixed Price Projects */}
-      {isFixedPrice && milestones.length > 0 && (
-        <MilestoneRevenueTracker milestones={milestones} projectId={project.id} />
-      )}
-
       {/* Project Hours/Revenue Section */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">
@@ -168,6 +164,13 @@ const ProjectOverview = ({
                 
                 return (
                   <div key={milestone.id} className="border rounded-lg p-4">
+                    {/* Show duplicate invoice warning if trying to create an invoice for a milestone that already has one */}
+                    {isCreatingForThisMilestone && milestoneInvoice && (
+                      <div className="mb-4">
+                        <DuplicateInvoiceWarning milestoneTitle={milestone.title} />
+                      </div>
+                    )}
+                    
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">

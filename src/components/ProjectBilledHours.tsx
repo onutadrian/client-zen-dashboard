@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { Clock, DollarSign, Target, TrendingUp } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
@@ -40,11 +41,18 @@ const ProjectBilledHours = ({ project, client, milestones = [] }: ProjectBilledH
   const paidInvoiceAmount = projectInvoices
     .filter(i => i.status === 'paid')
     .reduce((sum, i) => sum + i.amount, 0);
+  const pendingInvoiceAmount = projectInvoices
+    .filter(i => i.status === 'pending')
+    .reduce((sum, i) => sum + i.amount, 0);
   
   // Calculate rates and revenue
   const hourlyRate = client?.price || project.hourlyRate || 0;
   const hourlyRevenue = billedHours * hourlyRate;
   const pendingHourlyRevenue = unbilledHours * hourlyRate;
+  
+  // Calculate progress percentages for fixed price projects
+  const completionPercentage = totalMilestoneValue > 0 ? (completedMilestoneValue / totalMilestoneValue) * 100 : 0;
+  const paymentPercentage = totalMilestoneValue > 0 ? (paidInvoiceAmount / totalMilestoneValue) * 100 : 0;
 
   // Determine what to show based on project type
   const showMilestoneTracking = isFixedPrice && projectMilestones.length > 0;
@@ -63,8 +71,10 @@ const ProjectBilledHours = ({ project, client, milestones = [] }: ProjectBilledH
           {showMilestoneTracking ? (
             <>
               <div className="text-center p-4 rounded-lg bg-slate-50">
-                <p className="text-zinc-950 text-4xl font-normal">{totalHours.toFixed(1)}</p>
-                <p className="text-slate-600 py-[24px] text-base">Hours Worked</p>
+                <p className="text-zinc-950 text-4xl font-normal">
+                  ${pendingInvoiceAmount.toLocaleString()}
+                </p>
+                <p className="text-slate-600 py-[24px] text-base">Pending Revenue</p>
               </div>
 
               <div className="text-center p-4 rounded-lg bg-slate-50">
@@ -115,6 +125,27 @@ const ProjectBilledHours = ({ project, client, milestones = [] }: ProjectBilledH
           )}
         </div>
 
+        {/* Progress bars for fixed price projects */}
+        {showMilestoneTracking && (
+          <div className="mt-6 space-y-4">
+            <div>
+              <div className="flex justify-between text-sm mb-2">
+                <span className="font-medium">Work Completion</span>
+                <span>{completionPercentage.toFixed(1)}%</span>
+              </div>
+              <Progress value={completionPercentage} className="h-3" />
+            </div>
+            
+            <div>
+              <div className="flex justify-between text-sm mb-2">
+                <span className="font-medium">Payment Collection</span>
+                <span>{paymentPercentage.toFixed(1)}%</span>
+              </div>
+              <Progress value={paymentPercentage} className="h-3" />
+            </div>
+          </div>
+        )}
+
         {/* Additional metrics for fixed price projects */}
         {showMilestoneTracking && (
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
@@ -125,6 +156,9 @@ const ProjectBilledHours = ({ project, client, milestones = [] }: ProjectBilledH
               </div>
               <div>
                 <p className="text-blue-700">Target Rate: <span className="font-semibold">${hourlyRate}/hr</span></p>
+              </div>
+              <div>
+                <p className="text-blue-700">Hours Worked: <span className="font-semibold">{totalHours.toFixed(1)}h</span></p>
               </div>
             </div>
           </div>
