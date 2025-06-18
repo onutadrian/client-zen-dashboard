@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,13 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Download, FileText, Archive, Trash2 } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
 import ProjectExportOptions from '@/components/ProjectExportOptions';
-
 interface ProjectSettingsProps {
   project: Project;
   onUpdateProject: (projectId: string, updates: any) => void;
 }
-
-const ProjectSettings = ({ project, onUpdateProject }: ProjectSettingsProps) => {
+const ProjectSettings = ({
+  project,
+  onUpdateProject
+}: ProjectSettingsProps) => {
   const [projectData, setProjectData] = useState({
     name: project.name,
     status: project.status,
@@ -24,17 +24,19 @@ const ProjectSettings = ({ project, onUpdateProject }: ProjectSettingsProps) => 
     estimatedEndDate: project.estimatedEndDate,
     endDate: project.endDate || ''
   });
-
   const handleSave = () => {
-    onUpdateProject(project.id, { ...project, ...projectData });
+    onUpdateProject(project.id, {
+      ...project,
+      ...projectData
+    });
   };
-
   const handleArchive = () => {
-    onUpdateProject(project.id, { ...project, status: 'archived' });
+    onUpdateProject(project.id, {
+      ...project,
+      status: 'archived'
+    });
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Project Configuration */}
       <Card>
         <CardHeader>
@@ -43,16 +45,18 @@ const ProjectSettings = ({ project, onUpdateProject }: ProjectSettingsProps) => 
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="project-name">Project Name</Label>
-            <Input
-              id="project-name"
-              value={projectData.name}
-              onChange={(e) => setProjectData({ ...projectData, name: e.target.value })}
-            />
+            <Input id="project-name" value={projectData.name} onChange={e => setProjectData({
+            ...projectData,
+            name: e.target.value
+          })} />
           </div>
 
           <div>
             <Label htmlFor="project-status">Status</Label>
-            <Select value={projectData.status} onValueChange={(value) => setProjectData({ ...projectData, status: value })}>
+            <Select value={projectData.status} onValueChange={value => setProjectData({
+            ...projectData,
+            status: value
+          })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -68,35 +72,29 @@ const ProjectSettings = ({ project, onUpdateProject }: ProjectSettingsProps) => 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="start-date">Start Date</Label>
-              <Input
-                id="start-date"
-                type="date"
-                value={projectData.startDate}
-                onChange={(e) => setProjectData({ ...projectData, startDate: e.target.value })}
-              />
+              <Input id="start-date" type="date" value={projectData.startDate} onChange={e => setProjectData({
+              ...projectData,
+              startDate: e.target.value
+            })} />
             </div>
             <div>
               <Label htmlFor="estimated-end-date">Estimated End Date</Label>
-              <Input
-                id="estimated-end-date"
-                type="date"
-                value={projectData.estimatedEndDate}
-                onChange={(e) => setProjectData({ ...projectData, estimatedEndDate: e.target.value })}
-              />
+              <Input id="estimated-end-date" type="date" value={projectData.estimatedEndDate} onChange={e => setProjectData({
+              ...projectData,
+              estimatedEndDate: e.target.value
+            })} />
             </div>
           </div>
 
           <div>
             <Label htmlFor="project-notes">Notes</Label>
-            <Textarea
-              id="project-notes"
-              value={projectData.notes}
-              onChange={(e) => setProjectData({ ...projectData, notes: e.target.value })}
-              rows={4}
-            />
+            <Textarea id="project-notes" value={projectData.notes} onChange={e => setProjectData({
+            ...projectData,
+            notes: e.target.value
+          })} rows={4} />
           </div>
 
-          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={handleSave} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
             Save Changes
           </Button>
         </CardContent>
@@ -134,8 +132,6 @@ const ProjectSettings = ({ project, onUpdateProject }: ProjectSettingsProps) => 
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default ProjectSettings;
