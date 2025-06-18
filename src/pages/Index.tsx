@@ -9,6 +9,7 @@ import { useClients } from '@/hooks/useClients';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useCurrency } from '@/hooks/useCurrency';
+import { convertCurrency, formatCurrency } from '@/lib/currency';
 
 const Index = () => {
   const { displayCurrency, updateCurrency } = useCurrency();
@@ -37,8 +38,16 @@ const Index = () => {
         />
 
         <AnalyticsSection
-          analytics={analytics}
+          totalClients={analytics.totalClients}
+          activeClients={analytics.activeClients}
+          totalHours={analytics.totalHours}
+          totalRevenue={analytics.totalRevenue}
+          monthlySubscriptionCost={analytics.monthlySubscriptionCost}
+          totalPaidToDate={analytics.totalRevenue} // Using totalRevenue as totalPaidToDate
+          clients={clients}
           displayCurrency={displayCurrency}
+          convertCurrency={convertCurrency}
+          formatCurrency={formatCurrency}
         />
 
         <MainContentGrid
@@ -46,7 +55,6 @@ const Index = () => {
           subscriptions={subscriptions}
           analytics={analytics}
           displayCurrency={displayCurrency}
-          onAddClient={() => setShowClientModal(true)}
           onEditSubscription={(subscription) => {
             setSelectedSubscription(subscription);
             setShowEditSubscriptionModal(true);

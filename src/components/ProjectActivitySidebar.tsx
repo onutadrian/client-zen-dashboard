@@ -11,8 +11,6 @@ import { useInvoices } from '@/hooks/useInvoices';
 interface ProjectActivitySidebarProps {
   project: Project;
   client?: Client;
-  onAddTask: (task: any) => void;
-  onAddMilestone: (milestone: any) => void;
 }
 
 const ProjectActivitySidebar = ({ project, client }: ProjectActivitySidebarProps) => {
@@ -20,10 +18,10 @@ const ProjectActivitySidebar = ({ project, client }: ProjectActivitySidebarProps
   const { milestones } = useMilestones();
   const { invoices } = useInvoices();
 
-  // Filter data for this project
-  const projectTasks = tasks.filter(task => task.projectId === project.id);
-  const projectMilestones = milestones.filter(milestone => milestone.projectId === project.id);
-  const projectInvoices = invoices.filter(invoice => invoice.projectId === project.id);
+  // Filter data for this project - with safe defaults
+  const projectTasks = tasks?.filter(task => task.projectId === project.id) || [];
+  const projectMilestones = milestones?.filter(milestone => milestone.projectId === project.id) || [];
+  const projectInvoices = invoices?.filter(invoice => invoice.projectId === project.id) || [];
 
   // Create activity timeline
   const activities = [
@@ -38,14 +36,14 @@ const ProjectActivitySidebar = ({ project, client }: ProjectActivitySidebarProps
       type: 'milestone',
       icon: Calendar,
       title: milestone.status === 'completed' ? 'Milestone completed' : 'Milestone created',
-      date: new Date(milestone.dueDate),
+      date: new Date(milestone.targetDate), // Fixed: use targetDate instead of dueDate
       description: `Milestone "${milestone.title}" ${milestone.status === 'completed' ? 'completed' : 'created'}`
     })),
     ...projectTasks.filter(task => task.status === 'completed').map(task => ({
       type: 'task',
       icon: CheckCircle,
       title: 'Task completed',
-      date: new Date(task.dueDate || task.createdAt || new Date()),
+      date: new Date(task.createdDate), // Fixed: use createdDate instead of createdAt
       description: `Task "${task.title}" completed`
     })),
     ...projectInvoices.map(invoice => ({
@@ -59,7 +57,7 @@ const ProjectActivitySidebar = ({ project, client }: ProjectActivitySidebarProps
 
   return (
     <div className="p-4">
-      <Card className="border-0 shadow-none">
+      <Card className="border-0 shadow-none bg-transparent"> {/* Removed rounded corners background */}
         <CardHeader className="px-0 pt-0">
           <CardTitle className="text-lg">Recent Activity</CardTitle>
         </CardHeader>

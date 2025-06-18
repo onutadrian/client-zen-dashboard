@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
@@ -146,8 +145,6 @@ const ProjectDetailsPage = () => {
           <ProjectActivitySidebar 
             project={project}
             client={client}
-            onAddTask={addTask}
-            onAddMilestone={addMilestone}
           />
         </div>
       </div>
