@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -7,9 +8,11 @@ import ModalsContainer from '@/components/ModalsContainer';
 import { useClients } from '@/hooks/useClients';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
+import { useCurrency } from '@/hooks/useCurrency';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
+
 const ClientsPage = () => {
-  const [displayCurrency, setDisplayCurrency] = React.useState('USD');
+  const { displayCurrency } = useCurrency();
   const [showClientModal, setShowClientModal] = React.useState(false);
   const {
     clients,
@@ -23,9 +26,9 @@ const ClientsPage = () => {
   const {
     isMobile
   } = useSidebar();
-  return <div className="min-h-screen p-6" style={{
-    backgroundColor: '#F3F3F2'
-  }}>
+
+  return (
+    <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -38,10 +41,31 @@ const ClientsPage = () => {
           </Button>
         </div>
         
-        <ClientsSection clients={clients} onUpdateClient={updateClient} displayCurrency={displayCurrency} convertCurrency={convertCurrency} formatCurrency={formatCurrency} activeClients={analytics.activeClients} onAddClient={() => setShowClientModal(true)} />
+        <ClientsSection 
+          clients={clients} 
+          onUpdateClient={updateClient} 
+          displayCurrency={displayCurrency} 
+          convertCurrency={convertCurrency} 
+          formatCurrency={formatCurrency} 
+          activeClients={analytics.activeClients} 
+          onAddClient={() => setShowClientModal(true)} 
+        />
 
-        <ModalsContainer showClientModal={showClientModal} onCloseClientModal={() => setShowClientModal(false)} onAddClient={addClient} showSubscriptionModal={false} onCloseSubscriptionModal={() => {}} onAddSubscription={() => {}} showEditSubscriptionModal={false} onCloseEditSubscriptionModal={() => {}} selectedSubscription={null} onUpdateSubscription={() => {}} />
+        <ModalsContainer 
+          showClientModal={showClientModal} 
+          onCloseClientModal={() => setShowClientModal(false)} 
+          onAddClient={addClient} 
+          showSubscriptionModal={false} 
+          onCloseSubscriptionModal={() => {}} 
+          onAddSubscription={() => {}} 
+          showEditSubscriptionModal={false} 
+          onCloseEditSubscriptionModal={() => {}} 
+          selectedSubscription={null} 
+          onUpdateSubscription={() => {}} 
+        />
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default ClientsPage;

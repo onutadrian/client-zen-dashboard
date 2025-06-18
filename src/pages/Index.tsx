@@ -3,127 +3,67 @@ import React, { useState } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
-import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
+import MainContentGrid from '@/components/MainContentGrid';
 import ModalsContainer from '@/components/ModalsContainer';
 import { useClients } from '@/hooks/useClients';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
-import { useTasks } from '@/hooks/useTasks';
-import { useProjects } from '@/hooks/useProjects';
-import { useMilestones } from '@/hooks/useMilestones';
-import { useHourEntries } from '@/hooks/useHourEntries';
 import { useAnalytics } from '@/hooks/useAnalytics';
-import { convertCurrency, formatCurrency } from '@/lib/currency';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const Index = () => {
-  const [displayCurrency, setDisplayCurrency] = useState('USD');
-  const { isMobile } = useSidebar();
-
-  // Use custom hooks for state management
-  const { clients, addClient, updateClient } = useClients();
-  const { subscriptions, addSubscription, updateSubscription } = useSubscriptions();
-  const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks();
-  const { projects, addProject, updateProject, deleteProject } = useProjects();
-  const { milestones, addMilestone, updateMilestone } = useMilestones();
-  const { addHourEntry } = useHourEntries();
-
-  // Modal states
+  const { displayCurrency, updateCurrency } = useCurrency();
   const [showClientModal, setShowClientModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState(null);
 
-  // Get analytics data
+  const { clients, addClient } = useClients();
+  const { subscriptions, addSubscription, updateSubscription } = useSubscriptions();
   const analytics = useAnalytics(clients, subscriptions, displayCurrency);
-  
-  // Calculate total paid to date for subscriptions
-  const totalPaidToDate = subscriptions.reduce((total, subscription) => {
-    const convertedCost = convertCurrency(subscription.total_paid || 0, subscription.currency, displayCurrency);
-    return total + convertedCost;
-  }, 0);
-
-  const handleEditSubscription = (subscription: any) => {
-    setSelectedSubscription(subscription);
-    setShowEditSubscriptionModal(true);
-  };
-
-  const handleTaskUpdate = async (taskId: number, status: any, actualHours?: number) => {
-    const result = await updateTask(taskId, status, actualHours);
-
-    // If task was completed and has hours, log them to the hour entries
-    if (result && result.hoursToLog) {
-      const { task, hoursToLog } = result;
-      const project = projects.find(p => p.id === task.projectId);
-      
-      if (project) {
-        await addHourEntry({
-          projectId: task.projectId!,
-          clientId: task.clientId,
-          hours: hoursToLog,
-          description: `Completed task: ${task.title} (${project.name})`,
-          date: new Date().toISOString().split('T')[0],
-          billed: false
-        });
-      }
-    }
-  };
+  const { isMobile } = useSidebar();
 
   return (
     <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center space-x-4">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between mb-6">
           {isMobile && <SidebarTrigger />}
-          <div className="flex-1">
-            <DashboardHeader 
-              displayCurrency={displayCurrency} 
-              onCurrencyChange={setDisplayCurrency} 
-              onAddClient={() => setShowClientModal(true)} 
-              onAddSubscription={() => setShowSubscriptionModal(true)} 
-            />
-          </div>
         </div>
 
-        {/* Analytics Overview */}
-        <AnalyticsSection 
-          totalClients={analytics.totalClients} 
-          activeClients={analytics.activeClients} 
-          totalHours={analytics.totalHours} 
-          totalRevenue={analytics.totalRevenue} 
-          monthlySubscriptionCost={analytics.monthlySubscriptionCost}
-          totalPaidToDate={totalPaidToDate}
-          clients={clients} 
-          displayCurrency={displayCurrency} 
-          convertCurrency={convertCurrency} 
-          formatCurrency={formatCurrency} 
+        <DashboardHeader
+          displayCurrency={displayCurrency}
+          onCurrencyChange={updateCurrency}
+          onAddClient={() => setShowClientModal(true)}
+          onAddSubscription={() => setShowSubscriptionModal(true)}
         />
 
-        {/* Merged Tasks and Timeline Section */}
-        <DashboardTasksTimeline 
-          projects={projects} 
-          tasks={tasks} 
-          milestones={milestones} 
-          clients={clients} 
-          onAddTask={addTask} 
-          onUpdateTask={handleTaskUpdate} 
-          onDeleteTask={deleteTask} 
-          onEditTask={editTask} 
+        <AnalyticsSection
+          analytics={analytics}
+          displayCurrency={displayCurrency}
         />
 
-        {/* Modals */}
-        <ModalsContainer 
-          showClientModal={showClientModal} 
-          onCloseClientModal={() => setShowClientModal(false)} 
-          onAddClient={addClient} 
-          showSubscriptionModal={showSubscriptionModal} 
-          onCloseSubscriptionModal={() => setShowSubscriptionModal(false)} 
-          onAddSubscription={addSubscription} 
-          showEditSubscriptionModal={showEditSubscriptionModal} 
-          onCloseEditSubscriptionModal={() => {
-            setShowEditSubscriptionModal(false);
-            setSelectedSubscription(null);
-          }} 
-          selectedSubscription={selectedSubscription} 
-          onUpdateSubscription={updateSubscription} 
+        <MainContentGrid
+          clients={clients}
+          subscriptions={subscriptions}
+          analytics={analytics}
+          displayCurrency={displayCurrency}
+          onAddClient={() => setShowClientModal(true)}
+          onEditSubscription={(subscription) => {
+            setSelectedSubscription(subscription);
+            setShowEditSubscriptionModal(true);
+          }}
+        />
+
+        <ModalsContainer
+          showClientModal={showClientModal}
+          onCloseClientModal={() => setShowClientModal(false)}
+          onAddClient={addClient}
+          showSubscriptionModal={showSubscriptionModal}
+          onCloseSubscriptionModal={() => setShowSubscriptionModal(false)}
+          onAddSubscription={addSubscription}
+          showEditSubscriptionModal={showEditSubscriptionModal}
+          onCloseEditSubscriptionModal={() => setShowEditSubscriptionModal(false)}
+          selectedSubscription={selectedSubscription}
+          onUpdateSubscription={updateSubscription}
         />
       </div>
     </div>
