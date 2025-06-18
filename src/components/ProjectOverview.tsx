@@ -4,8 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, Clock } from 'lucide-react';
 import ProjectBilledHours from './ProjectBilledHours';
-import TasksSection from './TasksSection';
-import MilestonesSection from './MilestonesSection';
 import LogProjectHoursModal from './LogProjectHoursModal';
 import AddProjectTaskModal from './AddProjectTaskModal';
 import AddMilestoneModal from './AddMilestoneModal';
@@ -205,8 +203,9 @@ const ProjectOverview = ({
         isOpen={showAddTaskModal}
         onClose={() => setShowAddTaskModal(false)}
         onAdd={onAddTask}
-        project={project}
-        client={client}
+        projectId={project.id}
+        clientId={client?.id || 0}
+        clientName={client?.name || ''}
       />
 
       <AddMilestoneModal

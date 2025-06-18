@@ -10,6 +10,7 @@ import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useTasks } from '@/hooks/useTasks';
 import { useProjects } from '@/hooks/useProjects';
 import { useMilestones } from '@/hooks/useMilestones';
+import { useHourEntries } from '@/hooks/useHourEntries';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
 
@@ -23,6 +24,7 @@ const Index = () => {
   const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks();
   const { projects, addProject, updateProject, deleteProject } = useProjects();
   const { milestones, addMilestone, updateMilestone } = useMilestones();
+  const { addHourEntry } = useHourEntries();
 
   // Modal states
   const [showClientModal, setShowClientModal] = useState(false);
@@ -47,29 +49,20 @@ const Index = () => {
   const handleTaskUpdate = async (taskId: number, status: any, actualHours?: number) => {
     const result = await updateTask(taskId, status, actualHours);
 
-    // If task was completed and has hours, log them to the client with projectId
+    // If task was completed and has hours, log them to the hour entries
     if (result && result.hoursToLog) {
       const { task, hoursToLog } = result;
-      const client = clients.find(c => c.id === task.clientId);
       const project = projects.find(p => p.id === task.projectId);
       
-      if (client) {
-        const newHourEntry = {
-          id: Date.now(),
+      if (project) {
+        await addHourEntry({
+          projectId: task.projectId!,
+          clientId: task.clientId,
           hours: hoursToLog,
-          description: `Completed task: ${task.title}${project ? ` (${project.name})` : ''}`,
-          date: new Date().toISOString(),
-          billed: false,
-          projectId: task.projectId // Add projectId to hour entry
-        };
-        
-        const updatedHourEntries = [...(client.hourEntries || []), newHourEntry];
-        const updatedClient = {
-          ...client,
-          totalHours: updatedHourEntries.reduce((sum, entry) => sum + entry.hours, 0),
-          hourEntries: updatedHourEntries
-        };
-        updateClient(client.id, updatedClient);
+          description: `Completed task: ${task.title} (${project.name})`,
+          date: new Date().toISOString().split('T')[0],
+          billed: false
+        });
       }
     }
   };

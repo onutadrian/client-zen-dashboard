@@ -2,15 +2,20 @@
 import { convertCurrency } from '@/lib/currency';
 import { Client } from './useClients';
 import { Subscription } from './useSubscriptions';
+import { useHourEntries } from './useHourEntries';
 
 export const useAnalytics = (
   clients: Client[], 
   subscriptions: Subscription[], 
   displayCurrency: string
 ) => {
+  const { hourEntries } = useHourEntries();
+  
   const totalClients = clients.length;
   const activeClients = clients.filter(c => c.status === 'active').length;
-  const totalHours = clients.reduce((sum, client) => sum + (client.totalHours || 0), 0);
+  
+  // Calculate total hours from hour entries instead of client data
+  const totalHours = hourEntries.reduce((sum, entry) => sum + entry.hours, 0);
   
   const totalRevenue = clients.reduce((sum, client) => {
     const clientRevenue = (client.invoices || []).reduce((invoiceSum, invoice) => {

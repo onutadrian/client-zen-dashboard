@@ -9,7 +9,7 @@ export interface Milestone {
   title: string;
   description?: string;
   targetDate: string;
-  status: 'pending' | 'completed' | 'overdue';
+  status: 'pending' | 'in-progress' | 'completed';
   createdAt: string;
   updatedAt: string;
 }
@@ -37,7 +37,7 @@ export const useMilestones = () => {
         title: milestone.title,
         description: milestone.description || undefined,
         targetDate: milestone.target_date,
-        status: milestone.status as 'pending' | 'completed' | 'overdue',
+        status: milestone.status as 'pending' | 'in-progress' | 'completed',
         createdAt: milestone.created_at,
         updatedAt: milestone.updated_at
       }));
@@ -75,7 +75,7 @@ export const useMilestones = () => {
         title: data.title,
         description: data.description || undefined,
         targetDate: data.target_date,
-        status: data.status as 'pending' | 'completed' | 'overdue',
+        status: data.status as 'pending' | 'in-progress' | 'completed',
         createdAt: data.created_at,
         updatedAt: data.updated_at
       };
