@@ -13,20 +13,58 @@ interface ProjectBudgetTrackingProps {
 }
 
 const ProjectBudgetTracking = ({ project, client, tasks }: ProjectBudgetTrackingProps) => {
-  const hourlyRate = client?.price || 0;
+  const isFixedPrice = project.pricingType === 'fixed';
+  const hourlyRate = isFixedPrice ? (client?.price || 0) : (project.hourlyRate || 0);
+  
   const totalEstimatedHours = tasks.reduce((sum, task) => sum + (task.estimatedHours || 0), 0);
   const totalActualHours = tasks.reduce((sum, task) => sum + (task.actualHours || 0), 0);
   
-  const estimatedBudget = totalEstimatedHours * hourlyRate;
-  const actualCost = totalActualHours * hourlyRate;
-  const remainingBudget = estimatedBudget - actualCost;
-  const budgetProgress = estimatedBudget > 0 ? (actualCost / estimatedBudget) * 100 : 0;
+  // Calculate budget based on pricing type
+  let estimatedBudget: number;
+  let actualCost: number;
+  let remainingBudget: number;
+  let budgetProgress: number;
+
+  if (isFixedPrice) {
+    estimatedBudget = project.fixedPrice || 0;
+    actualCost = totalActualHours * hourlyRate; // Cost based on actual hours worked
+    remainingBudget = estimatedBudget - actualCost;
+    budgetProgress = estimatedBudget > 0 ? (actualCost / estimatedBudget) * 100 : 0;
+  } else {
+    // For hourly projects, use estimated hours for budget calculation
+    const projectEstimatedHours = project.estimatedHours || totalEstimatedHours;
+    estimatedBudget = projectEstimatedHours * hourlyRate;
+    actualCost = totalActualHours * hourlyRate;
+    remainingBudget = estimatedBudget - actualCost;
+    budgetProgress = estimatedBudget > 0 ? (actualCost / estimatedBudget) * 100 : 0;
+  }
 
   const completedTasks = tasks.filter(task => task.status === 'completed').length;
   const projectProgress = tasks.length > 0 ? (completedTasks / tasks.length) * 100 : 0;
 
   return (
     <div className="space-y-6">
+      {/* Project Type Badge */}
+      <div className="flex items-center space-x-2 mb-4">
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+          isFixedPrice 
+            ? 'bg-blue-100 text-blue-800' 
+            : 'bg-green-100 text-green-800'
+        }`}>
+          {isFixedPrice ? 'Fixed Price Project' : 'Hourly Project'}
+        </span>
+        {isFixedPrice && (
+          <span className="text-sm text-slate-600">
+            Budget: ${project.fixedPrice?.toLocaleString()}
+          </span>
+        )}
+        {!isFixedPrice && (
+          <span className="text-sm text-slate-600">
+            Rate: ${project.hourlyRate}/hr
+          </span>
+        )}
+      </div>
+
       {/* Budget Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -35,7 +73,9 @@ const ProjectBudgetTracking = ({ project, client, tasks }: ProjectBudgetTracking
             <p className="text-2xl font-bold text-blue-600">
               ${estimatedBudget.toLocaleString()}
             </p>
-            <p className="text-sm text-slate-600">Estimated Budget</p>
+            <p className="text-sm text-slate-600">
+              {isFixedPrice ? 'Fixed Budget' : 'Estimated Budget'}
+            </p>
           </CardContent>
         </Card>
 
@@ -55,7 +95,9 @@ const ProjectBudgetTracking = ({ project, client, tasks }: ProjectBudgetTracking
             <p className="text-2xl font-bold text-purple-600">
               ${remainingBudget.toLocaleString()}
             </p>
-            <p className="text-sm text-slate-600">Remaining Budget</p>
+            <p className="text-sm text-slate-600">
+              {isFixedPrice ? 'Remaining Budget' : 'Remaining Estimate'}
+            </p>
           </CardContent>
         </Card>
 
@@ -99,6 +141,14 @@ const ProjectBudgetTracking = ({ project, client, tasks }: ProjectBudgetTracking
               </p>
             </div>
           )}
+
+          {isFixedPrice && budgetProgress > 80 && (
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <p className="text-sm text-orange-800">
+                🔔 Fixed price project is approaching budget limit. Monitor closely to avoid overruns.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -111,7 +161,9 @@ const ProjectBudgetTracking = ({ project, client, tasks }: ProjectBudgetTracking
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
               <span className="font-medium">Estimated Hours</span>
-              <span className="font-bold">{totalEstimatedHours}h</span>
+              <span className="font-bold">
+                {isFixedPrice ? totalEstimatedHours : (project.estimatedHours || totalEstimatedHours)}h
+              </span>
             </div>
             <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
               <span className="font-medium">Actual Hours</span>
@@ -121,6 +173,14 @@ const ProjectBudgetTracking = ({ project, client, tasks }: ProjectBudgetTracking
               <span className="font-medium">Hourly Rate</span>
               <span className="font-bold">${hourlyRate}/hr</span>
             </div>
+            {isFixedPrice && (
+              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                <span className="font-medium">Effective Rate</span>
+                <span className="font-bold">
+                  ${totalActualHours > 0 ? (estimatedBudget / totalActualHours).toFixed(2) : '0'}/hr
+                </span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

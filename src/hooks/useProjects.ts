@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -15,6 +14,10 @@ export interface Project {
   documents: string[];
   team: string[];
   archived: boolean;
+  pricingType: 'fixed' | 'hourly';
+  fixedPrice?: number;
+  hourlyRate?: number;
+  estimatedHours?: number;
 }
 
 export const useProjects = () => {
@@ -48,7 +51,11 @@ export const useProjects = () => {
         notes: project.notes || '',
         documents: project.documents || [],
         team: project.team || [],
-        archived: project.archived || false
+        archived: project.archived || false,
+        pricingType: project.pricing_type as 'fixed' | 'hourly',
+        fixedPrice: project.fixed_price || undefined,
+        hourlyRate: project.hourly_rate || undefined,
+        estimatedHours: project.estimated_hours || undefined
       }));
 
       setProjects(transformedProjects);
@@ -75,7 +82,11 @@ export const useProjects = () => {
         notes: newProject.notes || '',
         documents: newProject.documents || [],
         team: newProject.team || [],
-        archived: false
+        archived: false,
+        pricing_type: newProject.pricingType,
+        fixed_price: newProject.fixedPrice || null,
+        hourly_rate: newProject.hourlyRate || null,
+        estimated_hours: newProject.estimatedHours || null
       };
 
       const { data, error } = await supabase
@@ -98,7 +109,11 @@ export const useProjects = () => {
         notes: data.notes || '',
         documents: data.documents || [],
         team: data.team || [],
-        archived: data.archived || false
+        archived: data.archived || false,
+        pricingType: data.pricing_type as 'fixed' | 'hourly',
+        fixedPrice: data.fixed_price || undefined,
+        hourlyRate: data.hourly_rate || undefined,
+        estimatedHours: data.estimated_hours || undefined
       };
 
       setProjects(prev => [...prev, transformedProject]);
@@ -130,7 +145,11 @@ export const useProjects = () => {
         notes: updatedProject.notes,
         documents: updatedProject.documents,
         team: updatedProject.team,
-        archived: updatedProject.archived
+        archived: updatedProject.archived,
+        pricing_type: updatedProject.pricingType,
+        fixed_price: updatedProject.fixedPrice || null,
+        hourly_rate: updatedProject.hourlyRate || null,
+        estimated_hours: updatedProject.estimatedHours || null
       };
 
       const { error } = await supabase

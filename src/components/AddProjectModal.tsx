@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface Client {
   id: number;
@@ -31,7 +33,11 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
     estimatedEndDate: '',
     status: 'active',
     notes: '',
-    team: ''
+    team: '',
+    pricingType: 'fixed' as 'fixed' | 'hourly',
+    fixedPrice: '',
+    hourlyRate: '',
+    estimatedHours: ''
   });
   
   const [inheritOptions, setInheritOptions] = useState({
@@ -80,7 +86,11 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
       status: formData.status,
       notes: projectNotes,
       documents: projectDocuments,
-      team: projectTeam
+      team: projectTeam,
+      pricingType: formData.pricingType,
+      fixedPrice: formData.pricingType === 'fixed' && formData.fixedPrice ? parseFloat(formData.fixedPrice) : undefined,
+      hourlyRate: formData.pricingType === 'hourly' && formData.hourlyRate ? parseFloat(formData.hourlyRate) : undefined,
+      estimatedHours: formData.pricingType === 'hourly' && formData.estimatedHours ? parseInt(formData.estimatedHours) : undefined
     };
 
     onAdd(projectData);
@@ -93,7 +103,11 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
       estimatedEndDate: '',
       status: 'active',
       notes: '',
-      team: ''
+      team: '',
+      pricingType: 'fixed',
+      fixedPrice: '',
+      hourlyRate: '',
+      estimatedHours: ''
     });
     setInheritOptions({
       documents: false,
@@ -152,6 +166,66 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
               </SelectContent>
             </Select>
           </div>
+
+          {/* Pricing Type Selection */}
+          <div>
+            <Label>Pricing Type</Label>
+            <RadioGroup 
+              value={formData.pricingType} 
+              onValueChange={(value: 'fixed' | 'hourly') => handleChange('pricingType', value)}
+              className="flex space-x-6 mt-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="fixed" id="fixed" />
+                <Label htmlFor="fixed">Fixed Price</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="hourly" id="hourly" />
+                <Label htmlFor="hourly">Hourly Rate</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {/* Conditional Pricing Fields */}
+          {formData.pricingType === 'fixed' ? (
+            <div>
+              <Label htmlFor="fixedPrice">Fixed Price ($)</Label>
+              <Input
+                id="fixedPrice"
+                type="number"
+                step="0.01"
+                value={formData.fixedPrice}
+                onChange={(e) => handleChange('fixedPrice', e.target.value)}
+                placeholder="Enter fixed price"
+                required
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="hourlyRate">Hourly Rate ($)</Label>
+                <Input
+                  id="hourlyRate"
+                  type="number"
+                  step="0.01"
+                  value={formData.hourlyRate}
+                  onChange={(e) => handleChange('hourlyRate', e.target.value)}
+                  placeholder="Rate per hour"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="estimatedHours">Estimated Hours</Label>
+                <Input
+                  id="estimatedHours"
+                  type="number"
+                  value={formData.estimatedHours}
+                  onChange={(e) => handleChange('estimatedHours', e.target.value)}
+                  placeholder="Estimated hours"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Inherit Options */}
           {selectedClient && (

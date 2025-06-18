@@ -190,9 +190,13 @@ export type Database = {
           documents: string[] | null
           end_date: string | null
           estimated_end_date: string
+          estimated_hours: number | null
+          fixed_price: number | null
+          hourly_rate: number | null
           id: string
           name: string
           notes: string | null
+          pricing_type: string
           start_date: string
           status: string
           team: string[] | null
@@ -206,9 +210,13 @@ export type Database = {
           documents?: string[] | null
           end_date?: string | null
           estimated_end_date: string
+          estimated_hours?: number | null
+          fixed_price?: number | null
+          hourly_rate?: number | null
           id?: string
           name: string
           notes?: string | null
+          pricing_type?: string
           start_date: string
           status?: string
           team?: string[] | null
@@ -222,9 +230,13 @@ export type Database = {
           documents?: string[] | null
           end_date?: string | null
           estimated_end_date?: string
+          estimated_hours?: number | null
+          fixed_price?: number | null
+          hourly_rate?: number | null
           id?: string
           name?: string
           notes?: string | null
+          pricing_type?: string
           start_date?: string
           status?: string
           team?: string[] | null

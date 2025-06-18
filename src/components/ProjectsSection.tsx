@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Users, FileText, Edit, Archive } from 'lucide-react';
+import { Calendar, Users, FileText, Edit, Archive, DollarSign } from 'lucide-react';
 import AddProjectModal from './AddProjectModal';
 import EditProjectSheet from './EditProjectSheet';
 import { Project } from '@/hooks/useProjects';
@@ -56,6 +56,22 @@ const ProjectsSection = ({
     }
   };
 
+  const getPricingDisplay = (project: Project) => {
+    if (project.pricingType === 'fixed') {
+      return {
+        type: 'Fixed',
+        amount: project.fixedPrice ? `$${project.fixedPrice.toLocaleString()}` : 'TBD',
+        color: 'bg-blue-100 text-blue-800'
+      };
+    } else {
+      return {
+        type: 'Hourly',
+        amount: project.hourlyRate ? `$${project.hourlyRate}/hr` : 'TBD',
+        color: 'bg-green-100 text-green-800'
+      };
+    }
+  };
+
   const handleEditProject = (e: React.MouseEvent, project: Project) => {
     e.stopPropagation();
     setEditingProject(project);
@@ -100,57 +116,72 @@ const ProjectsSection = ({
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {projects.map((project) => (
-                <Card 
-                  key={project.id} 
-                  className={`relative cursor-pointer hover:shadow-md transition-shadow ${
-                    project.archived ? 'opacity-75 border-slate-300' : ''
-                  }`}
-                  onClick={() => handleProjectClick(project.id)}
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
+              {projects.map((project) => {
+                const pricingInfo = getPricingDisplay(project);
+                return (
+                  <Card 
+                    key={project.id} 
+                    className={`relative cursor-pointer hover:shadow-md transition-shadow ${
+                      project.archived ? 'opacity-75 border-slate-300' : ''
+                    }`}
+                    onClick={() => handleProjectClick(project.id)}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <CardTitle className="text-lg font-semibold mb-2">{project.name}</CardTitle>
+                            {project.archived && <Archive className="w-4 h-4 text-slate-500" />}
+                          </div>
+                          <p className="text-sm text-slate-600">{getClientName(project.clientId)}</p>
+                        </div>
                         <div className="flex items-center space-x-2">
-                          <CardTitle className="text-lg font-semibold mb-2">{project.name}</CardTitle>
-                          {project.archived && <Archive className="w-4 h-4 text-slate-500" />}
+                          <Badge className={getStatusColor(project.status)}>
+                            {project.status}
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => handleEditProject(e, project)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <p className="text-sm text-slate-600">{getClientName(project.clientId)}</p>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge className={getStatusColor(project.status)}>
-                          {project.status}
-                        </Badge>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => handleEditProject(e, project)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-2">
-                      <div className="flex items-center text-sm text-slate-600">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        <span>{new Date(project.startDate).toLocaleDateString()} - {new Date(project.estimatedEndDate).toLocaleDateString()}</span>
-                      </div>
-                      {project.team && project.team.length > 0 && (
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="space-y-2">
                         <div className="flex items-center text-sm text-slate-600">
-                          <Users className="w-4 h-4 mr-2" />
-                          <span>{project.team.length} team member{project.team.length !== 1 ? 's' : ''}</span>
+                          <Calendar className="w-4 h-4 mr-2" />
+                          <span>{new Date(project.startDate).toLocaleDateString()} - {new Date(project.estimatedEndDate).toLocaleDateString()}</span>
                         </div>
-                      )}
-                      {project.notes && (
-                        <p className="text-sm text-slate-600 line-clamp-2">{project.notes}</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                        
+                        {/* Pricing Information */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center text-sm text-slate-600">
+                            <DollarSign className="w-4 h-4 mr-2" />
+                            <span>{pricingInfo.amount}</span>
+                          </div>
+                          <Badge className={pricingInfo.color} variant="secondary">
+                            {pricingInfo.type}
+                          </Badge>
+                        </div>
+
+                        {project.team && project.team.length > 0 && (
+                          <div className="flex items-center text-sm text-slate-600">
+                            <Users className="w-4 h-4 mr-2" />
+                            <span>{project.team.length} team member{project.team.length !== 1 ? 's' : ''}</span>
+                          </div>
+                        )}
+                        {project.notes && (
+                          <p className="text-sm text-slate-600 line-clamp-2">{project.notes}</p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </CardContent>

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Project } from '@/hooks/useProjects';
 
 interface Client {
@@ -46,7 +47,7 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Edit Project</SheetTitle>
         </SheetHeader>
@@ -80,6 +81,64 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
               </SelectContent>
             </Select>
           </div>
+
+          {/* Pricing Type Selection */}
+          <div className="space-y-2">
+            <Label>Pricing Type</Label>
+            <RadioGroup 
+              value={formData.pricingType || 'fixed'} 
+              onValueChange={(value: 'fixed' | 'hourly') => handleInputChange('pricingType', value)}
+              className="flex space-x-6"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="fixed" id="edit-fixed" />
+                <Label htmlFor="edit-fixed">Fixed Price</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="hourly" id="edit-hourly" />
+                <Label htmlFor="edit-hourly">Hourly Rate</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {/* Conditional Pricing Fields */}
+          {formData.pricingType === 'fixed' ? (
+            <div className="space-y-2">
+              <Label htmlFor="fixedPrice">Fixed Price ($)</Label>
+              <Input
+                id="fixedPrice"
+                type="number"
+                step="0.01"
+                value={formData.fixedPrice || ''}
+                onChange={(e) => handleInputChange('fixedPrice', e.target.value ? parseFloat(e.target.value) : undefined)}
+                placeholder="Enter fixed price"
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="hourlyRate">Hourly Rate ($)</Label>
+                <Input
+                  id="hourlyRate"
+                  type="number"
+                  step="0.01"
+                  value={formData.hourlyRate || ''}
+                  onChange={(e) => handleInputChange('hourlyRate', e.target.value ? parseFloat(e.target.value) : undefined)}
+                  placeholder="Rate per hour"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="estimatedHours">Estimated Hours</Label>
+                <Input
+                  id="estimatedHours"
+                  type="number"
+                  value={formData.estimatedHours || ''}
+                  onChange={(e) => handleInputChange('estimatedHours', e.target.value ? parseInt(e.target.value) : undefined)}
+                  placeholder="Estimated hours"
+                />
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
