@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -5,11 +6,11 @@ import { Plus } from 'lucide-react';
 import SubscriptionsSection from '@/components/SubscriptionsSection';
 import SubscriptionMetrics from '@/components/SubscriptionMetrics';
 import ModalsContainer from '@/components/ModalsContainer';
-import LogoutButton from '@/components/LogoutButton';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useClients } from '@/hooks/useClients';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
+
 const SubscriptionsPage = () => {
   const [displayCurrency, setDisplayCurrency] = React.useState('USD');
   const [showSubscriptionModal, setShowSubscriptionModal] = React.useState(false);
@@ -35,10 +36,12 @@ const SubscriptionsPage = () => {
     const convertedTotal = convertCurrency(totalPaid, sub.currency || 'USD', displayCurrency);
     return sum + convertedTotal;
   }, 0);
+  
   const handleEditSubscription = (subscription: any) => {
     setSelectedSubscription(subscription);
     setShowEditSubscriptionModal(true);
   };
+  
   if (loading) {
     return <div className="min-h-screen p-6" style={{
       backgroundColor: '#F3F3F2'
@@ -49,7 +52,6 @@ const SubscriptionsPage = () => {
               {isMobile && <SidebarTrigger />}
               <h1 className="text-3xl font-bold text-slate-800">Subscriptions</h1>
             </div>
-            <LogoutButton />
           </div>
           <div className="text-center py-8">
             <p className="text-slate-600">Loading subscriptions...</p>
@@ -57,6 +59,7 @@ const SubscriptionsPage = () => {
         </div>
       </div>;
   }
+  
   return <div className="min-h-screen p-6" style={{
     backgroundColor: '#F3F3F2'
   }}>
@@ -66,13 +69,10 @@ const SubscriptionsPage = () => {
             {isMobile && <SidebarTrigger />}
             <h1 className="text-3xl font-bold text-slate-800">Subscriptions</h1>
           </div>
-          <div className="flex items-center space-x-3">
-            <LogoutButton />
-            <Button onClick={() => setShowSubscriptionModal(true)} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Subscription
-            </Button>
-          </div>
+          <Button onClick={() => setShowSubscriptionModal(true)} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Subscription
+          </Button>
         </div>
         
         {/* Metrics Cards */}
@@ -87,4 +87,5 @@ const SubscriptionsPage = () => {
       </div>
     </div>;
 };
+
 export default SubscriptionsPage;

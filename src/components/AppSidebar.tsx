@@ -11,10 +11,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { BarChart3, Users, FolderOpen, CreditCard, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import LogoutButton from '@/components/LogoutButton';
 
 const menuItems = [
   {
@@ -90,6 +92,9 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="p-4">
+        <LogoutButton />
+      </SidebarFooter>
     </Sidebar>
   );
 }
