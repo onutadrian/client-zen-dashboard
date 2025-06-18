@@ -101,7 +101,7 @@ const ProjectBilledHours = ({ project, client, milestones = [] }: ProjectBilledH
               </div>
 
               <div className="text-center p-4 rounded-lg bg-slate-50">
-                <p className="text-zinc-950 text-4xl font-normal">{unbilledHours.toFixe</p>
+                <p className="text-zinc-950 text-4xl font-normal">{unbilledHours.toFixed(2)}</p>
                 <p className="text-slate-600 py-[24px] text-base">Unbilled Hours</p>
               </div>
 
