@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,7 @@ const ProjectsSection = ({ projects, clients, onAddProject, onUpdateProject, onD
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const navigate = useNavigate();
 
   const getClientName = (clientId: number) => {
     const client = clients.find(c => c.id === clientId);
@@ -46,9 +48,14 @@ const ProjectsSection = ({ projects, clients, onAddProject, onUpdateProject, onD
     }
   };
 
-  const handleEditProject = (project: Project) => {
+  const handleEditProject = (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
     setEditingProject(project);
     setIsEditSheetOpen(true);
+  };
+
+  const handleProjectClick = (projectId: string) => {
+    navigate(`/projects/${projectId}`);
   };
 
   const handleCloseEditSheet = () => {
@@ -86,7 +93,11 @@ const ProjectsSection = ({ projects, clients, onAddProject, onUpdateProject, onD
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {projects.map((project) => (
-                <Card key={project.id} className="relative">
+                <Card 
+                  key={project.id} 
+                  className="relative cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => handleProjectClick(project.id)}
+                >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -100,7 +111,7 @@ const ProjectsSection = ({ projects, clients, onAddProject, onUpdateProject, onD
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleEditProject(project)}
+                          onClick={(e) => handleEditProject(e, project)}
                           className="h-8 w-8 p-0"
                         >
                           <Edit className="h-4 w-4" />

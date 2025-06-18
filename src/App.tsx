@@ -7,6 +7,7 @@ import { AppSidebar } from '@/components/AppSidebar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Index from '@/pages/Index';
 import ProjectsPage from '@/pages/ProjectsPage';
+import ProjectDetailsPage from '@/pages/ProjectDetailsPage';
 import ClientsPage from '@/pages/ClientsPage';
 import SubscriptionsPage from '@/pages/SubscriptionsPage';
 import AuthPage from '@/pages/AuthPage';
@@ -28,6 +29,7 @@ function App() {
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/projects" element={<ProjectsPage />} />
+                      <Route path="/projects/:id" element={<ProjectDetailsPage />} />
                       <Route path="/clients" element={<ClientsPage />} />
                       <Route path="/subscriptions" element={<SubscriptionsPage />} />
                       <Route path="*" element={<NotFound />} />
