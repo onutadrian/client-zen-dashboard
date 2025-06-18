@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,15 +5,18 @@ import { Calendar, Users, CheckCircle, Clock } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
 import { Task } from '@/hooks/useTasks';
 import { Milestone } from '@/hooks/useMilestones';
-
 interface ProjectHeaderProps {
   project: Project;
   client?: any;
   tasks: Task[];
   milestones: Milestone[];
 }
-
-const ProjectHeader = ({ project, client, tasks, milestones }: ProjectHeaderProps) => {
+const ProjectHeader = ({
+  project,
+  client,
+  tasks,
+  milestones
+}: ProjectHeaderProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -29,12 +31,9 @@ const ProjectHeader = ({ project, client, tasks, milestones }: ProjectHeaderProp
         return 'bg-gray-100 text-gray-800';
     }
   };
-
   const completedTasks = tasks.filter(task => task.status === 'completed').length;
   const completedMilestones = milestones.filter(milestone => milestone.status === 'completed').length;
-
-  return (
-    <Card className="mb-6">
+  return <Card className="mb-6">
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
@@ -51,7 +50,7 @@ const ProjectHeader = ({ project, client, tasks, milestones }: ProjectHeaderProp
             <Calendar className="w-5 h-5 text-slate-500" />
             <div>
               <p className="text-sm text-slate-500">Duration</p>
-              <p className="font-medium">
+              <p className="text-xs font-semibold">
                 {new Date(project.startDate).toLocaleDateString()} - {new Date(project.estimatedEndDate).toLocaleDateString()}
               </p>
             </div>
@@ -61,7 +60,7 @@ const ProjectHeader = ({ project, client, tasks, milestones }: ProjectHeaderProp
             <Users className="w-5 h-5 text-slate-500" />
             <div>
               <p className="text-sm text-slate-500">Team Size</p>
-              <p className="font-medium">{project.team?.length || 0} members</p>
+              <p className="text-xs font-semibold">{project.team?.length || 0} members</p>
             </div>
           </div>
 
@@ -69,7 +68,7 @@ const ProjectHeader = ({ project, client, tasks, milestones }: ProjectHeaderProp
             <CheckCircle className="w-5 h-5 text-slate-500" />
             <div>
               <p className="text-sm text-slate-500">Tasks</p>
-              <p className="font-medium">{completedTasks}/{tasks.length} completed</p>
+              <p className="text-xs font-semibold">{completedTasks}/{tasks.length} completed</p>
             </div>
           </div>
 
@@ -77,13 +76,11 @@ const ProjectHeader = ({ project, client, tasks, milestones }: ProjectHeaderProp
             <Clock className="w-5 h-5 text-slate-500" />
             <div>
               <p className="text-sm text-slate-500">Milestones</p>
-              <p className="font-medium">{completedMilestones}/{milestones.length} completed</p>
+              <p className="text-xs font-semibold">{completedMilestones}/{milestones.length} completed</p>
             </div>
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default ProjectHeader;
