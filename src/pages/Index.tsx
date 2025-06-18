@@ -18,10 +18,15 @@ const Index = () => {
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState(null);
 
-  const { clients, addClient } = useClients();
+  const { clients, addClient, updateClient } = useClients();
   const { subscriptions, addSubscription, updateSubscription } = useSubscriptions();
   const analytics = useAnalytics(clients, subscriptions, displayCurrency);
   const { isMobile } = useSidebar();
+
+  const handleEditSubscription = (subscription) => {
+    setSelectedSubscription(subscription);
+    setShowEditSubscriptionModal(true);
+  };
 
   return (
     <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
@@ -55,10 +60,13 @@ const Index = () => {
           subscriptions={subscriptions}
           analytics={analytics}
           displayCurrency={displayCurrency}
-          onEditSubscription={(subscription) => {
-            setSelectedSubscription(subscription);
-            setShowEditSubscriptionModal(true);
-          }}
+          convertCurrency={convertCurrency}
+          formatCurrency={formatCurrency}
+          updateClient={updateClient}
+          handleEditSubscription={handleEditSubscription}
+          setShowClientModal={setShowClientModal}
+          setShowSubscriptionModal={setShowSubscriptionModal}
+          totalPaidToDate={analytics.totalRevenue}
         />
 
         <ModalsContainer
