@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -11,17 +10,24 @@ import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useClients } from '@/hooks/useClients';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
-
 const SubscriptionsPage = () => {
   const [displayCurrency, setDisplayCurrency] = React.useState('USD');
   const [showSubscriptionModal, setShowSubscriptionModal] = React.useState(false);
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = React.useState(false);
   const [selectedSubscription, setSelectedSubscription] = React.useState(null);
-  
-  const { subscriptions, loading, addSubscription, updateSubscription } = useSubscriptions();
-  const { clients } = useClients();
+  const {
+    subscriptions,
+    loading,
+    addSubscription,
+    updateSubscription
+  } = useSubscriptions();
+  const {
+    clients
+  } = useClients();
   const analytics = useAnalytics(clients, subscriptions, displayCurrency);
-  const { isMobile } = useSidebar();
+  const {
+    isMobile
+  } = useSidebar();
 
   // Calculate total paid to date for all subscriptions
   const totalPaidToDate = subscriptions.reduce((sum, sub) => {
@@ -29,15 +35,14 @@ const SubscriptionsPage = () => {
     const convertedTotal = convertCurrency(totalPaid, sub.currency || 'USD', displayCurrency);
     return sum + convertedTotal;
   }, 0);
-
   const handleEditSubscription = (subscription: any) => {
     setSelectedSubscription(subscription);
     setShowEditSubscriptionModal(true);
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
+    return <div className="min-h-screen p-6" style={{
+      backgroundColor: '#F3F3F2'
+    }}>
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -50,12 +55,11 @@ const SubscriptionsPage = () => {
             <p className="text-slate-600">Loading subscriptions...</p>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
+  return <div className="min-h-screen p-6" style={{
+    backgroundColor: '#F3F3F2'
+  }}>
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -64,7 +68,7 @@ const SubscriptionsPage = () => {
           </div>
           <div className="flex items-center space-x-3">
             <LogoutButton />
-            <Button onClick={() => setShowSubscriptionModal(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setShowSubscriptionModal(true)} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
               <Plus className="w-4 h-4 mr-2" />
               Add Subscription
             </Button>
@@ -72,39 +76,15 @@ const SubscriptionsPage = () => {
         </div>
         
         {/* Metrics Cards */}
-        <SubscriptionMetrics 
-          subscriptions={subscriptions}
-          displayCurrency={displayCurrency}
-        />
+        <SubscriptionMetrics subscriptions={subscriptions} displayCurrency={displayCurrency} />
         
-        <SubscriptionsSection 
-          subscriptions={subscriptions}
-          onEditSubscription={handleEditSubscription}
-          onAddSubscription={() => setShowSubscriptionModal(true)}
-          monthlySubscriptionCost={analytics.monthlySubscriptionCost}
-          totalPaidToDate={totalPaidToDate}
-          displayCurrency={displayCurrency}
-          formatCurrency={formatCurrency}
-        />
+        <SubscriptionsSection subscriptions={subscriptions} onEditSubscription={handleEditSubscription} onAddSubscription={() => setShowSubscriptionModal(true)} monthlySubscriptionCost={analytics.monthlySubscriptionCost} totalPaidToDate={totalPaidToDate} displayCurrency={displayCurrency} formatCurrency={formatCurrency} />
 
-        <ModalsContainer 
-          showClientModal={false} 
-          onCloseClientModal={() => {}} 
-          onAddClient={() => {}} 
-          showSubscriptionModal={showSubscriptionModal} 
-          onCloseSubscriptionModal={() => setShowSubscriptionModal(false)} 
-          onAddSubscription={addSubscription} 
-          showEditSubscriptionModal={showEditSubscriptionModal} 
-          onCloseEditSubscriptionModal={() => {
-            setShowEditSubscriptionModal(false);
-            setSelectedSubscription(null);
-          }} 
-          selectedSubscription={selectedSubscription} 
-          onUpdateSubscription={updateSubscription} 
-        />
+        <ModalsContainer showClientModal={false} onCloseClientModal={() => {}} onAddClient={() => {}} showSubscriptionModal={showSubscriptionModal} onCloseSubscriptionModal={() => setShowSubscriptionModal(false)} onAddSubscription={addSubscription} showEditSubscriptionModal={showEditSubscriptionModal} onCloseEditSubscriptionModal={() => {
+        setShowEditSubscriptionModal(false);
+        setSelectedSubscription(null);
+      }} selectedSubscription={selectedSubscription} onUpdateSubscription={updateSubscription} />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default SubscriptionsPage;
