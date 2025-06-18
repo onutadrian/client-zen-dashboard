@@ -146,24 +146,6 @@ const ProjectBilledHours = ({ project, client, milestones = [] }: ProjectBilledH
           </div>
         )}
 
-        {/* Additional metrics for fixed price projects */}
-        {showMilestoneTracking && (
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-medium mb-3 text-blue-900">Fixed Price Project Metrics</h4>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-blue-700">Effective Rate: <span className="font-semibold">${effectiveRate.toFixed(2)}/hr</span></p>
-              </div>
-              <div>
-                <p className="text-blue-700">Target Rate: <span className="font-semibold">${hourlyRate}/hr</span></p>
-              </div>
-              <div>
-                <p className="text-blue-700">Hours Worked: <span className="font-semibold">{totalHours.toFixed(1)}h</span></p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {projectHours.length > 0 && (
           <div className="mt-6">
             <h4 className="font-medium mb-3">Recent Time Entries</h4>
