@@ -131,8 +131,9 @@ const ProjectDetailsPage = () => {
         <div className="w-[30%] border-l bg-white">
           <ProjectActivitySidebar 
             project={project}
-            tasks={projectTasks}
-            milestones={projectMilestones}
+            client={client}
+            onAddTask={addTask}
+            onAddMilestone={addMilestone}
           />
         </div>
       </div>

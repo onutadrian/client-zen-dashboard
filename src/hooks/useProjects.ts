@@ -65,7 +65,13 @@ export const useProjects = () => {
         hourlyRate: project.hourly_rate || undefined,
         estimatedHours: project.estimated_hours || undefined,
         currency: project.currency || 'USD',
-        invoices: project.invoices || []
+        invoices: Array.isArray(project.invoices) ? project.invoices as Array<{
+          id: string;
+          amount: number;
+          date: string;
+          status: 'paid' | 'pending' | 'overdue';
+          description?: string;
+        }> : []
       }));
 
       setProjects(transformedProjects);
@@ -132,7 +138,13 @@ export const useProjects = () => {
         hourlyRate: data.hourly_rate || undefined,
         estimatedHours: data.estimated_hours || undefined,
         currency: data.currency || 'USD',
-        invoices: data.invoices || []
+        invoices: Array.isArray(data.invoices) ? data.invoices as Array<{
+          id: string;
+          amount: number;
+          date: string;
+          status: 'paid' | 'pending' | 'overdue';
+          description?: string;
+        }> : []
       };
 
       setProjects(prev => [...prev, transformedProject]);
