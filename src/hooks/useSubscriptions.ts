@@ -38,6 +38,7 @@ export const useSubscriptions = () => {
       const { data, error } = await supabase
         .from('subscriptions')
         .select('*')
+        .eq('user_id', user.id) // Only fetch user's own subscriptions
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -76,7 +77,7 @@ export const useSubscriptions = () => {
         total_paid: newSubscription.total_paid || 0,
         status: newSubscription.status || 'active',
         currency: newSubscription.currency || 'USD',
-        user_id: user.id
+        user_id: user.id // Ensure user_id is always set
       };
 
       const { data, error } = await supabase
@@ -134,6 +135,7 @@ export const useSubscriptions = () => {
         .from('subscriptions')
         .update(updateData)
         .eq('id', subscriptionId)
+        .eq('user_id', user.id) // Ensure user can only update their own subscriptions
         .select()
         .single();
 
@@ -168,7 +170,8 @@ export const useSubscriptions = () => {
       const { error } = await supabase
         .from('subscriptions')
         .delete()
-        .eq('id', subscriptionId);
+        .eq('id', subscriptionId)
+        .eq('user_id', user.id); // Ensure user can only delete their own subscriptions
 
       if (error) {
         console.error('Error deleting subscription:', error);

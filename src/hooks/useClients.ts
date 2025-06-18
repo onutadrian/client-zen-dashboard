@@ -37,9 +37,16 @@ export const useClients = () => {
 
   const loadClients = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('User not authenticated');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('clients')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -72,7 +79,12 @@ export const useClients = () => {
 
   const addClient = async (newClient: any) => {
     try {
-      // Transform to Supabase format
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Transform to Supabase format and ensure user_id is set
       const supabaseClient = {
         name: newClient.name,
         price: newClient.price,
@@ -83,7 +95,8 @@ export const useClients = () => {
         notes: newClient.notes || '',
         people: newClient.people || [],
         invoices: newClient.invoices || [],
-        currency: newClient.currency || 'USD'
+        currency: newClient.currency || 'USD',
+        user_id: user.id // Ensure user_id is always set
       };
 
       const { data, error } = await supabase
@@ -127,6 +140,11 @@ export const useClients = () => {
 
   const updateClient = async (clientId: number, updatedClient: any) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       // Transform to Supabase format
       const supabaseUpdate = {
         name: updatedClient.name,
@@ -144,7 +162,8 @@ export const useClients = () => {
       const { error } = await supabase
         .from('clients')
         .update(supabaseUpdate)
-        .eq('id', clientId);
+        .eq('id', clientId)
+        .eq('user_id', user.id); // Ensure user can only update their own clients
 
       if (error) throw error;
 
