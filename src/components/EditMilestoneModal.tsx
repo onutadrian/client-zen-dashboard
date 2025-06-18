@@ -4,8 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Milestone } from '@/hooks/useMilestones';
 
 interface EditMilestoneModalProps {
@@ -21,30 +21,16 @@ const EditMilestoneModal = ({ isOpen, onClose, onUpdate, milestone }: EditMilest
     description: milestone.description || '',
     targetDate: milestone.targetDate,
     status: milestone.status,
-    amount: milestone.amount?.toString() || '',
+    amount: milestone.amount || 0,
     currency: milestone.currency || 'USD',
-    completionPercentage: milestone.completionPercentage.toString()
+    completionPercentage: milestone.completionPercentage,
+    paymentStatus: milestone.paymentStatus
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const updates: Partial<Milestone> = {
-      title: formData.title,
-      description: formData.description || undefined,
-      targetDate: formData.targetDate,
-      status: formData.status as 'pending' | 'in-progress' | 'completed',
-      amount: formData.amount ? parseFloat(formData.amount) : undefined,
-      currency: formData.currency,
-      completionPercentage: parseInt(formData.completionPercentage)
-    };
-
-    onUpdate(milestone.id, updates);
+    onUpdate(milestone.id, formData);
     onClose();
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -53,14 +39,14 @@ const EditMilestoneModal = ({ isOpen, onClose, onUpdate, milestone }: EditMilest
         <DialogHeader>
           <DialogTitle>Edit Milestone</DialogTitle>
         </DialogHeader>
-
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title">Title</Label>
             <Input
               id="title"
               value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
             />
           </div>
@@ -70,28 +56,30 @@ const EditMilestoneModal = ({ isOpen, onClose, onUpdate, milestone }: EditMilest
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              rows={3}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Milestone description..."
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="targetDate">Target Date *</Label>
+              <Label htmlFor="targetDate">Target Date</Label>
               <Input
                 id="targetDate"
                 type="date"
                 value={formData.targetDate}
-                onChange={(e) => handleInputChange('targetDate', e.target.value)}
+                onChange={(e) => setFormData({ ...formData, targetDate: e.target.value })}
                 required
               />
             </div>
-
+            
             <div>
-              <Label htmlFor="status">Status *</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => handleInputChange('status', value)}
+              <Label htmlFor="status">Status</Label>
+              <Select 
+                value={formData.status} 
+                onValueChange={(value: 'pending' | 'in-progress' | 'completed') => 
+                  setFormData({ ...formData, status: value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -105,7 +93,7 @@ const EditMilestoneModal = ({ isOpen, onClose, onUpdate, milestone }: EditMilest
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="amount">Amount</Label>
               <Input
@@ -113,16 +101,15 @@ const EditMilestoneModal = ({ isOpen, onClose, onUpdate, milestone }: EditMilest
                 type="number"
                 step="0.01"
                 value={formData.amount}
-                onChange={(e) => handleInputChange('amount', e.target.value)}
-                placeholder="0.00"
+                onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
               />
             </div>
-
+            
             <div>
               <Label htmlFor="currency">Currency</Label>
-              <Select
-                value={formData.currency}
-                onValueChange={(value) => handleInputChange('currency', value)}
+              <Select 
+                value={formData.currency} 
+                onValueChange={(value) => setFormData({ ...formData, currency: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -131,35 +118,47 @@ const EditMilestoneModal = ({ isOpen, onClose, onUpdate, milestone }: EditMilest
                   <SelectItem value="USD">USD</SelectItem>
                   <SelectItem value="EUR">EUR</SelectItem>
                   <SelectItem value="GBP">GBP</SelectItem>
-                  <SelectItem value="CAD">CAD</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="completion">Completion %</Label>
+              <Input
+                id="completion"
+                type="number"
+                min="0"
+                max="100"
+                value={formData.completionPercentage}
+                onChange={(e) => setFormData({ ...formData, completionPercentage: parseInt(e.target.value) || 0 })}
+              />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="completionPercentage">Completion Percentage</Label>
-            <Input
-              id="completionPercentage"
-              type="number"
-              min="0"
-              max="100"
-              value={formData.completionPercentage}
-              onChange={(e) => handleInputChange('completionPercentage', e.target.value)}
-            />
-            <p className="text-sm text-slate-500 mt-1">
-              Current: {formData.completionPercentage}%
-            </p>
+            <Label htmlFor="paymentStatus">Payment Status</Label>
+            <Select 
+              value={formData.paymentStatus} 
+              onValueChange={(value: 'unpaid' | 'partial' | 'paid') => 
+                setFormData({ ...formData, paymentStatus: value })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unpaid">Unpaid</SelectItem>
+                <SelectItem value="partial">Partial</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button 
-              type="submit"
-              className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
-            >
+            <Button type="submit">
               Update Milestone
             </Button>
           </div>

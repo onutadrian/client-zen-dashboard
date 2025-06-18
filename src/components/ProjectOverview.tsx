@@ -1,16 +1,20 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Clock, Edit, Trash2, FileText } from 'lucide-react';
+import { Plus, Clock, Edit, Trash2, FileText, CheckCircle } from 'lucide-react';
 import ProjectBilledHours from './ProjectBilledHours';
 import LogProjectHoursModal from './LogProjectHoursModal';
 import AddProjectTaskModal from './AddProjectTaskModal';
 import AddMilestoneModal from './AddMilestoneModal';
 import EditMilestoneModal from './EditMilestoneModal';
 import AddInvoiceModal from './AddInvoiceModal';
+import MilestoneRevenueTracker from './MilestoneRevenueTracker';
+import InvoiceStatusButton from './InvoiceStatusButton';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
 import { Milestone } from '@/hooks/useMilestones';
+import { useInvoices } from '@/hooks/useInvoices';
 
 interface Task {
   id: number;
@@ -66,15 +70,31 @@ const ProjectOverview = ({
   const [showAddInvoiceModal, setShowAddInvoiceModal] = useState(false);
   const [selectedMilestoneForInvoice, setSelectedMilestoneForInvoice] = useState<Milestone | null>(null);
 
+  const { invoices } = useInvoices();
   const isFixedPrice = project.pricingType === 'fixed';
+  const projectInvoices = invoices.filter(i => i.projectId === project.id);
 
   const handleCreateInvoiceForMilestone = (milestone: Milestone) => {
     setSelectedMilestoneForInvoice(milestone);
     setShowAddInvoiceModal(true);
   };
 
+  const handleQuickMarkAsPaid = async (milestone: Milestone) => {
+    await onUpdateMilestone(milestone.id, { paymentStatus: 'paid' });
+  };
+
+  // Get invoice for milestone
+  const getMilestoneInvoice = (milestoneId: string) => {
+    return projectInvoices.find(inv => inv.milestoneId === milestoneId);
+  };
+
   return (
     <div className="space-y-6">
+      {/* Revenue Pipeline for Fixed Price Projects */}
+      {isFixedPrice && milestones.length > 0 && (
+        <MilestoneRevenueTracker milestones={milestones} projectId={project.id} />
+      )}
+
       {/* Project Hours/Revenue Section */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">
@@ -89,9 +109,9 @@ const ProjectOverview = ({
             Log Hours
           </Button>
         )}
-        {client && isFixedPrice && (
+        {client && isFixedPrice && milestones.length === 0 && (
           <div className="text-sm text-slate-500">
-            Time tracking optional for fixed-price projects
+            Add milestones to track project progress and revenue
           </div>
         )}
       </div>
@@ -127,69 +147,101 @@ const ProjectOverview = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {milestones.map((milestone) => (
-                <div key={milestone.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <h4 className="font-medium">{milestone.title}</h4>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          milestone.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          milestone.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {milestone.status.replace('-', ' ')}
-                        </span>
-                        {milestone.paymentStatus && (
+              {milestones.map((milestone) => {
+                const milestoneInvoice = getMilestoneInvoice(milestone.id);
+                
+                return (
+                  <div key={milestone.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <h4 className="font-medium">{milestone.title}</h4>
                           <span className={`px-2 py-1 rounded text-xs ${
-                            milestone.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                            milestone.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
+                            milestone.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            milestone.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
                             'bg-gray-100 text-gray-800'
                           }`}>
-                            {milestone.paymentStatus}
+                            {milestone.status.replace('-', ' ')}
                           </span>
+                          {milestone.paymentStatus && (
+                            <span className={`px-2 py-1 rounded text-xs ${
+                              milestone.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                              milestone.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {milestone.paymentStatus}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-slate-600 mb-1">{milestone.description}</p>
+                        <div className="flex items-center space-x-4 text-sm text-slate-500">
+                          <span>Due: {new Date(milestone.targetDate).toLocaleDateString()}</span>
+                          {milestone.amount && (
+                            <span>Value: ${milestone.amount.toLocaleString()}</span>
+                          )}
+                          <span>{milestone.completionPercentage}% complete</span>
+                        </div>
+                        
+                        {/* Invoice Status Display */}
+                        {milestoneInvoice && (
+                          <div className="mt-2">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-xs text-slate-500">Invoice:</span>
+                              <InvoiceStatusButton 
+                                invoiceId={milestoneInvoice.id}
+                                currentStatus={milestoneInvoice.status}
+                                onStatusChange={() => {
+                                  // Refresh data after status change
+                                  window.location.reload();
+                                }}
+                              />
+                            </div>
+                          </div>
                         )}
                       </div>
-                      <p className="text-sm text-slate-600 mb-1">{milestone.description}</p>
-                      <div className="flex items-center space-x-4 text-sm text-slate-500">
-                        <span>Due: {new Date(milestone.targetDate).toLocaleDateString()}</span>
-                        {milestone.amount && (
-                          <span>Value: ${milestone.amount.toLocaleString()}</span>
+                      <div className="flex items-center space-x-2">
+                        {milestone.status === 'completed' && milestone.paymentStatus === 'unpaid' && !milestoneInvoice && client && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleCreateInvoiceForMilestone(milestone)}
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            <FileText className="w-4 h-4 mr-1" />
+                            Invoice
+                          </Button>
                         )}
-                        <span>{milestone.completionPercentage}% complete</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {milestone.status === 'completed' && milestone.paymentStatus === 'unpaid' && client && (
+                        {milestone.status === 'completed' && milestone.paymentStatus === 'unpaid' && milestoneInvoice && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleQuickMarkAsPaid(milestone)}
+                            className="text-green-600 hover:text-green-700"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Mark Paid
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleCreateInvoiceForMilestone(milestone)}
-                          className="text-blue-600 hover:text-blue-700"
+                          onClick={() => setEditingMilestone(milestone)}
                         >
-                          <FileText className="w-4 h-4 mr-1" />
-                          Invoice
+                          <Edit className="w-4 h-4" />
                         </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setEditingMilestone(milestone)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => onDeleteMilestone(milestone.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onDeleteMilestone(milestone.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
