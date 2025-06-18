@@ -59,7 +59,7 @@ const ProjectOverview = ({
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Tasks ({tasks.length})</CardTitle>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+            <Button size="sm" className="bg-blue-600">
               <Plus className="w-4 h-4 mr-2" />
               Add Task
             </Button>
