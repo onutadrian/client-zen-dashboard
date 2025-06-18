@@ -1,13 +1,13 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Clock, Edit, Trash2 } from 'lucide-react';
+import { Plus, Clock, Edit, Trash2, FileText } from 'lucide-react';
 import ProjectBilledHours from './ProjectBilledHours';
 import LogProjectHoursModal from './LogProjectHoursModal';
 import AddProjectTaskModal from './AddProjectTaskModal';
 import AddMilestoneModal from './AddMilestoneModal';
 import EditMilestoneModal from './EditMilestoneModal';
+import AddInvoiceModal from './AddInvoiceModal';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
 import { Milestone } from '@/hooks/useMilestones';
@@ -63,8 +63,15 @@ const ProjectOverview = ({
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [showAddMilestoneModal, setShowAddMilestoneModal] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
+  const [showAddInvoiceModal, setShowAddInvoiceModal] = useState(false);
+  const [selectedMilestoneForInvoice, setSelectedMilestoneForInvoice] = useState<Milestone | null>(null);
 
   const isFixedPrice = project.pricingType === 'fixed';
+
+  const handleCreateInvoiceForMilestone = (milestone: Milestone) => {
+    setSelectedMilestoneForInvoice(milestone);
+    setShowAddInvoiceModal(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -73,7 +80,7 @@ const ProjectOverview = ({
         <h3 className="text-lg font-semibold">
           {isFixedPrice ? 'Progress & Revenue Tracking' : 'Time Tracking'}
         </h3>
-        {client && (
+        {client && !isFixedPrice && (
           <Button
             onClick={() => setShowLogHoursModal(true)}
             className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
@@ -81,6 +88,11 @@ const ProjectOverview = ({
             <Clock className="w-4 h-4 mr-2" />
             Log Hours
           </Button>
+        )}
+        {client && isFixedPrice && (
+          <div className="text-sm text-slate-500">
+            Time tracking optional for fixed-price projects
+          </div>
         )}
       </div>
       
@@ -148,6 +160,17 @@ const ProjectOverview = ({
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
+                      {milestone.status === 'completed' && milestone.paymentStatus === 'unpaid' && client && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCreateInvoiceForMilestone(milestone)}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          <FileText className="w-4 h-4 mr-1" />
+                          Invoice
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="outline"
@@ -229,7 +252,7 @@ const ProjectOverview = ({
       </Card>
 
       {/* Modals */}
-      {client && (
+      {client && !isFixedPrice && (
         <LogProjectHoursModal
           isOpen={showLogHoursModal}
           onClose={() => setShowLogHoursModal(false)}
@@ -260,6 +283,19 @@ const ProjectOverview = ({
           onClose={() => setEditingMilestone(null)}
           onUpdate={onUpdateMilestone}
           milestone={editingMilestone}
+        />
+      )}
+
+      {client && (
+        <AddInvoiceModal
+          isOpen={showAddInvoiceModal}
+          onClose={() => {
+            setShowAddInvoiceModal(false);
+            setSelectedMilestoneForInvoice(null);
+          }}
+          project={project}
+          client={client}
+          milestone={selectedMilestoneForInvoice || undefined}
         />
       )}
     </div>
