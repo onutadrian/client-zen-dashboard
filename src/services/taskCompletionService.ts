@@ -1,11 +1,10 @@
 
 import { Task } from '@/types/task';
-import { useHourEntries } from '@/hooks/useHourEntries';
+import { supabase } from '@/integrations/supabase/client';
 
 export const createHourEntryForCompletedTask = async (
   task: Task,
-  workedHours: number,
-  addHourEntry: ReturnType<typeof useHourEntries>['addHourEntry']
+  workedHours: number
 ) => {
   if (!task.projectId) {
     throw new Error('Task must have a project ID to create hour entry');
@@ -18,14 +17,36 @@ export const createHourEntryForCompletedTask = async (
     hours: workedHours
   });
 
-  await addHourEntry({
-    projectId: task.projectId,
-    clientId: task.clientId,
+  // Get the current authenticated user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError) throw userError;
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  // Create hour entry directly in Supabase
+  const supabaseEntry = {
+    project_id: task.projectId,
+    client_id: task.clientId,
     hours: workedHours,
     description: `Completed task: ${task.title}`,
     date: new Date().toISOString().split('T')[0],
-    billed: false
-  });
+    billed: false,
+    user_id: user.id
+  };
 
-  console.log('Hour entry created successfully');
+  console.log('Inserting hour entry:', supabaseEntry);
+
+  const { data, error } = await supabase
+    .from('hour_entries')
+    .insert([supabaseEntry])
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  console.log('Hour entry created successfully:', data);
+  
+  return data;
 };

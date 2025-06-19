@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useHourEntries } from './useHourEntries';
 import { Task, CreateTaskData, UpdateTaskData } from '@/types/task';
 import { 
   loadTasksFromDatabase, 
@@ -15,7 +14,6 @@ import { createHourEntryForCompletedTask } from '@/services/taskCompletionServic
 export const useTasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const { toast } = useToast();
-  const { addHourEntry } = useHourEntries();
 
   // Load tasks from Supabase on mount
   useEffect(() => {
@@ -65,7 +63,8 @@ export const useTasks = () => {
       // If task completed with hours and has projectId, create hour entry
       if (status === 'completed' && workedHours && completedTask?.projectId) {
         try {
-          await createHourEntryForCompletedTask(completedTask, workedHours, addHourEntry);
+          await createHourEntryForCompletedTask(completedTask, workedHours);
+          console.log('Hour entry created successfully for task:', taskId);
         } catch (hourError) {
           console.error('Error creating hour entry:', hourError);
           // Don't fail the task update if hour entry fails
