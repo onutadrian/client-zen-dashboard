@@ -35,6 +35,7 @@ const ProjectMilestoneSection = ({
   const [showAddInvoiceModal, setShowAddInvoiceModal] = useState(false);
   const [selectedMilestoneForInvoice, setSelectedMilestoneForInvoice] = useState<Milestone | null>(null);
   const [isCreatingInvoice, setIsCreatingInvoice] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const { invoices } = useInvoices();
   const isFixedPrice = project.pricingType === 'fixed';
@@ -60,11 +61,13 @@ const ProjectMilestoneSection = ({
     setShowAddInvoiceModal(false);
     setSelectedMilestoneForInvoice(null);
     setIsCreatingInvoice(null);
+    // Force refresh to show updated invoice status
+    setRefreshKey(prev => prev + 1);
   };
 
   const handleInvoiceStatusChange = () => {
-    // Force a re-render by updating the component state
-    // This ensures the UI reflects the updated invoice status
+    // Force a re-render by updating the refresh key
+    setRefreshKey(prev => prev + 1);
   };
 
   const getMilestoneInvoice = (milestoneId: string) => {
@@ -86,7 +89,7 @@ const ProjectMilestoneSection = ({
         </Button>
       </div>
 
-      <Card>
+      <Card key={refreshKey}>
         <CardContent className="p-6">
           {milestones.length === 0 ? (
             <div className="text-center py-8">
