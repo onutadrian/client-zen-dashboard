@@ -80,7 +80,7 @@ const MilestoneCard = ({
                 <span className="text-xs text-slate-500">Invoice:</span>
                 <InvoiceStatusButton 
                   invoiceId={milestoneInvoice.id}
-                  currentStatus={milestoneInvoice.status}
+                  currentStatus={milestoneInvoice.status as 'paid' | 'pending' | 'overdue'}
                   onStatusChange={onInvoiceStatusChange}
                 />
               </div>
