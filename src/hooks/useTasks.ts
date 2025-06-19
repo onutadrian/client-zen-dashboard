@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useHourEntries } from './useHourEntries';
 
 export interface Task {
   id: number;
@@ -46,6 +47,7 @@ const retryOperation = async <T>(
 export const useTasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const { toast } = useToast();
+  const { addHourEntry } = useHourEntries();
 
   // Load tasks from Supabase on mount
   useEffect(() => {
@@ -178,6 +180,40 @@ export const useTasks = () => {
 
       if (error) throw error;
 
+      // Get the task for creating hour entry
+      const completedTask = tasks.find(t => t.id === taskId);
+      
+      // If task completed with hours and has projectId, create hour entry
+      if (status === 'completed' && workedHours && completedTask?.projectId) {
+        try {
+          console.log('Creating hour entry for completed task:', {
+            taskId,
+            projectId: completedTask.projectId,
+            clientId: completedTask.clientId,
+            hours: workedHours
+          });
+
+          await addHourEntry({
+            projectId: completedTask.projectId,
+            clientId: completedTask.clientId,
+            hours: workedHours,
+            description: `Completed task: ${completedTask.title}`,
+            date: new Date().toISOString().split('T')[0],
+            billed: false
+          });
+
+          console.log('Hour entry created successfully');
+        } catch (hourError) {
+          console.error('Error creating hour entry:', hourError);
+          // Don't fail the task update if hour entry fails
+          toast({
+            title: "Warning",
+            description: "Task completed but failed to log hours. You can manually add the time entry.",
+            variant: "destructive"
+          });
+        }
+      }
+
       // Update local state
       setTasks(prev => prev.map(task => {
         if (task.id === taskId) {
@@ -202,7 +238,6 @@ export const useTasks = () => {
       });
 
       // Return the task and hours for client update
-      const completedTask = tasks.find(t => t.id === taskId);
       if (status === 'completed' && completedTask) {
         return { task: completedTask, hoursToLog: workedHours };
       }
