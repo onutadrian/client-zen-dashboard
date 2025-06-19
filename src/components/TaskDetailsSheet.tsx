@@ -19,6 +19,7 @@ interface Task {
   projectId?: string;
   estimatedHours?: number;
   actualHours?: number;
+  workedHours?: number;
   status: 'pending' | 'in-progress' | 'completed';
   notes: string;
   assets: string[];
@@ -29,7 +30,6 @@ interface Task {
 interface Project {
   id: string;
   name: string;
-  clientId: number;
 }
 
 interface TaskDetailsSheetProps {
@@ -91,20 +91,15 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
             </div>
           </div>
 
-          {/* Hours Information */}
-          {(task.estimatedHours || task.actualHours) && (
+          {/* Hours Information - Only show worked hours */}
+          {task.workedHours && task.workedHours > 0 && (
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-slate-700 flex items-center">
                 <Clock className="w-4 h-4 mr-2" />
-                Hours
+                Time Worked
               </h3>
               <div className="space-y-1 text-sm text-slate-600 ml-6">
-                {task.estimatedHours && (
-                  <div>Estimated: {task.estimatedHours}h</div>
-                )}
-                {task.actualHours && (
-                  <div>Actual: {task.actualHours}h</div>
-                )}
+                <div className="text-green-600 font-medium">{task.workedHours}h worked</div>
               </div>
             </div>
           )}

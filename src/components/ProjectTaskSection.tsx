@@ -16,6 +16,7 @@ interface Task {
   projectId?: string;
   estimatedHours?: number;
   actualHours?: number;
+  workedHours?: number;
   status: 'pending' | 'in-progress' | 'completed';
   notes: string;
   assets: string[];
@@ -74,9 +75,9 @@ const ProjectTaskSection = ({
                     <div>
                       <h4 className="font-medium">{task.title}</h4>
                       <p className="text-sm text-slate-600">{task.description}</p>
-                      {(task.estimatedHours || task.actualHours) && (
-                        <p className="text-sm text-slate-500 mt-1">
-                          {task.actualHours || 0}h / {task.estimatedHours || 0}h estimated
+                      {task.workedHours && task.workedHours > 0 && (
+                        <p className="text-sm text-green-600 mt-1">
+                          {task.workedHours}h worked
                         </p>
                       )}
                     </div>

@@ -15,6 +15,7 @@ interface Task {
   projectId?: string;
   estimatedHours?: number;
   actualHours?: number;
+  workedHours?: number;
   status: 'pending' | 'in-progress' | 'completed';
   notes: string;
   assets: string[];
@@ -62,49 +63,16 @@ const TaskTable = ({
   onDeleteTask, 
   onEditTask 
 }: TaskTableProps) => {
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'in-progress':
-        return <Clock className="w-4 h-4 text-blue-600" />;
-      case 'pending':
-        return <AlertCircle className="w-4 h-4 text-yellow-600" />;
-      default:
-        return null;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800 hover:bg-green-100';
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-100';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
-      default:
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
-    }
-  };
-
   const getProjectName = (projectId?: string) => {
     if (!projectId) return 'No Project';
     const project = projects.find(p => p.id === projectId);
     return project ? project.name : 'Unknown Project';
   };
 
-  const getClientPriceType = (clientId: number) => {
-    const client = clients.find(c => c.id === clientId);
-    return client ? client.priceType : 'hour';
-  };
-
   const isBilled = (task: Task) => {
-    // Find the client for this task
     const client = clients.find(c => c.id === task.clientId);
     if (!client || !client.hourEntries) return false;
 
-    // Check if there's a billed hour entry for this specific task
     const taskDescription = `Completed task: ${task.title}`;
     const taskHourEntry = client.hourEntries.find(entry => 
       entry.description === taskDescription && entry.billed === true
@@ -122,7 +90,7 @@ const TaskTable = ({
             <TableHead>Client</TableHead>
             <TableHead>Project</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Hours</TableHead>
+            <TableHead>Hours Worked</TableHead>
             <TableHead>Billed</TableHead>
             <TableHead>Created</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -183,11 +151,10 @@ const TaskTable = ({
               </TableCell>
               <TableCell>
                 <div className="text-sm">
-                  {task.estimatedHours && (
-                    <div>Est: {task.estimatedHours}h</div>
-                  )}
-                  {task.actualHours && (
-                    <div className="text-green-600">Actual: {task.actualHours}h</div>
+                  {task.workedHours && task.workedHours > 0 ? (
+                    <div className="text-green-600 font-medium">{task.workedHours}h</div>
+                  ) : (
+                    <div className="text-slate-400">-</div>
                   )}
                 </div>
               </TableCell>

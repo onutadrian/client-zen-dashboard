@@ -5,42 +5,19 @@ import { Plus } from 'lucide-react';
 import MilestoneCard from './MilestoneCard';
 import { Milestone } from '@/hooks/useMilestones';
 
-interface Invoice {
-  id: string;
-  status: string;
-  amount: number;
-  milestoneId?: string;
-}
-
 interface MilestonesListProps {
   milestones: Milestone[];
-  projectInvoices: Invoice[];
-  isCreatingInvoice: string | null;
   onAddMilestone: () => void;
   onEditMilestone: (milestone: Milestone) => void;
   onDeleteMilestone: (milestoneId: string) => void;
-  onCreateInvoiceForMilestone: (milestone: Milestone) => void;
-  onQuickMarkAsPaid: (milestone: Milestone) => void;
-  onInvoiceStatusChange: () => void;
-  hasClient: boolean;
 }
 
 const MilestonesList = ({
   milestones,
-  projectInvoices,
-  isCreatingInvoice,
   onAddMilestone,
   onEditMilestone,
-  onDeleteMilestone,
-  onCreateInvoiceForMilestone,
-  onQuickMarkAsPaid,
-  onInvoiceStatusChange,
-  hasClient
+  onDeleteMilestone
 }: MilestonesListProps) => {
-  const getMilestoneInvoice = (milestoneId: string) => {
-    return projectInvoices.find(inv => inv.milestoneId === milestoneId);
-  };
-
   if (milestones.length === 0) {
     return (
       <div className="text-center py-8">
@@ -58,25 +35,14 @@ const MilestonesList = ({
 
   return (
     <div className="space-y-4">
-      {milestones.map((milestone) => {
-        const milestoneInvoice = getMilestoneInvoice(milestone.id);
-        const isCreatingForThisMilestone = isCreatingInvoice === milestone.id;
-        
-        return (
-          <MilestoneCard
-            key={milestone.id}
-            milestone={milestone}
-            milestoneInvoice={milestoneInvoice}
-            isCreatingInvoice={isCreatingForThisMilestone}
-            onEdit={onEditMilestone}
-            onDelete={onDeleteMilestone}
-            onCreateInvoice={onCreateInvoiceForMilestone}
-            onMarkAsPaid={onQuickMarkAsPaid}
-            onInvoiceStatusChange={onInvoiceStatusChange}
-            hasClient={hasClient}
-          />
-        );
-      })}
+      {milestones.map((milestone) => (
+        <MilestoneCard
+          key={milestone.id}
+          milestone={milestone}
+          onEdit={onEditMilestone}
+          onDelete={onDeleteMilestone}
+        />
+      ))}
     </div>
   );
 };

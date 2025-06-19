@@ -5,12 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import AddMilestoneModal from './AddMilestoneModal';
 import EditMilestoneModal from './EditMilestoneModal';
-import AddInvoiceModal from './AddInvoiceModal';
 import MilestonesList from './MilestonesList';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
 import { Milestone } from '@/hooks/useMilestones';
-import { useInvoices } from '@/hooks/useInvoices';
 
 interface ProjectMilestoneSectionProps {
   project: Project;
@@ -31,44 +29,8 @@ const ProjectMilestoneSection = ({
 }: ProjectMilestoneSectionProps) => {
   const [showAddMilestoneModal, setShowAddMilestoneModal] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
-  const [showAddInvoiceModal, setShowAddInvoiceModal] = useState(false);
-  const [selectedMilestoneForInvoice, setSelectedMilestoneForInvoice] = useState<Milestone | null>(null);
-  const [isCreatingInvoice, setIsCreatingInvoice] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
 
-  const { invoices } = useInvoices();
   const isFixedPrice = project.pricingType === 'fixed';
-  const projectInvoices = invoices.filter(i => i.projectId === project.id);
-
-  const handleCreateInvoiceForMilestone = (milestone: Milestone) => {
-    const existingInvoice = projectInvoices.find(inv => inv.milestoneId === milestone.id);
-    if (existingInvoice) {
-      console.warn('Invoice already exists for this milestone');
-      return;
-    }
-    
-    setIsCreatingInvoice(milestone.id);
-    setSelectedMilestoneForInvoice(milestone);
-    setShowAddInvoiceModal(true);
-  };
-
-  const handleQuickMarkAsPaid = async (milestone: Milestone) => {
-    // This functionality is no longer needed since we removed paymentStatus
-    console.log('Mark as paid functionality removed');
-  };
-
-  const handleInvoiceModalClose = () => {
-    setShowAddInvoiceModal(false);
-    setSelectedMilestoneForInvoice(null);
-    setIsCreatingInvoice(null);
-    // Force refresh to show updated invoice status
-    setRefreshKey(prev => prev + 1);
-  };
-
-  const handleInvoiceStatusChange = () => {
-    // Force a re-render by updating the refresh key
-    setRefreshKey(prev => prev + 1);
-  };
 
   return (
     <>
@@ -85,19 +47,13 @@ const ProjectMilestoneSection = ({
         </Button>
       </div>
 
-      <Card key={refreshKey}>
+      <Card>
         <CardContent className="p-6">
           <MilestonesList
             milestones={milestones}
-            projectInvoices={projectInvoices}
-            isCreatingInvoice={isCreatingInvoice}
             onAddMilestone={() => setShowAddMilestoneModal(true)}
             onEditMilestone={setEditingMilestone}
             onDeleteMilestone={onDeleteMilestone}
-            onCreateInvoiceForMilestone={handleCreateInvoiceForMilestone}
-            onQuickMarkAsPaid={handleQuickMarkAsPaid}
-            onInvoiceStatusChange={handleInvoiceStatusChange}
-            hasClient={!!client}
           />
         </CardContent>
       </Card>
@@ -115,16 +71,6 @@ const ProjectMilestoneSection = ({
           onClose={() => setEditingMilestone(null)}
           onUpdate={onUpdateMilestone}
           milestone={editingMilestone}
-        />
-      )}
-
-      {client && (
-        <AddInvoiceModal
-          isOpen={showAddInvoiceModal}
-          onClose={handleInvoiceModalClose}
-          project={project}
-          client={client}
-          milestone={selectedMilestoneForInvoice || undefined}
         />
       )}
     </>

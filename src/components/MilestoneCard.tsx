@@ -1,49 +1,23 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, FileText, CheckCircle } from 'lucide-react';
-import InvoiceStatusButton from './InvoiceStatusButton';
-import DuplicateInvoiceWarning from './DuplicateInvoiceWarning';
+import { Edit, Trash2 } from 'lucide-react';
 import { Milestone } from '@/hooks/useMilestones';
 import { formatDate } from '@/lib/utils';
 
-interface Invoice {
-  id: string;
-  status: string;
-  amount: number;
-}
-
 interface MilestoneCardProps {
   milestone: Milestone;
-  milestoneInvoice?: Invoice;
-  isCreatingInvoice: boolean;
   onEdit: (milestone: Milestone) => void;
   onDelete: (milestoneId: string) => void;
-  onCreateInvoice: (milestone: Milestone) => void;
-  onMarkAsPaid: (milestone: Milestone) => void;
-  onInvoiceStatusChange: () => void;
-  hasClient: boolean;
 }
 
 const MilestoneCard = ({
   milestone,
-  milestoneInvoice,
-  isCreatingInvoice,
   onEdit,
-  onDelete,
-  onCreateInvoice,
-  onMarkAsPaid,
-  onInvoiceStatusChange,
-  hasClient
+  onDelete
 }: MilestoneCardProps) => {
   return (
     <div className="border rounded-lg p-4">
-      {isCreatingInvoice && milestoneInvoice && (
-        <div className="mb-4">
-          <DuplicateInvoiceWarning milestoneTitle={milestone.title} />
-        </div>
-      )}
-      
       <div className="flex items-start justify-between">
         <div className="flex-1 mr-4">
           <div className="flex items-center space-x-2 mb-2">
@@ -64,40 +38,10 @@ const MilestoneCard = ({
             )}
             <span>{milestone.completionPercentage}% complete</span>
           </div>
-          
-          {milestoneInvoice && (
-            <div className="mt-2">
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-slate-500">Invoice:</span>
-                <InvoiceStatusButton 
-                  invoiceId={milestoneInvoice.id}
-                  currentStatus={milestoneInvoice.status as 'paid' | 'pending' | 'overdue'}
-                  onStatusChange={onInvoiceStatusChange}
-                />
-              </div>
-            </div>
-          )}
         </div>
         
-        {/* Top right action buttons */}
+        {/* Action buttons */}
         <div className="flex items-center space-x-2 flex-shrink-0">
-          {milestone.status === 'completed' && !milestoneInvoice && hasClient && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onCreateInvoice(milestone)}
-              disabled={isCreatingInvoice}
-              className="text-blue-600 hover:text-blue-700 disabled:opacity-50"
-            >
-              <FileText className="w-4 h-4 mr-1" />
-              {isCreatingInvoice ? 'Creating...' : 'Invoice'}
-            </Button>
-          )}
-          {milestoneInvoice && (
-            <div className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
-              Invoice exists
-            </div>
-          )}
           <Button
             size="sm"
             variant="outline"
