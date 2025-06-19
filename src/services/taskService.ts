@@ -36,6 +36,13 @@ export const loadTasksFromDatabase = async (): Promise<Task[]> => {
 };
 
 export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Task> => {
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
   // Use the provided project_id or generate a temporary one
   const projectId = newTask.projectId || '00000000-0000-0000-0000-000000000000';
 
@@ -50,7 +57,8 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
     notes: newTask.notes,
     assets: newTask.assets,
     start_date: newTask.startDate,
-    end_date: newTask.endDate
+    end_date: newTask.endDate,
+    user_id: user.id // Add the user_id to satisfy RLS policy
   };
 
   const result = await retryOperation(async () => {
