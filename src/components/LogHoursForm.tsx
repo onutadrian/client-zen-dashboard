@@ -75,8 +75,8 @@ const LogHoursForm = ({
           <Input
             id="hours"
             type="number"
-            step={getStepValue(project.pricingType)}
-            min="0.1"
+            step="any"
+            min="0"
             placeholder={getPlaceholder(project.pricingType)}
             value={hours}
             onChange={(e) => setHours(e.target.value)}
