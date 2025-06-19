@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Clock, Save } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Clock, Save, Plus } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
+import { Milestone } from '@/hooks/useMilestones';
 import { useHourEntries } from '@/hooks/useHourEntries';
 
 interface LogProjectHoursModalProps {
@@ -16,14 +18,29 @@ interface LogProjectHoursModalProps {
   onClose: () => void;
   project: Project;
   client: Client;
+  milestones: Milestone[];
+  onCreateMilestone?: () => void;
 }
 
-const LogProjectHoursModal = ({ isOpen, onClose, project, client }: LogProjectHoursModalProps) => {
+const LogProjectHoursModal = ({ 
+  isOpen, 
+  onClose, 
+  project, 
+  client, 
+  milestones,
+  onCreateMilestone 
+}: LogProjectHoursModalProps) => {
   const [hours, setHours] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [billed, setBilled] = useState(false);
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState<string>('');
   const { addHourEntry } = useHourEntries();
+
+  // Filter milestones that are not completed
+  const availableMilestones = milestones.filter(m => 
+    m.status === 'pending' || m.status === 'in-progress'
+  );
 
   const getTimeLabel = () => {
     switch (client.priceType) {
@@ -70,6 +87,19 @@ const LogProjectHoursModal = ({ isOpen, onClose, project, client }: LogProjectHo
     }
   };
 
+  const getButtonText = () => {
+    switch (client.priceType) {
+      case 'day':
+        return 'Log Days';
+      case 'week':
+        return 'Log Weeks';
+      case 'month':
+        return 'Log Months';
+      default:
+        return 'Log Hours';
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!hours || isNaN(Number(hours)) || Number(hours) <= 0) {
@@ -100,7 +130,8 @@ const LogProjectHoursModal = ({ isOpen, onClose, project, client }: LogProjectHo
       hours: hoursEquivalent,
       description,
       date,
-      billed
+      billed,
+      milestoneId: selectedMilestoneId || undefined
     });
 
     // Reset form
@@ -108,6 +139,7 @@ const LogProjectHoursModal = ({ isOpen, onClose, project, client }: LogProjectHo
     setDescription('');
     setDate(new Date().toISOString().split('T')[0]);
     setBilled(false);
+    setSelectedMilestoneId('');
     onClose();
   };
 
@@ -117,7 +149,7 @@ const LogProjectHoursModal = ({ isOpen, onClose, project, client }: LogProjectHo
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Clock className="w-5 h-5 mr-2" />
-            Log Time for {project.name}
+            {getButtonText()} for {project.name}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -144,6 +176,36 @@ const LogProjectHoursModal = ({ isOpen, onClose, project, client }: LogProjectHo
                 onChange={(e) => setDate(e.target.value)}
                 required
               />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="milestone">Milestone (Optional)</Label>
+            <div className="flex gap-2">
+              <Select value={selectedMilestoneId} onValueChange={setSelectedMilestoneId}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select milestone or leave unassigned" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No milestone (unassigned)</SelectItem>
+                  {availableMilestones.map((milestone) => (
+                    <SelectItem key={milestone.id} value={milestone.id}>
+                      {milestone.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {onCreateMilestone && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={onCreateMilestone}
+                  className="px-3"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           </div>
           
@@ -176,7 +238,7 @@ const LogProjectHoursModal = ({ isOpen, onClose, project, client }: LogProjectHo
               className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
             >
               <Save className="w-4 h-4 mr-2" />
-              Log Time
+              {getButtonText()}
             </Button>
           </div>
         </form>

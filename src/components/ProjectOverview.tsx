@@ -57,6 +57,7 @@ const ProjectOverview = ({
         project={project}
         client={client}
         milestones={milestones}
+        onAddMilestone={onAddMilestone}
       />
 
       {/* Milestones Section */}

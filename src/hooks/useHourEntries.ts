@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +14,7 @@ export interface HourEntry {
   createdAt: string;
   updatedAt: string;
   userId?: string;
+  milestoneId?: string;
 }
 
 export const useHourEntries = () => {
@@ -48,7 +50,8 @@ export const useHourEntries = () => {
         billed: entry.billed,
         createdAt: entry.created_at,
         updatedAt: entry.updated_at,
-        userId: entry.user_id || undefined
+        userId: entry.user_id || undefined,
+        milestoneId: entry.milestone_id || undefined
       }));
 
       console.log('useHourEntries: Transformed entries:', transformedEntries);
@@ -73,7 +76,8 @@ export const useHourEntries = () => {
         description: newEntry.description || null,
         date: newEntry.date,
         billed: newEntry.billed,
-        user_id: newEntry.userId || null
+        user_id: newEntry.userId || null,
+        milestone_id: newEntry.milestoneId || null
       };
 
       const { data, error } = await supabase
@@ -95,7 +99,8 @@ export const useHourEntries = () => {
         billed: data.billed,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
-        userId: data.user_id || undefined
+        userId: data.user_id || undefined,
+        milestoneId: data.milestone_id || undefined
       };
 
       setHourEntries(prev => [transformedEntry, ...prev]);
@@ -125,6 +130,7 @@ export const useHourEntries = () => {
       if (updatedEntry.date) supabaseUpdate.date = updatedEntry.date;
       if (updatedEntry.billed !== undefined) supabaseUpdate.billed = updatedEntry.billed;
       if (updatedEntry.userId !== undefined) supabaseUpdate.user_id = updatedEntry.userId || null;
+      if (updatedEntry.milestoneId !== undefined) supabaseUpdate.milestone_id = updatedEntry.milestoneId || null;
 
       const { error } = await supabase
         .from('hour_entries')

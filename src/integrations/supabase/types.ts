@@ -69,6 +69,7 @@ export type Database = {
           description: string | null
           hours: number
           id: number
+          milestone_id: string | null
           project_id: string
           updated_at: string
           user_id: string | null
@@ -81,6 +82,7 @@ export type Database = {
           description?: string | null
           hours: number
           id?: number
+          milestone_id?: string | null
           project_id: string
           updated_at?: string
           user_id?: string | null
@@ -93,6 +95,7 @@ export type Database = {
           description?: string | null
           hours?: number
           id?: number
+          milestone_id?: string | null
           project_id?: string
           updated_at?: string
           user_id?: string | null
@@ -103,6 +106,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hour_entries_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
             referencedColumns: ["id"]
           },
           {
