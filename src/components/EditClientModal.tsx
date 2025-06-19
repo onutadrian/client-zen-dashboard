@@ -14,8 +14,24 @@ interface EditClientModalProps {
 }
 
 const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalProps) => {
+  // Map old price types to new ones for backward compatibility
+  const mapPriceType = (priceType: string) => {
+    const mapping = {
+      'hour': 'hourly',
+      'day': 'daily',
+      'week': 'weekly',
+      'month': 'monthly',
+      'hourly': 'hourly',
+      'daily': 'daily',
+      'weekly': 'weekly',
+      'monthly': 'monthly'
+    };
+    return mapping[priceType] || 'hourly';
+  };
+
   const [formData, setFormData] = useState({
     ...client,
+    priceType: mapPriceType(client.priceType),
     documents: client.documents || [],
     links: client.links || [],
     people: client.people || [],
@@ -120,7 +136,6 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
     const newErrors = {...errors};
     let hasErrors = false;
 
-    // Validate required fields
     if (!newInvoice.amount || parseFloat(newInvoice.amount) <= 0) {
       newErrors.invoiceAmount = 'Amount must be greater than 0';
       hasErrors = true;
@@ -226,10 +241,10 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
                 onChange={(e) => setFormData({ ...formData, priceType: e.target.value })}
               >
                 <option value="">Select type</option>
-                <option value="hour">Per Hour</option>
-                <option value="day">Per Day</option>
-                <option value="week">Per Week</option>
-                <option value="month">Per Month</option>
+                <option value="hourly">Per Hour</option>
+                <option value="daily">Per Day</option>
+                <option value="weekly">Per Week</option>
+                <option value="monthly">Per Month</option>
               </select>
               {errors.priceType && <p className="text-red-500 text-sm mt-1">{errors.priceType}</p>}
             </div>
@@ -436,11 +451,9 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
-              {/* Error messages */}
               {errors.invoiceAmount && <p className="text-red-500 text-sm">{errors.invoiceAmount}</p>}
               {errors.invoiceDate && <p className="text-red-500 text-sm">{errors.invoiceDate}</p>}
               
-              {/* Existing invoices */}
               {formData.invoices.map((invoice: any, index: number) => (
                 <div key={index} className="grid grid-cols-6 gap-2 items-center bg-slate-50 p-3 rounded-lg">
                   <Input
