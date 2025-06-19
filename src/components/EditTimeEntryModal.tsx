@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Save, Clock } from 'lucide-react';
 import { HourEntry, useHourEntries } from '@/hooks/useHourEntries';
+import { useMilestones } from '@/hooks/useMilestones';
 import { formatDateForInput } from '@/lib/utils';
 
 interface EditTimeEntryModalProps {
@@ -21,9 +23,14 @@ const EditTimeEntryModal = ({ isOpen, onClose, timeEntry }: EditTimeEntryModalPr
   const [description, setDescription] = useState(timeEntry.description || '');
   const [date, setDate] = useState(timeEntry.date);
   const [billed, setBilled] = useState(timeEntry.billed);
+  const [milestoneId, setMilestoneId] = useState(timeEntry.milestoneId || '');
   const [isUpdating, setIsUpdating] = useState(false);
 
   const { updateHourEntry } = useHourEntries();
+  const { milestones } = useMilestones();
+
+  // Filter milestones for the same project as the time entry
+  const projectMilestones = milestones.filter(milestone => milestone.projectId === timeEntry.projectId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +42,8 @@ const EditTimeEntryModal = ({ isOpen, onClose, timeEntry }: EditTimeEntryModalPr
         hours: parseFloat(hours),
         description: description || undefined,
         date,
-        billed
+        billed,
+        milestoneId: milestoneId || undefined
       });
       onClose();
     } catch (error) {
@@ -80,6 +88,23 @@ const EditTimeEntryModal = ({ isOpen, onClose, timeEntry }: EditTimeEntryModalPr
                 required
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="milestone">Milestone (Optional)</Label>
+            <Select value={milestoneId} onValueChange={setMilestoneId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a milestone" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">No milestone</SelectItem>
+                {projectMilestones.map((milestone) => (
+                  <SelectItem key={milestone.id} value={milestone.id}>
+                    {milestone.title} ({new Date(milestone.targetDate).toLocaleDateString()})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
