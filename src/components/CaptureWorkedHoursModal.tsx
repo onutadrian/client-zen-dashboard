@@ -66,7 +66,6 @@ const CaptureWorkedHoursModal = ({
               type="number"
               step="0.25"
               min="0.25"
-              max="24"
               value={workedHours}
               onChange={(e) => setWorkedHours(parseFloat(e.target.value) || 0)}
               placeholder="Enter hours worked"
