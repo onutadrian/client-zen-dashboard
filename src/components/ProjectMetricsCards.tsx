@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { formatCurrency } from '@/lib/currency';
 
 interface ProjectMetricsCardsProps {
   isFixedPrice: boolean;
@@ -10,6 +11,7 @@ interface ProjectMetricsCardsProps {
   unbilledRevenue: number;
   totalMilestoneValue?: number;
   completedMilestoneValue?: number;
+  displayCurrency: string;
 }
 
 const ProjectMetricsCards = ({
@@ -20,7 +22,8 @@ const ProjectMetricsCards = ({
   billedRevenue,
   unbilledRevenue,
   totalMilestoneValue = 0,
-  completedMilestoneValue = 0
+  completedMilestoneValue = 0,
+  displayCurrency
 }: ProjectMetricsCardsProps) => {
   const showMilestoneTracking = isFixedPrice && totalMilestoneValue > 0;
 
@@ -29,28 +32,28 @@ const ProjectMetricsCards = ({
       <>
         <div className="text-center p-4 rounded-lg bg-slate-50">
           <p className="text-zinc-950 text-4xl font-normal">
-            ${unbilledRevenue.toLocaleString()}
+            {formatCurrency(unbilledRevenue, displayCurrency)}
           </p>
           <p className="text-slate-600 py-[24px] text-base">Unbilled Revenue</p>
         </div>
 
         <div className="text-center p-4 rounded-lg bg-slate-50">
           <p className="text-zinc-950 text-4xl font-normal">
-            ${totalMilestoneValue.toLocaleString()}
+            {formatCurrency(totalMilestoneValue, displayCurrency)}
           </p>
           <p className="text-slate-600 py-[24px] text-base">Total Value</p>
         </div>
 
         <div className="text-center p-4 rounded-lg bg-slate-50">
           <p className="text-zinc-950 text-4xl font-normal">
-            ${completedMilestoneValue.toLocaleString()}
+            {formatCurrency(completedMilestoneValue, displayCurrency)}
           </p>
           <p className="text-slate-600 py-[24px] text-base">Earned Value</p>
         </div>
 
         <div className="text-center p-4 rounded-lg bg-slate-50">
           <p className="text-zinc-950 text-4xl font-normal">
-            ${billedRevenue.toLocaleString()}
+            {formatCurrency(billedRevenue, displayCurrency)}
           </p>
           <p className="text-slate-600 py-[24px] text-base">Billed Revenue</p>
         </div>
@@ -77,7 +80,7 @@ const ProjectMetricsCards = ({
 
       <div className="text-center p-4 rounded-lg bg-slate-50">
         <p className="text-zinc-950 font-normal text-4xl">
-          ${billedRevenue.toLocaleString()}
+          {formatCurrency(billedRevenue, displayCurrency)}
         </p>
         <p className="text-slate-600 py-[24px] text-base">Billed Revenue</p>
       </div>

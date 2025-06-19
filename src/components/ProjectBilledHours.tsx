@@ -8,6 +8,8 @@ import { Client } from '@/hooks/useClients';
 import { Milestone } from '@/hooks/useMilestones';
 import { useHourEntries } from '@/hooks/useHourEntries';
 import { useInvoices } from '@/hooks/useInvoices';
+import { useCurrency } from '@/hooks/useCurrency';
+import { convertCurrency, formatCurrency } from '@/lib/currency';
 
 interface ProjectBilledHoursProps {
   project: Project;
@@ -18,6 +20,7 @@ interface ProjectBilledHoursProps {
 const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursProps) => {
   const { hourEntries } = useHourEntries();
   const { invoices } = useInvoices();
+  const { displayCurrency } = useCurrency();
   
   const projectHours = hourEntries.filter(entry => entry.projectId === project.id);
   const projectInvoices = invoices.filter(invoice => invoice.projectId === project.id);
@@ -27,24 +30,38 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
   const billedHours = projectHours.filter(entry => entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
   const unbilledHours = projectHours.filter(entry => !entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
   
-  // Calculate revenue from invoices
+  // Calculate revenue from invoices with currency conversion
   const billedRevenue = projectInvoices
     .filter(invoice => invoice.status === 'paid')
-    .reduce((sum, invoice) => sum + invoice.amount, 0);
+    .reduce((sum, invoice) => {
+      const convertedAmount = convertCurrency(invoice.amount, invoice.currency, displayCurrency);
+      return sum + convertedAmount;
+    }, 0);
   
-  // Calculate unbilled revenue based on project pricing and unbilled hours
+  // Calculate unbilled revenue based on project pricing and unbilled hours with currency conversion
   let unbilledRevenue = 0;
   if (project.pricingType === 'hourly' && project.hourlyRate) {
-    unbilledRevenue = unbilledHours * project.hourlyRate;
+    const convertedRate = convertCurrency(project.hourlyRate, project.currency, displayCurrency);
+    unbilledRevenue = unbilledHours * convertedRate;
   } else if (project.pricingType === 'daily' && project.dailyRate) {
-    unbilledRevenue = unbilledHours * project.dailyRate;
+    const convertedRate = convertCurrency(project.dailyRate, project.currency, displayCurrency);
+    unbilledRevenue = unbilledHours * convertedRate;
   }
   
-  // For fixed price projects, calculate milestone values
-  const totalMilestoneValue = milestones.reduce((sum, m) => sum + (m.amount || 0), 0);
+  // For fixed price projects, calculate milestone values with currency conversion
+  const totalMilestoneValue = milestones.reduce((sum, m) => {
+    const amount = m.amount || 0;
+    const convertedAmount = convertCurrency(amount, project.currency, displayCurrency);
+    return sum + convertedAmount;
+  }, 0);
+  
   const completedMilestoneValue = milestones
     .filter(m => m.status === 'completed')
-    .reduce((sum, m) => sum + (m.amount || 0), 0);
+    .reduce((sum, m) => {
+      const amount = m.amount || 0;
+      const convertedAmount = convertCurrency(amount, project.currency, displayCurrency);
+      return sum + convertedAmount;
+    }, 0);
 
   const isFixedPrice = project.pricingType === 'fixed';
 
@@ -83,6 +100,7 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
             unbilledRevenue={unbilledRevenue}
             totalMilestoneValue={totalMilestoneValue}
             completedMilestoneValue={completedMilestoneValue}
+            displayCurrency={displayCurrency}
           />
         </div>
         
@@ -90,7 +108,7 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
           <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-sm text-amber-800">
               You have <strong>{unbilledHours.toFixed(2)} hours</strong> of unbilled work worth{' '}
-              <strong>${unbilledRevenue.toLocaleString()}</strong>. Consider creating an invoice.
+              <strong>{formatCurrency(unbilledRevenue, displayCurrency)}</strong>. Consider creating an invoice.
             </p>
           </div>
         )}

@@ -7,6 +7,8 @@ import { Project } from '@/hooks/useProjects';
 import { Task } from '@/hooks/useTasks';
 import { Milestone } from '@/hooks/useMilestones';
 import { Invoice, useInvoices } from '@/hooks/useInvoices';
+import { useCurrency } from '@/hooks/useCurrency';
+import { convertCurrency, formatCurrency } from '@/lib/currency';
 
 interface ProjectBudgetTrackingProps {
   project: Project;
@@ -17,17 +19,30 @@ interface ProjectBudgetTrackingProps {
 
 const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBudgetTrackingProps) => {
   const { invoices } = useInvoices();
+  const { displayCurrency } = useCurrency();
   const isFixedPrice = project.pricingType === 'fixed';
   
   // Filter project-specific data
   const projectMilestones = milestones.filter(m => m.projectId === project.id);
   const projectInvoices = invoices.filter(i => i.projectId === project.id);
   
-  // Calculate milestone-based financials
-  const totalMilestoneAmount = projectMilestones.reduce((sum, milestone) => sum + (milestone.amount || 0), 0);
-  const totalInvoiceAmount = projectInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+  // Calculate milestone-based financials with currency conversion
+  const totalMilestoneAmount = projectMilestones.reduce((sum, milestone) => {
+    const amount = milestone.amount || 0;
+    const convertedAmount = convertCurrency(amount, project.currency, displayCurrency);
+    return sum + convertedAmount;
+  }, 0);
+  
+  const totalInvoiceAmount = projectInvoices.reduce((sum, invoice) => {
+    const convertedAmount = convertCurrency(invoice.amount, invoice.currency, displayCurrency);
+    return sum + convertedAmount;
+  }, 0);
+  
   const paidInvoices = projectInvoices.filter(i => i.status === 'paid');
-  const totalPaidAmount = paidInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+  const totalPaidAmount = paidInvoices.reduce((sum, invoice) => {
+    const convertedAmount = convertCurrency(invoice.amount, invoice.currency, displayCurrency);
+    return sum + convertedAmount;
+  }, 0);
   
   // Calculate progress metrics
   const completedMilestones = projectMilestones.filter(m => m.status === 'completed').length;
@@ -41,11 +56,11 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
   const totalActualHours = tasks.reduce((sum, task) => sum + (task.actualHours || 0), 0);
   const hourlyRate = isFixedPrice ? (client?.price || 0) : (project.hourlyRate || 0);
 
-  // Budget calculations based on project type
+  // Budget calculations based on project type with currency conversion
   let budgetMetrics;
   if (isFixedPrice) {
-    const fixedBudget = project.fixedPrice || totalMilestoneAmount;
-    const costSoFar = totalActualHours * hourlyRate;
+    const fixedBudget = convertCurrency(project.fixedPrice || totalMilestoneAmount, project.currency, displayCurrency);
+    const costSoFar = totalActualHours * convertCurrency(hourlyRate, project.currency, displayCurrency);
     budgetMetrics = {
       totalBudget: fixedBudget,
       spentAmount: costSoFar,
@@ -55,8 +70,8 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
       revenueProgress: fixedBudget > 0 ? (totalPaidAmount / fixedBudget) * 100 : 0
     };
   } else {
-    const estimatedBudget = (project.estimatedHours || totalEstimatedHours) * hourlyRate;
-    const actualCost = totalActualHours * hourlyRate;
+    const estimatedBudget = (project.estimatedHours || totalEstimatedHours) * convertCurrency(hourlyRate, project.currency, displayCurrency);
+    const actualCost = totalActualHours * convertCurrency(hourlyRate, project.currency, displayCurrency);
     budgetMetrics = {
       totalBudget: estimatedBudget,
       spentAmount: actualCost,
@@ -80,12 +95,12 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
         </span>
         {isFixedPrice && (
           <span className="text-sm text-slate-600">
-            Budget: ${budgetMetrics.totalBudget.toLocaleString()}
+            Budget: {formatCurrency(budgetMetrics.totalBudget, displayCurrency)}
           </span>
         )}
         {!isFixedPrice && (
           <span className="text-sm text-slate-600">
-            Rate: ${project.hourlyRate}/hr
+            Rate: {formatCurrency(convertCurrency(project.hourlyRate || 0, project.currency, displayCurrency), displayCurrency)}/hr
           </span>
         )}
       </div>
@@ -96,7 +111,7 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
           <CardContent className="p-6 text-center">
             <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
             <p className="text-2xl font-bold text-blue-600">
-              ${budgetMetrics.totalBudget.toLocaleString()}
+              {formatCurrency(budgetMetrics.totalBudget, displayCurrency)}
             </p>
             <p className="text-sm text-slate-600">Total Budget</p>
           </CardContent>
@@ -106,7 +121,7 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
           <CardContent className="p-6 text-center">
             <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-2" />
             <p className="text-2xl font-bold text-green-600">
-              ${budgetMetrics.revenueEarned.toLocaleString()}
+              {formatCurrency(budgetMetrics.revenueEarned, displayCurrency)}
             </p>
             <p className="text-sm text-slate-600">Revenue Earned</p>
           </CardContent>
@@ -116,7 +131,7 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
           <CardContent className="p-6 text-center">
             <TrendingUp className="w-8 h-8 text-purple-600 mx-auto mb-2" />
             <p className="text-2xl font-bold text-purple-600">
-              ${(totalInvoiceAmount - budgetMetrics.revenueEarned).toLocaleString()}
+              {formatCurrency(totalInvoiceAmount - budgetMetrics.revenueEarned, displayCurrency)}
             </p>
             <p className="text-sm text-slate-600">Pending Revenue</p>
           </CardContent>
@@ -193,6 +208,7 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
                 // Check if there's an invoice for this milestone
                 const milestoneInvoice = projectInvoices.find(inv => inv.milestoneId === milestone.id);
                 const invoiceStatus = milestoneInvoice?.status || 'unpaid';
+                const milestoneAmount = convertCurrency(milestone.amount || 0, project.currency, displayCurrency);
                 
                 return (
                   <div key={milestone.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -220,7 +236,7 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
                     </div>
                     <div className="text-right">
                       <p className="font-medium">
-                        ${(milestone.amount || 0).toLocaleString()}
+                        {formatCurrency(milestoneAmount, displayCurrency)}
                       </p>
                       <p className={`text-sm ${
                         invoiceStatus === 'paid' ? 'text-green-600' :
@@ -256,20 +272,20 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
             <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
               <span className="font-medium">Effective Hourly Rate</span>
               <span className="font-bold">
-                ${totalActualHours > 0 ? (budgetMetrics.revenueEarned / totalActualHours).toFixed(2) : '0'}/hr
+                {formatCurrency(totalActualHours > 0 ? (budgetMetrics.revenueEarned / totalActualHours) : 0, displayCurrency)}/hr
               </span>
             </div>
             <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
               <span className="font-medium">Revenue per Hour</span>
               <span className="font-bold">
-                ${totalActualHours > 0 ? (totalInvoiceAmount / totalActualHours).toFixed(2) : '0'}/hr
+                {formatCurrency(totalActualHours > 0 ? (totalInvoiceAmount / totalActualHours) : 0, displayCurrency)}/hr
               </span>
             </div>
             {isFixedPrice && (
               <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
                 <span className="font-medium">Target Hourly Rate</span>
                 <span className="font-bold">
-                  ${totalEstimatedHours > 0 ? (budgetMetrics.totalBudget / totalEstimatedHours).toFixed(2) : '0'}/hr
+                  {formatCurrency(totalEstimatedHours > 0 ? (budgetMetrics.totalBudget / totalEstimatedHours) : 0, displayCurrency)}/hr
                 </span>
               </div>
             )}

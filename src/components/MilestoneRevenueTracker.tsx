@@ -5,30 +5,49 @@ import { Progress } from '@/components/ui/progress';
 import { TrendingUp, Target, DollarSign, Clock } from 'lucide-react';
 import { Milestone } from '@/hooks/useMilestones';
 import { useInvoices } from '@/hooks/useInvoices';
+import { useCurrency } from '@/hooks/useCurrency';
+import { convertCurrency, formatCurrency } from '@/lib/currency';
 
 interface MilestoneRevenueTrackerProps {
   milestones: Milestone[];
   projectId: string;
+  projectCurrency: string;
 }
 
-const MilestoneRevenueTracker = ({ milestones, projectId }: MilestoneRevenueTrackerProps) => {
+const MilestoneRevenueTracker = ({ milestones, projectId, projectCurrency }: MilestoneRevenueTrackerProps) => {
   const { invoices } = useInvoices();
+  const { displayCurrency } = useCurrency();
   
   const projectInvoices = invoices.filter(i => i.projectId === projectId);
   
-  // Calculate revenue metrics
-  const totalProjectValue = milestones.reduce((sum, m) => sum + (m.amount || 0), 0);
+  // Calculate revenue metrics with currency conversion
+  const totalProjectValue = milestones.reduce((sum, m) => {
+    const amount = m.amount || 0;
+    const convertedAmount = convertCurrency(amount, projectCurrency, displayCurrency);
+    return sum + convertedAmount;
+  }, 0);
+  
   const completedValue = milestones
     .filter(m => m.status === 'completed')
-    .reduce((sum, m) => sum + (m.amount || 0), 0);
+    .reduce((sum, m) => {
+      const amount = m.amount || 0;
+      const convertedAmount = convertCurrency(amount, projectCurrency, displayCurrency);
+      return sum + convertedAmount;
+    }, 0);
   
   const paidAmount = projectInvoices
     .filter(i => i.status === 'paid')
-    .reduce((sum, i) => sum + i.amount, 0);
+    .reduce((sum, i) => {
+      const convertedAmount = convertCurrency(i.amount, i.currency, displayCurrency);
+      return sum + convertedAmount;
+    }, 0);
   
   const pendingAmount = projectInvoices
     .filter(i => i.status === 'pending')
-    .reduce((sum, i) => sum + i.amount, 0);
+    .reduce((sum, i) => {
+      const convertedAmount = convertCurrency(i.amount, i.currency, displayCurrency);
+      return sum + convertedAmount;
+    }, 0);
   
   const completionPercentage = totalProjectValue > 0 ? (completedValue / totalProjectValue) * 100 : 0;
   const paymentPercentage = totalProjectValue > 0 ? (paidAmount / totalProjectValue) * 100 : 0;
@@ -48,7 +67,7 @@ const MilestoneRevenueTracker = ({ milestones, projectId }: MilestoneRevenueTrac
               <Target className="w-5 h-5 text-blue-600 mr-1" />
               <span className="text-sm font-medium text-blue-800">Project Value</span>
             </div>
-            <p className="text-2xl font-bold text-blue-900">${totalProjectValue.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-blue-900">{formatCurrency(totalProjectValue, displayCurrency)}</p>
           </div>
           
           <div className="text-center p-3 rounded-lg bg-green-50">
@@ -56,7 +75,7 @@ const MilestoneRevenueTracker = ({ milestones, projectId }: MilestoneRevenueTrac
               <DollarSign className="w-5 h-5 text-green-600 mr-1" />
               <span className="text-sm font-medium text-green-800">Paid Revenue</span>
             </div>
-            <p className="text-2xl font-bold text-green-900">${paidAmount.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-green-900">{formatCurrency(paidAmount, displayCurrency)}</p>
           </div>
           
           <div className="text-center p-3 rounded-lg bg-yellow-50">
@@ -64,7 +83,7 @@ const MilestoneRevenueTracker = ({ milestones, projectId }: MilestoneRevenueTrac
               <Clock className="w-5 h-5 text-yellow-600 mr-1" />
               <span className="text-sm font-medium text-yellow-800">Pending</span>
             </div>
-            <p className="text-2xl font-bold text-yellow-900">${pendingAmount.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-yellow-900">{formatCurrency(pendingAmount, displayCurrency)}</p>
           </div>
         </div>
 
@@ -89,7 +108,7 @@ const MilestoneRevenueTracker = ({ milestones, projectId }: MilestoneRevenueTrac
         {pendingAmount > 0 && (
           <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-sm text-amber-800">
-              <strong>${pendingAmount.toLocaleString()}</strong> in pending invoices ready for collection
+              <strong>{formatCurrency(pendingAmount, displayCurrency)}</strong> in pending invoices ready for collection
             </p>
           </div>
         )}
