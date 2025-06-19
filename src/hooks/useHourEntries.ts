@@ -30,19 +30,13 @@ export const useHourEntries = () => {
       async (event, session) => {
         console.log('useHourEntries: Auth state changed:', event, 'User ID:', session?.user?.id);
         
-        const wasAuthenticated = isAuthenticated;
         const nowAuthenticated = !!session?.user;
-        
         setIsAuthenticated(nowAuthenticated);
         
-        // Load data when user becomes authenticated or on sign in
-        if (nowAuthenticated && (!wasAuthenticated || event === 'SIGNED_IN')) {
+        if (nowAuthenticated) {
           console.log('useHourEntries: User authenticated, loading hour entries...');
-          // Use setTimeout to avoid potential deadlocks with auth state changes
-          setTimeout(() => {
-            loadHourEntries();
-          }, 0);
-        } else if (!nowAuthenticated) {
+          loadHourEntries();
+        } else {
           // Clear data when user signs out
           console.log('useHourEntries: User signed out, clearing entries');
           setHourEntries([]);
@@ -69,11 +63,6 @@ export const useHourEntries = () => {
   }, []);
 
   const loadHourEntries = async () => {
-    if (loading) {
-      console.log('useHourEntries: Already loading, skipping...');
-      return;
-    }
-    
     try {
       setLoading(true);
       console.log('useHourEntries: Loading hour entries from Supabase...');
@@ -89,7 +78,6 @@ export const useHourEntries = () => {
       if (!user) {
         console.log('useHourEntries: No authenticated user found');
         setHourEntries([]);
-        setLoading(false);
         return;
       }
 
