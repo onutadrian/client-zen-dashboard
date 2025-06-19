@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -105,6 +105,9 @@ const AddInvoiceModal = ({ isOpen, onClose, project, client, milestone }: AddInv
           <DialogTitle>
             Create Invoice {milestone ? `for ${milestone.title}` : ''}
           </DialogTitle>
+          <DialogDescription>
+            Generate a new invoice for {milestone ? 'this milestone' : 'the project'} and send it to the client.
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">

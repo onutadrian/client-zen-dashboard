@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -59,6 +59,9 @@ const AddMilestoneModal = ({ isOpen, onClose, onAdd, project }: AddMilestoneModa
             <Target className="w-5 h-5 mr-2" />
             Add Milestone for {project.name}
           </DialogTitle>
+          <DialogDescription>
+            Create a new milestone to track progress on this project.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
