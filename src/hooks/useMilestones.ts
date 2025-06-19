@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -125,7 +124,8 @@ export const useMilestones = () => {
           status: updates.status,
           amount: updates.amount,
           currency: updates.currency,
-          completion_percentage: updates.completionPercentage
+          completion_percentage: updates.completionPercentage,
+          payment_status: updates.paymentStatus
         })
         .eq('id', milestoneId);
 
@@ -174,10 +174,15 @@ export const useMilestones = () => {
     }
   };
 
+  const refreshMilestones = () => {
+    loadMilestones();
+  };
+
   return {
     milestones,
     addMilestone,
     updateMilestone,
-    deleteMilestone
+    deleteMilestone,
+    refreshMilestones
   };
 };

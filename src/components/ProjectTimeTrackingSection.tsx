@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Clock, Plus } from 'lucide-react';
@@ -5,6 +6,7 @@ import ProjectBilledHours from './ProjectBilledHours';
 import LogProjectHoursModal from './LogProjectHoursModal';
 import MilestoneHoursTracker from './MilestoneHoursTracker';
 import AddMilestoneModal from './AddMilestoneModal';
+import TimeEntryManagement from './TimeEntryManagement';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
 import { Milestone } from '@/hooks/useMilestones';
@@ -88,6 +90,12 @@ const ProjectTimeTrackingSection = ({
             hourEntries={projectHours}
           />
         )}
+
+        {/* Time Entry Management - replacing RecentTimeEntries */}
+        <TimeEntryManagement 
+          hourEntries={projectHours}
+          onAddTimeEntry={client ? () => setShowLogHoursModal(true) : undefined}
+        />
       </div>
 
       {client && (
