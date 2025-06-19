@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useInvoices } from '@/hooks/useInvoices';
-import { useClients } from '@/hooks/useClients';
 import { Project } from '@/hooks/useProjects';
 import { Milestone } from '@/hooks/useMilestones';
 import { Client } from '@/hooks/useClients';
@@ -22,7 +21,6 @@ interface AddInvoiceModalProps {
 
 const AddInvoiceModal = ({ isOpen, onClose, project, client, milestone }: AddInvoiceModalProps) => {
   const { addInvoice } = useInvoices();
-  const { updateClient } = useClients();
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -38,7 +36,7 @@ const AddInvoiceModal = ({ isOpen, onClose, project, client, milestone }: AddInv
     setLoading(true);
 
     try {
-      // Create invoice in invoices table
+      // Create invoice in invoices table only
       const newInvoiceData = {
         projectId: project.id,
         clientId: client.id,
@@ -51,21 +49,6 @@ const AddInvoiceModal = ({ isOpen, onClose, project, client, milestone }: AddInv
       };
 
       await addInvoice(newInvoiceData);
-
-      // Also update client's invoices array for compatibility
-      const clientInvoice = {
-        id: Date.now(), // Temporary ID for client's invoice array
-        amount: formData.amount,
-        date: formData.date,
-        status: formData.status
-      };
-
-      const updatedClient = {
-        ...client,
-        invoices: [...(client.invoices || []), clientInvoice]
-      };
-
-      await updateClient(client.id, updatedClient);
       
       onClose();
       
