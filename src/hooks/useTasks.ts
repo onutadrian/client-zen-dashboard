@@ -11,7 +11,7 @@ import {
 } from '@/services/taskService';
 import { createHourEntryForCompletedTask } from '@/services/taskCompletionService';
 
-export const useTasks = () => {
+export const useTasks = (onHourEntryCreated?: () => void) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const { toast } = useToast();
 
@@ -65,6 +65,11 @@ export const useTasks = () => {
         try {
           await createHourEntryForCompletedTask(completedTask, workedHours);
           console.log('Hour entry created successfully for task:', taskId);
+          
+          // Trigger refresh of hour entries if callback provided
+          if (onHourEntryCreated) {
+            onHourEntryCreated();
+          }
         } catch (hourError) {
           console.error('Error creating hour entry:', hourError);
           // Don't fail the task update if hour entry fails

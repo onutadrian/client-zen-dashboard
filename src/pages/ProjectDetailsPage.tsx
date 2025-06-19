@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
@@ -14,6 +15,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useClients } from '@/hooks/useClients';
 import { useTasks } from '@/hooks/useTasks';
 import { useMilestones } from '@/hooks/useMilestones';
+import { useHourEntries } from '@/hooks/useHourEntries';
 
 const ProjectDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +25,8 @@ const ProjectDetailsPage = () => {
 
   const { projects, updateProject, archiveProject, deleteProject } = useProjects();
   const { clients } = useClients();
-  const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks();
+  const { refreshHourEntries } = useHourEntries();
+  const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks(refreshHourEntries);
   const { milestones, addMilestone, updateMilestone, deleteMilestone } = useMilestones();
 
   const project = projects.find(p => p.id === id);
