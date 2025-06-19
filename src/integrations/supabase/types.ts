@@ -72,7 +72,7 @@ export type Database = {
           milestone_id: string | null
           project_id: string
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           billed?: boolean
@@ -85,7 +85,7 @@ export type Database = {
           milestone_id?: string | null
           project_id: string
           updated_at?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           billed?: boolean
@@ -98,7 +98,7 @@ export type Database = {
           milestone_id?: string | null
           project_id?: string
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -66,8 +65,18 @@ export const useHourEntries = () => {
     }
   };
 
-  const addHourEntry = async (newEntry: Omit<HourEntry, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addHourEntry = async (newEntry: Omit<HourEntry, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
     try {
+      // Get the current authenticated user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) throw userError;
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      console.log('useHourEntries: Adding hour entry for user:', user.id);
+
       // Transform to Supabase format
       const supabaseEntry = {
         project_id: newEntry.projectId,
@@ -76,9 +85,11 @@ export const useHourEntries = () => {
         description: newEntry.description || null,
         date: newEntry.date,
         billed: newEntry.billed,
-        user_id: newEntry.userId || null,
+        user_id: user.id, // Set the authenticated user's ID
         milestone_id: newEntry.milestoneId || null
       };
+
+      console.log('useHourEntries: Inserting entry:', supabaseEntry);
 
       const { data, error } = await supabase
         .from('hour_entries')
@@ -116,6 +127,7 @@ export const useHourEntries = () => {
         description: "Failed to add hour entry",
         variant: "destructive"
       });
+      throw error; // Re-throw to allow calling code to handle it
     }
   };
 
