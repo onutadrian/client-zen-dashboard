@@ -189,46 +189,52 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
         <CardContent>
           {projectMilestones.length > 0 ? (
             <div className="space-y-3">
-              {projectMilestones.map((milestone) => (
-                <div key={milestone.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <h4 className="font-medium">{milestone.title}</h4>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        milestone.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        milestone.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                        'bg-gray-100 text-gray-800'
+              {projectMilestones.map((milestone) => {
+                // Check if there's an invoice for this milestone
+                const milestoneInvoice = projectInvoices.find(inv => inv.milestoneId === milestone.id);
+                const invoiceStatus = milestoneInvoice?.status || 'unpaid';
+                
+                return (
+                  <div key={milestone.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <h4 className="font-medium">{milestone.title}</h4>
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          milestone.status === 'completed' ? 'bg-green-100 text-green-800' :
+                          milestone.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {milestone.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-4 mt-1">
+                        <p className="text-sm text-slate-600">
+                          <Calendar className="w-3 h-3 inline mr-1" />
+                          Due: {new Date(milestone.targetDate).toLocaleDateString()}
+                        </p>
+                        <p className="text-sm text-slate-600">
+                          <CheckCircle className="w-3 h-3 inline mr-1" />
+                          {milestone.completionPercentage}% complete
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">
+                        ${(milestone.amount || 0).toLocaleString()}
+                      </p>
+                      <p className={`text-sm ${
+                        invoiceStatus === 'paid' ? 'text-green-600' :
+                        invoiceStatus === 'pending' ? 'text-yellow-600' :
+                        'text-slate-600'
                       }`}>
-                        {milestone.status}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-4 mt-1">
-                      <p className="text-sm text-slate-600">
-                        <Calendar className="w-3 h-3 inline mr-1" />
-                        Due: {new Date(milestone.targetDate).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-slate-600">
-                        <CheckCircle className="w-3 h-3 inline mr-1" />
-                        {milestone.completionPercentage}% complete
+                        {invoiceStatus === 'paid' ? 'Paid' :
+                         invoiceStatus === 'pending' ? 'Invoiced' :
+                         'Not Invoiced'}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium">
-                      ${(milestone.amount || 0).toLocaleString()}
-                    </p>
-                    <p className={`text-sm ${
-                      milestone.paymentStatus === 'paid' ? 'text-green-600' :
-                      milestone.paymentStatus === 'partial' ? 'text-yellow-600' :
-                      'text-slate-600'
-                    }`}>
-                      {milestone.paymentStatus === 'paid' ? 'Paid' :
-                       milestone.paymentStatus === 'partial' ? 'Partially Paid' :
-                       'Unpaid'}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="text-slate-500 text-center py-4">No milestones to analyze</p>

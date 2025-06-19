@@ -16,7 +16,7 @@ interface ProjectMilestoneSectionProps {
   project: Project;
   client?: Client;
   milestones: Milestone[];
-  onAddMilestone: (milestone: Omit<Milestone, 'id' | 'createdAt' | 'updatedAt' | 'completionPercentage' | 'paymentStatus'>) => void;
+  onAddMilestone: (milestone: Omit<Milestone, 'id' | 'createdAt' | 'updatedAt' | 'completionPercentage'>) => void;
   onUpdateMilestone: (milestoneId: string, updatedMilestone: Partial<Milestone>) => void;
   onDeleteMilestone: (milestoneId: string) => void;
 }
@@ -53,7 +53,8 @@ const ProjectMilestoneSection = ({
   };
 
   const handleQuickMarkAsPaid = async (milestone: Milestone) => {
-    await onUpdateMilestone(milestone.id, { paymentStatus: 'paid' });
+    // This functionality is no longer needed since we removed paymentStatus
+    console.log('Mark as paid functionality removed');
   };
 
   const handleInvoiceModalClose = () => {

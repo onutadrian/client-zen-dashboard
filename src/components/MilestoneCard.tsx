@@ -55,15 +55,6 @@ const MilestoneCard = ({
             }`}>
               {milestone.status.replace('-', ' ')}
             </span>
-            {milestone.paymentStatus && (
-              <span className={`px-2 py-1 rounded text-xs ${
-                milestone.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                milestone.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {milestone.paymentStatus}
-              </span>
-            )}
           </div>
           <p className="text-sm text-slate-600 mb-1">{milestone.description}</p>
           <div className="flex items-center space-x-4 text-sm text-slate-500">
@@ -90,18 +81,7 @@ const MilestoneCard = ({
         
         {/* Top right action buttons */}
         <div className="flex items-center space-x-2 flex-shrink-0">
-          {milestone.status === 'completed' && milestone.paymentStatus === 'unpaid' && milestoneInvoice && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onMarkAsPaid(milestone)}
-              className="text-green-600 hover:text-green-700"
-            >
-              <CheckCircle className="w-4 h-4 mr-1" />
-              Mark Paid
-            </Button>
-          )}
-          {milestone.status === 'completed' && milestone.paymentStatus === 'unpaid' && !milestoneInvoice && hasClient && (
+          {milestone.status === 'completed' && !milestoneInvoice && hasClient && (
             <Button
               size="sm"
               variant="outline"

@@ -24,7 +24,6 @@ const EditMilestoneModal = ({ isOpen, onClose, onUpdate, milestone }: EditMilest
     amount: milestone.amount || 0,
     currency: milestone.currency || 'USD',
     completionPercentage: milestone.completionPercentage,
-    paymentStatus: milestone.paymentStatus,
     estimatedHours: milestone.estimatedHours || 8
   });
 
@@ -40,7 +39,7 @@ const EditMilestoneModal = ({ isOpen, onClose, onUpdate, milestone }: EditMilest
         <DialogHeader>
           <DialogTitle>Edit Milestone</DialogTitle>
           <DialogDescription>
-            Update the milestone details, status, and payment information.
+            Update the milestone details and status.
           </DialogDescription>
         </DialogHeader>
         
@@ -138,37 +137,16 @@ const EditMilestoneModal = ({ isOpen, onClose, onUpdate, milestone }: EditMilest
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="completion">Completion %</Label>
-              <Input
-                id="completion"
-                type="number"
-                min="0"
-                max="100"
-                value={formData.completionPercentage}
-                onChange={(e) => setFormData({ ...formData, completionPercentage: parseInt(e.target.value) || 0 })}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="paymentStatus">Payment Status</Label>
-              <Select 
-                value={formData.paymentStatus} 
-                onValueChange={(value: 'unpaid' | 'partial' | 'paid') => 
-                  setFormData({ ...formData, paymentStatus: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="unpaid">Unpaid</SelectItem>
-                  <SelectItem value="partial">Partial</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div>
+            <Label htmlFor="completion">Completion %</Label>
+            <Input
+              id="completion"
+              type="number"
+              min="0"
+              max="100"
+              value={formData.completionPercentage}
+              onChange={(e) => setFormData({ ...formData, completionPercentage: parseInt(e.target.value) || 0 })}
+            />
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
