@@ -3,16 +3,19 @@
 export const mapPriceType = (priceType: string) => {
   const mapping = {
     'hour': 'hourly',
-    'day': 'daily',
+    'day': 'daily', 
     'week': 'weekly',
     'month': 'monthly',
     'hourly': 'hourly',
     'daily': 'daily',
-    'weekly': 'weekly',
+    'weekly': 'weekly', 
     'monthly': 'monthly',
     'project': 'project'
   };
-  return mapping[priceType] || 'hourly';
+  
+  const mappedType = mapping[priceType] || 'hourly';
+  console.log('Mapping price type:', priceType, 'to:', mappedType);
+  return mappedType;
 };
 
 // Transform Supabase data to match our Client interface
@@ -31,16 +34,24 @@ export const transformSupabaseClient = (client: any) => ({
 });
 
 // Transform client data for Supabase format
-export const transformClientForSupabase = (client: any, userId: string) => ({
-  name: client.name,
-  price: client.price,
-  price_type: mapPriceType(client.priceType),
-  status: client.status || 'active',
-  documents: client.documents || [],
-  links: client.links || [],
-  notes: client.notes || '',
-  people: client.people || [],
-  invoices: client.invoices || [],
-  currency: client.currency || 'USD',
-  user_id: userId
-});
+export const transformClientForSupabase = (client: any, userId: string) => {
+  const mappedPriceType = mapPriceType(client.priceType);
+  console.log('Transforming client for Supabase:', {
+    originalPriceType: client.priceType,
+    mappedPriceType: mappedPriceType
+  });
+  
+  return {
+    name: client.name,
+    price: client.price,
+    price_type: mappedPriceType,
+    status: client.status || 'active',
+    documents: client.documents || [],
+    links: client.links || [],
+    notes: client.notes || '',
+    people: client.people || [],
+    invoices: client.invoices || [],
+    currency: client.currency || 'USD',
+    user_id: userId
+  };
+};

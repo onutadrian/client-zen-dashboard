@@ -46,11 +46,14 @@ export const updateClientInSupabase = async (clientId: number, updatedClient: an
     throw new Error('User not authenticated');
   }
 
-  // Transform to Supabase format
+  // Transform to Supabase format with explicit price type mapping
+  const mappedPriceType = mapPriceType(updatedClient.priceType);
+  console.log('Updating client with price type:', updatedClient.priceType, 'mapped to:', mappedPriceType);
+  
   const supabaseUpdate = {
     name: updatedClient.name,
     price: updatedClient.price,
-    price_type: mapPriceType(updatedClient.priceType),
+    price_type: mappedPriceType,
     status: updatedClient.status,
     documents: updatedClient.documents,
     links: updatedClient.links,
@@ -60,11 +63,16 @@ export const updateClientInSupabase = async (clientId: number, updatedClient: an
     currency: updatedClient.currency
   };
 
+  console.log('Supabase update payload:', supabaseUpdate);
+
   const { error } = await supabase
     .from('clients')
     .update(supabaseUpdate)
     .eq('id', clientId)
     .eq('user_id', user.id); // Ensure user can only update their own clients
 
-  if (error) throw error;
+  if (error) {
+    console.error('Supabase update error:', error);
+    throw error;
+  }
 };
