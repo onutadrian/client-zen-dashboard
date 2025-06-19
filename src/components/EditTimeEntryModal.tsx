@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,7 @@ const EditTimeEntryModal = ({ isOpen, onClose, timeEntry }: EditTimeEntryModalPr
   const [milestoneId, setMilestoneId] = useState(timeEntry.milestoneId || 'no-milestone');
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const { updateHourEntry } = useHourEntries();
+  const { updateHourEntry, refreshHourEntries } = useHourEntries();
   const { milestones } = useMilestones();
 
   // Filter milestones for the same project as the time entry
@@ -45,6 +44,10 @@ const EditTimeEntryModal = ({ isOpen, onClose, timeEntry }: EditTimeEntryModalPr
         billed,
         milestoneId: milestoneId === 'no-milestone' ? undefined : milestoneId
       });
+      
+      // Refresh the hour entries to update the UI
+      await refreshHourEntries();
+      
       onClose();
     } catch (error) {
       console.error('Error updating time entry:', error);
