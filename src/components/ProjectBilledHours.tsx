@@ -18,19 +18,21 @@ interface ProjectBilledHoursProps {
 }
 
 const ProjectBilledHours = ({ project, client, milestones = [] }: ProjectBilledHoursProps) => {
-  const { hourEntries } = useHourEntries();
+  const { hourEntries, loading } = useHourEntries();
   const { invoices } = useInvoices();
   
   console.log('ProjectBilledHours - Project ID:', project.id);
   console.log('ProjectBilledHours - All hour entries:', hourEntries);
-  console.log('ProjectBilledHours - Project:', project);
+  console.log('ProjectBilledHours - Loading state:', loading);
   
   const isFixedPrice = project.pricingType === 'fixed';
   
-  // Filter data for this project
+  // Filter data for this project - ensure both values are strings for comparison
   const projectHours = hourEntries.filter(entry => {
-    console.log('Comparing entry.projectId:', entry.projectId, 'with project.id:', project.id);
-    return entry.projectId === project.id;
+    const entryProjectId = String(entry.projectId);
+    const currentProjectId = String(project.id);
+    console.log('Comparing entry.projectId:', entryProjectId, 'with project.id:', currentProjectId, 'Match:', entryProjectId === currentProjectId);
+    return entryProjectId === currentProjectId;
   });
   
   console.log('ProjectBilledHours - Filtered project hours:', projectHours);
@@ -74,6 +76,30 @@ const ProjectBilledHours = ({ project, client, milestones = [] }: ProjectBilledH
 
   // Determine what to show based on project type
   const showMilestoneTracking = isFixedPrice && projectMilestones.length > 0;
+
+  // Show loading state
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Clock className="w-5 h-5 mr-2" />
+            Loading Project Hours...
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="text-center p-4 rounded-lg bg-slate-50 animate-pulse">
+                <div className="h-8 bg-slate-200 rounded mb-2"></div>
+                <div className="h-4 bg-slate-200 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
