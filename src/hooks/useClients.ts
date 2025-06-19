@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -29,6 +28,22 @@ export interface Client {
 export const useClients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const { toast } = useToast();
+
+  // Map old price types to new ones for backward compatibility
+  const mapPriceType = (priceType: string) => {
+    const mapping = {
+      'hour': 'hourly',
+      'day': 'daily',
+      'week': 'weekly',
+      'month': 'monthly',
+      'hourly': 'hourly',
+      'daily': 'daily',
+      'weekly': 'weekly',
+      'monthly': 'monthly',
+      'project': 'project'
+    };
+    return mapping[priceType] || 'hourly';
+  };
 
   // Load clients from Supabase on mount
   useEffect(() => {
@@ -84,25 +99,11 @@ export const useClients = () => {
         throw new Error('User not authenticated');
       }
 
-      // Map frontend price types to database-compatible values
-      const priceTypeMapping = {
-        'hourly': 'hourly',
-        'daily': 'daily', 
-        'weekly': 'weekly',
-        'monthly': 'monthly',
-        'project': 'project',
-        // Legacy mappings for backward compatibility
-        'hour': 'hourly',
-        'day': 'daily',
-        'week': 'weekly',
-        'month': 'monthly'
-      };
-
       // Transform to Supabase format and ensure user_id is set
       const supabaseClient = {
         name: newClient.name,
         price: newClient.price,
-        price_type: priceTypeMapping[newClient.priceType] || 'hourly',
+        price_type: mapPriceType(newClient.priceType),
         status: newClient.status || 'active',
         documents: newClient.documents || [],
         links: newClient.links || [],
@@ -159,25 +160,11 @@ export const useClients = () => {
         throw new Error('User not authenticated');
       }
 
-      // Map frontend price types to database-compatible values
-      const priceTypeMapping = {
-        'hourly': 'hourly',
-        'daily': 'daily', 
-        'weekly': 'weekly',
-        'monthly': 'monthly',
-        'project': 'project',
-        // Legacy mappings for backward compatibility
-        'hour': 'hourly',
-        'day': 'daily',
-        'week': 'weekly',
-        'month': 'monthly'
-      };
-
       // Transform to Supabase format
       const supabaseUpdate = {
         name: updatedClient.name,
         price: updatedClient.price,
-        price_type: priceTypeMapping[updatedClient.priceType] || 'hourly',
+        price_type: mapPriceType(updatedClient.priceType),
         status: updatedClient.status,
         documents: updatedClient.documents,
         links: updatedClient.links,
