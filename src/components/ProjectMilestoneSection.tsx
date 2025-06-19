@@ -1,17 +1,16 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2, FileText, CheckCircle } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import AddMilestoneModal from './AddMilestoneModal';
 import EditMilestoneModal from './EditMilestoneModal';
 import AddInvoiceModal from './AddInvoiceModal';
-import InvoiceStatusButton from './InvoiceStatusButton';
-import DuplicateInvoiceWarning from './DuplicateInvoiceWarning';
+import MilestonesList from './MilestonesList';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
 import { Milestone } from '@/hooks/useMilestones';
 import { useInvoices } from '@/hooks/useInvoices';
-import { formatDate } from '@/lib/utils';
 
 interface ProjectMilestoneSectionProps {
   project: Project;
@@ -42,7 +41,7 @@ const ProjectMilestoneSection = ({
   const projectInvoices = invoices.filter(i => i.projectId === project.id);
 
   const handleCreateInvoiceForMilestone = (milestone: Milestone) => {
-    const existingInvoice = getMilestoneInvoice(milestone.id);
+    const existingInvoice = projectInvoices.find(inv => inv.milestoneId === milestone.id);
     if (existingInvoice) {
       console.warn('Invoice already exists for this milestone');
       return;
@@ -70,10 +69,6 @@ const ProjectMilestoneSection = ({
     setRefreshKey(prev => prev + 1);
   };
 
-  const getMilestoneInvoice = (milestoneId: string) => {
-    return projectInvoices.find(inv => inv.milestoneId === milestoneId);
-  };
-
   return (
     <>
       <div className="flex items-center justify-between">
@@ -91,127 +86,18 @@ const ProjectMilestoneSection = ({
 
       <Card key={refreshKey}>
         <CardContent className="p-6">
-          {milestones.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-slate-500 mb-4">No milestones yet for this project</p>
-              <Button
-                onClick={() => setShowAddMilestoneModal(true)}
-                className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add First Milestone
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {milestones.map((milestone) => {
-                const milestoneInvoice = getMilestoneInvoice(milestone.id);
-                const isCreatingForThisMilestone = isCreatingInvoice === milestone.id;
-                
-                return (
-                  <div key={milestone.id} className="border rounded-lg p-4">
-                    {isCreatingForThisMilestone && milestoneInvoice && (
-                      <div className="mb-4">
-                        <DuplicateInvoiceWarning milestoneTitle={milestone.title} />
-                      </div>
-                    )}
-                    
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 mr-4">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <h4 className="font-medium">{milestone.title}</h4>
-                          <span className={`px-2 py-1 rounded text-xs ${
-                            milestone.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            milestone.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {milestone.status.replace('-', ' ')}
-                          </span>
-                          {milestone.paymentStatus && (
-                            <span className={`px-2 py-1 rounded text-xs ${
-                              milestone.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                              milestone.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {milestone.paymentStatus}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-slate-600 mb-1">{milestone.description}</p>
-                        <div className="flex items-center space-x-4 text-sm text-slate-500">
-                          <span>Due: {formatDate(milestone.targetDate)}</span>
-                          {milestone.amount && (
-                            <span>Value: ${milestone.amount.toLocaleString()}</span>
-                          )}
-                          <span>{milestone.completionPercentage}% complete</span>
-                        </div>
-                        
-                        {milestoneInvoice && (
-                          <div className="mt-2">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-xs text-slate-500">Invoice:</span>
-                              <InvoiceStatusButton 
-                                invoiceId={milestoneInvoice.id}
-                                currentStatus={milestoneInvoice.status}
-                                onStatusChange={handleInvoiceStatusChange}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Top right action buttons */}
-                      <div className="flex items-center space-x-2 flex-shrink-0">
-                        {milestone.status === 'completed' && milestone.paymentStatus === 'unpaid' && milestoneInvoice && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleQuickMarkAsPaid(milestone)}
-                            className="text-green-600 hover:text-green-700"
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Mark Paid
-                          </Button>
-                        )}
-                        {milestone.status === 'completed' && milestone.paymentStatus === 'unpaid' && !milestoneInvoice && client && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleCreateInvoiceForMilestone(milestone)}
-                            disabled={isCreatingForThisMilestone}
-                            className="text-blue-600 hover:text-blue-700 disabled:opacity-50"
-                          >
-                            <FileText className="w-4 h-4 mr-1" />
-                            {isCreatingForThisMilestone ? 'Creating...' : 'Invoice'}
-                          </Button>
-                        )}
-                        {milestoneInvoice && (
-                          <div className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
-                            Invoice exists
-                          </div>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setEditingMilestone(milestone)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => onDeleteMilestone(milestone.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <MilestonesList
+            milestones={milestones}
+            projectInvoices={projectInvoices}
+            isCreatingInvoice={isCreatingInvoice}
+            onAddMilestone={() => setShowAddMilestoneModal(true)}
+            onEditMilestone={setEditingMilestone}
+            onDeleteMilestone={onDeleteMilestone}
+            onCreateInvoiceForMilestone={handleCreateInvoiceForMilestone}
+            onQuickMarkAsPaid={handleQuickMarkAsPaid}
+            onInvoiceStatusChange={handleInvoiceStatusChange}
+            hasClient={!!client}
+          />
         </CardContent>
       </Card>
 
