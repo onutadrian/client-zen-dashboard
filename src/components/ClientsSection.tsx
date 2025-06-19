@@ -1,16 +1,10 @@
-
 import React from 'react';
 import { Users, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import ClientCard from '@/components/ClientCard';
-
-interface Client {
-  id: number;
-  name: string;
-  status: string;
-}
+import { Client } from '@/types/client';
 
 interface ClientsSectionProps {
   clients: Client[];

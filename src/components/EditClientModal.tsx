@@ -5,30 +5,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, X, Upload, Link as LinkIcon } from 'lucide-react';
+import { Client } from '@/types/client';
+import { mapPriceType } from '@/utils/clientUtils';
 
 interface EditClientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  client: any;
-  onSave: (updatedClient: any) => void;
+  client: Client;
+  onSave: (updatedClient: Client) => void;
 }
 
 const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalProps) => {
-  // Map old price types to new ones for backward compatibility
-  const mapPriceType = (priceType: string) => {
-    const mapping = {
-      'hour': 'hourly',
-      'day': 'daily',
-      'week': 'weekly',
-      'month': 'monthly',
-      'hourly': 'hourly',
-      'daily': 'daily',
-      'weekly': 'weekly',
-      'monthly': 'monthly'
-    };
-    return mapping[priceType] || 'hourly';
-  };
-
   const [formData, setFormData] = useState({
     ...client,
     priceType: mapPriceType(client.priceType),

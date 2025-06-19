@@ -1,49 +1,12 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
-export interface Client {
-  id: number;
-  name: string;
-  price: number;
-  priceType: string;
-  status: string;
-  documents: string[];
-  links: string[];
-  notes: string;
-  people: Array<{
-    name: string;
-    email: string;
-    title: string;
-  }>;
-  invoices: Array<{
-    id: number;
-    amount: number;
-    date: string;
-    status: string;
-  }>;
-  currency: string;
-}
+import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { Client } from '@/types/client';
+import { loadClientsFromSupabase, addClientToSupabase, updateClientInSupabase } from '@/services/clientService';
 
 export const useClients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const { toast } = useToast();
-
-  // Map old price types to new ones for backward compatibility
-  const mapPriceType = (priceType: string) => {
-    const mapping = {
-      'hour': 'hourly',
-      'day': 'daily',
-      'week': 'weekly',
-      'month': 'monthly',
-      'hourly': 'hourly',
-      'daily': 'daily',
-      'weekly': 'weekly',
-      'monthly': 'monthly',
-      'project': 'project'
-    };
-    return mapping[priceType] || 'hourly';
-  };
 
   // Load clients from Supabase on mount
   useEffect(() => {
@@ -52,36 +15,8 @@ export const useClients = () => {
 
   const loadClients = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.log('User not authenticated');
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Transform Supabase data to match our Client interface
-      const transformedClients: Client[] = data.map(client => ({
-        id: client.id,
-        name: client.name,
-        price: Number(client.price),
-        priceType: client.price_type,
-        status: client.status,
-        documents: client.documents || [],
-        links: client.links || [],
-        notes: client.notes || '',
-        people: (client.people as any[]) || [],
-        invoices: (client.invoices as any[]) || [],
-        currency: client.currency || 'USD'
-      }));
-
-      setClients(transformedClients);
+      const clientsData = await loadClientsFromSupabase();
+      setClients(clientsData);
     } catch (error) {
       console.error('Error loading clients:', error);
       toast({
@@ -94,49 +29,7 @@ export const useClients = () => {
 
   const addClient = async (newClient: any) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      // Transform to Supabase format and ensure user_id is set
-      const supabaseClient = {
-        name: newClient.name,
-        price: newClient.price,
-        price_type: mapPriceType(newClient.priceType),
-        status: newClient.status || 'active',
-        documents: newClient.documents || [],
-        links: newClient.links || [],
-        notes: newClient.notes || '',
-        people: newClient.people || [],
-        invoices: newClient.invoices || [],
-        currency: newClient.currency || 'USD',
-        user_id: user.id // Ensure user_id is always set
-      };
-
-      const { data, error } = await supabase
-        .from('clients')
-        .insert([supabaseClient])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Transform back to our format and add to state
-      const transformedClient: Client = {
-        id: data.id,
-        name: data.name,
-        price: Number(data.price),
-        priceType: data.price_type,
-        status: data.status,
-        documents: data.documents || [],
-        links: data.links || [],
-        notes: data.notes || '',
-        people: (data.people as any[]) || [],
-        invoices: (data.invoices as any[]) || [],
-        currency: data.currency || 'USD'
-      };
-
+      const transformedClient = await addClientToSupabase(newClient);
       setClients(prev => [...prev, transformedClient]);
       
       toast({
@@ -155,32 +48,7 @@ export const useClients = () => {
 
   const updateClient = async (clientId: number, updatedClient: any) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      // Transform to Supabase format
-      const supabaseUpdate = {
-        name: updatedClient.name,
-        price: updatedClient.price,
-        price_type: mapPriceType(updatedClient.priceType),
-        status: updatedClient.status,
-        documents: updatedClient.documents,
-        links: updatedClient.links,
-        notes: updatedClient.notes,
-        people: updatedClient.people,
-        invoices: updatedClient.invoices,
-        currency: updatedClient.currency
-      };
-
-      const { error } = await supabase
-        .from('clients')
-        .update(supabaseUpdate)
-        .eq('id', clientId)
-        .eq('user_id', user.id); // Ensure user can only update their own clients
-
-      if (error) throw error;
+      await updateClientInSupabase(clientId, updatedClient);
 
       // Update local state
       setClients(prev => prev.map(client => 
