@@ -4,6 +4,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Client } from '@/types/client';
 import { loadClientsFromSupabase, addClientToSupabase, updateClientInSupabase } from '@/services/clientService';
 
+// Export Client type for backward compatibility
+export { Client } from '@/types/client';
+
 export const useClients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const { toast } = useToast();
