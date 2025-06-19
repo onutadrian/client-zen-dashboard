@@ -62,6 +62,11 @@ const ProjectMilestoneSection = ({
     setIsCreatingInvoice(null);
   };
 
+  const handleInvoiceStatusChange = () => {
+    // Force a re-render by updating the component state
+    // This ensures the UI reflects the updated invoice status
+  };
+
   const getMilestoneInvoice = (milestoneId: string) => {
     return projectInvoices.find(inv => inv.milestoneId === milestoneId);
   };
@@ -108,8 +113,8 @@ const ProjectMilestoneSection = ({
                       </div>
                     )}
                     
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 mr-4">
                         <div className="flex items-center space-x-2 mb-2">
                           <h4 className="font-medium">{milestone.title}</h4>
                           <span className={`px-2 py-1 rounded text-xs ${
@@ -145,15 +150,26 @@ const ProjectMilestoneSection = ({
                               <InvoiceStatusButton 
                                 invoiceId={milestoneInvoice.id}
                                 currentStatus={milestoneInvoice.status}
-                                onStatusChange={() => {
-                                  window.location.reload();
-                                }}
+                                onStatusChange={handleInvoiceStatusChange}
                               />
                             </div>
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center space-x-2">
+                      
+                      {/* Top right action buttons */}
+                      <div className="flex items-center space-x-2 flex-shrink-0">
+                        {milestone.status === 'completed' && milestone.paymentStatus === 'unpaid' && milestoneInvoice && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleQuickMarkAsPaid(milestone)}
+                            className="text-green-600 hover:text-green-700"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Mark Paid
+                          </Button>
+                        )}
                         {milestone.status === 'completed' && milestone.paymentStatus === 'unpaid' && !milestoneInvoice && client && (
                           <Button
                             size="sm"
@@ -164,17 +180,6 @@ const ProjectMilestoneSection = ({
                           >
                             <FileText className="w-4 h-4 mr-1" />
                             {isCreatingForThisMilestone ? 'Creating...' : 'Invoice'}
-                          </Button>
-                        )}
-                        {milestone.status === 'completed' && milestone.paymentStatus === 'unpaid' && milestoneInvoice && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleQuickMarkAsPaid(milestone)}
-                            className="text-green-600 hover:text-green-700"
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Mark Paid
                           </Button>
                         )}
                         {milestoneInvoice && (

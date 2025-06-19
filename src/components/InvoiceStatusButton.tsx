@@ -16,6 +16,8 @@ const InvoiceStatusButton = ({ invoiceId, currentStatus, onStatusChange }: Invoi
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleStatusChange = async (newStatus: 'paid' | 'pending' | 'overdue') => {
+    if (newStatus === currentStatus) return;
+    
     setIsUpdating(true);
     try {
       await updateInvoice(invoiceId, { status: newStatus });
@@ -56,7 +58,11 @@ const InvoiceStatusButton = ({ invoiceId, currentStatus, onStatusChange }: Invoi
         <span className="capitalize">{currentStatus}</span>
       </div>
       
-      <Select onValueChange={handleStatusChange} disabled={isUpdating}>
+      <Select 
+        value={currentStatus} 
+        onValueChange={handleStatusChange} 
+        disabled={isUpdating}
+      >
         <SelectTrigger className="w-24 h-8 text-xs">
           <SelectValue placeholder="Change" />
         </SelectTrigger>
