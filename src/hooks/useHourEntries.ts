@@ -18,23 +18,92 @@ export interface HourEntry {
 
 export const useHourEntries = () => {
   const [hourEntries, setHourEntries] = useState<HourEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
 
-  // Load hour entries from Supabase on mount
+  // Monitor authentication state
   useEffect(() => {
-    loadHourEntries();
+    console.log('useHourEntries: Setting up auth state listener');
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('useHourEntries: Auth state changed:', event, 'User ID:', session?.user?.id);
+        
+        const wasAuthenticated = isAuthenticated;
+        const nowAuthenticated = !!session?.user;
+        
+        setIsAuthenticated(nowAuthenticated);
+        
+        // Load data when user becomes authenticated or on sign in
+        if (nowAuthenticated && (!wasAuthenticated || event === 'SIGNED_IN')) {
+          console.log('useHourEntries: User authenticated, loading hour entries...');
+          // Use setTimeout to avoid potential deadlocks with auth state changes
+          setTimeout(() => {
+            loadHourEntries();
+          }, 0);
+        } else if (!nowAuthenticated) {
+          // Clear data when user signs out
+          console.log('useHourEntries: User signed out, clearing entries');
+          setHourEntries([]);
+          setLoading(false);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const authenticated = !!session?.user;
+      console.log('useHourEntries: Initial session check, authenticated:', authenticated);
+      setIsAuthenticated(authenticated);
+      
+      if (authenticated) {
+        console.log('useHourEntries: Initial session found, loading entries...');
+        loadHourEntries();
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const loadHourEntries = async () => {
+    if (loading) {
+      console.log('useHourEntries: Already loading, skipping...');
+      return;
+    }
+    
     try {
+      setLoading(true);
       console.log('useHourEntries: Loading hour entries from Supabase...');
       
+      // Verify authentication before querying
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error('useHourEntries: Auth error:', authError);
+        throw authError;
+      }
+      
+      if (!user) {
+        console.log('useHourEntries: No authenticated user found');
+        setHourEntries([]);
+        setLoading(false);
+        return;
+      }
+
+      console.log('useHourEntries: Authenticated user confirmed, querying for user:', user.id);
+
       const { data, error } = await supabase
         .from('hour_entries')
         .select('*')
         .order('date', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('useHourEntries: Database error:', error);
+        throw error;
+      }
 
       console.log('useHourEntries: Raw data from Supabase:', data);
 
@@ -57,11 +126,25 @@ export const useHourEntries = () => {
       setHourEntries(transformedEntries);
     } catch (error) {
       console.error('Error loading hour entries:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load hour entries",
-        variant: "destructive"
-      });
+      
+      // Provide more specific error messages
+      if (error.message?.includes('row-level security')) {
+        toast({
+          title: "Authentication Error",
+          description: "Please sign in to view your hour entries",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to load hour entries",
+          variant: "destructive"
+        });
+      }
+      
+      setHourEntries([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -197,6 +280,7 @@ export const useHourEntries = () => {
 
   return {
     hourEntries,
+    loading,
     addHourEntry,
     updateHourEntry,
     deleteHourEntry,
