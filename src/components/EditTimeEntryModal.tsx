@@ -23,7 +23,7 @@ const EditTimeEntryModal = ({ isOpen, onClose, timeEntry }: EditTimeEntryModalPr
   const [description, setDescription] = useState(timeEntry.description || '');
   const [date, setDate] = useState(timeEntry.date);
   const [billed, setBilled] = useState(timeEntry.billed);
-  const [milestoneId, setMilestoneId] = useState(timeEntry.milestoneId || '');
+  const [milestoneId, setMilestoneId] = useState(timeEntry.milestoneId || 'no-milestone');
   const [isUpdating, setIsUpdating] = useState(false);
 
   const { updateHourEntry } = useHourEntries();
@@ -43,7 +43,7 @@ const EditTimeEntryModal = ({ isOpen, onClose, timeEntry }: EditTimeEntryModalPr
         description: description || undefined,
         date,
         billed,
-        milestoneId: milestoneId || undefined
+        milestoneId: milestoneId === 'no-milestone' ? undefined : milestoneId
       });
       onClose();
     } catch (error) {
@@ -97,7 +97,7 @@ const EditTimeEntryModal = ({ isOpen, onClose, timeEntry }: EditTimeEntryModalPr
                 <SelectValue placeholder="Select a milestone" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No milestone</SelectItem>
+                <SelectItem value="no-milestone">No milestone</SelectItem>
                 {projectMilestones.map((milestone) => (
                   <SelectItem key={milestone.id} value={milestone.id}>
                     {milestone.title} ({new Date(milestone.targetDate).toLocaleDateString()})
