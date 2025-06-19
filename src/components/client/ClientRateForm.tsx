@@ -35,10 +35,10 @@ const ClientRateForm = ({ formData, setFormData, errors }: ClientRateFormProps) 
           onChange={(e) => setFormData({ ...formData, priceType: e.target.value })}
         >
           <option value="">Select type</option>
-          <option value="hourly">Per Hour</option>
-          <option value="daily">Per Day</option>
-          <option value="weekly">Per Week</option>
-          <option value="monthly">Per Month</option>
+          <option value="hour">Per Hour</option>
+          <option value="day">Per Day</option>
+          <option value="week">Per Week</option>
+          <option value="month">Per Month</option>
         </select>
         {errors.priceType && <p className="text-red-500 text-sm mt-1">{errors.priceType}</p>}
       </div>

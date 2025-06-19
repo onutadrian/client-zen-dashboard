@@ -2,18 +2,18 @@
 // Map old price types to new ones for backward compatibility
 export const mapPriceType = (priceType: string) => {
   const mapping = {
-    'hour': 'hourly',
-    'day': 'daily', 
-    'week': 'weekly',
-    'month': 'monthly',
-    'hourly': 'hourly',
-    'daily': 'daily',
-    'weekly': 'weekly', 
-    'monthly': 'monthly',
+    'hour': 'hour',
+    'day': 'day', 
+    'week': 'week',
+    'month': 'month',
+    'hourly': 'hour',
+    'daily': 'day',
+    'weekly': 'week', 
+    'monthly': 'month',
     'project': 'project'
   };
   
-  const mappedType = mapping[priceType] || 'hourly';
+  const mappedType = mapping[priceType] || 'hour';
   console.log('Mapping price type:', priceType, 'to:', mappedType);
   return mappedType;
 };
