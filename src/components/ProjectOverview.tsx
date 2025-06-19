@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ProjectTimeTrackingSection from './ProjectTimeTrackingSection';
 import ProjectMilestoneSection from './ProjectMilestoneSection';
@@ -6,6 +5,7 @@ import ProjectTaskSection from './ProjectTaskSection';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
 import { Milestone } from '@/hooks/useMilestones';
+import { Task } from '@/types/task';
 
 interface Task {
   id: number;

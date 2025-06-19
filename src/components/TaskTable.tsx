@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Edit, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import CaptureWorkedHoursModal from './CaptureWorkedHoursModal';
+import { Task } from '@/types/task';
 
 interface Task {
   id: number;

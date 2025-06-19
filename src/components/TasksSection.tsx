@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,24 +7,7 @@ import { Plus, CheckSquare } from 'lucide-react';
 import TaskTable from './TaskTable';
 import TaskDetailsSheet from './TaskDetailsSheet';
 import AddTaskModal from './AddTaskModal';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  clientId: number;
-  clientName: string;
-  projectId?: string;
-  estimatedHours?: number;
-  actualHours?: number;
-  status: 'pending' | 'in-progress' | 'completed';
-  notes: string;
-  assets: string[];
-  createdDate: string;
-  completedDate?: string;
-  startDate?: string;
-  endDate?: string;
-}
+import { Task } from '@/types/task';
 
 interface Client {
   id: number;

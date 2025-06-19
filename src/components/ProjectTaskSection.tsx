@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Plus } from 'lucide-react';
 import AddProjectTaskModal from './AddProjectTaskModal';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
+import { Task } from '@/types/task';
 
 interface Task {
   id: number;

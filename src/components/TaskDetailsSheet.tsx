@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Sheet,
@@ -9,23 +8,7 @@ import {
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Clock, User, FileText, Link as LinkIcon, Calendar, FolderOpen } from 'lucide-react';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  clientId: number;
-  clientName: string;
-  projectId?: string;
-  estimatedHours?: number;
-  actualHours?: number;
-  workedHours?: number;
-  status: 'pending' | 'in-progress' | 'completed';
-  notes: string;
-  assets: string[];
-  createdDate: string;
-  completedDate?: string;
-}
+import { Task } from '@/types/task';
 
 interface Project {
   id: string;
