@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Clock, Plus } from 'lucide-react';
@@ -32,14 +31,9 @@ const ProjectTimeTrackingSection = ({
   const projectHours = hourEntries.filter(entry => entry.projectId === project.id);
 
   const getLogButtonText = () => {
-    if (!client) return 'Log Hours';
-    switch (client.priceType) {
-      case 'day':
+    switch (project.pricingType) {
+      case 'daily':
         return 'Log Days';
-      case 'week':
-        return 'Log Weeks';
-      case 'month':
-        return 'Log Months';
       default:
         return 'Log Hours';
     }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -43,58 +42,42 @@ const LogProjectHoursModal = ({
   );
 
   const getTimeLabel = () => {
-    switch (client.priceType) {
-      case 'hour':
+    switch (project.pricingType) {
+      case 'hourly':
         return 'Hours Worked';
-      case 'day':
+      case 'daily':
         return 'Days Worked';
-      case 'week':
-        return 'Weeks Worked';
-      case 'month':
-        return 'Months Worked';
       default:
         return 'Time Worked';
     }
   };
 
   const getStepValue = () => {
-    switch (client.priceType) {
-      case 'hour':
+    switch (project.pricingType) {
+      case 'hourly':
         return '0.25';
-      case 'day':
+      case 'daily':
         return '0.5';
-      case 'week':
-        return '0.25';
-      case 'month':
-        return '0.1';
       default:
         return '0.1';
     }
   };
 
   const getPlaceholder = () => {
-    switch (client.priceType) {
-      case 'hour':
+    switch (project.pricingType) {
+      case 'hourly':
         return 'e.g., 2.5';
-      case 'day':
+      case 'daily':
         return 'e.g., 1.5';
-      case 'week':
-        return 'e.g., 0.5';
-      case 'month':
-        return 'e.g., 0.3';
       default:
         return 'e.g., 1';
     }
   };
 
   const getButtonText = () => {
-    switch (client.priceType) {
-      case 'day':
+    switch (project.pricingType) {
+      case 'daily':
         return 'Log Days';
-      case 'week':
-        return 'Log Weeks';
-      case 'month':
-        return 'Log Months';
       default:
         return 'Log Hours';
     }
@@ -109,20 +92,16 @@ const LogProjectHoursModal = ({
     // Convert everything to hours for consistent storage
     const convertToHours = (value: number, type: string) => {
       switch (type) {
-        case 'hour':
+        case 'hourly':
           return value;
-        case 'day':
+        case 'daily':
           return value * 8; // 8 hours per day
-        case 'week':
-          return value * 40; // 40 hours per week
-        case 'month':
-          return value * 160; // ~160 hours per month (4 weeks)
         default:
           return value;
       }
     };
 
-    const hoursEquivalent = convertToHours(Number(hours), client.priceType);
+    const hoursEquivalent = convertToHours(Number(hours), project.pricingType);
     
     await addHourEntry({
       projectId: project.id,
