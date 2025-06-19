@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,25 +7,6 @@ import AddProjectTaskModal from './AddProjectTaskModal';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
 import { Task } from '@/types/task';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  clientId: number;
-  clientName: string;
-  projectId?: string;
-  estimatedHours?: number;
-  actualHours?: number;
-  workedHours?: number;
-  status: 'pending' | 'in-progress' | 'completed';
-  notes: string;
-  assets: string[];
-  createdDate: string;
-  completedDate?: string;
-  startDate?: string;
-  endDate?: string;
-}
 
 interface ProjectTaskSectionProps {
   project: Project;

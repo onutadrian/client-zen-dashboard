@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -6,25 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Trash2, Edit, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import CaptureWorkedHoursModal from './CaptureWorkedHoursModal';
 import { Task } from '@/types/task';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  clientId: number;
-  clientName: string;
-  projectId?: string;
-  estimatedHours?: number;
-  actualHours?: number;
-  workedHours?: number;
-  status: 'pending' | 'in-progress' | 'completed';
-  notes: string;
-  assets: string[];
-  createdDate: string;
-  completedDate?: string;
-  startDate?: string;
-  endDate?: string;
-}
 
 interface Client {
   id: number;

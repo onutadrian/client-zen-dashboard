@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -5,22 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Clock, User, FileText, Link as LinkIcon, CheckCircle, Play } from 'lucide-react';
 import CaptureWorkedHoursModal from './CaptureWorkedHoursModal';
 import { Task } from '@/types/task';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  clientId: number;
-  clientName: string;
-  estimatedHours?: number;
-  actualHours?: number;
-  workedHours?: number;
-  status: 'pending' | 'in-progress' | 'completed';
-  notes: string;
-  assets: string[];
-  createdDate: string;
-  completedDate?: string;
-}
 
 interface TaskCardProps {
   task: Task;

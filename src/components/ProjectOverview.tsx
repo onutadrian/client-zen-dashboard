@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ProjectTimeTrackingSection from './ProjectTimeTrackingSection';
 import ProjectMilestoneSection from './ProjectMilestoneSection';
@@ -6,24 +7,6 @@ import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
 import { Milestone } from '@/hooks/useMilestones';
 import { Task } from '@/types/task';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  clientId: number;
-  clientName: string;
-  projectId?: string;
-  estimatedHours?: number;
-  actualHours?: number;
-  status: 'pending' | 'in-progress' | 'completed';
-  notes: string;
-  assets: string[];
-  createdDate: string;
-  completedDate?: string;
-  startDate?: string;
-  endDate?: string;
-}
 
 interface ProjectOverviewProps {
   project: Project;
