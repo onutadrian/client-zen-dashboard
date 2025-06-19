@@ -34,7 +34,7 @@ const LogProjectHoursModal = ({
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [billed, setBilled] = useState(false);
-  const [selectedMilestoneId, setSelectedMilestoneId] = useState<string>('');
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState<string>('unassigned');
   const { addHourEntry } = useHourEntries();
 
   // Filter milestones that are not completed
@@ -131,7 +131,7 @@ const LogProjectHoursModal = ({
       description,
       date,
       billed,
-      milestoneId: selectedMilestoneId || undefined
+      milestoneId: selectedMilestoneId === 'unassigned' ? undefined : selectedMilestoneId
     });
 
     // Reset form
@@ -139,7 +139,7 @@ const LogProjectHoursModal = ({
     setDescription('');
     setDate(new Date().toISOString().split('T')[0]);
     setBilled(false);
-    setSelectedMilestoneId('');
+    setSelectedMilestoneId('unassigned');
     onClose();
   };
 
@@ -187,7 +187,7 @@ const LogProjectHoursModal = ({
                   <SelectValue placeholder="Select milestone or leave unassigned" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No milestone (unassigned)</SelectItem>
+                  <SelectItem value="unassigned">No milestone (unassigned)</SelectItem>
                   {availableMilestones.map((milestone) => (
                     <SelectItem key={milestone.id} value={milestone.id}>
                       {milestone.title}
