@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,7 @@ import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
 import { Milestone } from '@/hooks/useMilestones';
 import { useInvoices } from '@/hooks/useInvoices';
+import { formatDate } from '@/lib/utils';
 
 interface ProjectMilestoneSectionProps {
   project: Project;
@@ -139,7 +139,7 @@ const ProjectMilestoneSection = ({
                         </div>
                         <p className="text-sm text-slate-600 mb-1">{milestone.description}</p>
                         <div className="flex items-center space-x-4 text-sm text-slate-500">
-                          <span>Due: {new Date(milestone.targetDate).toLocaleDateString()}</span>
+                          <span>Due: {formatDate(milestone.targetDate)}</span>
                           {milestone.amount && (
                             <span>Value: ${milestone.amount.toLocaleString()}</span>
                           )}

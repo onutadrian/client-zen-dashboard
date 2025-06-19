@@ -8,6 +8,7 @@ import { Client } from '@/hooks/useClients';
 import { HourEntry, useHourEntries } from '@/hooks/useHourEntries';
 import { Milestone } from '@/hooks/useMilestones';
 import { useInvoices } from '@/hooks/useInvoices';
+import { formatDate } from '@/lib/utils';
 
 interface ProjectBilledHoursProps {
   project: Project;
@@ -45,10 +46,15 @@ const ProjectBilledHours = ({ project, client, milestones = [] }: ProjectBilledH
     .filter(i => i.status === 'pending')
     .reduce((sum, i) => sum + i.amount, 0);
   
-  // Calculate rates and revenue
-  const hourlyRate = client?.price || project.hourlyRate || 0;
-  const hourlyRevenue = billedHours * hourlyRate;
-  const pendingHourlyRevenue = unbilledHours * hourlyRate;
+  // Calculate rates and revenue - fix the rate calculation logic
+  const getProjectRate = () => {
+    // Use project's hourlyRate if available, otherwise fallback to 0
+    return project.hourlyRate || 0;
+  };
+  
+  const projectRate = getProjectRate();
+  const hourlyRevenue = billedHours * projectRate;
+  const pendingHourlyRevenue = unbilledHours * projectRate;
   
   // Calculate progress percentages for fixed price projects
   const completionPercentage = totalMilestoneValue > 0 ? (completedMilestoneValue / totalMilestoneValue) * 100 : 0;
@@ -155,7 +161,7 @@ const ProjectBilledHours = ({ project, client, milestones = [] }: ProjectBilledH
                   <div>
                     <p className="font-medium">{entry.description || 'Time entry'}</p>
                     <p className="text-sm text-slate-600">
-                      {new Date(entry.date).toLocaleDateString()}
+                      {formatDate(entry.date)}
                     </p>
                   </div>
                   <div className="text-right">
