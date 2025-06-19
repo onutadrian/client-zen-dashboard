@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -20,10 +19,20 @@ const ProjectBilledHours = ({ project, client, milestones = [] }: ProjectBilledH
   const { hourEntries } = useHourEntries();
   const { invoices } = useInvoices();
   
+  console.log('ProjectBilledHours - Project ID:', project.id);
+  console.log('ProjectBilledHours - All hour entries:', hourEntries);
+  console.log('ProjectBilledHours - Project:', project);
+  
   const isFixedPrice = project.pricingType === 'fixed';
   
   // Filter data for this project
-  const projectHours = hourEntries.filter(entry => entry.projectId === project.id);
+  const projectHours = hourEntries.filter(entry => {
+    console.log('Comparing entry.projectId:', entry.projectId, 'with project.id:', project.id);
+    return entry.projectId === project.id;
+  });
+  
+  console.log('ProjectBilledHours - Filtered project hours:', projectHours);
+  
   const projectMilestones = milestones.filter(m => m.projectId === project.id);
   const projectInvoices = invoices.filter(i => i.projectId === project.id);
 
@@ -33,6 +42,8 @@ const ProjectBilledHours = ({ project, client, milestones = [] }: ProjectBilledH
     .filter(entry => entry.billed)
     .reduce((sum, entry) => sum + entry.hours, 0);
   const unbilledHours = totalHours - billedHours;
+  
+  console.log('ProjectBilledHours - Calculated hours:', { totalHours, billedHours, unbilledHours });
   
   // Calculate milestone-based metrics
   const totalMilestoneValue = projectMilestones.reduce((sum, m) => sum + (m.amount || 0), 0);

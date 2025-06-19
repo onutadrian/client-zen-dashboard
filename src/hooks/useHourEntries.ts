@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -27,12 +26,16 @@ export const useHourEntries = () => {
 
   const loadHourEntries = async () => {
     try {
+      console.log('useHourEntries: Loading hour entries from Supabase...');
+      
       const { data, error } = await supabase
         .from('hour_entries')
         .select('*')
         .order('date', { ascending: false });
 
       if (error) throw error;
+
+      console.log('useHourEntries: Raw data from Supabase:', data);
 
       // Transform Supabase data to match our HourEntry interface
       const transformedEntries: HourEntry[] = data.map(entry => ({
@@ -48,6 +51,7 @@ export const useHourEntries = () => {
         userId: entry.user_id || undefined
       }));
 
+      console.log('useHourEntries: Transformed entries:', transformedEntries);
       setHourEntries(transformedEntries);
     } catch (error) {
       console.error('Error loading hour entries:', error);
