@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useInvoices } from '@/hooks/useInvoices';
+import { useToast } from '@/hooks/use-toast';
 import { Project } from '@/hooks/useProjects';
 import { Milestone } from '@/hooks/useMilestones';
 import { Client } from '@/hooks/useClients';
@@ -20,7 +21,8 @@ interface AddInvoiceModalProps {
 }
 
 const AddInvoiceModal = ({ isOpen, onClose, project, client, milestone }: AddInvoiceModalProps) => {
-  const { addInvoice } = useInvoices();
+  const { addInvoice, invoices } = useInvoices();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -36,6 +38,20 @@ const AddInvoiceModal = ({ isOpen, onClose, project, client, milestone }: AddInv
     setLoading(true);
 
     try {
+      // Check if invoice already exists for this milestone
+      if (milestone) {
+        const existingInvoice = invoices.find(inv => inv.milestoneId === milestone.id);
+        if (existingInvoice) {
+          toast({
+            title: "Invoice Already Exists",
+            description: `An invoice already exists for milestone "${milestone.title}". Each milestone can only have one invoice.`,
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
       // Create invoice in invoices table only
       const newInvoiceData = {
         projectId: project.id,
@@ -60,8 +76,23 @@ const AddInvoiceModal = ({ isOpen, onClose, project, client, milestone }: AddInv
         status: 'pending',
         description: milestone ? `Invoice for milestone: ${milestone.title}` : ''
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating invoice:', error);
+      
+      // Handle specific constraint violation error
+      if (error?.code === '23505' && error?.message?.includes('unique_invoice_per_milestone')) {
+        toast({
+          title: "Duplicate Invoice",
+          description: "An invoice already exists for this milestone. Each milestone can only have one invoice.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create invoice. Please try again.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
