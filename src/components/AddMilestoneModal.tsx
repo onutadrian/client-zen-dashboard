@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Target, Save } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
-import { formatDate } from '@/lib/utils';
 
 interface Milestone {
   id: string;
@@ -16,6 +16,9 @@ interface Milestone {
   description?: string;
   targetDate: string;
   status: 'pending' | 'in-progress' | 'completed';
+  amount?: number;
+  currency?: string;
+  estimatedHours?: number;
 }
 
 interface AddMilestoneModalProps {
@@ -30,6 +33,8 @@ const AddMilestoneModal = ({ isOpen, onClose, onAdd, project }: AddMilestoneModa
   const [description, setDescription] = useState('');
   const [targetDate, setTargetDate] = useState('');
   const [status, setStatus] = useState<'pending' | 'in-progress' | 'completed'>('pending');
+  const [amount, setAmount] = useState<number>(0);
+  const [estimatedHours, setEstimatedHours] = useState<number>(8);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +45,10 @@ const AddMilestoneModal = ({ isOpen, onClose, onAdd, project }: AddMilestoneModa
       title,
       description: description || undefined,
       targetDate,
-      status
+      status,
+      amount: amount > 0 ? amount : undefined,
+      currency: 'USD',
+      estimatedHours: estimatedHours > 0 ? estimatedHours : undefined
     });
 
     // Reset form
@@ -48,6 +56,8 @@ const AddMilestoneModal = ({ isOpen, onClose, onAdd, project }: AddMilestoneModa
     setDescription('');
     setTargetDate('');
     setStatus('pending');
+    setAmount(0);
+    setEstimatedHours(8);
     onClose();
   };
 
@@ -110,6 +120,32 @@ const AddMilestoneModal = ({ isOpen, onClose, onAdd, project }: AddMilestoneModa
                   <SelectItem value="completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="amount">Amount ($)</Label>
+              <Input
+                id="amount"
+                type="number"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+                placeholder="0.00"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="estimatedHours">Estimated Hours</Label>
+              <Input
+                id="estimatedHours"
+                type="number"
+                step="0.5"
+                value={estimatedHours}
+                onChange={(e) => setEstimatedHours(parseFloat(e.target.value) || 0)}
+                placeholder="0"
+              />
             </div>
           </div>
 

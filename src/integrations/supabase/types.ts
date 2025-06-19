@@ -198,6 +198,7 @@ export type Database = {
           created_at: string
           currency: string | null
           description: string | null
+          estimated_hours: number | null
           id: string
           payment_status: string | null
           project_id: string
@@ -213,6 +214,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string | null
+          estimated_hours?: number | null
           id?: string
           payment_status?: string | null
           project_id: string
@@ -228,6 +230,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string | null
+          estimated_hours?: number | null
           id?: string
           payment_status?: string | null
           project_id?: string

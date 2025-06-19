@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +14,7 @@ export interface Milestone {
   currency?: string;
   completionPercentage: number;
   paymentStatus: 'unpaid' | 'partial' | 'paid';
+  estimatedHours?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -45,6 +47,7 @@ export const useMilestones = () => {
         currency: milestone.currency || 'USD',
         completionPercentage: milestone.completion_percentage || 0,
         paymentStatus: milestone.payment_status as 'unpaid' | 'partial' | 'paid',
+        estimatedHours: milestone.estimated_hours || undefined,
         createdAt: milestone.created_at,
         updatedAt: milestone.updated_at
       }));
@@ -75,6 +78,7 @@ export const useMilestones = () => {
           status: newMilestone.status,
           amount: newMilestone.amount,
           currency: newMilestone.currency || 'USD',
+          estimated_hours: newMilestone.estimatedHours,
           user_id: user.id
         }])
         .select()
@@ -93,6 +97,7 @@ export const useMilestones = () => {
         currency: data.currency || 'USD',
         completionPercentage: data.completion_percentage || 0,
         paymentStatus: data.payment_status as 'unpaid' | 'partial' | 'paid',
+        estimatedHours: data.estimated_hours || undefined,
         createdAt: data.created_at,
         updatedAt: data.updated_at
       };
@@ -125,7 +130,8 @@ export const useMilestones = () => {
           amount: updates.amount,
           currency: updates.currency,
           completion_percentage: updates.completionPercentage,
-          payment_status: updates.paymentStatus
+          payment_status: updates.paymentStatus,
+          estimated_hours: updates.estimatedHours
         })
         .eq('id', milestoneId);
 

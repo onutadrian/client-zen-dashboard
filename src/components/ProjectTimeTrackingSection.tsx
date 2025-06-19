@@ -91,9 +91,9 @@ const ProjectTimeTrackingSection = ({
           />
         )}
 
-        {/* Time Entry Management - replacing RecentTimeEntries */}
+        {/* Time Entry Management - now uses hooks directly */}
         <TimeEntryManagement 
-          hourEntries={projectHours}
+          projectId={project.id}
           onAddTimeEntry={client ? () => setShowLogHoursModal(true) : undefined}
         />
       </div>

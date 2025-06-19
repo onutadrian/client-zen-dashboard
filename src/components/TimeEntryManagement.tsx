@@ -2,53 +2,49 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Edit, Trash2, Plus } from 'lucide-react';
-import { HourEntry, useHourEntries } from '@/hooks/useHourEntries';
-import { formatDate } from '@/lib/utils';
+import { Edit, Trash2, Plus, Clock } from 'lucide-react';
 import EditTimeEntryModal from './EditTimeEntryModal';
 import DeleteTimeEntryDialog from './DeleteTimeEntryDialog';
+import { HourEntry, useHourEntries } from '@/hooks/useHourEntries';
+import { formatDate } from '@/lib/utils';
 
 interface TimeEntryManagementProps {
-  hourEntries: HourEntry[];
+  projectId: string;
   onAddTimeEntry?: () => void;
 }
 
-const TimeEntryManagement = ({ hourEntries, onAddTimeEntry }: TimeEntryManagementProps) => {
+const TimeEntryManagement = ({ projectId, onAddTimeEntry }: TimeEntryManagementProps) => {
+  const { hourEntries, refreshHourEntries } = useHourEntries();
   const [editingEntry, setEditingEntry] = useState<HourEntry | null>(null);
-  const [deletingEntry, setDeleteingEntry] = useState<HourEntry | null>(null);
+  const [deletingEntry, setDeletingEntry] = useState<HourEntry | null>(null);
 
-  const sortedEntries = [...hourEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  // Filter entries for this project
+  const projectEntries = hourEntries.filter(entry => entry.projectId === projectId);
 
-  if (hourEntries.length === 0) {
+  const handleEditComplete = () => {
+    setEditingEntry(null);
+    refreshHourEntries();
+  };
+
+  const handleDeleteComplete = () => {
+    setDeletingEntry(null);
+    refreshHourEntries();
+  };
+
+  if (projectEntries.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Clock className="w-5 h-5 mr-2" />
-              Time Entries
-            </div>
-            {onAddTimeEntry && (
-              <Button
-                onClick={onAddTimeEntry}
-                size="sm"
-                className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Time
-              </Button>
-            )}
+          <CardTitle className="flex items-center">
+            <Clock className="w-5 h-5 mr-2" />
+            Time Entries
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <Clock className="w-12 h-12 mx-auto mb-4 text-slate-400" />
             <p className="text-slate-500 mb-4">No time entries logged yet</p>
             {onAddTimeEntry && (
-              <Button
-                onClick={onAddTimeEntry}
-                className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
-              >
+              <Button onClick={onAddTimeEntry} variant="outline">
                 <Plus className="w-4 h-4 mr-2" />
                 Log First Entry
               </Button>
@@ -63,71 +59,61 @@ const TimeEntryManagement = ({ hourEntries, onAddTimeEntry }: TimeEntryManagemen
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center">
               <Clock className="w-5 h-5 mr-2" />
-              Time Entries ({hourEntries.length})
-            </div>
+              Recent Time Entries ({projectEntries.length})
+            </CardTitle>
             {onAddTimeEntry && (
-              <Button
-                onClick={onAddTimeEntry}
-                size="sm"
-                className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
-              >
+              <Button onClick={onAddTimeEntry} size="sm" variant="outline">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Time
+                Add Entry
               </Button>
             )}
-          </CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {sortedEntries.map((entry) => (
-              <div key={entry.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-sm font-medium">
-                        {formatDate(entry.date)}
-                      </div>
-                      <div className="text-sm text-slate-600">
+            {projectEntries
+              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+              .slice(0, 10)
+              .map((entry) => (
+                <div key={entry.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="font-medium">{formatDate(entry.date)}</span>
+                      <span className="text-sm text-slate-500">
                         {entry.hours} {entry.hours === 1 ? 'hour' : 'hours'}
-                      </div>
-                      <div className={`text-xs px-2 py-1 rounded-full ${
-                        entry.billed 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {entry.billed ? 'Billed' : 'Unbilled'}
-                      </div>
+                      </span>
+                      {entry.billed && (
+                        <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
+                          Billed
+                        </span>
+                      )}
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingEntry(entry)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeleteingEntry(entry)}
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    {entry.description && (
+                      <p className="text-sm text-slate-600">{entry.description}</p>
+                    )}
                   </div>
-                  {entry.description && (
-                    <div className="text-sm text-slate-500 mt-1">
-                      {entry.description}
-                    </div>
-                  )}
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setEditingEntry(entry)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setDeletingEntry(entry)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </CardContent>
       </Card>
@@ -135,7 +121,7 @@ const TimeEntryManagement = ({ hourEntries, onAddTimeEntry }: TimeEntryManagemen
       {editingEntry && (
         <EditTimeEntryModal
           isOpen={true}
-          onClose={() => setEditingEntry(null)}
+          onClose={handleEditComplete}
           timeEntry={editingEntry}
         />
       )}
@@ -143,7 +129,7 @@ const TimeEntryManagement = ({ hourEntries, onAddTimeEntry }: TimeEntryManagemen
       {deletingEntry && (
         <DeleteTimeEntryDialog
           isOpen={true}
-          onClose={() => setDeleteingEntry(null)}
+          onClose={handleDeleteComplete}
           timeEntry={deletingEntry}
         />
       )}

@@ -24,7 +24,8 @@ const EditMilestoneModal = ({ isOpen, onClose, onUpdate, milestone }: EditMilest
     amount: milestone.amount || 0,
     currency: milestone.currency || 'USD',
     completionPercentage: milestone.completionPercentage,
-    paymentStatus: milestone.paymentStatus
+    paymentStatus: milestone.paymentStatus,
+    estimatedHours: milestone.estimatedHours || 8
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -126,6 +127,19 @@ const EditMilestoneModal = ({ isOpen, onClose, onUpdate, milestone }: EditMilest
             </div>
 
             <div>
+              <Label htmlFor="estimatedHours">Est. Hours</Label>
+              <Input
+                id="estimatedHours"
+                type="number"
+                step="0.5"
+                value={formData.estimatedHours}
+                onChange={(e) => setFormData({ ...formData, estimatedHours: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
               <Label htmlFor="completion">Completion %</Label>
               <Input
                 id="completion"
@@ -136,25 +150,25 @@ const EditMilestoneModal = ({ isOpen, onClose, onUpdate, milestone }: EditMilest
                 onChange={(e) => setFormData({ ...formData, completionPercentage: parseInt(e.target.value) || 0 })}
               />
             </div>
-          </div>
 
-          <div>
-            <Label htmlFor="paymentStatus">Payment Status</Label>
-            <Select 
-              value={formData.paymentStatus} 
-              onValueChange={(value: 'unpaid' | 'partial' | 'paid') => 
-                setFormData({ ...formData, paymentStatus: value })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unpaid">Unpaid</SelectItem>
-                <SelectItem value="partial">Partial</SelectItem>
-                <SelectItem value="paid">Paid</SelectItem>
-              </SelectContent>
-            </Select>
+            <div>
+              <Label htmlFor="paymentStatus">Payment Status</Label>
+              <Select 
+                value={formData.paymentStatus} 
+                onValueChange={(value: 'unpaid' | 'partial' | 'paid') => 
+                  setFormData({ ...formData, paymentStatus: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unpaid">Unpaid</SelectItem>
+                  <SelectItem value="partial">Partial</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
