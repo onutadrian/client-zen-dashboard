@@ -3,6 +3,7 @@ import { convertCurrency } from '@/lib/currency';
 import { Client } from './useClients';
 import { Subscription } from './useSubscriptions';
 import { useHourEntries } from './useHourEntries';
+import { useInvoices } from './useInvoices';
 
 export const useAnalytics = (
   clients: Client[], 
@@ -10,23 +11,21 @@ export const useAnalytics = (
   displayCurrency: string
 ) => {
   const { hourEntries } = useHourEntries();
+  const { invoices } = useInvoices();
   
   const totalClients = clients.length;
   const activeClients = clients.filter(c => c.status === 'active').length;
   
-  // Calculate total hours from hour entries instead of client data
+  // Calculate total hours from hour entries
   const totalHours = hourEntries.reduce((sum, entry) => sum + entry.hours, 0);
   
-  const totalRevenue = clients.reduce((sum, client) => {
-    const clientRevenue = (client.invoices || []).reduce((invoiceSum, invoice) => {
-      if (invoice.status === 'paid') {
-        const convertedAmount = convertCurrency(invoice.amount, client.currency || 'USD', displayCurrency);
-        return invoiceSum + convertedAmount;
-      }
-      return invoiceSum;
+  // Calculate total revenue from paid invoices
+  const totalRevenue = invoices
+    .filter(invoice => invoice.status === 'paid')
+    .reduce((sum, invoice) => {
+      const convertedAmount = convertCurrency(invoice.amount, invoice.currency, displayCurrency);
+      return sum + convertedAmount;
     }, 0);
-    return sum + clientRevenue;
-  }, 0);
   
   const monthlySubscriptionCost = subscriptions.reduce((sum, sub) => {
     const convertedPrice = convertCurrency(sub.price * (sub.seats || 1), sub.currency || 'USD', displayCurrency);

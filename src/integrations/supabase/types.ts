@@ -200,7 +200,6 @@ export type Database = {
           description: string | null
           estimated_hours: number | null
           id: string
-          payment_status: string | null
           project_id: string
           status: string
           target_date: string
@@ -216,7 +215,6 @@ export type Database = {
           description?: string | null
           estimated_hours?: number | null
           id?: string
-          payment_status?: string | null
           project_id: string
           status?: string
           target_date: string
@@ -232,7 +230,6 @@ export type Database = {
           description?: string | null
           estimated_hours?: number | null
           id?: string
-          payment_status?: string | null
           project_id?: string
           status?: string
           target_date?: string
@@ -423,6 +420,7 @@ export type Database = {
           status: string
           title: string
           user_id: string | null
+          worked_hours: number | null
         }
         Insert: {
           actual_hours?: number | null
@@ -441,6 +439,7 @@ export type Database = {
           status?: string
           title: string
           user_id?: string | null
+          worked_hours?: number | null
         }
         Update: {
           actual_hours?: number | null
@@ -459,6 +458,7 @@ export type Database = {
           status?: string
           title?: string
           user_id?: string | null
+          worked_hours?: number | null
         }
         Relationships: [
           {

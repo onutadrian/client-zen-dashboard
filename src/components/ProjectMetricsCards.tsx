@@ -6,11 +6,10 @@ interface ProjectMetricsCardsProps {
   totalHours: number;
   billedHours: number;
   unbilledHours: number;
-  hourlyRevenue: number;
-  pendingInvoiceAmount: number;
-  totalMilestoneValue: number;
-  completedMilestoneValue: number;
-  paidInvoiceAmount: number;
+  billedRevenue: number;
+  unbilledRevenue: number;
+  totalMilestoneValue?: number;
+  completedMilestoneValue?: number;
 }
 
 const ProjectMetricsCards = ({
@@ -18,11 +17,10 @@ const ProjectMetricsCards = ({
   totalHours,
   billedHours,
   unbilledHours,
-  hourlyRevenue,
-  pendingInvoiceAmount,
-  totalMilestoneValue,
-  completedMilestoneValue,
-  paidInvoiceAmount
+  billedRevenue,
+  unbilledRevenue,
+  totalMilestoneValue = 0,
+  completedMilestoneValue = 0
 }: ProjectMetricsCardsProps) => {
   const showMilestoneTracking = isFixedPrice && totalMilestoneValue > 0;
 
@@ -31,9 +29,9 @@ const ProjectMetricsCards = ({
       <>
         <div className="text-center p-4 rounded-lg bg-slate-50">
           <p className="text-zinc-950 text-4xl font-normal">
-            ${pendingInvoiceAmount.toLocaleString()}
+            ${unbilledRevenue.toLocaleString()}
           </p>
-          <p className="text-slate-600 py-[24px] text-base">Pending Revenue</p>
+          <p className="text-slate-600 py-[24px] text-base">Unbilled Revenue</p>
         </div>
 
         <div className="text-center p-4 rounded-lg bg-slate-50">
@@ -52,9 +50,9 @@ const ProjectMetricsCards = ({
 
         <div className="text-center p-4 rounded-lg bg-slate-50">
           <p className="text-zinc-950 text-4xl font-normal">
-            ${paidInvoiceAmount.toLocaleString()}
+            ${billedRevenue.toLocaleString()}
           </p>
-          <p className="text-slate-600 py-[24px] text-base">Paid Revenue</p>
+          <p className="text-slate-600 py-[24px] text-base">Billed Revenue</p>
         </div>
       </>
     );
@@ -79,9 +77,9 @@ const ProjectMetricsCards = ({
 
       <div className="text-center p-4 rounded-lg bg-slate-50">
         <p className="text-zinc-950 font-normal text-4xl">
-          ${hourlyRevenue.toLocaleString()}
+          ${billedRevenue.toLocaleString()}
         </p>
-        <p className="text-slate-600 py-[24px] text-base">Total Revenue</p>
+        <p className="text-slate-600 py-[24px] text-base">Billed Revenue</p>
       </div>
     </>
   );

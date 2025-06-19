@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +12,7 @@ export interface Task {
   projectId?: string;
   estimatedHours?: number;
   actualHours?: number;
+  workedHours?: number;
   status: 'pending' | 'in-progress' | 'completed';
   notes: string;
   assets: string[];
@@ -72,6 +74,7 @@ export const useTasks = () => {
         projectId: task.project_id,
         estimatedHours: task.estimated_hours,
         actualHours: task.actual_hours,
+        workedHours: task.worked_hours,
         status: task.status as 'pending' | 'in-progress' | 'completed',
         notes: task.notes || '',
         assets: task.assets || [],
@@ -131,6 +134,7 @@ export const useTasks = () => {
         projectId: result.project_id,
         estimatedHours: result.estimated_hours,
         actualHours: result.actual_hours,
+        workedHours: result.worked_hours,
         status: result.status as 'pending' | 'in-progress' | 'completed',
         notes: result.notes || '',
         assets: result.assets || [],
@@ -156,14 +160,14 @@ export const useTasks = () => {
     }
   };
 
-  const updateTask = async (taskId: number, status: Task['status'], actualHours?: number) => {
+  const updateTask = async (taskId: number, status: Task['status'], workedHours?: number) => {
     try {
       const updateData: any = { status };
       
       if (status === 'completed') {
         updateData.completed_date = new Date().toISOString();
-        if (actualHours) {
-          updateData.actual_hours = actualHours;
+        if (workedHours) {
+          updateData.worked_hours = workedHours;
         }
       }
 
@@ -182,9 +186,8 @@ export const useTasks = () => {
           if (status === 'completed') {
             updatedTask.completedDate = new Date().toISOString();
             
-            const hoursToLog = actualHours || task.estimatedHours;
-            if (hoursToLog) {
-              updatedTask.actualHours = hoursToLog;
+            if (workedHours) {
+              updatedTask.workedHours = workedHours;
             }
           }
           
@@ -201,8 +204,7 @@ export const useTasks = () => {
       // Return the task and hours for client update
       const completedTask = tasks.find(t => t.id === taskId);
       if (status === 'completed' && completedTask) {
-        const hoursToLog = actualHours || completedTask.estimatedHours;
-        return { task: completedTask, hoursToLog };
+        return { task: completedTask, hoursToLog: workedHours };
       }
       return null;
     } catch (error) {
@@ -255,6 +257,7 @@ export const useTasks = () => {
       if (updatedTask.assets) supabaseUpdate.assets = updatedTask.assets;
       if (updatedTask.startDate !== undefined) supabaseUpdate.start_date = updatedTask.startDate;
       if (updatedTask.endDate !== undefined) supabaseUpdate.end_date = updatedTask.endDate;
+      if (updatedTask.workedHours !== undefined) supabaseUpdate.worked_hours = updatedTask.workedHours;
 
       const { error } = await supabase
         .from('tasks')
