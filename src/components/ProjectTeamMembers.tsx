@@ -4,16 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Users, User, Trash2 } from 'lucide-react';
+import { Plus, Users, UserCheck, Trash2 } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
+import { Client } from '@/types/client';
 
 interface ProjectTeamMembersProps {
   project: Project;
+  client?: Client;
   onUpdateProject: (projectId: string, updates: any) => void;
 }
 
 const ProjectTeamMembers = ({
   project,
+  client,
   onUpdateProject
 }: ProjectTeamMembersProps) => {
   const [newMember, setNewMember] = useState('');
@@ -37,6 +40,17 @@ const ProjectTeamMembers = ({
       ...project,
       team: updatedTeam
     });
+  };
+
+  const getMemberTitle = (memberName: string) => {
+    if (!client?.people) return 'Team Member';
+    
+    // Try to find the member by name or email in the client's people data
+    const person = client.people.find(p => 
+      p.name === memberName || p.email === memberName
+    );
+    
+    return person?.title || 'Team Member';
   };
 
   return (
@@ -86,13 +100,13 @@ const ProjectTeamMembers = ({
                 <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-blue-600" />
+                      <UserCheck className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
                       <p className="font-medium">{member}</p>
                       <p className="text-sm text-slate-600 flex items-center">
-                        <User className="w-4 h-4 mr-1" />
-                        {member.includes('@') ? 'Team Member' : member}
+                        <UserCheck className="w-4 h-4 mr-1" />
+                        {getMemberTitle(member)}
                       </p>
                     </div>
                   </div>

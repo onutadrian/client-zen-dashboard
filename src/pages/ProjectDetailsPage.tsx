@@ -116,6 +116,7 @@ const ProjectDetailsPage = () => {
               <TabsContent value="team" className="mt-6">
                 <ProjectTeamMembers 
                   project={project}
+                  client={client}
                   onUpdateProject={updateProject}
                 />
               </TabsContent>
