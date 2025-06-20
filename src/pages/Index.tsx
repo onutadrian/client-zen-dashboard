@@ -15,7 +15,7 @@ import { useCurrency } from '@/hooks/useCurrency';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
 
 const Index = () => {
-  const { displayCurrency, updateCurrency } = useCurrency();
+  const { displayCurrency } = useCurrency();
   const [showClientModal, setShowClientModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = useState(false);
@@ -43,9 +43,7 @@ const Index = () => {
 
         <DashboardHeader
           displayCurrency={displayCurrency}
-          onCurrencyChange={updateCurrency}
-          onAddClient={() => setShowClientModal(true)}
-          onAddSubscription={() => setShowSubscriptionModal(true)}
+          onCurrencyChange={() => {}} // Currency is now handled in sidebar
         />
 
         <AnalyticsSection

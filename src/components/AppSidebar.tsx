@@ -14,9 +14,11 @@ import {
   SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart3, Users, FolderOpen, CreditCard, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LogoutButton from '@/components/LogoutButton';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const menuItems = [
   {
@@ -44,6 +46,7 @@ const menuItems = [
 export function AppSidebar() {
   const location = useLocation();
   const { isMobile, setOpenMobile } = useSidebar();
+  const { displayCurrency, updateCurrency } = useCurrency();
 
   // Auto-close sidebar on navigation for mobile
   useEffect(() => {
@@ -92,7 +95,22 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 space-y-4">
+        <div className="group-data-[collapsible=icon]:hidden">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs text-slate-600 font-medium">Currency</span>
+            <Select value={displayCurrency} onValueChange={updateCurrency}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="USD">US Dollar ($)</SelectItem>
+                <SelectItem value="EUR">Euro (€)</SelectItem>
+                <SelectItem value="RON">Romanian Lei (RON)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         <LogoutButton />
       </SidebarFooter>
     </Sidebar>
