@@ -42,7 +42,7 @@ export const useAnalytics = (
   // Calculate time breakdown by client
   const getTimeBreakdownByClient = () => {
     return clients.map(client => {
-      const clientHourEntries = hourEntries.filter(entry => entry.client_id === client.id);
+      const clientHourEntries = hourEntries.filter(entry => entry.clientId === client.id);
       const totalHours = clientHourEntries.reduce((sum, entry) => sum + entry.hours, 0);
 
       // Convert hours to appropriate unit based on client's price type
@@ -72,7 +72,7 @@ export const useAnalytics = (
   // Calculate revenue breakdown by client
   const getRevenueBreakdownByClient = () => {
     return clients.map(client => {
-      const clientInvoices = invoices.filter(invoice => invoice.client_id === client.id);
+      const clientInvoices = invoices.filter(invoice => invoice.clientId === client.id);
       const paidAmount = clientInvoices.reduce((sum, invoice) => {
         if (invoice.status === 'paid') {
           const convertedAmount = convertCurrency(invoice.amount, invoice.currency, displayCurrency);
