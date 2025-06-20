@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +15,9 @@ const AnalyticsSection = ({
   clients,
   displayCurrency,
   convertCurrency,
-  formatCurrency
+  formatCurrency,
+  timeBreakdown = [],
+  revenueBreakdown = []
 }) => {
   // Format numbers: remove decimals and convert 1000+ to K format
   const formatMetric = (value, isCurrency = false, currency = '') => {
@@ -55,58 +58,12 @@ const AnalyticsSection = ({
       'Total Time': { change: 23, isIncrease: true },
       'Total Revenue': { change: 8, isIncrease: true },
       'Monthly Costs': { change: 12, isIncrease: false }, // decrease is good for costs
+      'Total Paid to Date': { change: 18, isIncrease: true },
       'Net Profit': { change: 18, isIncrease: true }
     };
     return trends[metric] || { change: 0, isIncrease: true };
   };
 
-  // Calculate time breakdown by client and type
-  const getTimeBreakdownByClient = () => {
-    return clients.map(client => {
-      const totalHours = client.hourEntries?.reduce((sum, entry) => sum + entry.hours, 0) || 0;
-
-      // Convert hours to appropriate unit based on client's price type
-      let displayValue = totalHours;
-      let unit = 'hrs';
-      if (client.priceType === 'day') {
-        displayValue = Math.round(totalHours / 8 * 10) / 10; // 8 hours = 1 day
-        unit = 'days';
-      } else if (client.priceType === 'week') {
-        displayValue = Math.round(totalHours / 40 * 10) / 10; // 40 hours = 1 week
-        unit = 'weeks';
-      } else if (client.priceType === 'month') {
-        displayValue = Math.round(totalHours / 160 * 10) / 10; // 160 hours = 1 month
-        unit = 'months';
-      }
-      return {
-        name: client.name,
-        value: displayValue,
-        unit: unit,
-        hasTime: totalHours > 0
-      };
-    }).filter(client => client.hasTime);
-  };
-
-  // Calculate revenue breakdown by client with currency conversion
-  const getRevenueBreakdownByClient = () => {
-    return clients.map(client => {
-      const paidAmount = client.invoices?.reduce((sum, invoice) => {
-        if (invoice.status === 'paid') {
-          const convertedAmount = convertCurrency(invoice.amount, client.currency || 'USD', displayCurrency);
-          return sum + convertedAmount;
-        }
-        return sum;
-      }, 0) || 0;
-      return {
-        name: client.name,
-        value: paidAmount,
-        hasRevenue: paidAmount > 0
-      };
-    }).filter(client => client.hasRevenue);
-  };
-
-  const timeBreakdown = getTimeBreakdownByClient();
-  const revenueBreakdown = getRevenueBreakdownByClient();
   const netProfitAnnual = totalRevenue - monthlySubscriptionCost * 12;
   const inactiveClients = totalClients - activeClients;
   const pendingClients = clients.filter(c => c.status === 'pending').length;
@@ -132,27 +89,27 @@ const AnalyticsSection = ({
       value: totalClients,
       originalValue: totalClients.toString(),
       isCurrency: false,
-      subtitle: "tracked hours",
+      subtitle: "client accounts",
       statusRows: getClientStatusRows(),
-      details: clients.map(client => client.name)
+      details: clients.slice(0, 3).map(client => client.name)
     },
     {
       title: "Total Time",
       value: totalHours,
-      originalValue: totalHours.toString(),
+      originalValue: `${totalHours.toFixed(1)} hours`,
       isCurrency: false,
       subtitle: "tracked hours",
       statusRows: [],
-      details: timeBreakdown
+      details: timeBreakdown.slice(0, 3)
     },
     {
       title: "Total Revenue",
       value: formatCurrency(totalRevenue, displayCurrency),
       originalValue: formatCurrency(totalRevenue, displayCurrency),
       isCurrency: true,
-      subtitle: "earned this period",
+      subtitle: "from paid invoices",
       statusRows: [],
-      details: revenueBreakdown
+      details: revenueBreakdown.slice(0, 3)
     },
     {
       title: "Monthly Costs",
@@ -179,7 +136,7 @@ const AnalyticsSection = ({
       isCurrency: true,
       subtitle: "annual estimate",
       statusRows: [],
-      details: revenueBreakdown
+      details: revenueBreakdown.slice(0, 3)
     }
   ];
 
@@ -229,9 +186,7 @@ const AnalyticsSection = ({
                         <span className="text-xs text-slate-500 truncate">{statusRow}</span>
                         {stat.details && stat.details.length > 0 && rowIndex === 0 && (
                           <span className="text-xs text-slate-600 truncate max-w-16 lg:max-w-20">
-                            {stat.title === "Total Clients" && stat.details[0]}
-                            {stat.title === "Total Time" && stat.details[0]?.name}
-                            {(stat.title === "Total Revenue" || stat.title === "Net Profit") && stat.details[0]?.name}
+                            {typeof stat.details[0] === 'string' ? stat.details[0] : stat.details[0]?.name}
                           </span>
                         )}
                       </div>
@@ -241,9 +196,7 @@ const AnalyticsSection = ({
                         <span className="text-xs text-slate-500 truncate">{stat.subtitle}</span>
                         {stat.details && stat.details.length > 0 && (
                           <span className="text-xs text-slate-600 truncate max-w-16 lg:max-w-20">
-                            {stat.title === "Total Clients" && stat.details[0]}
-                            {stat.title === "Total Time" && stat.details[0]?.name}
-                            {(stat.title === "Total Revenue" || stat.title === "Net Profit") && stat.details[0]?.name}
+                            {typeof stat.details[0] === 'string' ? stat.details[0] : stat.details[0]?.name}
                           </span>
                         )}
                       </div>

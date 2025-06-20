@@ -54,11 +54,13 @@ const Index = () => {
           totalHours={analytics.totalHours}
           totalRevenue={analytics.totalRevenue}
           monthlySubscriptionCost={analytics.monthlySubscriptionCost}
-          totalPaidToDate={analytics.totalRevenue}
+          totalPaidToDate={analytics.totalPaidToDate}
           clients={clients}
           displayCurrency={displayCurrency}
           convertCurrency={convertCurrency}
           formatCurrency={formatCurrency}
+          timeBreakdown={analytics.timeBreakdown}
+          revenueBreakdown={analytics.revenueBreakdown}
         />
 
         <DashboardTasksTimeline
