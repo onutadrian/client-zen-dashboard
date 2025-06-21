@@ -1,10 +1,26 @@
 
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
 
 export const useAnalytics = (clients, subscriptions, displayCurrency) => {
+  const [forceUpdate, setForceUpdate] = useState(0);
+  
   console.log('useAnalytics: Calculating analytics for currency:', displayCurrency);
   console.log('useAnalytics: Clients data:', clients);
+  
+  // Listen for currency changes
+  useEffect(() => {
+    const handleCurrencyChange = (event: CustomEvent) => {
+      console.log('useAnalytics: Currency changed to:', event.detail.currency);
+      setForceUpdate(prev => prev + 1);
+    };
+
+    window.addEventListener('currencyChanged', handleCurrencyChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('currencyChanged', handleCurrencyChange as EventListener);
+    };
+  }, []);
   
   return useMemo(() => {
     const totalClients = clients.length;
@@ -122,5 +138,5 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
       timeBreakdown,
       revenueBreakdown
     };
-  }, [clients, subscriptions, displayCurrency]);
+  }, [clients, subscriptions, displayCurrency, forceUpdate]);
 };
