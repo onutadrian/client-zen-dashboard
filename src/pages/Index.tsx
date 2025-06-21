@@ -41,10 +41,7 @@ const Index = () => {
           {isMobile && <SidebarTrigger />}
         </div>
 
-        <DashboardHeader
-          displayCurrency={displayCurrency}
-          onCurrencyChange={() => {}} // Currency is now handled in sidebar
-        />
+        <DashboardHeader />
 
         <AnalyticsSection
           totalClients={analytics.totalClients}
