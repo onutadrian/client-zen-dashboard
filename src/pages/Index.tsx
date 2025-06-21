@@ -44,6 +44,7 @@ const Index = () => {
         <DashboardHeader />
 
         <AnalyticsSection
+          key={displayCurrency} // Force re-render when currency changes
           totalClients={analytics.totalClients}
           activeClients={analytics.activeClients}
           totalHours={analytics.totalHours}

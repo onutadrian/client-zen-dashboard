@@ -10,33 +10,34 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
     const totalClients = clients.length;
     const activeClients = clients.filter(client => client.status === 'active').length;
 
-    // Calculate total hours from all clients
+    // Calculate total hours from all clients (if available)
     const totalHours = clients.reduce((total, client) => {
       const hours = client.hours_logged || 0;
       return total + hours;
     }, 0);
 
-    // Calculate total revenue from all clients with proper error handling
+    // Calculate total revenue from client invoices (paid invoices only)
     let totalRevenue = clients.reduce((total, client) => {
-      const rate = client.rate || 0;
-      const hours = client.hours_logged || 0;
-      const clientCurrency = client.currency || 'USD';
-      
-      console.log(`useAnalytics: Client ${client.name} - rate: ${rate}, hours: ${hours}, currency: ${clientCurrency}`);
-      
-      if (rate === 0 || hours === 0) {
+      if (!client.invoices || !Array.isArray(client.invoices)) {
         return total;
       }
       
-      const clientRevenue = rate * hours;
+      const clientRevenue = client.invoices
+        .filter(invoice => invoice.status === 'paid')
+        .reduce((invoiceTotal, invoice) => {
+          const amount = invoice.amount || 0;
+          const invoiceCurrency = invoice.currency || 'USD';
+          
+          if (amount === 0 || isNaN(amount)) {
+            return invoiceTotal;
+          }
+          
+          const convertedAmount = convertCurrency(amount, invoiceCurrency, displayCurrency);
+          return invoiceTotal + convertedAmount;
+        }, 0);
       
-      if (isNaN(clientRevenue)) {
-        console.log(`useAnalytics: NaN revenue for client ${client.name}, rate: ${rate}, hours: ${hours}`);
-        return total;
-      }
-      
-      const convertedRevenue = convertCurrency(clientRevenue, clientCurrency, displayCurrency);
-      return total + convertedRevenue;
+      console.log(`useAnalytics: Client ${client.name} - invoice revenue: ${clientRevenue} ${displayCurrency}`);
+      return total + clientRevenue;
     }, 0);
 
     // Calculate monthly subscription cost
@@ -70,38 +71,38 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
       return total + convertedPaid;
     }, 0);
 
-    // Create time breakdown by client
+    // Create time breakdown by client (if hours are available)
     const timeBreakdown = clients.map(client => ({
       name: client.name,
       hours: client.hours_logged || 0
     })).filter(item => item.hours > 0);
 
-    // Create revenue breakdown by client
+    // Create revenue breakdown by client (from invoices)
     const revenueBreakdown = clients.map(client => {
-      const rate = client.rate || 0;
-      const hours = client.hours_logged || 0;
-      const clientCurrency = client.currency || 'USD';
-      
-      if (rate === 0 || hours === 0) {
+      if (!client.invoices || !Array.isArray(client.invoices)) {
         return {
           name: client.name,
           revenue: formatCurrency(0, displayCurrency)
         };
       }
       
-      const clientRevenue = rate * hours;
+      const clientRevenue = client.invoices
+        .filter(invoice => invoice.status === 'paid')
+        .reduce((invoiceTotal, invoice) => {
+          const amount = invoice.amount || 0;
+          const invoiceCurrency = invoice.currency || 'USD';
+          
+          if (amount === 0 || isNaN(amount)) {
+            return invoiceTotal;
+          }
+          
+          const convertedAmount = convertCurrency(amount, invoiceCurrency, displayCurrency);
+          return invoiceTotal + convertedAmount;
+        }, 0);
       
-      if (isNaN(clientRevenue)) {
-        return {
-          name: client.name,
-          revenue: formatCurrency(0, displayCurrency)
-        };
-      }
-      
-      const convertedRevenue = convertCurrency(clientRevenue, clientCurrency, displayCurrency);
       return {
         name: client.name,
-        revenue: formatCurrency(convertedRevenue, displayCurrency)
+        revenue: formatCurrency(clientRevenue, displayCurrency)
       };
     }).filter(item => parseFloat(item.revenue.replace(/[^0-9.-]/g, '')) > 0);
 
