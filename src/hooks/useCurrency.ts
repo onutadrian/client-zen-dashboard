@@ -8,8 +8,14 @@ export const useCurrency = () => {
   });
 
   const updateCurrency = (currency: string) => {
+    console.log('Currency updated to:', currency);
     setDisplayCurrency(currency);
     localStorage.setItem('displayCurrency', currency);
+    
+    // Dispatch a custom event to notify other components
+    window.dispatchEvent(new CustomEvent('currencyChanged', { 
+      detail: { currency } 
+    }));
   };
 
   return {
