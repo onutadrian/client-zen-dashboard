@@ -75,15 +75,17 @@ const ProjectMetricsCards = ({
       </div>
 
       <div className="text-center p-4 rounded-lg bg-slate-50">
-        <p className="text-zinc-950 text-4xl font-normal">{unbilledHours.toFixed(2)}</p>
-        <p className="text-slate-600 py-[24px] text-base">Unbilled Hours</p>
+        <p className="text-zinc-950 text-4xl font-normal">
+          {formatCurrency(valueFromBilledHours, displayCurrency)}
+        </p>
+        <p className="text-slate-600 py-[24px] text-base">Billed Revenue</p>
       </div>
 
       <div className="text-center p-4 rounded-lg bg-slate-50">
         <p className="text-zinc-950 font-normal text-4xl">
-          {formatCurrency(valueFromBilledHours, displayCurrency)}
+          {formatCurrency(unbilledRevenue, displayCurrency)}
         </p>
-        <p className="text-slate-600 py-[24px] text-base">Billed Revenue</p>
+        <p className="text-slate-600 py-[24px] text-base">Unbilled Revenue</p>
       </div>
     </>
   );
