@@ -143,12 +143,15 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
           <div className="text-center p-4 rounded-lg bg-slate-50">
             <Tooltip>
               <TooltipTrigger asChild>
-                <p className={`text-zinc-950 text-4xl font-normal cursor-help ${budgetMetrics.budgetProgress > 100 ? 'text-red-600' : ''}`}>
+                <p className={`text-4xl font-normal cursor-help ${budgetMetrics.budgetProgress > 100 ? 'text-red-600' : 'text-zinc-950'}`}>
                   {budgetMetrics.budgetProgress.toFixed(1)}%
                 </p>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{budgetMetrics.budgetProgress.toFixed(1)}% of budget used</p>
+                {budgetMetrics.budgetProgress > 100 && (
+                  <p className="text-red-600">Over budget by {(budgetMetrics.budgetProgress - 100).toFixed(1)}%</p>
+                )}
               </TooltipContent>
             </Tooltip>
             <p className="text-slate-600 py-[24px] text-base">Budget Used</p>
@@ -166,7 +169,7 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
                 <span className="text-sm font-medium">Milestone Completion</span>
                 <span className="text-sm text-slate-600">{averageCompletion.toFixed(1)}%</span>
               </div>
-              <Progress value={averageCompletion} className="h-3" />
+              <Progress value={Math.min(averageCompletion, 100)} className="h-3" />
             </div>
 
             <div>
@@ -174,7 +177,7 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
                 <span className="text-sm font-medium">Revenue Progress</span>
                 <span className="text-sm text-slate-600">{budgetMetrics.revenueProgress.toFixed(1)}%</span>
               </div>
-              <Progress value={budgetMetrics.revenueProgress} className="h-3" />
+              <Progress value={Math.min(budgetMetrics.revenueProgress, 100)} className="h-3" />
             </div>
 
             <div>
@@ -184,7 +187,10 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
                   {budgetMetrics.budgetProgress.toFixed(1)}%
                 </span>
               </div>
-              <Progress value={Math.min(budgetMetrics.budgetProgress, 100)} className={`h-3 ${budgetMetrics.budgetProgress > 100 ? 'bg-red-200' : ''}`} />
+              <Progress 
+                value={Math.min(budgetMetrics.budgetProgress, 100)} 
+                className={`h-3 ${budgetMetrics.budgetProgress > 100 ? '[&>div]:bg-red-500' : ''}`} 
+              />
               {budgetMetrics.budgetProgress > 100 && (
                 <div className="mt-1">
                   <span className="text-xs text-red-600">
