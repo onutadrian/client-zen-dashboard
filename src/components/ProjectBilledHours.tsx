@@ -29,13 +29,24 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
   const billedHours = projectHours.filter(entry => entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
   const unbilledHours = projectHours.filter(entry => !entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
   
-  // Calculate revenue from invoices with currency conversion
-  const billedRevenue = projectInvoices
+  // Calculate paid invoiced revenue (from paid invoices) with currency conversion
+  const paidInvoicedRevenue = projectInvoices
     .filter(invoice => invoice.status === 'paid')
     .reduce((sum, invoice) => {
       const convertedAmount = convert(invoice.amount, invoice.currency, displayCurrency);
       return sum + convertedAmount;
     }, 0);
+  
+  // Calculate value of billed hours (this is the actual "Billed Revenue" for hourly/daily projects)
+  let valueFromBilledHours = 0;
+  if (project.pricingType === 'hourly' && project.hourlyRate) {
+    const convertedRate = convert(project.hourlyRate, project.currency, displayCurrency);
+    valueFromBilledHours = billedHours * convertedRate;
+  } else if (project.pricingType === 'daily' && project.dailyRate) {
+    const convertedRate = convert(project.dailyRate, project.currency, displayCurrency);
+    // Convert hours to days (assuming 8-hour workday)
+    valueFromBilledHours = (billedHours / 8) * convertedRate;
+  }
   
   // Calculate unbilled revenue based on project pricing and unbilled hours with currency conversion
   let unbilledRevenue = 0;
@@ -96,7 +107,8 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
             totalHours={totalHours}
             billedHours={billedHours}
             unbilledHours={unbilledHours}
-            billedRevenue={billedRevenue}
+            paidInvoicedRevenue={paidInvoicedRevenue}
+            valueFromBilledHours={valueFromBilledHours}
             unbilledRevenue={unbilledRevenue}
             totalMilestoneValue={totalMilestoneValue}
             completedMilestoneValue={completedMilestoneValue}
