@@ -125,7 +125,7 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
         </div>
 
         {/* Financial Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="text-center p-4 rounded-lg bg-slate-50">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -143,35 +143,14 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
           <div className="text-center p-4 rounded-lg bg-slate-50">
             <Tooltip>
               <TooltipTrigger asChild>
-                <p className="text-zinc-950 text-4xl font-normal cursor-help">
-                  {formatMetric(budgetMetrics.revenueEarned, true)}
+                <p className={`text-zinc-950 text-4xl font-normal cursor-help ${budgetMetrics.budgetProgress > 100 ? 'text-red-600' : ''}`}>
+                  {budgetMetrics.budgetProgress.toFixed(1)}%
                 </p>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{formatCurrency(budgetMetrics.revenueEarned, displayCurrency)}</p>
+                <p>{budgetMetrics.budgetProgress.toFixed(1)}% of budget used</p>
               </TooltipContent>
             </Tooltip>
-            <p className="text-slate-600 py-[24px] text-base">Revenue Earned</p>
-          </div>
-
-          <div className="text-center p-4 rounded-lg bg-slate-50">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <p className="text-zinc-950 text-4xl font-normal cursor-help">
-                  {formatMetric(totalInvoiceAmount - budgetMetrics.revenueEarned, true)}
-                </p>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{formatCurrency(totalInvoiceAmount - budgetMetrics.revenueEarned, displayCurrency)}</p>
-              </TooltipContent>
-            </Tooltip>
-            <p className="text-slate-600 py-[24px] text-base">Pending Revenue</p>
-          </div>
-
-          <div className="text-center p-4 rounded-lg bg-slate-50">
-            <p className={`text-zinc-950 font-normal text-4xl ${budgetMetrics.budgetProgress > 90 ? 'text-red-600' : ''}`}>
-              {budgetMetrics.budgetProgress.toFixed(1)}%
-            </p>
             <p className="text-slate-600 py-[24px] text-base">Budget Used</p>
           </div>
         </div>
@@ -201,9 +180,18 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
             <div>
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium">Budget Usage</span>
-                <span className="text-sm text-slate-600">{budgetMetrics.budgetProgress.toFixed(1)}%</span>
+                <span className={`text-sm ${budgetMetrics.budgetProgress > 100 ? 'text-red-600 font-semibold' : 'text-slate-600'}`}>
+                  {budgetMetrics.budgetProgress.toFixed(1)}%
+                </span>
               </div>
-              <Progress value={budgetMetrics.budgetProgress} className="h-3" />
+              <Progress value={Math.min(budgetMetrics.budgetProgress, 100)} className={`h-3 ${budgetMetrics.budgetProgress > 100 ? 'bg-red-200' : ''}`} />
+              {budgetMetrics.budgetProgress > 100 && (
+                <div className="mt-1">
+                  <span className="text-xs text-red-600">
+                    Over budget by {(budgetMetrics.budgetProgress - 100).toFixed(1)}%
+                  </span>
+                </div>
+              )}
             </div>
 
             {budgetMetrics.budgetProgress > averageCompletion + 15 && (
@@ -288,6 +276,41 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
             ) : (
               <p className="text-slate-500 text-center py-4">No milestones to analyze</p>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Hours vs Revenue Analysis */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Time Investment Analysis</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                <span className="font-medium">Total Hours Worked</span>
+                <span className="font-bold">{totalActualHours}h</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                <span className="font-medium">Effective Hourly Rate</span>
+                <span className="font-bold">
+                  {formatCurrency(totalActualHours > 0 ? (budgetMetrics.revenueEarned / totalActualHours) : 0, displayCurrency)}/hr
+                </span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                <span className="font-medium">Revenue per Hour</span>
+                <span className="font-bold">
+                  {formatCurrency(totalActualHours > 0 ? (totalInvoiceAmount / totalActualHours) : 0, displayCurrency)}/hr
+                </span>
+              </div>
+              {isFixedPrice && (
+                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                  <span className="font-medium">Target Hourly Rate</span>
+                  <span className="font-bold">
+                    {formatCurrency(totalEstimatedHours > 0 ? (budgetMetrics.totalBudget / totalEstimatedHours) : 0, displayCurrency)}/hr
+                  </span>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
