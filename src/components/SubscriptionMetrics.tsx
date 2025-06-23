@@ -1,11 +1,11 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import { formatCurrency, convertCurrency } from '@/lib/currency';
+import { formatCurrency } from '@/lib/currency';
 import { Subscription } from '@/hooks/useSubscriptions';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface SubscriptionMetricsProps {
   subscriptions: Subscription[];
@@ -13,16 +13,17 @@ interface SubscriptionMetricsProps {
 }
 
 const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMetricsProps) => {
+  const { convert } = useCurrency();
   const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
   
   const monthlyTotal = activeSubscriptions.reduce((total, subscription) => {
-    const convertedCost = convertCurrency(subscription.price, subscription.currency, displayCurrency);
+    const convertedCost = convert(subscription.price, subscription.currency, displayCurrency);
     const totalSeats = subscription.seats || 1;
     return total + (convertedCost * totalSeats);
   }, 0);
 
   const totalPaidToDate = subscriptions.reduce((total, subscription) => {
-    const convertedCost = convertCurrency(subscription.total_paid || 0, subscription.currency, displayCurrency);
+    const convertedCost = convert(subscription.total_paid || 0, subscription.currency, displayCurrency);
     return total + convertedCost;
   }, 0);
 

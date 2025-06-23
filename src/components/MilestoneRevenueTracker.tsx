@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -6,7 +5,7 @@ import { TrendingUp, Target, DollarSign, Clock } from 'lucide-react';
 import { Milestone } from '@/hooks/useMilestones';
 import { useInvoices } from '@/hooks/useInvoices';
 import { useCurrency } from '@/hooks/useCurrency';
-import { convertCurrency, formatCurrency } from '@/lib/currency';
+import { formatCurrency } from '@/lib/currency';
 
 interface MilestoneRevenueTrackerProps {
   milestones: Milestone[];
@@ -16,14 +15,14 @@ interface MilestoneRevenueTrackerProps {
 
 const MilestoneRevenueTracker = ({ milestones, projectId, projectCurrency }: MilestoneRevenueTrackerProps) => {
   const { invoices } = useInvoices();
-  const { displayCurrency } = useCurrency();
+  const { displayCurrency, convert } = useCurrency();
   
   const projectInvoices = invoices.filter(i => i.projectId === projectId);
   
   // Calculate revenue metrics with currency conversion
   const totalProjectValue = milestones.reduce((sum, m) => {
     const amount = m.amount || 0;
-    const convertedAmount = convertCurrency(amount, projectCurrency, displayCurrency);
+    const convertedAmount = convert(amount, projectCurrency, displayCurrency);
     return sum + convertedAmount;
   }, 0);
   
@@ -31,21 +30,21 @@ const MilestoneRevenueTracker = ({ milestones, projectId, projectCurrency }: Mil
     .filter(m => m.status === 'completed')
     .reduce((sum, m) => {
       const amount = m.amount || 0;
-      const convertedAmount = convertCurrency(amount, projectCurrency, displayCurrency);
+      const convertedAmount = convert(amount, projectCurrency, displayCurrency);
       return sum + convertedAmount;
     }, 0);
   
   const paidAmount = projectInvoices
     .filter(i => i.status === 'paid')
     .reduce((sum, i) => {
-      const convertedAmount = convertCurrency(i.amount, i.currency, displayCurrency);
+      const convertedAmount = convert(i.amount, i.currency, displayCurrency);
       return sum + convertedAmount;
     }, 0);
   
   const pendingAmount = projectInvoices
     .filter(i => i.status === 'pending')
     .reduce((sum, i) => {
-      const convertedAmount = convertCurrency(i.amount, i.currency, displayCurrency);
+      const convertedAmount = convert(i.amount, i.currency, displayCurrency);
       return sum + convertedAmount;
     }, 0);
   

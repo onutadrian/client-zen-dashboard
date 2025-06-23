@@ -1,9 +1,11 @@
 import { useMemo, useEffect, useState } from 'react';
-import { convertCurrency, formatCurrency } from '@/lib/currency';
+import { formatCurrency } from '@/lib/currency';
 import { useHourEntries } from '@/hooks/useHourEntries';
+import { useCurrency } from '@/hooks/useCurrency';
 
 export const useAnalytics = (clients, subscriptions, displayCurrency) => {
   const { hourEntries } = useHourEntries();
+  const { convert } = useCurrency();
   const [analytics, setAnalytics] = useState({
     totalClients: 0,
     activeClients: 0,
@@ -44,7 +46,7 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
             return invoiceTotal;
           }
           
-          const convertedAmount = convertCurrency(amount, invoiceCurrency, displayCurrency);
+          const convertedAmount = convert(amount, invoiceCurrency, displayCurrency);
           return invoiceTotal + convertedAmount;
         }, 0);
       
@@ -65,7 +67,7 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
         return total;
       }
       
-      const convertedCost = convertCurrency(subscriptionCost, subscriptionCurrency, displayCurrency);
+      const convertedCost = convert(subscriptionCost, subscriptionCurrency, displayCurrency);
       return total + convertedCost;
     }, 0);
 
@@ -79,7 +81,7 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
         return total;
       }
       
-      const convertedPaid = convertCurrency(paid, subscriptionCurrency, displayCurrency);
+      const convertedPaid = convert(paid, subscriptionCurrency, displayCurrency);
       return total + convertedPaid;
     }, 0);
 
@@ -120,7 +122,7 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
             return invoiceTotal;
           }
           
-          const convertedAmount = convertCurrency(amount, invoiceCurrency, displayCurrency);
+          const convertedAmount = convert(amount, invoiceCurrency, displayCurrency);
           return invoiceTotal + convertedAmount;
         }, 0);
       
@@ -147,7 +149,7 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
       timeBreakdown,
       revenueBreakdown
     });
-  }, [clients, subscriptions, displayCurrency, hourEntries]);
+  }, [clients, subscriptions, displayCurrency, hourEntries, convert]);
 
   return analytics;
 };

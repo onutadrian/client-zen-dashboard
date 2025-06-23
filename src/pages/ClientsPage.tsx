@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -9,10 +8,10 @@ import { useClients } from '@/hooks/useClients';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useCurrency } from '@/hooks/useCurrency';
-import { convertCurrency, formatCurrency } from '@/lib/currency';
+import { formatCurrency } from '@/lib/currency';
 
 const ClientsPage = () => {
-  const { displayCurrency } = useCurrency();
+  const { displayCurrency, convert } = useCurrency();
   const [showClientModal, setShowClientModal] = React.useState(false);
   const {
     clients,
@@ -45,7 +44,7 @@ const ClientsPage = () => {
           clients={clients} 
           onUpdateClient={updateClient} 
           displayCurrency={displayCurrency} 
-          convertCurrency={convertCurrency} 
+          convertCurrency={convert} 
           formatCurrency={formatCurrency} 
           activeClients={analytics.activeClients} 
           onAddClient={() => setShowClientModal(true)} 

@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -9,10 +8,12 @@ import ModalsContainer from '@/components/ModalsContainer';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useClients } from '@/hooks/useClients';
-import { convertCurrency, formatCurrency } from '@/lib/currency';
+import { useCurrency } from '@/hooks/useCurrency';
+import { formatCurrency } from '@/lib/currency';
 
 const SubscriptionsPage = () => {
-  const [displayCurrency, setDisplayCurrency] = React.useState('USD');
+  const { displayCurrency, convert } = useCurrency();
+  const [forceRefresh, setForceRefresh] = useState(0);
   const [showSubscriptionModal, setShowSubscriptionModal] = React.useState(false);
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = React.useState(false);
   const [selectedSubscription, setSelectedSubscription] = React.useState(null);
@@ -30,10 +31,23 @@ const SubscriptionsPage = () => {
     isMobile
   } = useSidebar();
 
+  // Listen for currency changes to force refresh
+  useEffect(() => {
+    const handleCurrencyChange = () => {
+      setForceRefresh(prev => prev + 1);
+    };
+
+    window.addEventListener('currencyChanged', handleCurrencyChange);
+    
+    return () => {
+      window.removeEventListener('currencyChanged', handleCurrencyChange);
+    };
+  }, []);
+
   // Calculate total paid to date for all subscriptions
   const totalPaidToDate = subscriptions.reduce((sum, sub) => {
     const totalPaid = sub.total_paid || 0;
-    const convertedTotal = convertCurrency(totalPaid, sub.currency || 'USD', displayCurrency);
+    const convertedTotal = convert(totalPaid, sub.currency || 'USD', displayCurrency);
     return sum + convertedTotal;
   }, 0);
   
@@ -76,14 +90,37 @@ const SubscriptionsPage = () => {
         </div>
         
         {/* Metrics Cards */}
-        <SubscriptionMetrics subscriptions={subscriptions} displayCurrency={displayCurrency} />
+        <SubscriptionMetrics 
+          key={`metrics-${displayCurrency}-${forceRefresh}`}
+          subscriptions={subscriptions} 
+          displayCurrency={displayCurrency} 
+        />
         
-        <SubscriptionsSection subscriptions={subscriptions} onEditSubscription={handleEditSubscription} onAddSubscription={() => setShowSubscriptionModal(true)} monthlySubscriptionCost={analytics.monthlySubscriptionCost} totalPaidToDate={totalPaidToDate} displayCurrency={displayCurrency} formatCurrency={formatCurrency} />
+        <SubscriptionsSection 
+          subscriptions={subscriptions} 
+          onEditSubscription={handleEditSubscription} 
+          onAddSubscription={() => setShowSubscriptionModal(true)} 
+          monthlySubscriptionCost={analytics.monthlySubscriptionCost} 
+          totalPaidToDate={totalPaidToDate} 
+          displayCurrency={displayCurrency} 
+          formatCurrency={formatCurrency} 
+        />
 
-        <ModalsContainer showClientModal={false} onCloseClientModal={() => {}} onAddClient={() => {}} showSubscriptionModal={showSubscriptionModal} onCloseSubscriptionModal={() => setShowSubscriptionModal(false)} onAddSubscription={addSubscription} showEditSubscriptionModal={showEditSubscriptionModal} onCloseEditSubscriptionModal={() => {
-        setShowEditSubscriptionModal(false);
-        setSelectedSubscription(null);
-      }} selectedSubscription={selectedSubscription} onUpdateSubscription={updateSubscription} />
+        <ModalsContainer 
+          showClientModal={false} 
+          onCloseClientModal={() => {}} 
+          onAddClient={() => {}} 
+          showSubscriptionModal={showSubscriptionModal} 
+          onCloseSubscriptionModal={() => setShowSubscriptionModal(false)} 
+          onAddSubscription={addSubscription} 
+          showEditSubscriptionModal={showEditSubscriptionModal} 
+          onCloseEditSubscriptionModal={() => {
+            setShowEditSubscriptionModal(false);
+            setSelectedSubscription(null);
+          }} 
+          selectedSubscription={selectedSubscription} 
+          onUpdateSubscription={updateSubscription} 
+        />
       </div>
     </div>;
 };

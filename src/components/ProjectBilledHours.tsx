@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign } from 'lucide-react';
@@ -9,7 +8,7 @@ import { Milestone } from '@/hooks/useMilestones';
 import { useHourEntries } from '@/hooks/useHourEntries';
 import { useInvoices } from '@/hooks/useInvoices';
 import { useCurrency } from '@/hooks/useCurrency';
-import { convertCurrency, formatCurrency } from '@/lib/currency';
+import { formatCurrency } from '@/lib/currency';
 
 interface ProjectBilledHoursProps {
   project: Project;
@@ -20,7 +19,7 @@ interface ProjectBilledHoursProps {
 const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursProps) => {
   const { hourEntries } = useHourEntries();
   const { invoices } = useInvoices();
-  const { displayCurrency } = useCurrency();
+  const { displayCurrency, convert } = useCurrency();
   
   const projectHours = hourEntries.filter(entry => entry.projectId === project.id);
   const projectInvoices = invoices.filter(invoice => invoice.projectId === project.id);
@@ -34,24 +33,24 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
   const billedRevenue = projectInvoices
     .filter(invoice => invoice.status === 'paid')
     .reduce((sum, invoice) => {
-      const convertedAmount = convertCurrency(invoice.amount, invoice.currency, displayCurrency);
+      const convertedAmount = convert(invoice.amount, invoice.currency, displayCurrency);
       return sum + convertedAmount;
     }, 0);
   
   // Calculate unbilled revenue based on project pricing and unbilled hours with currency conversion
   let unbilledRevenue = 0;
   if (project.pricingType === 'hourly' && project.hourlyRate) {
-    const convertedRate = convertCurrency(project.hourlyRate, project.currency, displayCurrency);
+    const convertedRate = convert(project.hourlyRate, project.currency, displayCurrency);
     unbilledRevenue = unbilledHours * convertedRate;
   } else if (project.pricingType === 'daily' && project.dailyRate) {
-    const convertedRate = convertCurrency(project.dailyRate, project.currency, displayCurrency);
+    const convertedRate = convert(project.dailyRate, project.currency, displayCurrency);
     unbilledRevenue = unbilledHours * convertedRate;
   }
   
   // For fixed price projects, calculate milestone values with currency conversion
   const totalMilestoneValue = milestones.reduce((sum, m) => {
     const amount = m.amount || 0;
-    const convertedAmount = convertCurrency(amount, project.currency, displayCurrency);
+    const convertedAmount = convert(amount, project.currency, displayCurrency);
     return sum + convertedAmount;
   }, 0);
   
@@ -59,7 +58,7 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
     .filter(m => m.status === 'completed')
     .reduce((sum, m) => {
       const amount = m.amount || 0;
-      const convertedAmount = convertCurrency(amount, project.currency, displayCurrency);
+      const convertedAmount = convert(amount, project.currency, displayCurrency);
       return sum + convertedAmount;
     }, 0);
 

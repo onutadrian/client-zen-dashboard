@@ -41,7 +41,6 @@ const ClientsSection = ({
             client={client} 
             onUpdateClient={onUpdateClient} 
             displayCurrency={displayCurrency} 
-            convertCurrency={convertCurrency} 
             formatCurrency={formatCurrency} 
           />
         ))}

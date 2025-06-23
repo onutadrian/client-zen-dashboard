@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const AnalyticsSection = ({
   totalClients,
@@ -14,11 +14,12 @@ const AnalyticsSection = ({
   totalPaidToDate,
   clients,
   displayCurrency,
-  convertCurrency,
   formatCurrency,
   timeBreakdown = [],
   revenueBreakdown = []
 }) => {
+  const { convert } = useCurrency();
+  
   // Format numbers: remove decimals and convert 1000+ to K format
   const formatMetric = (value, isCurrency = false, currency = '') => {
     const numValue = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : value;

@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { DollarSign, Clock, FileText, Link as LinkIcon, Users, FileCheck, Mail, ExternalLink, Plus, Edit, Upload, Eye } from 'lucide-react';
 import LogHoursModal from './LogHoursModal';
 import EditClientModal from './EditClientModal';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface HourEntry {
   id: number;
@@ -19,20 +20,19 @@ interface ClientCardProps {
   client: any;
   onUpdateClient?: (clientId: number, updatedClient: any) => void;
   displayCurrency?: string;
-  convertCurrency?: (amount: number, fromCurrency: string, toCurrency: string) => number;
   formatCurrency?: (amount: number, currency: string) => string;
 }
 const ClientCard = ({
   client,
   onUpdateClient,
   displayCurrency = 'USD',
-  convertCurrency,
   formatCurrency
 }: ClientCardProps) => {
   const [showLogHoursModal, setShowLogHoursModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [hourEntries, setHourEntries] = useState<HourEntry[]>(client.hourEntries || []);
+  const { convert } = useCurrency();
 
   // Update hour entries when client data changes
   useEffect(() => {
@@ -47,13 +47,9 @@ const ClientCard = ({
       week: '/week',
       month: '/month'
     };
-    if (convertCurrency && formatCurrency) {
-      const convertedPrice = convertCurrency(client.price, client.currency || 'USD', displayCurrency);
-      return `${formatCurrency(convertedPrice, displayCurrency)}${typeMap[client.priceType] || ''}`;
-    }
-
-    // Fallback to original behavior
-    return `$${client.price}${typeMap[client.priceType] || ''}`;
+    
+    const convertedPrice = convert(client.price, client.currency || 'USD', displayCurrency);
+    return `${formatCurrency(convertedPrice, displayCurrency)}${typeMap[client.priceType] || ''}`;
   };
 
   const getStatusColor = (status: string) => {
@@ -133,22 +129,23 @@ const ClientCard = ({
   };
 
   const totalInvoiceAmount = client.invoices?.reduce((sum: number, inv: any) => {
-    if (convertCurrency) {
-      return sum + convertCurrency(inv.amount, inv.currency || client.currency || 'USD', displayCurrency);
-    }
-    return sum + inv.amount;
+    const convertedAmount = convert(inv.amount, inv.currency || client.currency || 'USD', displayCurrency);
+    return sum + convertedAmount;
   }, 0) || 0;
+  
   const paidInvoices = client.invoices?.filter((inv: any) => inv.status === 'paid').length || 0;
   const totalInvoices = client.invoices?.length || 0;
   const totalHours = hourEntries.reduce((sum, entry) => sum + entry.hours, 0);
   const billedHours = hourEntries.filter(entry => entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
   const unbilledHours = totalHours - billedHours;
+  
   const formatDisplayAmount = (amount: number) => {
     if (formatCurrency) {
       return formatCurrency(amount, displayCurrency);
     }
     return `$${amount.toLocaleString()}`;
   };
+  
   return <>
       <Card 
         className={`
@@ -312,7 +309,7 @@ const ClientCard = ({
                 </h4>
                 <div className="space-y-2">
                   {client.invoices.map((invoice: any) => {
-                const displayAmount = convertCurrency && formatCurrency ? formatCurrency(convertCurrency(invoice.amount, invoice.currency || client.currency || 'USD', displayCurrency), displayCurrency) : `$${invoice.amount.toLocaleString()}`;
+                const displayAmount = formatCurrency(convert(invoice.amount, invoice.currency || client.currency || 'USD', displayCurrency), displayCurrency);
                 return <div key={invoice.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
                         <div>
                           <div className="font-medium text-slate-800">{displayAmount}</div>

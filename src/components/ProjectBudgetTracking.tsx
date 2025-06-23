@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -8,7 +7,7 @@ import { Task } from '@/hooks/useTasks';
 import { Milestone } from '@/hooks/useMilestones';
 import { Invoice, useInvoices } from '@/hooks/useInvoices';
 import { useCurrency } from '@/hooks/useCurrency';
-import { convertCurrency, formatCurrency } from '@/lib/currency';
+import { formatCurrency } from '@/lib/currency';
 
 interface ProjectBudgetTrackingProps {
   project: Project;
@@ -19,7 +18,7 @@ interface ProjectBudgetTrackingProps {
 
 const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBudgetTrackingProps) => {
   const { invoices } = useInvoices();
-  const { displayCurrency } = useCurrency();
+  const { displayCurrency, convert } = useCurrency();
   const isFixedPrice = project.pricingType === 'fixed';
   
   // Filter project-specific data
@@ -29,18 +28,18 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
   // Calculate milestone-based financials with currency conversion
   const totalMilestoneAmount = projectMilestones.reduce((sum, milestone) => {
     const amount = milestone.amount || 0;
-    const convertedAmount = convertCurrency(amount, project.currency, displayCurrency);
+    const convertedAmount = convert(amount, project.currency, displayCurrency);
     return sum + convertedAmount;
   }, 0);
   
   const totalInvoiceAmount = projectInvoices.reduce((sum, invoice) => {
-    const convertedAmount = convertCurrency(invoice.amount, invoice.currency, displayCurrency);
+    const convertedAmount = convert(invoice.amount, invoice.currency, displayCurrency);
     return sum + convertedAmount;
   }, 0);
   
   const paidInvoices = projectInvoices.filter(i => i.status === 'paid');
   const totalPaidAmount = paidInvoices.reduce((sum, invoice) => {
-    const convertedAmount = convertCurrency(invoice.amount, invoice.currency, displayCurrency);
+    const convertedAmount = convert(invoice.amount, invoice.currency, displayCurrency);
     return sum + convertedAmount;
   }, 0);
   
@@ -59,8 +58,8 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
   // Budget calculations based on project type with currency conversion
   let budgetMetrics;
   if (isFixedPrice) {
-    const fixedBudget = convertCurrency(project.fixedPrice || totalMilestoneAmount, project.currency, displayCurrency);
-    const costSoFar = totalActualHours * convertCurrency(hourlyRate, project.currency, displayCurrency);
+    const fixedBudget = convert(project.fixedPrice || totalMilestoneAmount, project.currency, displayCurrency);
+    const costSoFar = totalActualHours * convert(hourlyRate, project.currency, displayCurrency);
     budgetMetrics = {
       totalBudget: fixedBudget,
       spentAmount: costSoFar,
@@ -70,8 +69,8 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
       revenueProgress: fixedBudget > 0 ? (totalPaidAmount / fixedBudget) * 100 : 0
     };
   } else {
-    const estimatedBudget = (project.estimatedHours || totalEstimatedHours) * convertCurrency(hourlyRate, project.currency, displayCurrency);
-    const actualCost = totalActualHours * convertCurrency(hourlyRate, project.currency, displayCurrency);
+    const estimatedBudget = (project.estimatedHours || totalEstimatedHours) * convert(hourlyRate, project.currency, displayCurrency);
+    const actualCost = totalActualHours * convert(hourlyRate, project.currency, displayCurrency);
     budgetMetrics = {
       totalBudget: estimatedBudget,
       spentAmount: actualCost,
@@ -100,7 +99,7 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
         )}
         {!isFixedPrice && (
           <span className="text-sm text-slate-600">
-            Rate: {formatCurrency(convertCurrency(project.hourlyRate || 0, project.currency, displayCurrency), displayCurrency)}/hr
+            Rate: {formatCurrency(convert(project.hourlyRate || 0, project.currency, displayCurrency), displayCurrency)}/hr
           </span>
         )}
       </div>
@@ -208,7 +207,7 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
                 // Check if there's an invoice for this milestone
                 const milestoneInvoice = projectInvoices.find(inv => inv.milestoneId === milestone.id);
                 const invoiceStatus = milestoneInvoice?.status || 'unpaid';
-                const milestoneAmount = convertCurrency(milestone.amount || 0, project.currency, displayCurrency);
+                const milestoneAmount = convert(milestone.amount || 0, project.currency, displayCurrency);
                 
                 return (
                   <div key={milestone.id} className="flex items-center justify-between p-3 border rounded-lg">
