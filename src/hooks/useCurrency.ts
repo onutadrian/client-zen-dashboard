@@ -42,47 +42,57 @@ export const useCurrency = () => {
       
       // Fetch new rates
       const apiKey = import.meta.env.VITE_APILAYER_API_KEY;
-      if (!apiKey) {
-        console.error('API key not found. Please set VITE_APILAYER_API_KEY in .env file');
-        throw new Error('API key not found');
+      if (!apiKey || apiKey === 'your_actual_api_key_here') {
+        console.warn('API key not configured properly. Please set VITE_APILAYER_API_KEY in .env file with your actual APILayer API key.');
+        throw new Error('API key not configured');
       }
       
-      const response = await fetch(`https://api.apilayer.com/currency_data/live?source=EUR&currencies=USD,RON`, {
-        headers: {
-          'apikey': apiKey
-        }
-      });
+      // Use the correct currencylayer API endpoint
+      const response = await fetch(`https://api.currencylayer.com/live?access_key=${apiKey}&source=EUR&currencies=USD,RON,GBP`);
       
       if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+        const errorText = await response.text();
+        console.error('API Response Error:', response.status, errorText);
+        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
       }
       
       const data = await response.json();
       
       if (!data.success) {
-        throw new Error(`API request failed: ${data.error?.info || 'Unknown error'}`);
+        console.error('API Error Response:', data);
+        throw new Error(`API request failed: ${data.error?.info || JSON.stringify(data)}`);
       }
       
       // Format the rates into our expected structure
       // The API returns rates relative to EUR, so we need to calculate cross-rates
       const eurToUsd = data.quotes.EURUSD;
       const eurToRon = data.quotes.EURRON;
+      const eurToGbp = data.quotes.EURGBP || 0.85; // Fallback if GBP not available
       
       const rates: ExchangeRates = {
         EUR: {
           EUR: 1,
           USD: eurToUsd,
-          RON: eurToRon
+          RON: eurToRon,
+          GBP: eurToGbp
         },
         USD: {
           EUR: 1 / eurToUsd,
           USD: 1,
-          RON: eurToRon / eurToUsd
+          RON: eurToRon / eurToUsd,
+          GBP: eurToGbp / eurToUsd
         },
         RON: {
           EUR: 1 / eurToRon,
           USD: eurToUsd / eurToRon,
-          RON: 1
+          RON: 1,
+          GBP: eurToGbp / eurToRon
+        },
+        GBP: {
+          EUR: 1 / eurToGbp,
+          USD: eurToUsd / eurToGbp,
+          RON: eurToRon / eurToGbp,
+          GBP: 1
         }
       };
       
