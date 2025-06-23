@@ -8,6 +8,7 @@ import { Milestone } from '@/hooks/useMilestones';
 import { Invoice, useInvoices } from '@/hooks/useInvoices';
 import { useCurrency } from '@/hooks/useCurrency';
 import { formatCurrency } from '@/lib/currency';
+import { useHourEntries } from '@/hooks/useHourEntries';
 
 interface ProjectBudgetTrackingProps {
   project: Project;
@@ -18,12 +19,17 @@ interface ProjectBudgetTrackingProps {
 
 const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBudgetTrackingProps) => {
   const { invoices } = useInvoices();
+  const { hourEntries } = useHourEntries();
   const { displayCurrency, convert } = useCurrency();
   const isFixedPrice = project.pricingType === 'fixed';
   
   // Filter project-specific data
   const projectMilestones = milestones.filter(m => m.projectId === project.id);
   const projectInvoices = invoices.filter(i => i.projectId === project.id);
+  const projectHours = hourEntries.filter(entry => entry.projectId === project.id);
+  
+  // Calculate total hours worked on this project
+  const totalHoursWorked = projectHours.reduce((sum, entry) => sum + entry.hours, 0);
   
   // Calculate milestone-based financials with currency conversion
   const totalMilestoneAmount = projectMilestones.reduce((sum, milestone) => {
@@ -52,7 +58,7 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
   
   // Task-based metrics for context
   const totalEstimatedHours = tasks.reduce((sum, task) => sum + (task.estimatedHours || 0), 0);
-  const totalActualHours = tasks.reduce((sum, task) => sum + (task.actualHours || 0), 0);
+  const totalActualHours = totalHoursWorked || tasks.reduce((sum, task) => sum + (task.actualHours || 0), 0);
   const hourlyRate = isFixedPrice ? (client?.price || 0) : (project.hourlyRate || 0);
 
   // Budget calculations based on project type with currency conversion
@@ -60,22 +66,36 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
   if (isFixedPrice) {
     const fixedBudget = convert(project.fixedPrice || totalMilestoneAmount, project.currency, displayCurrency);
     const costSoFar = totalActualHours * convert(hourlyRate, project.currency, displayCurrency);
+    
+    // Calculate budget progress - ensure we have a valid percentage
+    let budgetProgress = 0;
+    if (fixedBudget > 0) {
+      budgetProgress = (costSoFar / fixedBudget) * 100;
+    }
+    
     budgetMetrics = {
       totalBudget: fixedBudget,
       spentAmount: costSoFar,
       remainingBudget: fixedBudget - costSoFar,
-      budgetProgress: fixedBudget > 0 ? (costSoFar / fixedBudget) * 100 : 0,
+      budgetProgress: budgetProgress,
       revenueEarned: totalPaidAmount,
       revenueProgress: fixedBudget > 0 ? (totalPaidAmount / fixedBudget) * 100 : 0
     };
   } else {
     const estimatedBudget = (project.estimatedHours || totalEstimatedHours) * convert(hourlyRate, project.currency, displayCurrency);
     const actualCost = totalActualHours * convert(hourlyRate, project.currency, displayCurrency);
+    
+    // Calculate budget progress - ensure we have a valid percentage
+    let budgetProgress = 0;
+    if (estimatedBudget > 0) {
+      budgetProgress = (actualCost / estimatedBudget) * 100;
+    }
+    
     budgetMetrics = {
       totalBudget: estimatedBudget,
       spentAmount: actualCost,
       remainingBudget: estimatedBudget - actualCost,
-      budgetProgress: estimatedBudget > 0 ? (actualCost / estimatedBudget) * 100 : 0,
+      budgetProgress: budgetProgress,
       revenueEarned: totalPaidAmount,
       revenueProgress: estimatedBudget > 0 ? (totalPaidAmount / estimatedBudget) * 100 : 0
     };
