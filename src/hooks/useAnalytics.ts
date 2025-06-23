@@ -2,8 +2,15 @@ import { useMemo, useEffect, useState } from 'react';
 import { formatCurrency } from '@/lib/currency';
 import { useHourEntries } from '@/hooks/useHourEntries';
 import { useCurrency } from '@/hooks/useCurrency';
+import { isWithinInterval, parseISO } from 'date-fns';
 
-export const useAnalytics = (clients, subscriptions, displayCurrency) => {
+export const useAnalytics = (
+  clients, 
+  subscriptions, 
+  displayCurrency,
+  startDate?: Date,
+  endDate?: Date
+) => {
   const { hourEntries } = useHourEntries();
   const { convert } = useCurrency();
   const [analytics, setAnalytics] = useState({
@@ -19,24 +26,44 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
   
   useEffect(() => {
     console.log('useAnalytics: Calculating analytics for currency:', displayCurrency);
-    console.log('useAnalytics: Clients data:', clients);
-    console.log('useAnalytics: Hour entries:', hourEntries.length);
+    console.log('useAnalytics: Date range:', startDate, endDate);
     
     const totalClients = clients.length;
     const activeClients = clients.filter(client => client.status === 'active').length;
 
-    // Calculate total hours from hour entries
-    const totalHours = hourEntries.reduce((total, entry) => {
+    // Filter hour entries by date range if provided
+    const filteredHourEntries = startDate && endDate 
+      ? hourEntries.filter(entry => {
+          const entryDate = parseISO(entry.date);
+          return isWithinInterval(entryDate, { start: startDate, end: endDate });
+        })
+      : hourEntries;
+
+    // Calculate total hours from filtered hour entries
+    const totalHours = filteredHourEntries.reduce((total, entry) => {
       return total + entry.hours;
     }, 0);
 
     // Calculate total revenue from client invoices (paid invoices only)
+    // Filter by date range if provided
     let totalRevenue = clients.reduce((total, client) => {
       if (!client.invoices || !Array.isArray(client.invoices)) {
         return total;
       }
       
-      const clientRevenue = client.invoices
+      const filteredInvoices = startDate && endDate
+        ? client.invoices.filter(invoice => {
+            try {
+              const invoiceDate = parseISO(invoice.date);
+              return isWithinInterval(invoiceDate, { start: startDate, end: endDate });
+            } catch (e) {
+              console.error('Invalid date in invoice:', invoice);
+              return false;
+            }
+          })
+        : client.invoices;
+      
+      const clientRevenue = filteredInvoices
         .filter(invoice => invoice.status === 'paid')
         .reduce((invoiceTotal, invoice) => {
           const amount = invoice.amount || 0;
@@ -50,12 +77,31 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
           return invoiceTotal + convertedAmount;
         }, 0);
       
-      console.log(`useAnalytics: Client ${client.name} - invoice revenue: ${clientRevenue} ${displayCurrency}`);
       return total + clientRevenue;
     }, 0);
 
     // Calculate monthly subscription cost
+    // For date filtering, we consider subscriptions active during the period
     let monthlySubscriptionCost = subscriptions.reduce((total, subscription) => {
+      // Skip inactive subscriptions
+      if (subscription.status !== 'active') {
+        return total;
+      }
+      
+      // If date range is provided, check if the subscription was active during that period
+      if (startDate && endDate) {
+        try {
+          const billingDate = parseISO(subscription.billing_date);
+          // Simple check: if billing date is within the period, count it
+          // This is a simplification - ideally we'd check if any billing cycle overlaps with the period
+          if (!isWithinInterval(billingDate, { start: startDate, end: endDate })) {
+            return total;
+          }
+        } catch (e) {
+          console.error('Invalid billing date in subscription:', subscription);
+        }
+      }
+      
       const price = subscription.price || 0;
       const seats = subscription.seats || 1;
       const subscriptionCurrency = subscription.currency || 'USD';
@@ -63,7 +109,7 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
       const subscriptionCost = price * seats;
       
       if (isNaN(subscriptionCost)) {
-        console.log(`useAnalytics: NaN cost for subscription ${subscription.name}`);
+        console.log('useAnalytics: NaN cost for subscription', subscription.name);
         return total;
       }
       
@@ -72,12 +118,27 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
     }, 0);
 
     // Calculate total paid to date for subscriptions
+    // Filter by date range if provided
     let totalPaidToDate = subscriptions.reduce((total, subscription) => {
+      // If date range is provided, we only count payments made during that period
+      // This is a simplification since we don't have individual payment dates
+      if (startDate && endDate) {
+        try {
+          const billingDate = parseISO(subscription.billing_date);
+          // Simple check: if billing date is within the period, count it
+          if (!isWithinInterval(billingDate, { start: startDate, end: endDate })) {
+            return total;
+          }
+        } catch (e) {
+          console.error('Invalid billing date in subscription:', subscription);
+        }
+      }
+      
       const paid = subscription.total_paid || 0;
       const subscriptionCurrency = subscription.currency || 'USD';
       
       if (isNaN(paid)) {
-        console.log(`useAnalytics: NaN total_paid for subscription ${subscription.name}`);
+        console.log('useAnalytics: NaN total_paid for subscription', subscription.name);
         return total;
       }
       
@@ -85,9 +146,9 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
       return total + convertedPaid;
     }, 0);
 
-    // Create time breakdown by client (using hour entries)
+    // Create time breakdown by client (using filtered hour entries)
     const clientHours = {};
-    hourEntries.forEach(entry => {
+    filteredHourEntries.forEach(entry => {
       const clientId = entry.clientId;
       if (!clientHours[clientId]) {
         clientHours[clientId] = 0;
@@ -103,7 +164,7 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
       };
     }).sort((a, b) => b.hours - a.hours);
 
-    // Create revenue breakdown by client (from invoices)
+    // Create revenue breakdown by client (from filtered invoices)
     const revenueBreakdown = clients.map(client => {
       if (!client.invoices || !Array.isArray(client.invoices)) {
         return {
@@ -112,7 +173,18 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
         };
       }
       
-      const clientRevenue = client.invoices
+      const filteredInvoices = startDate && endDate
+        ? client.invoices.filter(invoice => {
+            try {
+              const invoiceDate = parseISO(invoice.date);
+              return isWithinInterval(invoiceDate, { start: startDate, end: endDate });
+            } catch (e) {
+              return false;
+            }
+          })
+        : client.invoices;
+      
+      const clientRevenue = filteredInvoices
         .filter(invoice => invoice.status === 'paid')
         .reduce((invoiceTotal, invoice) => {
           const amount = invoice.amount || 0;
@@ -149,7 +221,7 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
       timeBreakdown,
       revenueBreakdown
     });
-  }, [clients, subscriptions, displayCurrency, hourEntries, convert]);
+  }, [clients, subscriptions, displayCurrency, hourEntries, convert, startDate, endDate]);
 
   return analytics;
 };
