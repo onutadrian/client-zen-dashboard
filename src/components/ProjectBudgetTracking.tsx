@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Project } from '@/hooks/useProjects';
 import { Task } from '@/hooks/useTasks';
 import { Milestone } from '@/hooks/useMilestones';
@@ -80,168 +81,217 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
     };
   }
 
+  // Format numbers: remove decimals and convert 1000+ to K format
+  const formatMetric = (value: number, isCurrency = false) => {
+    const rounded = Math.round(value);
+    
+    if (rounded >= 1000) {
+      const kValue = (rounded / 1000).toFixed(2).replace(/\.?0+$/, '');
+      if (isCurrency) {
+        return `${displayCurrency === 'RON' ? 'RON ' : (displayCurrency === 'EUR' ? '€' : '$')}${kValue}K`;
+      }
+      return `${kValue}K`;
+    }
+    
+    if (isCurrency) {
+      return `${displayCurrency === 'RON' ? 'RON ' : (displayCurrency === 'EUR' ? '€' : '$')}${rounded}`;
+    }
+    
+    return rounded.toString();
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Project Type Badge */}
-      <div className="flex items-center space-x-2 mb-4">
-        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-          isFixedPrice 
-            ? 'bg-blue-100 text-blue-800' 
-            : 'bg-green-100 text-green-800'
-        }`}>
-          {isFixedPrice ? 'Fixed Price Project' : 'Hourly Project'}
-        </span>
-        {isFixedPrice && (
-          <span className="text-sm text-slate-600">
-            Budget: {formatCurrency(budgetMetrics.totalBudget, displayCurrency)}
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* Project Type Badge */}
+        <div className="flex items-center space-x-2 mb-4">
+          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+            isFixedPrice 
+              ? 'bg-blue-100 text-blue-800' 
+              : 'bg-green-100 text-green-800'
+          }`}>
+            {isFixedPrice ? 'Fixed Price Project' : 'Hourly Project'}
           </span>
-        )}
-        {!isFixedPrice && (
-          <span className="text-sm text-slate-600">
-            Rate: {formatCurrency(convert(project.hourlyRate || 0, project.currency, displayCurrency), displayCurrency)}/hr
-          </span>
-        )}
-      </div>
-
-      {/* Financial Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="text-center p-4 rounded-lg bg-slate-50">
-          <p className="text-zinc-950 text-4xl font-normal">
-            {formatCurrency(budgetMetrics.totalBudget, displayCurrency)}
-          </p>
-          <p className="text-slate-600 py-[24px] text-base">Total Budget</p>
-        </div>
-
-        <div className="text-center p-4 rounded-lg bg-slate-50">
-          <p className="text-zinc-950 text-4xl font-normal">
-            {formatCurrency(budgetMetrics.revenueEarned, displayCurrency)}
-          </p>
-          <p className="text-slate-600 py-[24px] text-base">Revenue Earned</p>
-        </div>
-
-        <div className="text-center p-4 rounded-lg bg-slate-50">
-          <p className="text-zinc-950 text-4xl font-normal">
-            {formatCurrency(totalInvoiceAmount - budgetMetrics.revenueEarned, displayCurrency)}
-          </p>
-          <p className="text-slate-600 py-[24px] text-base">Pending Revenue</p>
-        </div>
-
-        <div className="text-center p-4 rounded-lg bg-slate-50">
-          <p className={`text-zinc-950 font-normal text-4xl ${budgetMetrics.budgetProgress > 90 ? 'text-red-600' : ''}`}>
-            {budgetMetrics.budgetProgress.toFixed(1)}%
-          </p>
-          <p className="text-slate-600 py-[24px] text-base">Budget Used</p>
-        </div>
-      </div>
-
-      {/* Progress Tracking */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Progress vs Revenue</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium">Milestone Completion</span>
-              <span className="text-sm text-slate-600">{averageCompletion.toFixed(1)}%</span>
-            </div>
-            <Progress value={averageCompletion} className="h-3" />
-          </div>
-
-          <div>
-            <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium">Revenue Progress</span>
-              <span className="text-sm text-slate-600">{budgetMetrics.revenueProgress.toFixed(1)}%</span>
-            </div>
-            <Progress value={budgetMetrics.revenueProgress} className="h-3" />
-          </div>
-
-          <div>
-            <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium">Budget Usage</span>
-              <span className="text-sm text-slate-600">{budgetMetrics.budgetProgress.toFixed(1)}%</span>
-            </div>
-            <Progress value={budgetMetrics.budgetProgress} className="h-3" />
-          </div>
-
-          {budgetMetrics.budgetProgress > averageCompletion + 15 && (
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                ⚠️ Budget usage is significantly ahead of milestone completion. Review project scope or budget allocation.
-              </p>
-            </div>
+          {isFixedPrice && (
+            <span className="text-sm text-slate-600">
+              Budget: {formatCurrency(budgetMetrics.totalBudget, displayCurrency)}
+            </span>
           )}
-
-          {budgetMetrics.revenueProgress < averageCompletion - 20 && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800">
-                💡 Consider invoicing for completed milestones to improve cash flow.
-              </p>
-            </div>
+          {!isFixedPrice && (
+            <span className="text-sm text-slate-600">
+              Rate: {formatCurrency(convert(project.hourlyRate || 0, project.currency, displayCurrency), displayCurrency)}/hr
+            </span>
           )}
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Milestone Financial Breakdown */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Milestone Financial Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {projectMilestones.length > 0 ? (
-            <div className="space-y-3">
-              {projectMilestones.map((milestone) => {
-                // Check if there's an invoice for this milestone
-                const milestoneInvoice = projectInvoices.find(inv => inv.milestoneId === milestone.id);
-                const invoiceStatus = milestoneInvoice?.status || 'unpaid';
-                const milestoneAmount = convert(milestone.amount || 0, project.currency, displayCurrency);
-                
-                return (
-                  <div key={milestone.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <h4 className="font-medium">{milestone.title}</h4>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          milestone.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          milestone.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                          'bg-gray-100 text-gray-800'
+        {/* Financial Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="text-center p-4 rounded-lg bg-slate-50">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-zinc-950 text-4xl font-normal cursor-help">
+                  {formatMetric(budgetMetrics.totalBudget, true)}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{formatCurrency(budgetMetrics.totalBudget, displayCurrency)}</p>
+              </TooltipContent>
+            </Tooltip>
+            <p className="text-slate-600 py-[24px] text-base">Total Budget</p>
+          </div>
+
+          <div className="text-center p-4 rounded-lg bg-slate-50">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-zinc-950 text-4xl font-normal cursor-help">
+                  {formatMetric(budgetMetrics.revenueEarned, true)}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{formatCurrency(budgetMetrics.revenueEarned, displayCurrency)}</p>
+              </TooltipContent>
+            </Tooltip>
+            <p className="text-slate-600 py-[24px] text-base">Revenue Earned</p>
+          </div>
+
+          <div className="text-center p-4 rounded-lg bg-slate-50">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-zinc-950 text-4xl font-normal cursor-help">
+                  {formatMetric(totalInvoiceAmount - budgetMetrics.revenueEarned, true)}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{formatCurrency(totalInvoiceAmount - budgetMetrics.revenueEarned, displayCurrency)}</p>
+              </TooltipContent>
+            </Tooltip>
+            <p className="text-slate-600 py-[24px] text-base">Pending Revenue</p>
+          </div>
+
+          <div className="text-center p-4 rounded-lg bg-slate-50">
+            <p className={`text-zinc-950 font-normal text-4xl ${budgetMetrics.budgetProgress > 90 ? 'text-red-600' : ''}`}>
+              {budgetMetrics.budgetProgress.toFixed(1)}%
+            </p>
+            <p className="text-slate-600 py-[24px] text-base">Budget Used</p>
+          </div>
+        </div>
+
+        {/* Progress Tracking */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Progress vs Revenue</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <div className="flex justify-between mb-2">
+                <span className="text-sm font-medium">Milestone Completion</span>
+                <span className="text-sm text-slate-600">{averageCompletion.toFixed(1)}%</span>
+              </div>
+              <Progress value={averageCompletion} className="h-3" />
+            </div>
+
+            <div>
+              <div className="flex justify-between mb-2">
+                <span className="text-sm font-medium">Revenue Progress</span>
+                <span className="text-sm text-slate-600">{budgetMetrics.revenueProgress.toFixed(1)}%</span>
+              </div>
+              <Progress value={budgetMetrics.revenueProgress} className="h-3" />
+            </div>
+
+            <div>
+              <div className="flex justify-between mb-2">
+                <span className="text-sm font-medium">Budget Usage</span>
+                <span className="text-sm text-slate-600">{budgetMetrics.budgetProgress.toFixed(1)}%</span>
+              </div>
+              <Progress value={budgetMetrics.budgetProgress} className="h-3" />
+            </div>
+
+            {budgetMetrics.budgetProgress > averageCompletion + 15 && (
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  ⚠️ Budget usage is significantly ahead of milestone completion. Review project scope or budget allocation.
+                </p>
+              </div>
+            )}
+
+            {budgetMetrics.revenueProgress < averageCompletion - 20 && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  💡 Consider invoicing for completed milestones to improve cash flow.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Milestone Financial Breakdown */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Milestone Financial Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {projectMilestones.length > 0 ? (
+              <div className="space-y-3">
+                {projectMilestones.map((milestone) => {
+                  // Check if there's an invoice for this milestone
+                  const milestoneInvoice = projectInvoices.find(inv => inv.milestoneId === milestone.id);
+                  const invoiceStatus = milestoneInvoice?.status || 'unpaid';
+                  const milestoneAmount = convert(milestone.amount || 0, project.currency, displayCurrency);
+                  
+                  return (
+                    <div key={milestone.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <h4 className="font-medium">{milestone.title}</h4>
+                          <span className={`px-2 py-1 rounded text-xs ${
+                            milestone.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            milestone.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {milestone.status}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-4 mt-1">
+                          <p className="text-sm text-slate-600">
+                            Due: {new Date(milestone.targetDate).toLocaleDateString()}
+                          </p>
+                          <p className="text-sm text-slate-600">
+                            {milestone.completionPercentage}% complete
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="font-medium cursor-help">
+                              {formatMetric(milestoneAmount, true)}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{formatCurrency(milestoneAmount, displayCurrency)}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <p className={`text-sm ${
+                          invoiceStatus === 'paid' ? 'text-green-600' :
+                          invoiceStatus === 'pending' ? 'text-yellow-600' :
+                          'text-slate-600'
                         }`}>
-                          {milestone.status}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-4 mt-1">
-                        <p className="text-sm text-slate-600">
-                          Due: {new Date(milestone.targetDate).toLocaleDateString()}
-                        </p>
-                        <p className="text-sm text-slate-600">
-                          {milestone.completionPercentage}% complete
+                          {invoiceStatus === 'paid' ? 'Paid' :
+                           invoiceStatus === 'pending' ? 'Invoiced' :
+                           'Not Invoiced'}
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-medium">
-                        {formatCurrency(milestoneAmount, displayCurrency)}
-                      </p>
-                      <p className={`text-sm ${
-                        invoiceStatus === 'paid' ? 'text-green-600' :
-                        invoiceStatus === 'pending' ? 'text-yellow-600' :
-                        'text-slate-600'
-                      }`}>
-                        {invoiceStatus === 'paid' ? 'Paid' :
-                         invoiceStatus === 'pending' ? 'Invoiced' :
-                         'Not Invoiced'}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-slate-500 text-center py-4">No milestones to analyze</p>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-slate-500 text-center py-4">No milestones to analyze</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </TooltipProvider>
   );
 };
 
