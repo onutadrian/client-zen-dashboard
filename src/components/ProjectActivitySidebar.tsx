@@ -102,7 +102,7 @@ const ProjectActivitySidebar = ({ project, client }: ProjectActivitySidebarProps
               </div>
               <span className="font-medium text-slate-800">{activity.title}</span>
             </div>
-            <div className="text-sm text-slate-600 ml-8 mb-1">
+            <div className="text-sm text-slate-600 ml-8 mb-1 line-clamp-2">
               {activity.description}
             </div>
             <div className="text-xs text-slate-400 ml-8">

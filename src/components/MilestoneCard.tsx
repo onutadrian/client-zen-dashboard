@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2 } from 'lucide-react';
@@ -30,7 +29,7 @@ const MilestoneCard = ({
               {milestone.status.replace('-', ' ')}
             </span>
           </div>
-          <p className="text-sm text-slate-600 mb-1">{milestone.description}</p>
+          <p className="text-sm text-slate-600 mb-1 line-clamp-2">{milestone.description}</p>
           <div className="flex items-center space-x-4 text-sm text-slate-500">
             <span>Due: {formatDate(milestone.targetDate)}</span>
             {milestone.amount && (

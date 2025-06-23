@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -83,7 +82,7 @@ const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
         
         <CardContent className="pt-0">
           {task.description && (
-            <p className="text-slate-600 text-sm mb-3">{task.description}</p>
+            <p className="text-slate-600 text-sm mb-3 line-clamp-2">{task.description}</p>
           )}
           
           {task.notes && (
@@ -92,7 +91,7 @@ const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
                 <FileText className="w-4 h-4 mr-1 text-slate-500" />
                 <span className="text-sm font-medium text-slate-700">Notes</span>
               </div>
-              <p className="text-sm text-slate-600 bg-slate-50 p-2 rounded">{task.notes}</p>
+              <p className="text-sm text-slate-600 bg-slate-50 p-2 rounded line-clamp-2">{task.notes}</p>
             </div>
           )}
           
@@ -103,22 +102,27 @@ const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
                 <span className="text-sm font-medium text-slate-700">Assets ({task.assets.length})</span>
               </div>
               <div className="space-y-1">
-                {task.assets.map((asset, index) => (
+                {task.assets.slice(0, 2).map((asset, index) => (
                   <div key={index} className="text-sm">
                     {asset.startsWith('http') ? (
                       <a 
                         href={asset} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 hover:underline"
+                        className="text-blue-600 hover:text-blue-800 hover:underline line-clamp-1"
                       >
                         {asset}
                       </a>
                     ) : (
-                      <span className="text-slate-600">{asset}</span>
+                      <span className="text-slate-600 line-clamp-1">{asset}</span>
                     )}
                   </div>
                 ))}
+                {task.assets.length > 2 && (
+                  <div className="text-xs text-slate-500">
+                    +{task.assets.length - 2} more assets
+                  </div>
+                )}
               </div>
             </div>
           )}

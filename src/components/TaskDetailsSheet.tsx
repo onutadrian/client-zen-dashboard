@@ -46,7 +46,7 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{task.title}</SheetTitle>
           <SheetDescription>Task details and information</SheetDescription>
@@ -123,12 +123,12 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
                         href={asset} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 hover:underline break-all"
+                        className="text-blue-600 hover:text-blue-800 hover:underline break-all line-clamp-1"
                       >
                         {asset}
                       </a>
                     ) : (
-                      <span className="text-slate-600">{asset}</span>
+                      <span className="text-slate-600 line-clamp-1">{asset}</span>
                     )}
                   </div>
                 ))}
