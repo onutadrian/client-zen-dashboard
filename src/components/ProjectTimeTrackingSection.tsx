@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Clock, Plus } from 'lucide-react';
 import ProjectBilledHours from './ProjectBilledHours';
@@ -11,6 +10,7 @@ import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
 import { Milestone } from '@/hooks/useMilestones';
 import { useHourEntries } from '@/hooks/useHourEntries';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface ProjectTimeTrackingSectionProps {
   project: Project;
@@ -28,9 +28,24 @@ const ProjectTimeTrackingSection = ({
   const [showLogHoursModal, setShowLogHoursModal] = useState(false);
   const [showAddMilestoneModal, setShowAddMilestoneModal] = useState(false);
   const { hourEntries } = useHourEntries();
+  const { displayCurrency } = useCurrency();
+  const [forceRefresh, setForceRefresh] = useState(0);
   
   const isFixedPrice = project.pricingType === 'fixed';
   const projectHours = hourEntries.filter(entry => entry.projectId === project.id);
+
+  // Listen for currency changes to force refresh
+  useEffect(() => {
+    const handleCurrencyChange = () => {
+      setForceRefresh(prev => prev + 1);
+    };
+
+    window.addEventListener('currencyChanged', handleCurrencyChange);
+    
+    return () => {
+      window.removeEventListener('currencyChanged', handleCurrencyChange);
+    };
+  }, []);
 
   const getLogButtonText = () => {
     switch (project.pricingType) {
@@ -81,7 +96,12 @@ const ProjectTimeTrackingSection = ({
           )}
         </div>
         
-        <ProjectBilledHours project={project} client={client} milestones={milestones} />
+        <ProjectBilledHours 
+          key={`billed-hours-${displayCurrency}-${forceRefresh}`}
+          project={project} 
+          client={client} 
+          milestones={milestones} 
+        />
 
         {/* Show milestone hours tracker if there are any hours logged */}
         {projectHours.length > 0 && (

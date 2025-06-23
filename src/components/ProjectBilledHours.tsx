@@ -44,7 +44,7 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
     unbilledRevenue = unbilledHours * convertedRate;
   } else if (project.pricingType === 'daily' && project.dailyRate) {
     const convertedRate = convert(project.dailyRate, project.currency, displayCurrency);
-    unbilledRevenue = unbilledHours * convertedRate;
+    unbilledRevenue = unbilledHours * convertedRate / 8; // Convert hours to days
   }
   
   // For fixed price projects, calculate milestone values with currency conversion

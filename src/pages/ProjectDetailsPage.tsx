@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
@@ -16,12 +15,15 @@ import { useClients } from '@/hooks/useClients';
 import { useTasks } from '@/hooks/useTasks';
 import { useMilestones } from '@/hooks/useMilestones';
 import { useHourEntries } from '@/hooks/useHourEntries';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const ProjectDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isMobile } = useSidebar();
   const [activeTab, setActiveTab] = useState('overview');
+  const [forceRefresh, setForceRefresh] = useState(0);
+  const { displayCurrency } = useCurrency();
 
   const { projects, updateProject, archiveProject, deleteProject } = useProjects();
   const { clients } = useClients();
@@ -36,6 +38,19 @@ const ProjectDetailsPage = () => {
 
   // Hide budget tracking for fixed price projects
   const showBudgetTracking = project?.pricingType !== 'fixed';
+
+  // Listen for currency changes to force refresh
+  useEffect(() => {
+    const handleCurrencyChange = () => {
+      setForceRefresh(prev => prev + 1);
+    };
+
+    window.addEventListener('currencyChanged', handleCurrencyChange);
+    
+    return () => {
+      window.removeEventListener('currencyChanged', handleCurrencyChange);
+    };
+  }, []);
 
   // Redirect to overview if current tab is budget and it's hidden
   useEffect(() => {
@@ -98,6 +113,7 @@ const ProjectDetailsPage = () => {
 
               <TabsContent value="overview" className="mt-6">
                 <ProjectOverview 
+                  key={`overview-${displayCurrency}-${forceRefresh}`}
                   project={project}
                   client={client}
                   tasks={projectTasks}
@@ -124,6 +140,7 @@ const ProjectDetailsPage = () => {
               {showBudgetTracking && (
                 <TabsContent value="budget" className="mt-6">
                   <ProjectBudgetTracking 
+                    key={`budget-${displayCurrency}-${forceRefresh}`}
                     project={project}
                     client={client}
                     tasks={projectTasks}
