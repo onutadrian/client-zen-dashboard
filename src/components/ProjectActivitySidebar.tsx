@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, FileText, Calendar, CheckCircle, DollarSign, Target, User } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/hooks/useClients';
@@ -93,32 +92,29 @@ const ProjectActivitySidebar = ({ project, client }: ProjectActivitySidebarProps
   }, [project, tasks, milestones, invoices, hourEntries]);
 
   return (
-    <div className="p-6">
-      <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
-      <div className="space-y-4">
-        {activities.length > 0 ? (
-          activities.map((activity, index) => (
-            <div key={index} className="text-sm border-b border-slate-100 pb-3 last:border-0">
-              <div className="flex items-center space-x-2 mb-1">
-                <div className="bg-slate-100 p-1.5 rounded-full">
-                  <activity.icon className="w-3.5 h-3.5 text-slate-600" />
-                </div>
-                <span className="font-medium text-slate-800">{activity.title}</span>
+    <div className="space-y-4">
+      {activities.length > 0 ? (
+        activities.map((activity, index) => (
+          <div key={index} className="text-sm border-b border-slate-100 pb-3 last:border-0">
+            <div className="flex items-center space-x-2 mb-1">
+              <div className="bg-slate-100 p-1.5 rounded-full">
+                <activity.icon className="w-3.5 h-3.5 text-slate-600" />
               </div>
-              <div className="text-sm text-slate-600 ml-8 mb-1">
-                {activity.description}
-              </div>
-              <div className="text-xs text-slate-400 ml-8">
-                {activity.date.toLocaleDateString()} {activity.date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-              </div>
+              <span className="font-medium text-slate-800">{activity.title}</span>
             </div>
-          ))
-        ) : (
-          <div className="text-sm text-slate-500 py-4 text-center">
-            No recent activity for this project.
+            <div className="text-sm text-slate-600 ml-8 mb-1">
+              {activity.description}
+            </div>
+            <div className="text-xs text-slate-400 ml-8">
+              {activity.date.toLocaleDateString()} {activity.date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+            </div>
           </div>
-        )}
-      </div>
+        ))
+      ) : (
+        <div className="text-sm text-slate-500 py-4 text-center">
+          No recent activity for this project.
+        </div>
+      )}
     </div>
   );
 };

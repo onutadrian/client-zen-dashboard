@@ -163,10 +163,19 @@ const ProjectDetailsPage = () => {
 
         {/* Activity Sidebar - 30% */}
         <div className="w-[30%] border-l bg-white">
-          <ProjectActivitySidebar 
-            project={project}
-            client={client}
-          />
+          <div className="p-6">
+            <Card className="border-0 shadow-none bg-transparent">
+              <CardHeader className="px-0 pt-0 pb-4">
+                <CardTitle className="text-lg">Recent Activity</CardTitle>
+              </CardHeader>
+              <CardContent className="px-0 py-0">
+                <ProjectActivitySidebar 
+                  project={project}
+                  client={client}
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
