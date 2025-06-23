@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   AlertDialog,
@@ -46,7 +45,9 @@ const DeleteTimeEntryDialog = ({ isOpen, onClose, timeEntry }: DeleteTimeEntryDi
               <div className="font-medium">{formatDate(timeEntry.date)}</div>
               <div className="text-sm text-slate-600">
                 {timeEntry.hours} {timeEntry.hours === 1 ? 'hour' : 'hours'}
-                {timeEntry.description && ` - ${timeEntry.description}`}
+                {timeEntry.description && (
+                  <div className="line-clamp-2 mt-1">{timeEntry.description}</div>
+                )}
               </div>
             </div>
             This action cannot be undone.

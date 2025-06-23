@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -89,7 +88,7 @@ const MilestoneHoursTracker = ({ milestones, hourEntries }: MilestoneHoursTracke
                   {milestoneHours.slice(0, 3).map((entry) => (
                     <div key={entry.id} className="flex justify-between items-center text-sm bg-slate-50 p-2 rounded">
                       <div>
-                        <p className="font-medium">{entry.description || 'Time entry'}</p>
+                        <p className="font-medium line-clamp-1">{entry.description || 'Time entry'}</p>
                         <p className="text-slate-500">{formatDate(entry.date)}</p>
                       </div>
                       <div className="text-right">
@@ -123,7 +122,7 @@ const MilestoneHoursTracker = ({ milestones, hourEntries }: MilestoneHoursTracke
               {unassignedHours.slice(0, 3).map((entry) => (
                 <div key={entry.id} className="flex justify-between items-center text-sm bg-white p-2 rounded border">
                   <div>
-                    <p className="font-medium">{entry.description || 'Time entry'}</p>
+                    <p className="font-medium line-clamp-1">{entry.description || 'Time entry'}</p>
                     <p className="text-slate-500">{formatDate(entry.date)}</p>
                   </div>
                   <div className="text-right">
@@ -134,6 +133,11 @@ const MilestoneHoursTracker = ({ milestones, hourEntries }: MilestoneHoursTracke
                   </div>
                 </div>
               ))}
+              {unassignedHours.length > 3 && (
+                <p className="text-xs text-orange-600 text-center mt-1">
+                  +{unassignedHours.length - 3} more entries
+                </p>
+              )}
             </div>
           </div>
         )}

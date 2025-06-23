@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { HourEntry } from '@/hooks/useHourEntries';
 import { formatDate } from '@/lib/utils';
@@ -25,13 +24,13 @@ const RecentTimeEntries = ({ hourEntries }: RecentTimeEntriesProps) => {
       <div className="space-y-2">
         {hourEntries.slice(0, 5).map((entry) => (
           <div key={entry.id} className="flex items-center justify-between p-2 border rounded">
-            <div>
-              <p className="font-medium">{entry.description || 'Time entry'}</p>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium line-clamp-1">{entry.description || 'Time entry'}</p>
               <p className="text-sm text-slate-600">
                 {formatDate(entry.date)}
               </p>
             </div>
-            <div className="text-right">
+            <div className="text-right ml-4 flex-shrink-0">
               <p className="font-medium">{entry.hours}h</p>
               <p className="text-sm text-slate-600">
                 {entry.billed ? 'Billed' : 'Unbilled'}
