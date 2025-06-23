@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
@@ -20,6 +19,7 @@ const Index = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState(null);
+  const [forceRefresh, setForceRefresh] = useState(0);
 
   const { clients, addClient, updateClient } = useClients();
   const { subscriptions, addSubscription, updateSubscription } = useSubscriptions();
@@ -28,6 +28,19 @@ const Index = () => {
   const { milestones } = useMilestones();
   const analytics = useAnalytics(clients, subscriptions, displayCurrency);
   const { isMobile } = useSidebar();
+
+  // Listen for currency changes to force refresh
+  useEffect(() => {
+    const handleCurrencyChange = () => {
+      setForceRefresh(prev => prev + 1);
+    };
+
+    window.addEventListener('currencyChanged', handleCurrencyChange);
+    
+    return () => {
+      window.removeEventListener('currencyChanged', handleCurrencyChange);
+    };
+  }, []);
 
   const handleEditSubscription = (subscription) => {
     setSelectedSubscription(subscription);
@@ -44,7 +57,7 @@ const Index = () => {
         <DashboardHeader />
 
         <AnalyticsSection
-          key={displayCurrency} // Force re-render when currency changes
+          key={`analytics-${displayCurrency}-${forceRefresh}`} // Force re-render when currency changes
           totalClients={analytics.totalClients}
           activeClients={analytics.activeClients}
           totalHours={analytics.totalHours}

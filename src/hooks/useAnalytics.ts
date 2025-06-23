@@ -1,20 +1,31 @@
-
-
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
+import { useHourEntries } from '@/hooks/useHourEntries';
 
 export const useAnalytics = (clients, subscriptions, displayCurrency) => {
-  console.log('useAnalytics: Calculating analytics for currency:', displayCurrency);
-  console.log('useAnalytics: Clients data:', clients);
+  const { hourEntries } = useHourEntries();
+  const [analytics, setAnalytics] = useState({
+    totalClients: 0,
+    activeClients: 0,
+    totalHours: 0,
+    totalRevenue: 0,
+    monthlySubscriptionCost: 0,
+    totalPaidToDate: 0,
+    timeBreakdown: [],
+    revenueBreakdown: []
+  });
   
-  return useMemo(() => {
+  useEffect(() => {
+    console.log('useAnalytics: Calculating analytics for currency:', displayCurrency);
+    console.log('useAnalytics: Clients data:', clients);
+    console.log('useAnalytics: Hour entries:', hourEntries.length);
+    
     const totalClients = clients.length;
     const activeClients = clients.filter(client => client.status === 'active').length;
 
-    // Calculate total hours from all clients (if available)
-    const totalHours = clients.reduce((total, client) => {
-      const hours = client.hours_logged || 0;
-      return total + hours;
+    // Calculate total hours from hour entries
+    const totalHours = hourEntries.reduce((total, entry) => {
+      return total + entry.hours;
     }, 0);
 
     // Calculate total revenue from client invoices (paid invoices only)
@@ -72,11 +83,23 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
       return total + convertedPaid;
     }, 0);
 
-    // Create time breakdown by client (if hours are available)
-    const timeBreakdown = clients.map(client => ({
-      name: client.name,
-      hours: client.hours_logged || 0
-    })).filter(item => item.hours > 0);
+    // Create time breakdown by client (using hour entries)
+    const clientHours = {};
+    hourEntries.forEach(entry => {
+      const clientId = entry.clientId;
+      if (!clientHours[clientId]) {
+        clientHours[clientId] = 0;
+      }
+      clientHours[clientId] += entry.hours;
+    });
+    
+    const timeBreakdown = Object.entries(clientHours).map(([clientId, hours]) => {
+      const client = clients.find(c => c.id === parseInt(clientId));
+      return {
+        name: client ? client.name : `Client ${clientId}`,
+        hours: hours
+      };
+    }).sort((a, b) => b.hours - a.hours);
 
     // Create revenue breakdown by client (from invoices)
     const revenueBreakdown = clients.map(client => {
@@ -108,12 +131,13 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
     }).filter(item => parseFloat(item.revenue.replace(/[^0-9.-]/g, '')) > 0);
 
     console.log('useAnalytics: Calculated values:', {
+      totalHours,
       totalRevenue: formatCurrency(totalRevenue, displayCurrency),
       monthlySubscriptionCost: formatCurrency(monthlySubscriptionCost, displayCurrency),
       totalPaidToDate: formatCurrency(totalPaidToDate, displayCurrency)
     });
 
-    return {
+    setAnalytics({
       totalClients,
       activeClients,
       totalHours,
@@ -122,7 +146,8 @@ export const useAnalytics = (clients, subscriptions, displayCurrency) => {
       totalPaidToDate,
       timeBreakdown,
       revenueBreakdown
-    };
-  }, [clients, subscriptions, displayCurrency]);
-};
+    });
+  }, [clients, subscriptions, displayCurrency, hourEntries]);
 
+  return analytics;
+};
