@@ -31,6 +31,13 @@ const ProjectMetricsCards = ({
       <>
         <div className="text-center p-4 rounded-lg bg-slate-50">
           <p className="text-zinc-950 text-4xl font-normal">
+            {formatCurrency(billedRevenue, displayCurrency)}
+          </p>
+          <p className="text-slate-600 py-[24px] text-base">Billed Revenue</p>
+        </div>
+
+        <div className="text-center p-4 rounded-lg bg-slate-50">
+          <p className="text-zinc-950 text-4xl font-normal">
             {formatCurrency(unbilledRevenue, displayCurrency)}
           </p>
           <p className="text-slate-600 py-[24px] text-base">Unbilled Revenue</p>
@@ -48,13 +55,6 @@ const ProjectMetricsCards = ({
             {formatCurrency(completedMilestoneValue, displayCurrency)}
           </p>
           <p className="text-slate-600 py-[24px] text-base">Earned Value</p>
-        </div>
-
-        <div className="text-center p-4 rounded-lg bg-slate-50">
-          <p className="text-zinc-950 text-4xl font-normal">
-            {formatCurrency(billedRevenue, displayCurrency)}
-          </p>
-          <p className="text-slate-600 py-[24px] text-base">Billed Revenue</p>
         </div>
       </>
     );
