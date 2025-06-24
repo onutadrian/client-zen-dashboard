@@ -33,11 +33,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
         // Ignore errors
+        console.log('Error during signOut:', err);
       }
-      window.location.href = '/auth';
+      
+      // Don't redirect here - let the component handle navigation
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setIsAdmin(false);
+      
     } catch (error) {
       console.error('Error signing out:', error);
-      window.location.href = '/auth';
     }
   };
 
