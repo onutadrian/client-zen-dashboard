@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Clock, User, FileText, Link as LinkIcon, CheckCircle, Play } from 'lucide-react';
 import CaptureWorkedHoursModal from './CaptureWorkedHoursModal';
 import { Task } from '@/types/task';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TaskCardProps {
   task: Task;
@@ -14,6 +15,7 @@ interface TaskCardProps {
 
 const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
   const [showHoursModal, setShowHoursModal] = useState(false);
+  const { isAdmin } = useAuth();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -63,20 +65,22 @@ const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
                 </Badge>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              {task.status === 'pending' && (
-                <Button size="sm" variant="outline" onClick={handleStartTask}>
-                  <Play className="w-3 h-3 mr-1" />
-                  Start
-                </Button>
-              )}
-              {task.status === 'in-progress' && (
-                <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleCompleteTask}>
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Complete
-                </Button>
-              )}
-            </div>
+            {isAdmin && (
+              <div className="flex items-center space-x-2">
+                {task.status === 'pending' && (
+                  <Button size="sm" variant="outline" onClick={handleStartTask}>
+                    <Play className="w-3 h-3 mr-1" />
+                    Start
+                  </Button>
+                )}
+                {task.status === 'in-progress' && (
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleCompleteTask}>
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    Complete
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </CardHeader>
         

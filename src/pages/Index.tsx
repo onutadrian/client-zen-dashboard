@@ -12,6 +12,7 @@ import { useTasks } from '@/hooks/useTasks';
 import { useMilestones } from '@/hooks/useMilestones';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useCurrency } from '@/hooks/useCurrency';
+import { useAuth } from '@/hooks/useAuth';
 import { convertCurrency, formatCurrency } from '@/lib/currency';
 import { 
   startOfMonth, 
@@ -25,6 +26,7 @@ import {
 
 const Index = () => {
   const { displayCurrency } = useCurrency();
+  const { isAdmin } = useAuth();
   const [showClientModal, setShowClientModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = useState(false);
@@ -124,31 +126,35 @@ const Index = () => {
 
         <DashboardHeader />
 
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-slate-800">Dashboard Analytics</h2>
-          <PeriodFilter
-            selectedPeriod={selectedPeriod}
-            onPeriodChange={setSelectedPeriod}
-            customDateRange={customDateRange}
-            onCustomDateChange={setCustomDateRange}
-          />
-        </div>
+        {isAdmin && (
+          <>
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-slate-800">Dashboard Analytics</h2>
+              <PeriodFilter
+                selectedPeriod={selectedPeriod}
+                onPeriodChange={setSelectedPeriod}
+                customDateRange={customDateRange}
+                onCustomDateChange={setCustomDateRange}
+              />
+            </div>
 
-        <AnalyticsSection
-          key={`analytics-${displayCurrency}-${forceRefresh}-${selectedPeriod}`}
-          totalClients={analytics.totalClients}
-          activeClients={analytics.activeClients}
-          totalHours={analytics.totalHours}
-          totalRevenue={analytics.totalRevenue}
-          monthlySubscriptionCost={analytics.monthlySubscriptionCost}
-          totalPaidToDate={analytics.totalPaidToDate}
-          clients={clients}
-          displayCurrency={displayCurrency}
-          convertCurrency={convertCurrency}
-          formatCurrency={formatCurrency}
-          timeBreakdown={analytics.timeBreakdown}
-          revenueBreakdown={analytics.revenueBreakdown}
-        />
+            <AnalyticsSection
+              key={`analytics-${displayCurrency}-${forceRefresh}-${selectedPeriod}`}
+              totalClients={analytics.totalClients}
+              activeClients={analytics.activeClients}
+              totalHours={analytics.totalHours}
+              totalRevenue={analytics.totalRevenue}
+              monthlySubscriptionCost={analytics.monthlySubscriptionCost}
+              totalPaidToDate={analytics.totalPaidToDate}
+              clients={clients}
+              displayCurrency={displayCurrency}
+              convertCurrency={convertCurrency}
+              formatCurrency={formatCurrency}
+              timeBreakdown={analytics.timeBreakdown}
+              revenueBreakdown={analytics.revenueBreakdown}
+            />
+          </>
+        )}
 
         <DashboardTasksTimeline
           projects={projects}

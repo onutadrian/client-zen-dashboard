@@ -14,38 +14,17 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, Users, FolderOpen, CreditCard, X } from 'lucide-react';
+import { BarChart3, Users, FolderOpen, CreditCard, X, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LogoutButton from '@/components/LogoutButton';
 import { useCurrency } from '@/hooks/useCurrency';
-
-const menuItems = [
-  {
-    title: 'Dashboard',
-    url: '/',
-    icon: BarChart3,
-  },
-  {
-    title: 'Projects',
-    url: '/projects',
-    icon: FolderOpen,
-  },
-  {
-    title: 'Clients',
-    url: '/clients',
-    icon: Users,
-  },
-  {
-    title: 'Subscriptions',
-    url: '/subscriptions',
-    icon: CreditCard,
-  },
-];
+import { useAuth } from '@/hooks/useAuth';
 
 export function AppSidebar() {
   const location = useLocation();
   const { isMobile, setOpenMobile } = useSidebar();
   const { displayCurrency, updateCurrency } = useCurrency();
+  const { isAdmin } = useAuth();
 
   // Auto-close sidebar on navigation for mobile
   useEffect(() => {
@@ -53,6 +32,48 @@ export function AppSidebar() {
       setOpenMobile(false);
     }
   }, [location.pathname, isMobile, setOpenMobile]);
+
+  // Define menu items based on user role
+  const getMenuItems = () => {
+    const baseItems = [
+      {
+        title: 'Dashboard',
+        url: '/',
+        icon: BarChart3,
+        showFor: ['admin', 'standard'],
+      },
+      {
+        title: 'Projects',
+        url: '/projects',
+        icon: FolderOpen,
+        showFor: ['admin', 'standard'],
+      },
+      {
+        title: 'Clients',
+        url: '/clients',
+        icon: Users,
+        showFor: ['admin'],
+      },
+      {
+        title: 'Subscriptions',
+        url: '/subscriptions',
+        icon: CreditCard,
+        showFor: ['admin'],
+      },
+      {
+        title: 'Invite Manager',
+        url: '/invite-manager',
+        icon: UserPlus,
+        showFor: ['admin'],
+      },
+    ];
+
+    return baseItems.filter(item => 
+      item.showFor.includes(isAdmin ? 'admin' : 'standard')
+    );
+  };
+
+  const menuItems = getMenuItems();
 
   return (
     <Sidebar collapsible="icon">

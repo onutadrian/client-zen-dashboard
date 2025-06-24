@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Trash2, Edit, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import CaptureWorkedHoursModal from './CaptureWorkedHoursModal';
 import { Task } from '@/types/task';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Client {
   id: number;
@@ -48,6 +48,7 @@ const TaskTable = ({
 }: TaskTableProps) => {
   const [showHoursModal, setShowHoursModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const { isAdmin } = useAuth();
 
   const getProjectName = (projectId?: string) => {
     if (!projectId) return 'No Project';
@@ -94,7 +95,7 @@ const TaskTable = ({
               <TableHead>Project</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Hours Worked</TableHead>
-              <TableHead>Billed</TableHead>
+              {isAdmin && <TableHead>Billed</TableHead>}
               <TableHead>Created</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -125,6 +126,7 @@ const TaskTable = ({
                     <Select
                       value={task.status}
                       onValueChange={(value: Task['status']) => handleStatusChange(task, value)}
+                      disabled={!isAdmin}
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue />
@@ -161,35 +163,41 @@ const TaskTable = ({
                     )}
                   </div>
                 </TableCell>
-                <TableCell>
-                  <Badge 
-                    variant={isBilled(task) ? "default" : "secondary"}
-                    className={isBilled(task) ? "bg-green-100 text-green-800" : ""}
-                  >
-                    {isBilled(task) ? "Billed" : "Not Billed"}
-                  </Badge>
-                </TableCell>
+                {isAdmin && (
+                  <TableCell>
+                    <Badge 
+                      variant={isBilled(task) ? "default" : "secondary"}
+                      className={isBilled(task) ? "bg-green-100 text-green-800" : ""}
+                    >
+                      {isBilled(task) ? "Billed" : "Not Billed"}
+                    </Badge>
+                  </TableCell>
+                )}
                 <TableCell className="text-sm text-slate-600">
                   {new Date(task.createdDate).toLocaleDateString()}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEditTask(task)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDeleteTask(task.id)}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {isAdmin && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEditTask(task)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onDeleteTask(task.id)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
