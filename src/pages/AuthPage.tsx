@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Loader2, UserPlus, LogIn } from 'lucide-react';
 import { useInviteCodes } from '@/hooks/useInviteCodes';
 import { UserRole } from '@/types/auth';
+import { useNavigate } from 'react-router-dom';
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
@@ -23,13 +24,14 @@ const AuthPage = () => {
   const [inviteCodeRole, setInviteCodeRole] = useState<UserRole | null>(null);
   const { toast } = useToast();
   const { validateInviteCode } = useInviteCodes();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check if user is already logged in
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        window.location.href = '/';
+        navigate('/', { replace: true });
       }
     };
     checkAuth();
@@ -42,7 +44,7 @@ const AuthPage = () => {
       checkInviteCode(codeFromUrl);
       setActiveTab('sign-up');
     }
-  }, []);
+  }, [navigate]);
 
   const checkInviteCode = async (code: string) => {
     const result = await validateInviteCode(code);
@@ -123,7 +125,7 @@ const AuthPage = () => {
           title: "Success",
           description: "Signed in successfully!",
         });
-        window.location.href = '/';
+        navigate('/', { replace: true });
       }
     } catch (error: any) {
       console.error('Sign in error:', error);

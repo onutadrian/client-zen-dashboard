@@ -71,9 +71,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          const userProfile = await fetchUserProfile(session.user.id);
-          setProfile(userProfile);
-          setIsAdmin(userProfile?.role === 'admin');
+          try {
+            const userProfile = await fetchUserProfile(session.user.id);
+            setProfile(userProfile);
+            setIsAdmin(userProfile?.role === 'admin');
+          } catch (error) {
+            console.error('Error fetching profile:', error);
+            // Continue with default values
+            setProfile(null);
+            setIsAdmin(false);
+          }
         } else {
           setProfile(null);
           setIsAdmin(false);
@@ -84,19 +91,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        const userProfile = await fetchUserProfile(session.user.id);
-        setProfile(userProfile);
-        setIsAdmin(userProfile?.role === 'admin');
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          try {
+            const userProfile = await fetchUserProfile(session.user.id);
+            setProfile(userProfile);
+            setIsAdmin(userProfile?.role === 'admin');
+          } catch (error) {
+            console.error('Error fetching profile:', error);
+            // Continue with default values
+            setProfile(null);
+            setIsAdmin(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
-    });
+    };
 
+    checkSession();
+    
     return () => subscription.unsubscribe();
   }, []);
 
