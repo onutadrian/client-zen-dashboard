@@ -4,11 +4,13 @@ import { AuthProvider } from '@/hooks/useAuth';
 import { Toaster } from '@/components/ui/toaster';
 import { AppSidebar } from '@/components/AppSidebar';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import AdminRoute from '@/components/AdminRoute';
 import Index from '@/pages/Index';
 import ProjectsPage from '@/pages/ProjectsPage';
 import ProjectDetailsPage from '@/pages/ProjectDetailsPage';
 import ClientsPage from '@/pages/ClientsPage';
 import SubscriptionsPage from '@/pages/SubscriptionsPage';
+import InviteManagerPage from '@/pages/InviteManagerPage';
 import AuthPage from '@/pages/AuthPage';
 import NotFound from '@/pages/NotFound';
 import './App.css';
@@ -29,8 +31,21 @@ function App() {
                       <Route path="/" element={<Index />} />
                       <Route path="/projects" element={<ProjectsPage />} />
                       <Route path="/projects/:id" element={<ProjectDetailsPage />} />
-                      <Route path="/clients" element={<ClientsPage />} />
-                      <Route path="/subscriptions" element={<SubscriptionsPage />} />
+                      <Route path="/clients" element={
+                        <AdminRoute>
+                          <ClientsPage />
+                        </AdminRoute>
+                      } />
+                      <Route path="/subscriptions" element={
+                        <AdminRoute>
+                          <SubscriptionsPage />
+                        </AdminRoute>
+                      } />
+                      <Route path="/invite-manager" element={
+                        <AdminRoute>
+                          <InviteManagerPage />
+                        </AdminRoute>
+                      } />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </SidebarInset>
