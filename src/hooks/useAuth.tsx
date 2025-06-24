@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Error during signOut:', err);
       }
       
-      // Don't redirect here - let the component handle navigation
+      // Clear state
       setUser(null);
       setSession(null);
       setProfile(null);
