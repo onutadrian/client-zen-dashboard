@@ -222,12 +222,9 @@ const Index = () => {
     editTask(task.id, taskData);
   };
 
-  // Handle task table update - Create a wrapper that matches TaskTable's expected signature
-  const handleTaskTableUpdate = (taskId: number, updates: Partial<import('@/types/task').Task>) => {
-    // Extract status and actualHours from the updates object
-    if (updates.status) {
-      updateTask(taskId, updates.status, updates.actualHours);
-    }
+  // Handle task table update - TaskTable expects this signature: (taskId: number, status: Task['status'], actualHours?: number) => void
+  const handleTaskTableUpdate = (taskId: number, status: import('@/types/task').Task['status'], actualHours?: number) => {
+    updateTask(taskId, status, actualHours);
   };
 
   const handleTaskTableEdit = (task: any) => {
