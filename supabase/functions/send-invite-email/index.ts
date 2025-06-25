@@ -28,7 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
     const inviteUrl = `${appUrl || "http://localhost:5173"}/auth?invite=${token}`;
 
     const emailResponse = await resend.emails.send({
-      from: "Project Manager <onboarding@resend.dev>",
+      from: "Project Manager <noreply@furtuna.ro>",
       to: [email],
       subject: "You've been invited to join Project Manager",
       html: `
