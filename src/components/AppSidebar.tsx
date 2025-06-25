@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { Calendar, Users, BarChart3, Clock, FileText, CreditCard, Settings, Home, Briefcase, UserCheck } from "lucide-react";
+import { Link, useLocation } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -12,6 +14,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useAuth } from '@/hooks/useAuth';
+import LogoutButton from '@/components/LogoutButton';
 
 const items = [
   {
@@ -72,6 +75,7 @@ const items = [
 
 export default function AppSidebar() {
   const { profile } = useAuth();
+  const location = useLocation();
   const userRole = profile?.role || 'standard';
 
   const filteredItems = items.filter(item => item.roles.includes(userRole));
@@ -85,11 +89,11 @@ export default function AppSidebar() {
             <SidebarMenu>
               {filteredItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                    <Link to={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -97,6 +101,17 @@ export default function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <div className="p-4 space-y-3">
+          <div className="text-sm text-sidebar-foreground/70">
+            Signed in as: {profile?.email || 'Loading...'}
+          </div>
+          <div className="text-xs text-sidebar-foreground/50">
+            Role: {profile?.role || 'Loading...'}
+          </div>
+          <LogoutButton />
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }

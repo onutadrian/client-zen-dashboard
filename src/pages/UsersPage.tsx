@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,6 @@ import { useUsers } from '@/hooks/useUsers';
 import { useUserInvites } from '@/hooks/useUserInvites';
 import { useAuth } from '@/hooks/useAuth';
 import InviteUserModal from '@/components/InviteUserModal';
-import CreateInviteForOnut from '@/components/CreateInviteForOnut';
 import { format } from 'date-fns';
 
 const UsersPage = () => {
@@ -55,9 +53,6 @@ const UsersPage = () => {
             Invite User
           </Button>
         </div>
-
-        {/* Temporary component for testing - will be removed after testing */}
-        <CreateInviteForOnut />
 
         <Tabs defaultValue="users" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
