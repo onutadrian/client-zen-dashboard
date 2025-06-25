@@ -14,6 +14,7 @@ import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
 import { Loader2 } from 'lucide-react';
+import type { Task, Project, Milestone, Client } from '@/types';
 
 const Index = () => {
   const { isMobile } = useSidebar();
@@ -37,6 +38,44 @@ const Index = () => {
   const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks();
   const { milestones } = useMilestones();
   const { clients } = useClients();
+
+  // Create wrapper functions to match expected interfaces
+  const handleAddTask = (task: Omit<Task, 'id' | 'created_date'>) => {
+    // Convert to expected format for the hook
+    const taskData = {
+      title: task.title,
+      description: task.description,
+      clientId: task.client_id,
+      clientName: task.client_name,
+      projectId: task.project_id,
+      estimatedHours: task.estimated_hours,
+      startDate: task.start_date,
+      endDate: task.end_date
+    };
+    addTask(taskData);
+  };
+
+  const handleUpdateTask = (taskId: number, updates: Partial<Task>) => {
+    // Extract status from updates and call the hook with the expected signature
+    const status = updates.status || 'pending';
+    const workedHours = updates.worked_hours;
+    updateTask(taskId, status, workedHours);
+  };
+
+  const handleEditTask = (task: Task) => {
+    // Convert to expected format for the hook
+    const taskData = {
+      title: task.title,
+      description: task.description,
+      clientId: task.client_id,
+      clientName: task.client_name,
+      projectId: task.project_id,
+      estimatedHours: task.estimated_hours,
+      startDate: task.start_date,
+      endDate: task.end_date
+    };
+    editTask(task.id, taskData);
+  };
 
   if (authLoading) {
     return (
@@ -83,14 +122,14 @@ const Index = () => {
         )}
 
         <DashboardTasksTimeline
-          projects={projects}
-          tasks={tasks}
-          milestones={milestones}
-          clients={clients}
-          onAddTask={addTask}
-          onUpdateTask={updateTask}
+          projects={projects as Project[]}
+          tasks={tasks as Task[]}
+          milestones={milestones as Milestone[]}
+          clients={clients as Client[]}
+          onAddTask={handleAddTask}
+          onUpdateTask={handleUpdateTask}
           onDeleteTask={deleteTask}
-          onEditTask={editTask}
+          onEditTask={handleEditTask}
           hideFinancialColumns={!isAdmin}
         />
       </div>

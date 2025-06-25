@@ -18,7 +18,12 @@ export const useUsers = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setUsers(data || []);
+      // Type assertion to ensure role is properly typed
+      const typedUsers = (data || []).map(user => ({
+        ...user,
+        role: user.role as 'admin' | 'standard'
+      }));
+      setUsers(typedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({

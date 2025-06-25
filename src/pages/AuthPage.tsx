@@ -1,256 +1,134 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserInvites } from '@/hooks/useUserInvites';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Loader2, UserPlus, LogIn } from 'lucide-react';
-import { useInviteCodes } from '@/hooks/useInviteCodes';
+import { Navigate, useSearchParams } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { UserRole } from '@/types/auth';
-import { useNavigate } from 'react-router-dom';
 
 const AuthPage = () => {
+  const { user, loading } = useAuth();
+  const { validateInviteToken, markInviteAsUsed } = useUserInvites();
+  const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('sign-in');
-  const [inviteCode, setInviteCode] = useState('');
-  const [inviteCodeValid, setInviteCodeValid] = useState(false);
-  const [inviteCodeRole, setInviteCodeRole] = useState<UserRole | null>(null);
-  const { toast } = useToast();
-  const { validateInviteCode } = useInviteCodes();
-  const navigate = useNavigate();
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [inviteData, setInviteData] = useState<{ email: string; role: UserRole } | null>(null);
 
   useEffect(() => {
-    // Check if user is already logged in
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate('/', { replace: true });
-      }
-    };
-    checkAuth();
-
-    // Check for invite code in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const codeFromUrl = urlParams.get('invite_code');
-    if (codeFromUrl) {
-      setInviteCode(codeFromUrl);
-      checkInviteCode(codeFromUrl);
-      setActiveTab('sign-up');
+    const token = searchParams.get('token');
+    if (token) {
+      validateToken(token);
     }
-  }, [navigate]);
+  }, [searchParams]);
 
-  const checkInviteCode = async (code: string) => {
-    const result = await validateInviteCode(code);
-    setInviteCodeValid(result.valid);
-    setInviteCodeRole(result.role || null);
-    
-    if (!result.valid) {
+  const validateToken = async (token: string) => {
+    const invite = await validateInviteToken(token);
+    if (invite) {
+      setInviteData({ email: invite.email, role: invite.role });
+      setEmail(invite.email);
+      setIsSignUp(true);
       toast({
-        title: "Invalid Invite Code",
-        description: "This invite code is invalid or has already been used.",
-        variant: "destructive",
+        title: "Valid Invite",
+        description: `You've been invited to join as ${invite.role}`,
       });
     } else {
       toast({
-        title: "Valid Invite Code",
-        description: `You're invited to join as a ${result.role} user.`,
-      });
-    }
-  };
-
-  const cleanupAuthState = () => {
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
-  };
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (loading) return;
-
-    if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
+        title: "Invalid Invite",
+        description: "This invite link is invalid or has expired",
         variant: "destructive",
       });
-      return;
     }
+  };
 
-    setLoading(true);
-    
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+
     try {
-      cleanupAuthState();
-      
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          toast({
-            title: "Error",
-            description: "Invalid email or password",
-            variant: "destructive",
-          });
-        } else {
-          throw error;
-        }
-        return;
-      }
-
-      if (data.user) {
-        toast({
-          title: "Success",
-          description: "Signed in successfully!",
+      if (isSignUp) {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: inviteData ? { role: inviteData.role } : undefined
+          }
         });
-        navigate('/', { replace: true });
-      }
-    } catch (error: any) {
-      console.error('Sign in error:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to sign in",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (loading) return;
+        if (error) throw error;
 
-    // Validate form
-    if (!email || !password || !confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // For sign-up, invite code is required
-    if (!inviteCode) {
-      toast({
-        title: "Error",
-        description: "Invite code is required to sign up",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate invite code
-    const inviteResult = await validateInviteCode(inviteCode);
-    if (!inviteResult.valid) {
-      toast({
-        title: "Error",
-        description: "Invalid or expired invite code",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-    
-    try {
-      cleanupAuthState();
-      
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
-
-      // Sign up with invite code in metadata
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            invite_code: inviteCode
+        if (data.user && inviteData) {
+          const token = searchParams.get('token');
+          if (token) {
+            await markInviteAsUsed(token, data.user.id);
           }
         }
-      });
 
-      if (error) throw error;
-
-      if (data.user) {
         toast({
-          title: "Success",
-          description: "Account created successfully! You can now sign in.",
+          title: "Success!",
+          description: "Please check your email to confirm your account.",
         });
-        setActiveTab('sign-in');
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
       }
     } catch (error: any) {
-      console.error('Sign up error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to create account",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setAuthLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: '#F3F3F2' }}>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Welcome</CardTitle>
-          <CardDescription className="text-center">
-            Sign in to your account or create a new one
-          </CardDescription>
+          <CardTitle className="text-center">
+            {inviteData ? 'Complete Your Registration' : 'Welcome'}
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="sign-in">
-                <LogIn className="w-4 h-4 mr-2" />
-                Sign In
-              </TabsTrigger>
-              <TabsTrigger value="sign-up">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Sign Up
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="sign-in">
-              <form onSubmit={handleSignIn} className="space-y-4">
+          <Tabs value={isSignUp ? 'signup' : 'signin'} onValueChange={(value) => setIsSignUp(value === 'signup')}>
+            {!inviteData && (
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Sign In</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              </TabsList>
+            )}
+
+            <TabsContent value="signin">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -259,142 +137,54 @@ const AuthPage = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    disabled={loading}
                   />
                 </div>
                 <div>
                   <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                      className="pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                      disabled={loading}
-                    >
-                      {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                    </Button>
-                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Signing In...
-                    </>
-                  ) : (
-                    'Sign In'
-                  )}
+                <Button type="submit" className="w-full" disabled={authLoading}>
+                  {authLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sign In'}
                 </Button>
               </form>
             </TabsContent>
-            
-            <TabsContent value="sign-up">
-              <form onSubmit={handleSignUp} className="space-y-4">
+
+            <TabsContent value="signup">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="invite-code">Invite Code</Label>
-                  <div className="flex space-x-2">
-                    <Input
-                      id="invite-code"
-                      value={inviteCode}
-                      onChange={(e) => setInviteCode(e.target.value)}
-                      required
-                      disabled={loading}
-                      className={inviteCodeValid ? "border-green-500" : ""}
-                    />
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => checkInviteCode(inviteCode)}
-                      disabled={loading || !inviteCode}
-                    >
-                      Verify
-                    </Button>
-                  </div>
-                  {inviteCodeValid && inviteCodeRole && (
-                    <p className="text-sm text-green-600 mt-1">
-                      Valid invite code for {inviteCodeRole} role
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="full-name">Full Name (Optional)</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
-                    id="full-name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
+                    id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    disabled={loading}
+                    disabled={!!inviteData}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="signup-password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="signup-password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                      className="pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                      disabled={loading}
-                    >
-                      {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                    </Button>
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Label htmlFor="password">Password</Label>
                   <Input
-                    id="confirm-password"
+                    id="password"
                     type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
-                    disabled={loading}
                   />
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={loading || !inviteCodeValid}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creating Account...
-                    </>
-                  ) : (
-                    'Create Account'
-                  )}
+                {inviteData && (
+                  <div className="text-sm text-gray-600">
+                    You're signing up as: <strong>{inviteData.role}</strong>
+                  </div>
+                )}
+                <Button type="submit" className="w-full" disabled={authLoading}>
+                  {authLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sign Up'}
                 </Button>
               </form>
             </TabsContent>

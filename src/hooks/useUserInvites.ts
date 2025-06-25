@@ -18,7 +18,12 @@ export const useUserInvites = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setInvites(data || []);
+      // Type assertion to ensure role is properly typed
+      const typedInvites = (data || []).map(invite => ({
+        ...invite,
+        role: invite.role as UserRole
+      }));
+      setInvites(typedInvites);
     } catch (error) {
       console.error('Error fetching invites:', error);
       toast({
@@ -102,7 +107,7 @@ export const useUserInvites = () => {
         .single();
 
       if (error) return null;
-      return data;
+      return data ? { ...data, role: data.role as UserRole } : null;
     } catch (error) {
       console.error('Error validating invite token:', error);
       return null;
