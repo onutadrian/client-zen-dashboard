@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
@@ -33,12 +34,12 @@ const ProjectDetailsPage = () => {
   const { milestones, addMilestone, updateMilestone, deleteMilestone } = useMilestones();
 
   const project = projects.find(p => p.id === id);
-  const client = clients.find(c => c.id === project?.clientId);
-  const projectTasks = tasks.filter(task => task.projectId === id);
-  const projectMilestones = milestones.filter(milestone => milestone.projectId === id);
+  const client = clients.find(c => c.id === project?.client_id);
+  const projectTasks = tasks.filter(task => task.project_id === id);
+  const projectMilestones = milestones.filter(milestone => milestone.project_id === id);
 
   // Hide budget tracking for fixed price projects
-  const showBudgetTracking = project?.pricingType !== 'fixed';
+  const showBudgetTracking = project?.pricing_type !== 'fixed';
 
   // Listen for currency changes to force refresh
   useEffect(() => {
@@ -172,7 +173,7 @@ const ProjectDetailsPage = () => {
               <CardContent className="px-0 py-0">
                 <ProjectActivitySidebar 
                   project={project}
-                  client={client}
+                  onClose={() => {}}
                 />
               </CardContent>
             </Card>

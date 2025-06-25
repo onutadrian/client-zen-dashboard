@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
+import { formatCurrency } from '@/lib/currency';
 
 export const useAnalytics = () => {
   const { user } = useAuth();
-  const { displayCurrency, formatCurrency } = useCurrency();
+  const { displayCurrency } = useCurrency();
   const [analytics, setAnalytics] = useState({
     totalClients: 0,
     activeClients: 0,

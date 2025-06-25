@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Sheet,
@@ -6,9 +7,11 @@ import {
   SheetTitle,
   SheetClose,
 } from "@/components/ui/sheet"
-import { Project } from '@/integrations/supabase/types';
+import { Tables } from '@/integrations/supabase/types';
 import { X } from 'lucide-react';
 import { format } from 'date-fns';
+
+type Project = Tables<'projects'>;
 
 interface ProjectActivitySidebarProps {
   project: Project;

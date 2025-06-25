@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -26,7 +27,7 @@ const SubscriptionsPage = () => {
   const {
     clients
   } = useClients();
-  const analytics = useAnalytics(clients, subscriptions, displayCurrency);
+  const analytics = useAnalytics();
   const {
     isMobile
   } = useSidebar();
