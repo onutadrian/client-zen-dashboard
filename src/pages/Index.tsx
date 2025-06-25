@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,11 +10,10 @@ import { useMilestones } from '@/hooks/useMilestones';
 import { useClients } from '@/hooks/useClients';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
-import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
 import TaskTable from '@/components/TaskTable';
+import ProjectTimeline from '@/components/ProjectTimeline';
 import AddTaskModal from '@/components/AddTaskModal';
 import { Loader2 } from 'lucide-react';
-import type { Task as MainTask, Project as MainProject, Milestone as MainMilestone, Client as MainClient } from '@/types';
 import type { Task as HookTask } from '@/types/task';
 
 const Index = () => {
@@ -61,103 +61,6 @@ const Index = () => {
     startDate: task.startDate || '',
     endDate: task.endDate || ''
   });
-
-  // Transform HookTask to MainTask for DashboardTasksTimeline
-  const transformTaskForTimeline = (task: HookTask): MainTask => ({
-    id: task.id,
-    title: task.title,
-    description: task.description || '',
-    status: task.status,
-    client_id: task.clientId,
-    client_name: task.clientName,
-    project_id: task.projectId || '',
-    user_id: '',
-    estimated_hours: task.estimatedHours || 0,
-    worked_hours: task.workedHours || 0,
-    actual_hours: task.actualHours || 0,
-    start_date: task.startDate || '',
-    end_date: task.endDate || '',
-    completed_date: task.completedDate || '',
-    created_date: task.createdDate,
-    notes: task.notes || '',
-    assets: task.assets || []
-  });
-
-  // Transform hook Project to MainProject for DashboardTasksTimeline
-  const transformProjectForDashboard = (project: any): MainProject => {
-    // Ensure status is one of the allowed values
-    let status: 'active' | 'completed' | 'archived' = 'active';
-    if (project.status === 'completed' || project.status === 'archived') {
-      status = project.status;
-    }
-
-    return {
-      id: project.id,
-      name: project.name,
-      client_id: project.clientId,
-      user_id: '',
-      status: status,
-      pricing_type: project.pricingType,
-      fixed_price: project.fixedPrice,
-      hourly_rate: project.hourlyRate,
-      daily_rate: project.dailyRate,
-      currency: project.currency,
-      estimated_hours: project.estimatedHours,
-      start_date: project.startDate,
-      estimated_end_date: project.estimatedEndDate,
-      end_date: project.endDate,
-      created_at: '',
-      updated_at: '',
-      archived: project.archived,
-      team: project.team,
-      documents: project.documents,
-      notes: project.notes,
-      invoices: project.invoices
-    };
-  };
-
-  // Transform hook Milestone to MainMilestone for DashboardTasksTimeline
-  const transformMilestoneForDashboard = (milestone: any): MainMilestone => ({
-    id: milestone.id,
-    title: milestone.title,
-    description: milestone.description || '',
-    project_id: milestone.projectId,
-    user_id: '',
-    status: milestone.status,
-    target_date: milestone.targetDate,
-    amount: milestone.amount,
-    currency: milestone.currency || 'USD',
-    estimated_hours: milestone.estimatedHours,
-    completion_percentage: milestone.completionPercentage,
-    created_at: milestone.createdAt,
-    updated_at: milestone.updatedAt
-  });
-
-  // Transform hook Client to MainClient for DashboardTasksTimeline
-  const transformClientForDashboard = (client: any): MainClient => {
-    // Ensure status is one of the allowed values
-    let status: 'active' | 'inactive' = 'active';
-    if (client.status === 'inactive') {
-      status = 'inactive';
-    }
-
-    return {
-      id: client.id,
-      name: client.name,
-      user_id: '',
-      status: status,
-      price_type: client.priceType,
-      price: client.price,
-      currency: client.currency,
-      created_at: '',
-      updated_at: '',
-      people: client.people,
-      documents: client.documents,
-      invoices: client.invoices,
-      links: client.links,
-      notes: client.notes
-    };
-  };
 
   // Create wrapper functions to match expected interfaces
   const handleAddTask = (task: Omit<HookTask, 'id' | 'createdDate'>) => {
@@ -236,29 +139,6 @@ const Index = () => {
     editTask(transformedTask.id, taskData);
   };
 
-  // Create a wrapper for DashboardTasksTimeline that matches its expected signature
-  const handleDashboardAddTask = (task: Omit<MainTask, 'id' | 'created_date'>) => {
-    const hookTaskData = {
-      title: task.title,
-      description: task.description || '',
-      clientId: task.client_id,
-      clientName: task.client_name,
-      projectId: task.project_id,
-      estimatedHours: task.estimated_hours || 0,
-      startDate: task.start_date || '',
-      endDate: task.end_date || '',
-      notes: task.notes || '',
-      assets: task.assets || []
-    };
-    addTask(hookTaskData);
-  };
-
-  const handleDashboardUpdateTask = (taskId: number, updates: Partial<MainTask>) => {
-    if (updates.status) {
-      updateTask(taskId, updates.status, updates.actual_hours);
-    }
-  };
-
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F3F3F2' }}>
@@ -303,58 +183,103 @@ const Index = () => {
           />
         )}
 
-        {/* Timeline view with Add Task button - shown for ALL users */}
-        <DashboardTasksTimeline
-          projects={projects.map(transformProjectForDashboard)}
-          tasks={tasks.map(transformTaskForTimeline)}
-          milestones={milestones.map(transformMilestoneForDashboard)}
-          clients={clients.map(transformClientForDashboard)}
-          onAddTask={handleDashboardAddTask}
-          onUpdateTask={handleDashboardUpdateTask}
+        {/* Task Management Table with Add Task button */}
+        <TaskTable
+          tasks={tasks.map(transformTaskForTaskTable)}
+          clients={clients.map(client => ({
+            id: client.id,
+            name: client.name,
+            priceType: client.priceType || 'hour',
+            hourEntries: []
+          }))}
+          projects={projects.map(project => ({
+            id: project.id,
+            name: project.name,
+            clientId: project.clientId
+          }))}
+          onTaskClick={(task) => setSelectedTask({
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            status: task.status,
+            clientId: task.clientId,
+            clientName: task.clientName,
+            projectId: task.projectId || '',
+            estimatedHours: task.estimatedHours,
+            workedHours: task.workedHours,
+            actualHours: task.actualHours,
+            startDate: task.startDate,
+            endDate: task.endDate,
+            completedDate: task.completedDate,
+            createdDate: task.createdDate,
+            notes: task.notes,
+            assets: task.assets
+          })}
+          onUpdateTask={handleUpdateTask}
           onDeleteTask={deleteTask}
           onEditTask={handleEditTask}
           onAddTaskClick={() => setShowAddTaskModal(true)}
-          hideFinancialColumns={!isAdmin}
         />
 
-        {/* Admin-only detailed task management table */}
-        {isAdmin && (
-          <TaskTable
-            tasks={tasks.map(transformTaskForTaskTable)}
-            clients={clients.map(client => ({
-              id: client.id,
-              name: client.name,
-              priceType: client.priceType || 'hour',
-              hourEntries: []
-            }))}
-            projects={projects.map(project => ({
-              id: project.id,
-              name: project.name,
-              clientId: project.clientId
-            }))}
-            onTaskClick={(task) => setSelectedTask({
-              id: task.id,
-              title: task.title,
-              description: task.description,
-              status: task.status,
-              clientId: task.clientId,
-              clientName: task.clientName,
-              projectId: task.projectId || '',
-              estimatedHours: task.estimatedHours,
-              workedHours: task.workedHours,
-              actualHours: task.actualHours,
-              startDate: task.startDate,
-              endDate: task.endDate,
-              completedDate: task.completedDate,
-              createdDate: task.createdDate,
-              notes: task.notes,
-              assets: task.assets
-            })}
-            onUpdateTask={handleUpdateTask}
-            onDeleteTask={deleteTask}
-            onEditTask={handleEditTask}
-          />
-        )}
+        {/* Gantt Chart Timeline View */}
+        <ProjectTimeline
+          projects={projects.map(project => ({
+            id: project.id,
+            name: project.name,
+            clientId: project.clientId,
+            startDate: project.startDate,
+            estimatedEndDate: project.estimatedEndDate,
+            endDate: project.endDate,
+            status: project.status,
+            notes: project.notes,
+            documents: project.documents,
+            team: project.team,
+            archived: project.archived,
+            pricingType: project.pricingType,
+            fixedPrice: project.fixedPrice,
+            hourlyRate: project.hourlyRate,
+            dailyRate: project.dailyRate,
+            estimatedHours: project.estimatedHours,
+            currency: project.currency,
+            invoices: project.invoices
+          }))}
+          tasks={tasks.map(task => ({
+            id: task.id,
+            title: task.title,
+            description: task.description || '',
+            status: task.status,
+            projectId: task.projectId || '',
+            clientId: task.clientId,
+            clientName: task.clientName,
+            estimatedHours: task.estimatedHours,
+            actualHours: task.actualHours,
+            workedHours: task.workedHours,
+            startDate: task.startDate,
+            endDate: task.endDate,
+            completedDate: task.completedDate,
+            createdDate: task.createdDate,
+            notes: task.notes,
+            assets: task.assets
+          }))}
+          milestones={milestones.map(milestone => ({
+            id: milestone.id,
+            title: milestone.title,
+            description: milestone.description || '',
+            projectId: milestone.projectId,
+            status: milestone.status,
+            targetDate: milestone.targetDate,
+            amount: milestone.amount,
+            currency: milestone.currency || 'USD',
+            estimatedHours: milestone.estimatedHours,
+            completionPercentage: milestone.completionPercentage,
+            createdAt: milestone.createdAt,
+            updatedAt: milestone.updatedAt
+          }))}
+          clients={clients.map(client => ({
+            id: client.id,
+            name: client.name
+          }))}
+        />
 
         {/* Add Task Modal */}
         <AddTaskModal
