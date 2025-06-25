@@ -4,6 +4,7 @@ import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdminCheck } from '@/hooks/useAdminCheck';
 import { useCurrency } from '@/hooks/useCurrency';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import MainContentGrid from '@/components/MainContentGrid';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
@@ -15,12 +16,7 @@ const Index = () => {
   const { loading: authLoading, profile } = useAuth();
   const { isCheckingAdmin, needsAdminSetup, isAdmin } = useAdminCheck();
   const { displayCurrency } = useCurrency();
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  // Force refresh when currency changes
-  useEffect(() => {
-    setRefreshKey(prev => prev + 1);
-  }, [displayCurrency]);
+  const analytics = useAnalytics();
 
   const handleRefresh = () => {
     window.location.reload();
@@ -57,9 +53,33 @@ const Index = () => {
 
         <DashboardHeader />
         
-        <AnalyticsSection key={refreshKey} />
+        <AnalyticsSection 
+          totalClients={analytics.totalClients}
+          activeClients={analytics.activeClients}
+          totalHours={analytics.totalHours}
+          totalRevenue={analytics.totalRevenue}
+          monthlySubscriptionCost={analytics.monthlySubscriptionCost}
+          totalPaidToDate={analytics.totalPaidToDate}
+          clients={analytics.clients}
+          displayCurrency={analytics.displayCurrency}
+          formatCurrency={analytics.formatCurrency}
+          timeBreakdown={analytics.timeBreakdown}
+          revenueBreakdown={analytics.revenueBreakdown}
+        />
         
-        <MainContentGrid />
+        <MainContentGrid 
+          clients={analytics.clients}
+          subscriptions={[]}
+          analytics={analytics}
+          displayCurrency={analytics.displayCurrency}
+          formatCurrency={analytics.formatCurrency}
+          totalClients={analytics.totalClients}
+          activeClients={analytics.activeClients}
+          totalHours={analytics.totalHours}
+          totalRevenue={analytics.totalRevenue}
+          monthlySubscriptionCost={analytics.monthlySubscriptionCost}
+          totalPaidToDate={analytics.totalPaidToDate}
+        />
       </div>
     </div>
   );
