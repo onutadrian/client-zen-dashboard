@@ -66,20 +66,6 @@ const Index = () => {
           timeBreakdown={analytics.timeBreakdown}
           revenueBreakdown={analytics.revenueBreakdown}
         />
-        
-        <MainContentGrid 
-          clients={analytics.clients}
-          subscriptions={[]}
-          analytics={analytics}
-          displayCurrency={analytics.displayCurrency}
-          formatCurrency={analytics.formatCurrency}
-          totalClients={analytics.totalClients}
-          activeClients={analytics.activeClients}
-          totalHours={analytics.totalHours}
-          totalRevenue={analytics.totalRevenue}
-          monthlySubscriptionCost={analytics.monthlySubscriptionCost}
-          totalPaidToDate={analytics.totalPaidToDate}
-        />
       </div>
     </div>
   );

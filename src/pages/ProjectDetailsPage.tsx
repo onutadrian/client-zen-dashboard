@@ -18,6 +18,10 @@ import { useTasks } from '@/hooks/useTasks';
 import { useMilestones } from '@/hooks/useMilestones';
 import { useHourEntries } from '@/hooks/useHourEntries';
 import { useCurrency } from '@/hooks/useCurrency';
+import { supabase } from '@/integrations/supabase/client';
+import { Tables } from '@/integrations/supabase/types';
+
+type SupabaseProject = Tables<'projects'>;
 
 const ProjectDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +29,7 @@ const ProjectDetailsPage = () => {
   const { isMobile } = useSidebar();
   const [activeTab, setActiveTab] = useState('overview');
   const [forceRefresh, setForceRefresh] = useState(0);
+  const [supabaseProject, setSupabaseProject] = useState<SupabaseProject | null>(null);
   const { displayCurrency } = useCurrency();
 
   const { projects, updateProject, archiveProject, deleteProject } = useProjects();
@@ -34,12 +39,31 @@ const ProjectDetailsPage = () => {
   const { milestones, addMilestone, updateMilestone, deleteMilestone } = useMilestones();
 
   const project = projects.find(p => p.id === id);
-  const client = clients.find(c => c.id === project?.client_id);
-  const projectTasks = tasks.filter(task => task.project_id === id);
-  const projectMilestones = milestones.filter(milestone => milestone.project_id === id);
+  const client = clients.find(c => c.id === project?.clientId);
+  const projectTasks = tasks.filter(task => task.projectId === id);
+  const projectMilestones = milestones.filter(milestone => milestone.projectId === id);
+
+  // Fetch Supabase project for activity sidebar
+  useEffect(() => {
+    const fetchSupabaseProject = async () => {
+      if (!id) return;
+      
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (!error && data) {
+        setSupabaseProject(data);
+      }
+    };
+
+    fetchSupabaseProject();
+  }, [id]);
 
   // Hide budget tracking for fixed price projects
-  const showBudgetTracking = project?.pricing_type !== 'fixed';
+  const showBudgetTracking = project?.pricingType !== 'fixed';
 
   // Listen for currency changes to force refresh
   useEffect(() => {
@@ -171,10 +195,12 @@ const ProjectDetailsPage = () => {
                 <CardTitle className="text-lg">Recent Activity</CardTitle>
               </CardHeader>
               <CardContent className="px-0 py-0">
-                <ProjectActivitySidebar 
-                  project={project}
-                  onClose={() => {}}
-                />
+                {supabaseProject && (
+                  <ProjectActivitySidebar 
+                    project={supabaseProject}
+                    onClose={() => {}}
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
