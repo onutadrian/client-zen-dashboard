@@ -85,29 +85,37 @@ const Index = () => {
   });
 
   // Transform hook Project to MainProject for DashboardTasksTimeline
-  const transformProjectForDashboard = (project: any): MainProject => ({
-    id: project.id,
-    name: project.name,
-    client_id: project.clientId,
-    user_id: '',
-    status: project.status,
-    pricing_type: project.pricingType,
-    fixed_price: project.fixedPrice,
-    hourly_rate: project.hourlyRate,
-    daily_rate: project.dailyRate,
-    currency: project.currency,
-    estimated_hours: project.estimatedHours,
-    start_date: project.startDate,
-    estimated_end_date: project.estimatedEndDate,
-    end_date: project.endDate,
-    created_at: '',
-    updated_at: '',
-    archived: project.archived,
-    team: project.team,
-    documents: project.documents,
-    notes: project.notes,
-    invoices: project.invoices
-  });
+  const transformProjectForDashboard = (project: any): MainProject => {
+    // Ensure status is one of the allowed values
+    let status: 'active' | 'completed' | 'archived' = 'active';
+    if (project.status === 'completed' || project.status === 'archived') {
+      status = project.status;
+    }
+
+    return {
+      id: project.id,
+      name: project.name,
+      client_id: project.clientId,
+      user_id: '',
+      status: status,
+      pricing_type: project.pricingType,
+      fixed_price: project.fixedPrice,
+      hourly_rate: project.hourlyRate,
+      daily_rate: project.dailyRate,
+      currency: project.currency,
+      estimated_hours: project.estimatedHours,
+      start_date: project.startDate,
+      estimated_end_date: project.estimatedEndDate,
+      end_date: project.endDate,
+      created_at: '',
+      updated_at: '',
+      archived: project.archived,
+      team: project.team,
+      documents: project.documents,
+      notes: project.notes,
+      invoices: project.invoices
+    };
+  };
 
   // Transform hook Milestone to MainMilestone for DashboardTasksTimeline
   const transformMilestoneForDashboard = (milestone: any): MainMilestone => ({
@@ -127,22 +135,30 @@ const Index = () => {
   });
 
   // Transform hook Client to MainClient for DashboardTasksTimeline
-  const transformClientForDashboard = (client: any): MainClient => ({
-    id: client.id,
-    name: client.name,
-    user_id: '',
-    status: client.status,
-    price_type: client.priceType,
-    price: client.price,
-    currency: client.currency,
-    created_at: '',
-    updated_at: '',
-    people: client.people,
-    documents: client.documents,
-    invoices: client.invoices,
-    links: client.links,
-    notes: client.notes
-  });
+  const transformClientForDashboard = (client: any): MainClient => {
+    // Ensure status is one of the allowed values
+    let status: 'active' | 'inactive' = 'active';
+    if (client.status === 'inactive') {
+      status = 'inactive';
+    }
+
+    return {
+      id: client.id,
+      name: client.name,
+      user_id: '',
+      status: status,
+      price_type: client.priceType,
+      price: client.price,
+      currency: client.currency,
+      created_at: '',
+      updated_at: '',
+      people: client.people,
+      documents: client.documents,
+      invoices: client.invoices,
+      links: client.links,
+      notes: client.notes
+    };
+  };
 
   // Create wrapper functions to match expected interfaces
   const handleAddTask = (task: Omit<HookTask, 'id' | 'createdDate'>) => {
@@ -328,61 +344,10 @@ const Index = () => {
         ) : (
           /* Standard User Dashboard - Simplified timeline view */
           <DashboardTasksTimeline
-            projects={projects.map(project => ({
-              id: project.id,
-              name: project.name,
-              client_id: project.clientId,
-              user_id: '',
-              status: project.status,
-              pricing_type: project.pricingType,
-              fixed_price: project.fixedPrice,
-              hourly_rate: project.hourlyRate,
-              daily_rate: project.dailyRate,
-              currency: project.currency,
-              estimated_hours: project.estimatedHours,
-              start_date: project.startDate,
-              estimated_end_date: project.estimatedEndDate,
-              end_date: project.endDate,
-              created_at: '',
-              updated_at: '',
-              archived: project.archived,
-              team: project.team,
-              documents: project.documents,
-              notes: project.notes,
-              invoices: project.invoices
-            }))}
+            projects={projects.map(transformProjectForDashboard)}
             tasks={tasks.map(transformTaskForTimeline)}
-            milestones={milestones.map(milestone => ({
-              id: milestone.id,
-              title: milestone.title,
-              description: milestone.description || '',
-              project_id: milestone.projectId,
-              user_id: '',
-              status: milestone.status,
-              target_date: milestone.targetDate,
-              amount: milestone.amount,
-              currency: milestone.currency || 'USD',
-              estimated_hours: milestone.estimatedHours,
-              completion_percentage: milestone.completionPercentage,
-              created_at: milestone.createdAt,
-              updated_at: milestone.updatedAt
-            }))}
-            clients={clients.map(client => ({
-              id: client.id,
-              name: client.name,
-              user_id: '',
-              status: client.status,
-              price_type: client.priceType,
-              price: client.price,
-              currency: client.currency,
-              created_at: '',
-              updated_at: '',
-              people: client.people,
-              documents: client.documents,
-              invoices: client.invoices,
-              links: client.links,
-              notes: client.notes
-            }))}
+            milestones={milestones.map(transformMilestoneForDashboard)}
+            clients={clients.map(transformClientForDashboard)}
             onAddTask={handleDashboardAddTask}
             onUpdateTask={handleDashboardUpdateTask}
             onDeleteTask={deleteTask}
