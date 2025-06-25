@@ -4,8 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
 import { formatCurrency } from '@/lib/currency';
+import { DateRange } from '@/hooks/usePeriodFilter';
 
-export const useAnalytics = () => {
+interface AnalyticsParams {
+  dateRange?: DateRange;
+}
+
+export const useAnalytics = (params?: AnalyticsParams) => {
   const { user } = useAuth();
   const { displayCurrency } = useCurrency();
   const [analytics, setAnalytics] = useState({
@@ -28,7 +33,7 @@ export const useAnalytics = () => {
       return;
     }
 
-    console.log('Calculating analytics for user:', user.email);
+    console.log('Calculating analytics for user:', user.email, 'with date range:', params?.dateRange);
     setLoading(true);
 
     try {
@@ -56,11 +61,18 @@ export const useAnalytics = () => {
       }
       console.log('Projects fetched:', projects?.length || 0);
 
-      // Fetch hour entries
+      // Fetch hour entries with date filtering
       console.log('Fetching hour entries...');
-      const { data: hourEntries, error: hoursError } = await supabase
-        .from('hour_entries')
-        .select('*');
+      let hourEntriesQuery = supabase.from('hour_entries').select('*');
+      
+      if (params?.dateRange?.from) {
+        hourEntriesQuery = hourEntriesQuery.gte('date', params.dateRange.from.toISOString().split('T')[0]);
+      }
+      if (params?.dateRange?.to) {
+        hourEntriesQuery = hourEntriesQuery.lte('date', params.dateRange.to.toISOString().split('T')[0]);
+      }
+
+      const { data: hourEntries, error: hoursError } = await hourEntriesQuery;
 
       if (hoursError) {
         console.error('Error fetching hour entries:', hoursError);
@@ -68,11 +80,18 @@ export const useAnalytics = () => {
       }
       console.log('Hour entries fetched:', hourEntries?.length || 0);
 
-      // Fetch subscriptions
+      // Fetch subscriptions with date filtering
       console.log('Fetching subscriptions...');
-      const { data: subscriptions, error: subscriptionsError } = await supabase
-        .from('subscriptions')
-        .select('*');
+      let subscriptionsQuery = supabase.from('subscriptions').select('*');
+      
+      if (params?.dateRange?.from) {
+        subscriptionsQuery = subscriptionsQuery.gte('created_at', params.dateRange.from.toISOString());
+      }
+      if (params?.dateRange?.to) {
+        subscriptionsQuery = subscriptionsQuery.lte('created_at', params.dateRange.to.toISOString());
+      }
+
+      const { data: subscriptions, error: subscriptionsError } = await subscriptionsQuery;
 
       if (subscriptionsError) {
         console.error('Error fetching subscriptions:', subscriptionsError);
@@ -180,10 +199,10 @@ export const useAnalytics = () => {
 
   useEffect(() => {
     if (user) {
-      console.log('User changed, recalculating analytics');
+      console.log('User or date range changed, recalculating analytics');
       calculateAnalytics();
     }
-  }, [user, displayCurrency]);
+  }, [user, displayCurrency, params?.dateRange?.from, params?.dateRange?.to]);
 
   return {
     ...analytics,

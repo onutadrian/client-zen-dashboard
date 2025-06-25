@@ -1,9 +1,29 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
+import PeriodFilter, { PeriodOption } from '@/components/PeriodFilter';
+
+interface AnalyticsSectionProps {
+  totalClients: number;
+  activeClients: number;
+  totalHours: number;
+  totalRevenue: number;
+  monthlySubscriptionCost: number;
+  totalPaidToDate: number;
+  clients: any[];
+  displayCurrency: string;
+  formatCurrency: (amount: number, currency: string) => string;
+  timeBreakdown?: any[];
+  revenueBreakdown?: any[];
+  selectedPeriod: PeriodOption;
+  onPeriodChange: (period: PeriodOption) => void;
+  customDateRange: { from: Date | undefined; to: Date | undefined };
+  onCustomDateChange: (range: { from: Date | undefined; to: Date | undefined }) => void;
+}
 
 const AnalyticsSection = ({
   totalClients,
@@ -16,8 +36,12 @@ const AnalyticsSection = ({
   displayCurrency,
   formatCurrency,
   timeBreakdown = [],
-  revenueBreakdown = []
-}) => {
+  revenueBreakdown = [],
+  selectedPeriod,
+  onPeriodChange,
+  customDateRange,
+  onCustomDateChange
+}: AnalyticsSectionProps) => {
   const { convert } = useCurrency();
   
   // Format numbers: remove decimals and convert 1000+ to K format
@@ -43,22 +67,20 @@ const AnalyticsSection = ({
     return rounded.toString();
   };
 
-  // Get original formatted value for tooltip
   const getOriginalValue = (value, isCurrency = false) => {
     if (isCurrency) {
-      return value; // Already formatted currency string
+      return value;
     }
     const numValue = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : value;
     return Math.round(numValue).toString();
   };
 
-  // Mock trend data for 30-day comparison (in a real app, this would come from historical data)
   const getTrendData = (metric: string) => {
     const trends = {
       'Total Clients': { change: 15, isIncrease: true },
       'Total Time': { change: 23, isIncrease: true },
       'Total Revenue': { change: 8, isIncrease: true },
-      'Monthly Costs': { change: 12, isIncrease: false }, // decrease is good for costs
+      'Monthly Costs': { change: 12, isIncrease: false },
       'Total Paid to Date': { change: 18, isIncrease: true },
       'Net Profit': { change: 18, isIncrease: true }
     };
@@ -69,7 +91,6 @@ const AnalyticsSection = ({
   const inactiveClients = totalClients - activeClients;
   const pendingClients = clients.filter(c => c.status === 'pending').length;
 
-  // Get client status rows with proper formatting
   const getClientStatusRows = () => {
     const rows = [];
     if (activeClients > 0) {
@@ -142,104 +163,118 @@ const AnalyticsSection = ({
   ];
 
   return (
-    <TooltipProvider>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-        {stats.map((stat, index) => {
-          const trend = getTrendData(stat.title);
-          const TrendIcon = trend.isIncrease ? TrendingUp : TrendingDown;
-          const formattedValue = formatMetric(stat.value, stat.isCurrency, displayCurrency);
-          const needsTooltip = typeof stat.value === 'number' ? stat.value >= 1000 : 
-            (typeof stat.value === 'string' && parseFloat(stat.value.replace(/[^0-9.-]/g, '')) >= 1000);
-          
-          return (
-            <Card key={index} className="hover:shadow-none transition-all duration-200 shadow-none w-full min-w-0">
-              <CardContent className="p-4 lg:p-6 flex flex-col justify-between h-full min-h-[200px] lg:min-h-[231px]">
-                {/* Section 1: Top content */}
-                <div className="space-y-2 lg:space-y-3">
-                  <div className="space-y-1 lg:space-y-2">
-                    <h3 
-                      className="font-satoshi font-normal text-sm lg:text-lg xl:text-xl leading-tight"
-                      style={{
-                        color: 'var(--Dark-color, #081735)',
-                      }}
-                    >
-                      {stat.title}
-                    </h3>
-                    
-                    <div className="flex items-center space-x-1 lg:space-x-2">
-                      <Badge 
-                        className={`text-xs px-1.5 lg:px-2 py-0.5 lg:py-1 flex items-center space-x-1 ${
-                          trend.isIncrease 
-                            ? 'bg-green-100 text-green-800 hover:bg-green-100' 
-                            : 'bg-red-100 text-red-800 hover:bg-red-100'
-                        }`}
+    <div className="space-y-6">
+      {/* Period Filter */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">Analytics</h2>
+        <PeriodFilter
+          selectedPeriod={selectedPeriod}
+          onPeriodChange={onPeriodChange}
+          customDateRange={customDateRange}
+          onCustomDateChange={onCustomDateChange}
+        />
+      </div>
+
+      {/* Metrics Grid */}
+      <TooltipProvider>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+          {stats.map((stat, index) => {
+            const trend = getTrendData(stat.title);
+            const TrendIcon = trend.isIncrease ? TrendingUp : TrendingDown;
+            const formattedValue = formatMetric(stat.value, stat.isCurrency, displayCurrency);
+            const needsTooltip = typeof stat.value === 'number' ? stat.value >= 1000 : 
+              (typeof stat.value === 'string' && parseFloat(stat.value.replace(/[^0-9.-]/g, '')) >= 1000);
+            
+            return (
+              <Card key={index} className="hover:shadow-none transition-all duration-200 shadow-none w-full min-w-0">
+                <CardContent className="p-4 lg:p-6 flex flex-col justify-between h-full min-h-[200px] lg:min-h-[231px]">
+                  {/* Section 1: Top content */}
+                  <div className="space-y-2 lg:space-y-3">
+                    <div className="space-y-1 lg:space-y-2">
+                      <h3 
+                        className="font-satoshi font-normal text-sm lg:text-lg xl:text-xl leading-tight"
+                        style={{
+                          color: 'var(--Dark-color, #081735)',
+                        }}
                       >
-                        <TrendIcon className="w-2.5 h-2.5 lg:w-3 lg:h-3" />
-                        <span className="text-xs">{trend.change}%</span>
-                      </Badge>
-                      <span className="text-xs text-slate-500 hidden sm:inline">vs prev 30d</span>
+                        {stat.title}
+                      </h3>
+                      
+                      <div className="flex items-center space-x-1 lg:space-x-2">
+                        <Badge 
+                          className={`text-xs px-1.5 lg:px-2 py-0.5 lg:py-1 flex items-center space-x-1 ${
+                            trend.isIncrease 
+                              ? 'bg-green-100 text-green-800 hover:bg-green-100' 
+                              : 'bg-red-100 text-red-800 hover:bg-red-100'
+                          }`}
+                        >
+                          <TrendIcon className="w-2.5 h-2.5 lg:w-3 lg:h-3" />
+                          <span className="text-xs">{trend.change}%</span>
+                        </Badge>
+                        <span className="text-xs text-slate-500 hidden sm:inline">vs prev 30d</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      {stat.statusRows.map((statusRow, rowIndex) => (
+                        <div key={rowIndex} className="flex items-center justify-between">
+                          <span className="text-xs text-slate-500 truncate">{statusRow}</span>
+                          {stat.details && stat.details.length > 0 && rowIndex === 0 && (
+                            <span className="text-xs text-slate-600 truncate max-w-16 lg:max-w-20">
+                              {typeof stat.details[0] === 'string' ? stat.details[0] : stat.details[0]?.name}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                      {stat.statusRows.length === 0 && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-slate-500 truncate">{stat.subtitle}</span>
+                          {stat.details && stat.details.length > 0 && (
+                            <span className="text-xs text-slate-600 truncate max-w-16 lg:max-w-20">
+                              {typeof stat.details[0] === 'string' ? stat.details[0] : stat.details[0]?.name}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    {stat.statusRows.map((statusRow, rowIndex) => (
-                      <div key={rowIndex} className="flex items-center justify-between">
-                        <span className="text-xs text-slate-500 truncate">{statusRow}</span>
-                        {stat.details && stat.details.length > 0 && rowIndex === 0 && (
-                          <span className="text-xs text-slate-600 truncate max-w-16 lg:max-w-20">
-                            {typeof stat.details[0] === 'string' ? stat.details[0] : stat.details[0]?.name}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                    {stat.statusRows.length === 0 && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-slate-500 truncate">{stat.subtitle}</span>
-                        {stat.details && stat.details.length > 0 && (
-                          <span className="text-xs text-slate-600 truncate max-w-16 lg:max-w-20">
-                            {typeof stat.details[0] === 'string' ? stat.details[0] : stat.details[0]?.name}
-                          </span>
-                        )}
-                      </div>
+                  {/* Section 2: Bottom metric */}
+                  <div className="mt-2 lg:mt-4">
+                    {needsTooltip ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <p 
+                            className="font-satoshi font-normal cursor-help text-xl sm:text-2xl lg:text-3xl xl:text-5xl leading-tight"
+                            style={{
+                              color: 'var(--Dark-color, #081735)',
+                            }}
+                          >
+                            {formattedValue}
+                          </p>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{stat.originalValue}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <p 
+                        className="font-satoshi font-normal text-xl sm:text-2xl lg:text-3xl xl:text-5xl leading-tight"
+                        style={{
+                          color: 'var(--Dark-color, #081735)',
+                        }}
+                      >
+                        {formattedValue}
+                      </p>
                     )}
                   </div>
-                </div>
-
-                {/* Section 2: Bottom metric */}
-                <div className="mt-2 lg:mt-4">
-                  {needsTooltip ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p 
-                          className="font-satoshi font-normal cursor-help text-xl sm:text-2xl lg:text-3xl xl:text-5xl leading-tight"
-                          style={{
-                            color: 'var(--Dark-color, #081735)',
-                          }}
-                        >
-                          {formattedValue}
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{stat.originalValue}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : (
-                    <p 
-                      className="font-satoshi font-normal text-xl sm:text-2xl lg:text-3xl xl:text-5xl leading-tight"
-                      style={{
-                        color: 'var(--Dark-color, #081735)',
-                      }}
-                    >
-                      {formattedValue}
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-    </TooltipProvider>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </TooltipProvider>
+    </div>
   );
 };
 
