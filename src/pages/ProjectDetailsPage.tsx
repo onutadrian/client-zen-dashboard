@@ -11,7 +11,6 @@ import ProjectOverview from '@/components/ProjectOverview';
 import ProjectTeamMembers from '@/components/ProjectTeamMembers';
 import ProjectBudgetTracking from '@/components/ProjectBudgetTracking';
 import ProjectSettings from '@/components/ProjectSettings';
-import ProjectActivitySidebar from '@/components/ProjectActivitySidebar';
 import { useProjects } from '@/hooks/useProjects';
 import { useClients } from '@/hooks/useClients';
 import { useTasks } from '@/hooks/useTasks';
@@ -43,7 +42,7 @@ const ProjectDetailsPage = () => {
   const projectTasks = tasks.filter(task => task.projectId === id);
   const projectMilestones = milestones.filter(milestone => milestone.projectId === id);
 
-  // Fetch Supabase project for activity sidebar
+  // Fetch Supabase project for future use
   useEffect(() => {
     const fetchSupabaseProject = async () => {
       if (!id) return;
@@ -100,111 +99,87 @@ const ProjectDetailsPage = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F3F3F2' }}>
-      <div className="flex">
-        {/* Main Content - 70% */}
-        <div className="flex-1 p-6 pr-3">
-          <div className="max-w-full">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                {isMobile && <SidebarTrigger />}
-                <Button 
-                  onClick={() => navigate('/projects')} 
-                  variant="outline" 
-                  size="sm"
-                  className="flex items-center space-x-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Back to Projects</span>
-                </Button>
-              </div>
-            </div>
+    <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            {isMobile && <SidebarTrigger />}
+            <Button 
+              onClick={() => navigate('/projects')} 
+              variant="outline" 
+              size="sm"
+              className="flex items-center space-x-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Projects</span>
+            </Button>
+          </div>
+        </div>
 
-            <ProjectHeader 
-              project={project} 
-              client={client} 
+        <ProjectHeader 
+          project={project} 
+          client={client} 
+          tasks={projectTasks}
+          milestones={projectMilestones}
+        />
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className={`grid w-full ${showBudgetTracking ? 'grid-cols-4' : 'grid-cols-3'}`}>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="team">Team Members</TabsTrigger>
+            {showBudgetTracking && <TabsTrigger value="budget">Budget Tracking</TabsTrigger>}
+            <TabsTrigger value="settings">Project Settings</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="mt-6">
+            <ProjectOverview 
+              key={`overview-${displayCurrency}-${forceRefresh}`}
+              project={project}
+              client={client}
               tasks={projectTasks}
               milestones={projectMilestones}
+              onAddTask={addTask}
+              onUpdateTask={updateTask}
+              onDeleteTask={deleteTask}
+              onEditTask={editTask}
+              onAddMilestone={addMilestone}
+              onUpdateMilestone={updateMilestone}
+              onDeleteMilestone={deleteMilestone}
+              onUpdateProject={updateProject}
             />
+          </TabsContent>
 
-            {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className={`grid w-full ${showBudgetTracking ? 'grid-cols-4' : 'grid-cols-3'}`}>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="team">Team Members</TabsTrigger>
-                {showBudgetTracking && <TabsTrigger value="budget">Budget Tracking</TabsTrigger>}
-                <TabsTrigger value="settings">Project Settings</TabsTrigger>
-              </TabsList>
+          <TabsContent value="team" className="mt-6">
+            <ProjectTeamMembers 
+              project={project}
+              client={client}
+              onUpdateProject={updateProject}
+            />
+          </TabsContent>
 
-              <TabsContent value="overview" className="mt-6">
-                <ProjectOverview 
-                  key={`overview-${displayCurrency}-${forceRefresh}`}
-                  project={project}
-                  client={client}
-                  tasks={projectTasks}
-                  milestones={projectMilestones}
-                  onAddTask={addTask}
-                  onUpdateTask={updateTask}
-                  onDeleteTask={deleteTask}
-                  onEditTask={editTask}
-                  onAddMilestone={addMilestone}
-                  onUpdateMilestone={updateMilestone}
-                  onDeleteMilestone={deleteMilestone}
-                  onUpdateProject={updateProject}
-                />
-              </TabsContent>
+          {showBudgetTracking && (
+            <TabsContent value="budget" className="mt-6">
+              <ProjectBudgetTracking 
+                key={`budget-${displayCurrency}-${forceRefresh}`}
+                project={project}
+                client={client}
+                tasks={projectTasks}
+                milestones={projectMilestones}
+              />
+            </TabsContent>
+          )}
 
-              <TabsContent value="team" className="mt-6">
-                <ProjectTeamMembers 
-                  project={project}
-                  client={client}
-                  onUpdateProject={updateProject}
-                />
-              </TabsContent>
-
-              {showBudgetTracking && (
-                <TabsContent value="budget" className="mt-6">
-                  <ProjectBudgetTracking 
-                    key={`budget-${displayCurrency}-${forceRefresh}`}
-                    project={project}
-                    client={client}
-                    tasks={projectTasks}
-                    milestones={projectMilestones}
-                  />
-                </TabsContent>
-              )}
-
-              <TabsContent value="settings" className="mt-6">
-                <ProjectSettings 
-                  project={project}
-                  onUpdateProject={updateProject}
-                  onArchiveProject={archiveProject}
-                  onDeleteProject={deleteProject}
-                />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-
-        {/* Activity Sidebar - 30% */}
-        <div className="w-[30%] border-l bg-white">
-          <div className="p-6">
-            <Card className="border-0 shadow-none bg-transparent">
-              <CardHeader className="px-0 pt-0 pb-4">
-                <CardTitle className="text-lg">Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent className="px-0 py-0">
-                {supabaseProject && (
-                  <ProjectActivitySidebar 
-                    project={supabaseProject}
-                    onClose={() => {}}
-                  />
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+          <TabsContent value="settings" className="mt-6">
+            <ProjectSettings 
+              project={project}
+              onUpdateProject={updateProject}
+              onArchiveProject={archiveProject}
+              onDeleteProject={deleteProject}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
