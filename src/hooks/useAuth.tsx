@@ -46,16 +46,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Fetch user profile from the profiles table
-  const fetchUserProfile = async (userId: string) => {
+  // Fetch user profile from the profiles table with timeout
+  const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
       console.log('Fetching user profile for:', userId);
       
-      const { data, error } = await supabase
+      // Create a timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 10000); // 10 second timeout
+      });
+
+      // Race between the actual query and timeout
+      const profilePromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
+
+      const { data, error } = await Promise.race([profilePromise, timeoutPromise]);
 
       if (error) {
         console.error('Error fetching user profile:', error);
@@ -94,15 +102,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.error('Error fetching profile in auth state change:', error);
             setProfile(null);
             setIsAdmin(false);
+          } finally {
+            // Always set loading to false after attempting to fetch profile
+            console.log('Setting loading to false after profile fetch attempt');
+            setLoading(false);
           }
         } else {
           console.log('No user session, clearing profile');
           setProfile(null);
           setIsAdmin(false);
+          console.log('Setting loading to false (no user)');
+          setLoading(false);
         }
-        
-        console.log('Setting loading to false');
-        setLoading(false);
       }
     );
 
