@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, Briefcase, UserCheck, Users } from "lucide-react";
+import { Home, Briefcase, UserCheck, Users, CreditCard } from "lucide-react";
 import { Link, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -35,6 +35,12 @@ const items = [
     title: "Clients",
     url: "/clients",
     icon: UserCheck,
+    roles: ['admin']
+  },
+  {
+    title: "Subscriptions",
+    url: "/subscriptions",
+    icon: CreditCard,
     roles: ['admin']
   },
   {

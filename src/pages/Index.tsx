@@ -1,20 +1,17 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
-import { useCurrency } from '@/hooks/useCurrency';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { usePeriodFilter } from '@/hooks/usePeriodFilter';
 import { useProjects } from '@/hooks/useProjects';
 import { useTasks } from '@/hooks/useTasks';
 import { useMilestones } from '@/hooks/useMilestones';
 import { useClients } from '@/hooks/useClients';
-import MainContentGrid from '@/components/MainContentGrid';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
 import TaskTable from '@/components/TaskTable';
-import ProjectTimeline from '@/components/ProjectTimeline';
 import { Loader2 } from 'lucide-react';
 import type { Task as MainTask, Project as MainProject, Milestone as MainMilestone, Client as MainClient } from '@/types';
 import type { Task as HookTask } from '@/types/task';
@@ -62,44 +59,6 @@ const Index = () => {
     completedDate: task.completedDate || '',
     startDate: task.startDate || '',
     endDate: task.endDate || ''
-  });
-
-  // Transform data for ProjectTimeline component
-  const transformProjectForTimeline = (project: any) => ({
-    id: project.id,
-    name: project.name,
-    clientId: project.clientId,
-    startDate: project.startDate,
-    estimatedEndDate: project.estimatedEndDate,
-    endDate: project.endDate,
-    status: project.status,
-    notes: project.notes,
-    documents: project.documents,
-    team: project.team,
-    archived: project.archived,
-    pricingType: project.pricingType,
-    fixedPrice: project.fixedPrice,
-    hourlyRate: project.hourlyRate,
-    dailyRate: project.dailyRate,
-    estimatedHours: project.estimatedHours,
-    currency: project.currency,
-    invoices: project.invoices
-  });
-
-  // Transform data for milestones
-  const transformMilestoneForTimeline = (milestone: any) => ({
-    id: milestone.id,
-    projectId: milestone.projectId,
-    title: milestone.title,
-    description: milestone.description,
-    targetDate: milestone.targetDate,
-    status: milestone.status,
-    amount: milestone.amount,
-    currency: milestone.currency,
-    completionPercentage: milestone.completionPercentage,
-    estimatedHours: milestone.estimatedHours,
-    createdAt: milestone.createdAt,
-    updatedAt: milestone.updatedAt
   });
 
   // Transform HookTask to MainTask for DashboardTasksTimeline
@@ -185,7 +144,6 @@ const Index = () => {
 
   // Create wrapper functions to match expected interfaces
   const handleAddTask = (task: Omit<HookTask, 'id' | 'createdDate'>) => {
-    // Convert to expected format for the hook, adding missing required properties
     const taskData = {
       title: task.title,
       description: task.description || '',
@@ -206,7 +164,6 @@ const Index = () => {
   };
 
   const handleEditTask = (task: any) => {
-    // Convert to expected format for the hook
     const taskData = {
       title: task.title,
       description: task.description || '',
@@ -222,13 +179,12 @@ const Index = () => {
     editTask(task.id, taskData);
   };
 
-  // Handle task table update - TaskTable expects this signature: (taskId: number, status: Task['status'], actualHours?: number) => void
+  // Handle task table update - TaskTable expects this signature
   const handleTaskTableUpdate = (taskId: number, status: import('@/types/task').Task['status'], actualHours?: number) => {
     updateTask(taskId, status, actualHours);
   };
 
   const handleTaskTableEdit = (task: any) => {
-    // Transform back to main Task type
     const transformedTask: HookTask = {
       id: task.id,
       title: task.title,
@@ -265,7 +221,6 @@ const Index = () => {
 
   // Create a wrapper for DashboardTasksTimeline that matches its expected signature
   const handleDashboardAddTask = (task: Omit<MainTask, 'id' | 'created_date'>) => {
-    // Convert MainTask format to HookTask format
     const hookTaskData = {
       title: task.title,
       description: task.description || '',
@@ -282,7 +237,6 @@ const Index = () => {
   };
 
   const handleDashboardUpdateTask = (taskId: number, updates: Partial<MainTask>) => {
-    // Convert MainTask updates to HookTask format
     if (updates.status) {
       updateTask(taskId, updates.status, updates.actual_hours);
     }
@@ -332,71 +286,45 @@ const Index = () => {
           />
         )}
 
-        {/* Admin Dashboard - Full featured view */}
+        {/* Admin Dashboard - Show TaskTable for detailed task management */}
         {isAdmin ? (
-          <div className="space-y-6">
-            {/* Tasks Table for Admin */}
-            <TaskTable
-              tasks={tasks.map(transformTaskForTaskTable)}
-              clients={clients.map(client => ({
-                id: client.id,
-                name: client.name,
-                priceType: client.priceType || 'hour',
-                hourEntries: [] // TODO: Add hour entries data
-              }))}
-              projects={projects.map(project => ({
-                id: project.id,
-                name: project.name,
-                clientId: project.clientId
-              }))}
-              onTaskClick={(task) => setSelectedTask({
-                id: task.id,
-                title: task.title,
-                description: task.description,
-                status: task.status,
-                clientId: task.clientId,
-                clientName: task.clientName,
-                projectId: task.projectId || '',
-                estimatedHours: task.estimatedHours,
-                workedHours: task.workedHours,
-                actualHours: task.actualHours,
-                startDate: task.startDate,
-                endDate: task.endDate,
-                completedDate: task.completedDate,
-                createdDate: task.createdDate,
-                notes: task.notes,
-                assets: task.assets
-              })}
-              onUpdateTask={handleTaskTableUpdate}
-              onDeleteTask={deleteTask}
-              onEditTask={handleTaskTableEdit}
-            />
-
-            {/* Project Timeline for Admin */}
-            <ProjectTimeline
-              projects={projects.map(transformProjectForTimeline)}
-              tasks={tasks}
-              milestones={milestones.map(transformMilestoneForTimeline)}
-              clients={clients}
-            />
-
-            {/* Main Content Grid for Admin */}
-            <MainContentGrid
-              clients={analytics.clients}
-              subscriptions={[]} // TODO: Add subscriptions data
-              analytics={analytics}
-              displayCurrency={analytics.displayCurrency}
-              convertCurrency={() => 0} // TODO: Add convert function
-              formatCurrency={analytics.formatCurrency}
-              updateClient={() => {}} // TODO: Add update function
-              handleEditSubscription={() => {}} // TODO: Add edit function
-              setShowClientModal={() => {}} // TODO: Add modal handlers
-              setShowSubscriptionModal={() => {}} // TODO: Add modal handlers
-              totalPaidToDate={analytics.totalPaidToDate}
-            />
-          </div>
+          <TaskTable
+            tasks={tasks.map(transformTaskForTaskTable)}
+            clients={clients.map(client => ({
+              id: client.id,
+              name: client.name,
+              priceType: client.priceType || 'hour',
+              hourEntries: []
+            }))}
+            projects={projects.map(project => ({
+              id: project.id,
+              name: project.name,
+              clientId: project.clientId
+            }))}
+            onTaskClick={(task) => setSelectedTask({
+              id: task.id,
+              title: task.title,
+              description: task.description,
+              status: task.status,
+              clientId: task.clientId,
+              clientName: task.clientName,
+              projectId: task.projectId || '',
+              estimatedHours: task.estimatedHours,
+              workedHours: task.workedHours,
+              actualHours: task.actualHours,
+              startDate: task.startDate,
+              endDate: task.endDate,
+              completedDate: task.completedDate,
+              createdDate: task.createdDate,
+              notes: task.notes,
+              assets: task.assets
+            })}
+            onUpdateTask={handleTaskTableUpdate}
+            onDeleteTask={deleteTask}
+            onEditTask={handleTaskTableEdit}
+          />
         ) : (
-          /* Standard User Dashboard - Simplified view */
+          /* Standard User Dashboard - Simplified timeline view */
           <DashboardTasksTimeline
             projects={projects.map(transformProjectForDashboard)}
             tasks={tasks.map(transformTaskForTimeline)}

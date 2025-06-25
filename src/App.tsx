@@ -14,6 +14,7 @@ import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 import ClientsPage from "./pages/ClientsPage";
 import ClientDetailsPage from "./pages/ClientDetailsPage";
+import SubscriptionsPage from "./pages/SubscriptionsPage";
 import AuthPage from "./pages/AuthPage";
 import UsersPage from "./pages/UsersPage";
 
@@ -56,6 +57,11 @@ const App = () => (
                     <Route path="/clients/:id" element={
                       <ProtectedRoute>
                         <ClientDetailsPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/subscriptions" element={
+                      <ProtectedRoute>
+                        <SubscriptionsPage />
                       </ProtectedRoute>
                     } />
                     <Route path="/users" element={
