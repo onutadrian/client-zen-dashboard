@@ -13,13 +13,18 @@ export const useAdminCheck = () => {
     const checkAndSetupAdmin = async () => {
       console.log('Admin check - authLoading:', authLoading, 'user:', user?.email, 'profile:', profile, 'hasChecked:', hasChecked);
       
-      if (authLoading || !user || hasChecked) {
-        if (!authLoading && hasChecked) {
-          setIsCheckingAdmin(false);
-        }
+      if (authLoading || !user) {
+        console.log('Admin check - still loading or no user, skipping...');
         return;
       }
 
+      if (hasChecked) {
+        console.log('Admin check - already checked, setting isCheckingAdmin to false');
+        setIsCheckingAdmin(false);
+        return;
+      }
+
+      console.log('Admin check - performing check for user:', user.email);
       setHasChecked(true);
 
       // Check if this is the main admin account that needs to be setup
@@ -27,7 +32,6 @@ export const useAdminCheck = () => {
         console.log('Setting up admin role for adrian@furtuna.ro');
         
         try {
-          // Update the profile role to admin
           const { error } = await supabase
             .from('profiles')
             .update({ role: 'admin' })
@@ -37,7 +41,7 @@ export const useAdminCheck = () => {
             console.error('Error updating admin role:', error);
           } else {
             console.log('Successfully set admin role');
-            setNeedsAdminSetup(true); // This will trigger a refresh
+            setNeedsAdminSetup(true);
           }
         } catch (error) {
           console.error('Error in admin setup:', error);
@@ -50,6 +54,8 @@ export const useAdminCheck = () => {
 
     checkAndSetupAdmin();
   }, [user, profile, authLoading, hasChecked]);
+
+  console.log('useAdminCheck render - isCheckingAdmin:', isCheckingAdmin, 'needsAdminSetup:', needsAdminSetup, 'isAdmin:', profile?.role === 'admin');
 
   return {
     isCheckingAdmin,

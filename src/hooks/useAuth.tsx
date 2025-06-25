@@ -33,11 +33,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
-        // Ignore errors
         console.log('Error during signOut:', err);
       }
       
-      // Clear state
       setUser(null);
       setSession(null);
       setProfile(null);
@@ -52,6 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchUserProfile = async (userId: string) => {
     try {
       console.log('Fetching user profile for:', userId);
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -60,13 +59,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching user profile:', error);
+        console.log('Profile fetch failed, but continuing with default values');
         return null;
       }
 
-      console.log('User profile fetched:', data);
+      console.log('User profile fetched successfully:', data);
       return data as UserProfile;
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
+      console.log('Profile fetch threw exception, but continuing with default values');
       return null;
     }
   };
@@ -82,18 +83,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          console.log('User is signed in, fetching profile...');
           try {
             const userProfile = await fetchUserProfile(session.user.id);
+            console.log('Profile fetch completed, setting profile state');
             setProfile(userProfile);
             setIsAdmin(userProfile?.role === 'admin');
             console.log('User role set:', userProfile?.role);
           } catch (error) {
-            console.error('Error fetching profile:', error);
-            // Continue with default values
+            console.error('Error fetching profile in auth state change:', error);
             setProfile(null);
             setIsAdmin(false);
           }
         } else {
+          console.log('No user session, clearing profile');
           setProfile(null);
           setIsAdmin(false);
         }
@@ -117,6 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // If session exists, the onAuthStateChange will handle it
       } catch (error) {
         console.error('Error checking session:', error);
+        console.log('Session check failed, setting loading to false');
         setLoading(false);
       }
     };
@@ -128,6 +132,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       subscription.unsubscribe();
     };
   }, []);
+
+  console.log('AuthProvider render - loading:', loading, 'user:', user?.email, 'profile:', profile?.role);
 
   return (
     <AuthContext.Provider value={{ user, session, profile, loading, signOut, isAdmin }}>
