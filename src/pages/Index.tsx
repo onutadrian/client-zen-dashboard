@@ -43,14 +43,14 @@ const Index = () => {
   // State for task details modal
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  // Transform data for TaskTable component which expects different Task type
+  // Transform data for TaskTable component
   const transformTaskForTaskTable = (task: Task) => ({
     id: task.id,
     title: task.title,
     description: task.description || '',
     clientId: task.client_id,
     clientName: task.client_name,
-    projectId: task.project_id,
+    projectId: task.project_id || '',
     estimatedHours: task.estimated_hours || 0,
     actualHours: task.actual_hours || 0,
     workedHours: task.worked_hours || 0,
@@ -140,7 +140,7 @@ const Index = () => {
     editTask(task.id, taskData);
   };
 
-  // Handle task table update - fix function signature to match TaskTable expectation
+  // Handle task table update - TaskTable expects this signature
   const handleTaskTableUpdate = (taskId: number, updates: Partial<import('@/types/task').Task>) => {
     // Convert updates to the expected format for the main updateTask function
     if (updates.status) {
@@ -234,11 +234,11 @@ const Index = () => {
           <div className="space-y-6">
             {/* Tasks Table for Admin */}
             <TaskTable
-              tasks={tasks.map((task: Task) => transformTaskForTaskTable(task))}
+              tasks={tasks.map(transformTaskForTaskTable)}
               clients={clients.map(client => ({
                 id: client.id,
                 name: client.name,
-                priceType: client.priceType || 'hour',
+                priceType: client.price_type || 'hour',
                 hourEntries: [] // TODO: Add hour entries data
               }))}
               projects={projects.map(project => ({
@@ -295,10 +295,10 @@ const Index = () => {
         ) : (
           /* Standard User Dashboard - Simplified view */
           <DashboardTasksTimeline
-            projects={projects as unknown as Project[]}
-            tasks={tasks as unknown as Task[]}
-            milestones={milestones as unknown as Milestone[]}
-            clients={clients as unknown as Client[]}
+            projects={projects}
+            tasks={tasks}
+            milestones={milestones}
+            clients={clients}
             onAddTask={handleAddTask}
             onUpdateTask={handleUpdateTask}
             onDeleteTask={deleteTask}
