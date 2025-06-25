@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
@@ -304,8 +303,22 @@ const Index = () => {
           />
         )}
 
-        {/* Admin Dashboard - Show TaskTable for detailed task management */}
-        {isAdmin ? (
+        {/* Timeline view with Add Task button - shown for ALL users */}
+        <DashboardTasksTimeline
+          projects={projects.map(transformProjectForDashboard)}
+          tasks={tasks.map(transformTaskForTimeline)}
+          milestones={milestones.map(transformMilestoneForDashboard)}
+          clients={clients.map(transformClientForDashboard)}
+          onAddTask={handleDashboardAddTask}
+          onUpdateTask={handleDashboardUpdateTask}
+          onDeleteTask={deleteTask}
+          onEditTask={handleEditTask}
+          onAddTaskClick={() => setShowAddTaskModal(true)}
+          hideFinancialColumns={!isAdmin}
+        />
+
+        {/* Admin-only detailed task management table */}
+        {isAdmin && (
           <TaskTable
             tasks={tasks.map(transformTaskForTaskTable)}
             clients={clients.map(client => ({
@@ -340,20 +353,6 @@ const Index = () => {
             onUpdateTask={handleUpdateTask}
             onDeleteTask={deleteTask}
             onEditTask={handleEditTask}
-          />
-        ) : (
-          /* Standard User Dashboard - Simplified timeline view */
-          <DashboardTasksTimeline
-            projects={projects.map(transformProjectForDashboard)}
-            tasks={tasks.map(transformTaskForTimeline)}
-            milestones={milestones.map(transformMilestoneForDashboard)}
-            clients={clients.map(transformClientForDashboard)}
-            onAddTask={handleDashboardAddTask}
-            onUpdateTask={handleDashboardUpdateTask}
-            onDeleteTask={deleteTask}
-            onEditTask={handleEditTask}
-            onAddTaskClick={() => setShowAddTaskModal(true)}
-            hideFinancialColumns={true}
           />
         )}
 
