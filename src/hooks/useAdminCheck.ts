@@ -21,6 +21,11 @@ export const useAdminCheck = () => {
       if (hasChecked) {
         console.log('Admin check - already checked, setting isCheckingAdmin to false');
         setIsCheckingAdmin(false);
+        // Reset needsAdminSetup if user already has admin role
+        if (profile?.role === 'admin') {
+          console.log('Admin check - user already has admin role, clearing needsAdminSetup');
+          setNeedsAdminSetup(false);
+        }
         return;
       }
 
@@ -46,6 +51,10 @@ export const useAdminCheck = () => {
         } catch (error) {
           console.error('Error in admin setup:', error);
         }
+      } else if (profile?.role === 'admin') {
+        // User already has admin role, no setup needed
+        console.log('User already has admin role, no setup needed');
+        setNeedsAdminSetup(false);
       }
 
       console.log('Admin check complete, setting isCheckingAdmin to false');
