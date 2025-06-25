@@ -41,16 +41,18 @@ const Index = () => {
 
   // Create wrapper functions to match expected interfaces
   const handleAddTask = (task: Omit<Task, 'id' | 'created_date'>) => {
-    // Convert to expected format for the hook
+    // Convert to expected format for the hook, adding missing required properties
     const taskData = {
       title: task.title,
-      description: task.description,
+      description: task.description || '',
       clientId: task.client_id,
       clientName: task.client_name,
       projectId: task.project_id,
-      estimatedHours: task.estimated_hours,
-      startDate: task.start_date,
-      endDate: task.end_date
+      estimatedHours: task.estimated_hours || 0,
+      startDate: task.start_date || '',
+      endDate: task.end_date || '',
+      notes: task.notes || '',
+      assets: task.assets || []
     };
     addTask(taskData);
   };
@@ -66,13 +68,15 @@ const Index = () => {
     // Convert to expected format for the hook
     const taskData = {
       title: task.title,
-      description: task.description,
+      description: task.description || '',
       clientId: task.client_id,
       clientName: task.client_name,
       projectId: task.project_id,
-      estimatedHours: task.estimated_hours,
-      startDate: task.start_date,
-      endDate: task.end_date
+      estimatedHours: task.estimated_hours || 0,
+      startDate: task.start_date || '',
+      endDate: task.end_date || '',
+      notes: task.notes || '',
+      assets: task.assets || []
     };
     editTask(task.id, taskData);
   };
@@ -122,10 +126,10 @@ const Index = () => {
         )}
 
         <DashboardTasksTimeline
-          projects={projects as Project[]}
-          tasks={tasks as Task[]}
-          milestones={milestones as Milestone[]}
-          clients={clients as Client[]}
+          projects={projects as unknown as Project[]}
+          tasks={tasks as unknown as Task[]}
+          milestones={milestones as unknown as Milestone[]}
+          clients={clients as unknown as Client[]}
           onAddTask={handleAddTask}
           onUpdateTask={handleUpdateTask}
           onDeleteTask={deleteTask}
