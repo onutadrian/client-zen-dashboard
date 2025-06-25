@@ -72,24 +72,36 @@ export const fetchInvoicesData = async (params?: any) => {
   if (clients) {
     for (const client of clients) {
       if (client.invoices && Array.isArray(client.invoices)) {
-        for (const invoice of client.invoices) {
-          // Add client info to each invoice for processing
-          const enrichedInvoice = {
-            ...invoice,
-            client_id: client.id,
-            client_name: client.name,
-            client_currency: client.currency
-          };
-          
-          // Apply date filtering if specified
-          if (params?.dateRange?.from || params?.dateRange?.to) {
-            const invoiceDate = new Date(invoice.date);
+        for (const invoiceData of client.invoices) {
+          // Type guard to ensure invoiceData is an object
+          if (typeof invoiceData === 'object' && invoiceData !== null && !Array.isArray(invoiceData)) {
+            const invoice = invoiceData as any;
             
-            if (params.dateRange.from && invoiceDate < params.dateRange.from) continue;
-            if (params.dateRange.to && invoiceDate > params.dateRange.to) continue;
+            // Add client info to each invoice for processing
+            const enrichedInvoice = {
+              id: invoice.id,
+              amount: invoice.amount,
+              date: invoice.date,
+              status: invoice.status,
+              currency: invoice.currency,
+              description: invoice.description,
+              client_id: client.id,
+              client_name: client.name,
+              client_currency: client.currency
+            };
+            
+            // Apply date filtering if specified
+            if (params?.dateRange?.from || params?.dateRange?.to) {
+              if (invoice.date) {
+                const invoiceDate = new Date(invoice.date);
+                
+                if (params.dateRange.from && invoiceDate < params.dateRange.from) continue;
+                if (params.dateRange.to && invoiceDate > params.dateRange.to) continue;
+              }
+            }
+            
+            allInvoices.push(enrichedInvoice);
           }
-          
-          allInvoices.push(enrichedInvoice);
         }
       }
     }
