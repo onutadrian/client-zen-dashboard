@@ -32,4 +32,6 @@ export interface UserInvite {
   used: boolean;
   used_at?: string;
   used_by?: string;
+  email_sent?: boolean;
+  email_sent_at?: string;
 }
