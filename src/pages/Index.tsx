@@ -13,6 +13,8 @@ import MainContentGrid from '@/components/MainContentGrid';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
+import TaskTable from '@/components/TaskTable';
+import ProjectTimeline from '@/components/ProjectTimeline';
 import { Loader2 } from 'lucide-react';
 import type { Task, Project, Milestone, Client } from '@/types';
 
@@ -38,6 +40,9 @@ const Index = () => {
   const { milestones } = useMilestones();
   const { clients } = useClients();
 
+  // State for task details modal
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
   // Create wrapper functions to match expected interfaces
   const handleAddTask = (task: Omit<Task, 'id' | 'created_date'>) => {
     // Convert to expected format for the hook, adding missing required properties
@@ -56,11 +61,8 @@ const Index = () => {
     addTask(taskData);
   };
 
-  const handleUpdateTask = (taskId: number, updates: Partial<Task>) => {
-    // Extract status from updates and call the hook with the expected signature
-    const status = updates.status || 'pending';
-    const workedHours = updates.worked_hours;
-    updateTask(taskId, status, workedHours);
+  const handleUpdateTask = (taskId: number, status: Task['status'], actualHours?: number) => {
+    updateTask(taskId, status, actualHours);
   };
 
   const handleEditTask = (task: Task) => {
@@ -124,17 +126,57 @@ const Index = () => {
           />
         )}
 
-        <DashboardTasksTimeline
-          projects={projects as unknown as Project[]}
-          tasks={tasks as unknown as Task[]}
-          milestones={milestones as unknown as Milestone[]}
-          clients={clients as unknown as Client[]}
-          onAddTask={handleAddTask}
-          onUpdateTask={handleUpdateTask}
-          onDeleteTask={deleteTask}
-          onEditTask={handleEditTask}
-          hideFinancialColumns={!isAdmin}
-        />
+        {/* Admin Dashboard - Full featured view */}
+        {isAdmin ? (
+          <div className="space-y-6">
+            {/* Tasks Table for Admin */}
+            <TaskTable
+              tasks={tasks as unknown as Task[]}
+              clients={clients as unknown as any[]}
+              projects={projects as unknown as any[]}
+              onTaskClick={setSelectedTask}
+              onUpdateTask={handleUpdateTask}
+              onDeleteTask={deleteTask}
+              onEditTask={handleEditTask}
+            />
+
+            {/* Project Timeline for Admin */}
+            <ProjectTimeline
+              projects={projects as unknown as Project[]}
+              tasks={tasks as unknown as Task[]}
+              milestones={milestones as unknown as Milestone[]}
+              clients={clients as unknown as Client[]}
+            />
+
+            {/* Main Content Grid for Admin */}
+            <MainContentGrid
+              clients={analytics.clients}
+              subscriptions={[]} // TODO: Add subscriptions data
+              analytics={analytics}
+              displayCurrency={analytics.displayCurrency}
+              convertCurrency={() => 0} // TODO: Add convert function
+              formatCurrency={analytics.formatCurrency}
+              updateClient={() => {}} // TODO: Add update function
+              handleEditSubscription={() => {}} // TODO: Add edit function
+              setShowClientModal={() => {}} // TODO: Add modal handlers
+              setShowSubscriptionModal={() => {}} // TODO: Add modal handlers
+              totalPaidToDate={analytics.totalPaidToDate}
+            />
+          </div>
+        ) : (
+          /* Standard User Dashboard - Simplified view */
+          <DashboardTasksTimeline
+            projects={projects as unknown as Project[]}
+            tasks={tasks as unknown as Task[]}
+            milestones={milestones as unknown as Milestone[]}
+            clients={clients as unknown as Client[]}
+            onAddTask={handleAddTask}
+            onUpdateTask={handleUpdateTask}
+            onDeleteTask={deleteTask}
+            onEditTask={handleEditTask}
+            hideFinancialColumns={true}
+          />
+        )}
       </div>
     </div>
   );

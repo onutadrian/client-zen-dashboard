@@ -50,9 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('Fetching user profile for:', userId);
       
-      // Reduced timeout to 5 seconds to prevent long waits
+      // Increased timeout to 15 seconds to prevent frequent timeouts
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000);
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 15000);
       });
 
       const profilePromise = supabase
@@ -72,7 +72,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return data as UserProfile;
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
-      return null;
+      // Return a basic profile if fetch fails to prevent auth flow from breaking
+      return {
+        id: userId,
+        email: user?.email || '',
+        role: 'standard',
+        full_name: user?.email || '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
     }
   };
 
@@ -95,7 +103,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.log('User role set:', userProfile?.role);
           } catch (error) {
             console.error('Error fetching profile in auth state change:', error);
-            setProfile(null);
+            // Set basic profile to prevent auth flow from breaking
+            setProfile({
+              id: session.user.id,
+              email: session.user.email || '',
+              role: 'standard',
+              full_name: session.user.email || '',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
             setIsAdmin(false);
           } finally {
             console.log('Setting loading to false after profile fetch attempt');
