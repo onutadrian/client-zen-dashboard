@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,11 +14,6 @@ import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 import ClientsPage from "./pages/ClientsPage";
 import ClientDetailsPage from "./pages/ClientDetailsPage";
-import AnalyticsPage from "./pages/AnalyticsPage";
-import TimeTrackingPage from "./pages/TimeTrackingPage";
-import InvoicesPage from "./pages/InvoicesPage";
-import SubscriptionsPage from "./pages/SubscriptionsPage";
-import SettingsPage from "./pages/SettingsPage";
 import AuthPage from "./pages/AuthPage";
 import UsersPage from "./pages/UsersPage";
 
@@ -65,31 +61,6 @@ const App = () => (
                     <Route path="/users" element={
                       <ProtectedRoute>
                         <UsersPage />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/analytics" element={
-                      <ProtectedRoute>
-                        <AnalyticsPage />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/time-tracking" element={
-                      <ProtectedRoute>
-                        <TimeTrackingPage />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/invoices" element={
-                      <ProtectedRoute>
-                        <InvoicesPage />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/subscriptions" element={
-                      <ProtectedRoute>
-                        <SubscriptionsPage />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/settings" element={
-                      <ProtectedRoute>
-                        <SettingsPage />
                       </ProtectedRoute>
                     } />
                   </Routes>

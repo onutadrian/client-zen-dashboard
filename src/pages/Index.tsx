@@ -19,7 +19,6 @@ import type { Task, Project, Milestone, Client } from '@/types';
 const Index = () => {
   const { isMobile } = useSidebar();
   const { loading: authLoading, profile, isAdmin } = useAuth();
-  const { displayCurrency } = useCurrency();
   
   // Period filtering
   const {
@@ -104,7 +103,7 @@ const Index = () => {
 
         <DashboardHeader />
         
-        {/* Only show analytics for admin users */}
+        {/* Show analytics for admin users */}
         {isAdmin && (
           <AnalyticsSection 
             totalClients={analytics.totalClients}
