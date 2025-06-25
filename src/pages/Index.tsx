@@ -16,7 +16,8 @@ import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
 import TaskTable from '@/components/TaskTable';
 import ProjectTimeline from '@/components/ProjectTimeline';
 import { Loader2 } from 'lucide-react';
-import type { Task, Project, Milestone, Client } from '@/types';
+import type { Task as MainTask, Project as MainProject, Milestone as MainMilestone, Client as MainClient } from '@/types';
+import type { Task as HookTask } from '@/types/task';
 
 const Index = () => {
   const { isMobile } = useSidebar();
@@ -41,26 +42,26 @@ const Index = () => {
   const { clients } = useClients();
 
   // State for task details modal
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<HookTask | null>(null);
 
   // Transform data for TaskTable component
-  const transformTaskForTaskTable = (task: Task) => ({
+  const transformTaskForTaskTable = (task: HookTask) => ({
     id: task.id,
     title: task.title,
     description: task.description || '',
-    clientId: task.client_id,
-    clientName: task.client_name,
-    projectId: task.project_id || '',
-    estimatedHours: task.estimated_hours || 0,
-    actualHours: task.actual_hours || 0,
-    workedHours: task.worked_hours || 0,
+    clientId: task.clientId,
+    clientName: task.clientName,
+    projectId: task.projectId || '',
+    estimatedHours: task.estimatedHours || 0,
+    actualHours: task.actualHours || 0,
+    workedHours: task.workedHours || 0,
     status: task.status,
     notes: task.notes || '',
     assets: task.assets || [],
-    createdDate: task.created_date,
-    completedDate: task.completed_date || '',
-    startDate: task.start_date || '',
-    endDate: task.end_date || ''
+    createdDate: task.createdDate,
+    completedDate: task.completedDate || '',
+    startDate: task.startDate || '',
+    endDate: task.endDate || ''
   });
 
   // Transform data for ProjectTimeline component
@@ -101,25 +102,106 @@ const Index = () => {
     updatedAt: milestone.updatedAt
   });
 
+  // Transform HookTask to MainTask for DashboardTasksTimeline
+  const transformTaskForTimeline = (task: HookTask): MainTask => ({
+    id: task.id,
+    title: task.title,
+    description: task.description || '',
+    status: task.status,
+    client_id: task.clientId,
+    client_name: task.clientName,
+    project_id: task.projectId || '',
+    user_id: '',
+    estimated_hours: task.estimatedHours || 0,
+    worked_hours: task.workedHours || 0,
+    actual_hours: task.actualHours || 0,
+    start_date: task.startDate || '',
+    end_date: task.endDate || '',
+    completed_date: task.completedDate || '',
+    created_date: task.createdDate,
+    notes: task.notes || '',
+    assets: task.assets || []
+  });
+
+  // Transform hook Project to MainProject for DashboardTasksTimeline
+  const transformProjectForDashboard = (project: any): MainProject => ({
+    id: project.id,
+    name: project.name,
+    client_id: project.clientId,
+    user_id: '',
+    status: project.status,
+    pricing_type: project.pricingType,
+    fixed_price: project.fixedPrice,
+    hourly_rate: project.hourlyRate,
+    daily_rate: project.dailyRate,
+    currency: project.currency,
+    estimated_hours: project.estimatedHours,
+    start_date: project.startDate,
+    estimated_end_date: project.estimatedEndDate,
+    end_date: project.endDate,
+    created_at: '',
+    updated_at: '',
+    archived: project.archived,
+    team: project.team,
+    documents: project.documents,
+    notes: project.notes,
+    invoices: project.invoices
+  });
+
+  // Transform hook Milestone to MainMilestone for DashboardTasksTimeline
+  const transformMilestoneForDashboard = (milestone: any): MainMilestone => ({
+    id: milestone.id,
+    title: milestone.title,
+    description: milestone.description || '',
+    project_id: milestone.projectId,
+    user_id: '',
+    status: milestone.status,
+    target_date: milestone.targetDate,
+    amount: milestone.amount,
+    currency: milestone.currency || 'USD',
+    estimated_hours: milestone.estimatedHours,
+    completion_percentage: milestone.completionPercentage,
+    created_at: milestone.createdAt,
+    updated_at: milestone.updatedAt
+  });
+
+  // Transform hook Client to MainClient for DashboardTasksTimeline
+  const transformClientForDashboard = (client: any): MainClient => ({
+    id: client.id,
+    name: client.name,
+    user_id: '',
+    status: client.status,
+    price_type: client.priceType,
+    price: client.price,
+    currency: client.currency,
+    created_at: '',
+    updated_at: '',
+    people: client.people,
+    documents: client.documents,
+    invoices: client.invoices,
+    links: client.links,
+    notes: client.notes
+  });
+
   // Create wrapper functions to match expected interfaces
-  const handleAddTask = (task: Omit<Task, 'id' | 'created_date'>) => {
+  const handleAddTask = (task: Omit<HookTask, 'id' | 'createdDate'>) => {
     // Convert to expected format for the hook, adding missing required properties
     const taskData = {
       title: task.title,
       description: task.description || '',
-      clientId: task.client_id,
-      clientName: task.client_name,
-      projectId: task.project_id,
-      estimatedHours: task.estimated_hours || 0,
-      startDate: task.start_date || '',
-      endDate: task.end_date || '',
+      clientId: task.clientId,
+      clientName: task.clientName,
+      projectId: task.projectId,
+      estimatedHours: task.estimatedHours || 0,
+      startDate: task.startDate || '',
+      endDate: task.endDate || '',
       notes: task.notes || '',
       assets: task.assets || []
     };
     addTask(taskData);
   };
 
-  const handleUpdateTask = (taskId: number, status: Task['status'], actualHours?: number) => {
+  const handleUpdateTask = (taskId: number, status: HookTask['status'], actualHours?: number) => {
     updateTask(taskId, status, actualHours);
   };
 
@@ -150,22 +232,21 @@ const Index = () => {
 
   const handleTaskTableEdit = (task: any) => {
     // Transform back to main Task type
-    const transformedTask: Task = {
+    const transformedTask: HookTask = {
       id: task.id,
       title: task.title,
       description: task.description,
       status: task.status,
-      client_id: task.clientId,
-      client_name: task.clientName,
-      project_id: task.projectId,
-      user_id: task.user_id,
-      estimated_hours: task.estimatedHours,
-      worked_hours: task.workedHours,
-      actual_hours: task.actualHours,
-      start_date: task.startDate,
-      end_date: task.endDate,
-      completed_date: task.completedDate,
-      created_date: task.createdDate,
+      clientId: task.clientId,
+      clientName: task.clientName,
+      projectId: task.projectId,
+      estimatedHours: task.estimatedHours,
+      workedHours: task.workedHours,
+      actualHours: task.actualHours,
+      startDate: task.startDate,
+      endDate: task.endDate,
+      completedDate: task.completedDate,
+      createdDate: task.createdDate,
       notes: task.notes,
       assets: task.assets
     };
@@ -173,12 +254,12 @@ const Index = () => {
     const taskData = {
       title: transformedTask.title,
       description: transformedTask.description || '',
-      clientId: transformedTask.client_id,
-      clientName: transformedTask.client_name,
-      projectId: transformedTask.project_id,
-      estimatedHours: transformedTask.estimated_hours || 0,
-      startDate: transformedTask.start_date || '',
-      endDate: transformedTask.end_date || '',
+      clientId: transformedTask.clientId,
+      clientName: transformedTask.clientName,
+      projectId: transformedTask.projectId,
+      estimatedHours: transformedTask.estimatedHours || 0,
+      startDate: transformedTask.startDate || '',
+      endDate: transformedTask.endDate || '',
       notes: transformedTask.notes || '',
       assets: transformedTask.assets || []
     };
@@ -238,7 +319,7 @@ const Index = () => {
               clients={clients.map(client => ({
                 id: client.id,
                 name: client.name,
-                priceType: client.price_type || 'hour',
+                priceType: client.priceType || 'hour',
                 hourEntries: [] // TODO: Add hour entries data
               }))}
               projects={projects.map(project => ({
@@ -251,16 +332,16 @@ const Index = () => {
                 title: task.title,
                 description: task.description,
                 status: task.status,
-                client_id: task.clientId,
-                client_name: task.clientName,
-                project_id: task.projectId || '',
-                estimated_hours: task.estimatedHours,
-                worked_hours: task.workedHours,
-                actual_hours: task.actualHours,
-                start_date: task.startDate,
-                end_date: task.endDate,
-                completed_date: task.completedDate,
-                created_date: task.createdDate,
+                clientId: task.clientId,
+                clientName: task.clientName,
+                projectId: task.projectId || '',
+                estimatedHours: task.estimatedHours,
+                workedHours: task.workedHours,
+                actualHours: task.actualHours,
+                startDate: task.startDate,
+                endDate: task.endDate,
+                completedDate: task.completedDate,
+                createdDate: task.createdDate,
                 notes: task.notes,
                 assets: task.assets
               })}
@@ -295,10 +376,10 @@ const Index = () => {
         ) : (
           /* Standard User Dashboard - Simplified view */
           <DashboardTasksTimeline
-            projects={projects}
-            tasks={tasks}
-            milestones={milestones}
-            clients={clients}
+            projects={projects.map(transformProjectForDashboard)}
+            tasks={tasks.map(transformTaskForTimeline)}
+            milestones={milestones.map(transformMilestoneForDashboard)}
+            clients={clients.map(transformClientForDashboard)}
             onAddTask={handleAddTask}
             onUpdateTask={handleUpdateTask}
             onDeleteTask={deleteTask}
