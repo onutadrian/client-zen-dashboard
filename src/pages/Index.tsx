@@ -222,9 +222,9 @@ const Index = () => {
     editTask(task.id, taskData);
   };
 
-  // Handle task table update - TaskTable expects this signature
+  // Handle task table update - Create a wrapper that matches TaskTable's expected signature
   const handleTaskTableUpdate = (taskId: number, updates: Partial<import('@/types/task').Task>) => {
-    // Convert updates to the expected format for the main updateTask function
+    // Extract status and actualHours from the updates object
     if (updates.status) {
       updateTask(taskId, updates.status, updates.actualHours);
     }
@@ -264,6 +264,31 @@ const Index = () => {
       assets: transformedTask.assets || []
     };
     editTask(transformedTask.id, taskData);
+  };
+
+  // Create a wrapper for DashboardTasksTimeline that matches its expected signature
+  const handleDashboardAddTask = (task: Omit<MainTask, 'id' | 'created_date'>) => {
+    // Convert MainTask format to HookTask format
+    const hookTaskData = {
+      title: task.title,
+      description: task.description || '',
+      clientId: task.client_id,
+      clientName: task.client_name,
+      projectId: task.project_id,
+      estimatedHours: task.estimated_hours || 0,
+      startDate: task.start_date || '',
+      endDate: task.end_date || '',
+      notes: task.notes || '',
+      assets: task.assets || []
+    };
+    addTask(hookTaskData);
+  };
+
+  const handleDashboardUpdateTask = (taskId: number, updates: Partial<MainTask>) => {
+    // Convert MainTask updates to HookTask format
+    if (updates.status) {
+      updateTask(taskId, updates.status, updates.actual_hours);
+    }
   };
 
   if (authLoading) {
@@ -380,8 +405,8 @@ const Index = () => {
             tasks={tasks.map(transformTaskForTimeline)}
             milestones={milestones.map(transformMilestoneForDashboard)}
             clients={clients.map(transformClientForDashboard)}
-            onAddTask={handleAddTask}
-            onUpdateTask={handleUpdateTask}
+            onAddTask={handleDashboardAddTask}
+            onUpdateTask={handleDashboardUpdateTask}
             onDeleteTask={deleteTask}
             onEditTask={handleEditTask}
             hideFinancialColumns={true}
