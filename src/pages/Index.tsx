@@ -140,9 +140,9 @@ const Index = () => {
     editTask(task.id, taskData);
   };
 
-  // Handle task table update (different signature for TaskTable)
+  // Handle task table update - fix function signature to match TaskTable expectation
   const handleTaskTableUpdate = (taskId: number, updates: any) => {
-    // Convert updates to the expected format
+    // Convert updates to the expected format for the main updateTask function
     if (updates.status) {
       updateTask(taskId, updates.status, updates.actualHours);
     }
