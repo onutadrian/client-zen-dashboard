@@ -30,7 +30,7 @@ const TaskCard = ({
     const updates: Partial<Task> = { status: newStatus };
     
     if (newStatus === 'completed') {
-      updates.completedDate = new Date().toISOString();
+      updates.completed_date = new Date().toISOString();
     }
     
     onUpdateTask(task.id, updates);
@@ -79,16 +79,16 @@ const TaskCard = ({
               <span>📋 {project?.name || 'Unknown Project'}</span>
               <span>👤 {client?.name || 'Unknown Client'}</span>
               
-              {task.estimatedHours && (
-                <span>⏱️ {task.estimatedHours}h estimated</span>
+              {task.estimated_hours && (
+                <span>⏱️ {task.estimated_hours}h estimated</span>
               )}
               
-              {task.workedHours && task.workedHours > 0 && (
-                <span>✅ {task.workedHours}h worked</span>
+              {task.worked_hours && task.worked_hours > 0 && (
+                <span>✅ {task.worked_hours}h worked</span>
               )}
               
-              {task.endDate && (
-                <span>📅 Due {format(parseISO(task.endDate), 'MMM d')}</span>
+              {task.end_date && (
+                <span>📅 Due {format(parseISO(task.end_date), 'MMM d')}</span>
               )}
             </div>
           </div>
