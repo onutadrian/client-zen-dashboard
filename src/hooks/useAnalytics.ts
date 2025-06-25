@@ -10,6 +10,14 @@ interface AnalyticsParams {
   dateRange?: DateRange;
 }
 
+interface Invoice {
+  id: number;
+  amount: number;
+  date: string;
+  status: string;
+  currency?: string;
+}
+
 export const useAnalytics = (params?: AnalyticsParams) => {
   const { user } = useAuth();
   const { displayCurrency, convert } = useCurrency();
@@ -143,7 +151,9 @@ export const useAnalytics = (params?: AnalyticsParams) => {
         const invoiceRevenue = clients.reduce((sum, client) => {
           if (!client.invoices || !Array.isArray(client.invoices)) return sum;
           
-          const clientInvoiceRevenue = client.invoices.reduce((clientSum, invoice) => {
+          const clientInvoiceRevenue = client.invoices.reduce((clientSum, invoiceJson) => {
+            // Type assertion for invoice object
+            const invoice = invoiceJson as Invoice;
             const invoiceDate = new Date(invoice.date);
             
             // Check if invoice is within date range
@@ -246,7 +256,9 @@ export const useAnalytics = (params?: AnalyticsParams) => {
         
         // Revenue from client invoices
         if (client.invoices && Array.isArray(client.invoices)) {
-          const invoiceClientRevenue = client.invoices.reduce((sum, invoice) => {
+          const invoiceClientRevenue = client.invoices.reduce((sum, invoiceJson) => {
+            // Type assertion for invoice object
+            const invoice = invoiceJson as Invoice;
             const invoiceDate = new Date(invoice.date);
             
             if (params?.dateRange?.from && invoiceDate < params.dateRange.from) return sum;
