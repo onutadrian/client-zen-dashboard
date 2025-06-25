@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ interface DashboardTasksTimelineProps {
   onUpdateTask: (taskId: number, updates: Partial<Task>) => void;
   onDeleteTask: (taskId: number) => void;
   onEditTask: (task: Task) => void;
+  onAddTaskClick: () => void;
   hideFinancialColumns?: boolean;
 }
 
@@ -28,6 +30,7 @@ const DashboardTasksTimeline = ({
   onUpdateTask,
   onDeleteTask,
   onEditTask,
+  onAddTaskClick,
   hideFinancialColumns = false
 }: DashboardTasksTimelineProps) => {
   const [activeTab, setActiveTab] = useState('tasks');
@@ -89,7 +92,7 @@ const DashboardTasksTimeline = ({
             Tasks & Timeline
           </CardTitle>
           <Button 
-            onClick={() => console.log('Add task clicked')}
+            onClick={onAddTaskClick}
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="w-4 h-4 mr-2" />
