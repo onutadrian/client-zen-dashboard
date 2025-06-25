@@ -1,184 +1,65 @@
+
 import React, { useState, useEffect } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import { useAuth } from '@/hooks/useAuth';
+import { useAdminCheck } from '@/hooks/useAdminCheck';
+import { useCurrency } from '@/hooks/useCurrency';
+import MainContentGrid from '@/components/MainContentGrid';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
-import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
-import ModalsContainer from '@/components/ModalsContainer';
-import PeriodFilter, { PeriodOption } from '@/components/PeriodFilter';
-import { useClients } from '@/hooks/useClients';
-import { useSubscriptions } from '@/hooks/useSubscriptions';
-import { useProjects } from '@/hooks/useProjects';
-import { useTasks } from '@/hooks/useTasks';
-import { useMilestones } from '@/hooks/useMilestones';
-import { useAnalytics } from '@/hooks/useAnalytics';
-import { useCurrency } from '@/hooks/useCurrency';
-import { useAuth } from '@/hooks/useAuth';
-import { convertCurrency, formatCurrency } from '@/lib/currency';
-import { 
-  startOfMonth, 
-  endOfMonth, 
-  subMonths, 
-  startOfYear, 
-  endOfYear, 
-  subYears,
-  endOfDay
-} from 'date-fns';
+import AdminSetupNotice from '@/components/AdminSetupNotice';
+import { Loader2 } from 'lucide-react';
 
 const Index = () => {
-  const { displayCurrency } = useCurrency();
-  const { isAdmin } = useAuth();
-  const [showClientModal, setShowClientModal] = useState(false);
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  const [showEditSubscriptionModal, setShowEditSubscriptionModal] = useState(false);
-  const [selectedSubscription, setSelectedSubscription] = useState(null);
-  const [forceRefresh, setForceRefresh] = useState(0);
-  
-  // Period filter state
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption>('all-time');
-  const [customDateRange, setCustomDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
-    from: undefined,
-    to: undefined
-  });
-  
-  // Calculate actual date range based on selected period
-  const [calculatedDateRange, setCalculatedDateRange] = useState<{ startDate?: Date; endDate?: Date }>({
-    startDate: undefined,
-    endDate: undefined
-  });
-
-  const { clients, addClient, updateClient } = useClients();
-  const { subscriptions, addSubscription, updateSubscription } = useSubscriptions();
-  const { projects } = useProjects();
-  const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks();
-  const { milestones } = useMilestones();
-  const analytics = useAnalytics(
-    clients, 
-    subscriptions, 
-    displayCurrency, 
-    calculatedDateRange.startDate, 
-    calculatedDateRange.endDate
-  );
   const { isMobile } = useSidebar();
+  const { loading: authLoading, profile } = useAuth();
+  const { isCheckingAdmin, needsAdminSetup, isAdmin } = useAdminCheck();
+  const { displayCurrency } = useCurrency();
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // Calculate date range when period changes
+  // Force refresh when currency changes
   useEffect(() => {
-    const today = new Date();
-    let startDate: Date | undefined;
-    let endDate: Date | undefined;
-    
-    switch (selectedPeriod) {
-      case 'all-time':
-        // No date filtering
-        startDate = undefined;
-        endDate = undefined;
-        break;
-      case 'this-month':
-        startDate = startOfMonth(today);
-        endDate = endOfDay(today);
-        break;
-      case 'last-month':
-        const lastMonth = subMonths(today, 1);
-        startDate = startOfMonth(lastMonth);
-        endDate = endOfMonth(lastMonth);
-        break;
-      case 'this-year':
-        startDate = startOfYear(today);
-        endDate = endOfDay(today);
-        break;
-      case 'last-year':
-        const lastYear = subYears(today, 1);
-        startDate = startOfYear(lastYear);
-        endDate = endOfYear(lastYear);
-        break;
-      case 'custom':
-        startDate = customDateRange.from;
-        endDate = customDateRange.to ? endOfDay(customDateRange.to) : undefined;
-        break;
-    }
-    
-    setCalculatedDateRange({ startDate, endDate });
-  }, [selectedPeriod, customDateRange]);
+    setRefreshKey(prev => prev + 1);
+  }, [displayCurrency]);
 
-  // Listen for currency changes to force refresh
-  useEffect(() => {
-    const handleCurrencyChange = () => {
-      setForceRefresh(prev => prev + 1);
-    };
-
-    window.addEventListener('currencyChanged', handleCurrencyChange);
-    
-    return () => {
-      window.removeEventListener('currencyChanged', handleCurrencyChange);
-    };
-  }, []);
-
-  const handleEditSubscription = (subscription) => {
-    setSelectedSubscription(subscription);
-    setShowEditSubscriptionModal(true);
+  const handleRefresh = () => {
+    window.location.reload();
   };
+
+  if (authLoading || isCheckingAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F3F3F2' }}>
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (needsAdminSetup) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F3F3F2' }}>
+        <AdminSetupNotice onRefresh={handleRefresh} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center justify-between mb-6">
-          {isMobile && <SidebarTrigger />}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            {isMobile && <SidebarTrigger />}
+            <h1 className="text-3xl font-bold text-slate-800">Dashboard</h1>
+          </div>
         </div>
 
         <DashboardHeader />
-
-        {isAdmin && (
-          <>
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-slate-800">Dashboard Analytics</h2>
-              <PeriodFilter
-                selectedPeriod={selectedPeriod}
-                onPeriodChange={setSelectedPeriod}
-                customDateRange={customDateRange}
-                onCustomDateChange={setCustomDateRange}
-              />
-            </div>
-
-            <AnalyticsSection
-              key={`analytics-${displayCurrency}-${forceRefresh}-${selectedPeriod}`}
-              totalClients={analytics.totalClients}
-              activeClients={analytics.activeClients}
-              totalHours={analytics.totalHours}
-              totalRevenue={analytics.totalRevenue}
-              monthlySubscriptionCost={analytics.monthlySubscriptionCost}
-              totalPaidToDate={analytics.totalPaidToDate}
-              clients={clients}
-              displayCurrency={displayCurrency}
-              convertCurrency={convertCurrency}
-              formatCurrency={formatCurrency}
-              timeBreakdown={analytics.timeBreakdown}
-              revenueBreakdown={analytics.revenueBreakdown}
-            />
-          </>
-        )}
-
-        <DashboardTasksTimeline
-          projects={projects}
-          tasks={tasks}
-          milestones={milestones}
-          clients={clients}
-          onAddTask={addTask}
-          onUpdateTask={updateTask}
-          onDeleteTask={deleteTask}
-          onEditTask={editTask}
-        />
-
-        <ModalsContainer
-          showClientModal={showClientModal}
-          onCloseClientModal={() => setShowClientModal(false)}
-          onAddClient={addClient}
-          showSubscriptionModal={showSubscriptionModal}
-          onCloseSubscriptionModal={() => setShowSubscriptionModal(false)}
-          onAddSubscription={addSubscription}
-          showEditSubscriptionModal={showEditSubscriptionModal}
-          onCloseEditSubscriptionModal={() => setShowEditSubscriptionModal(false)}
-          selectedSubscription={selectedSubscription}
-          onUpdateSubscription={updateSubscription}
-        />
+        
+        <AnalyticsSection key={refreshKey} />
+        
+        <MainContentGrid />
       </div>
     </div>
   );
