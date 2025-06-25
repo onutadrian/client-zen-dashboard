@@ -60,20 +60,31 @@ export const useAnalytics = (params?: AnalyticsParams) => {
       // Calculate revenue from multiple sources
       let totalRevenue = 0;
       
-      // 1. Revenue from hour entries (hourly work)
+      // 1. Revenue from hour entries (hourly work) - only for hourly projects/clients
       const hourlyRevenue = calculateHourlyRevenue(hourEntries, projects, clients, convert, displayCurrency);
-      totalRevenue += hourlyRevenue;
       console.log('Hourly revenue calculated:', hourlyRevenue);
 
-      // 2. Revenue from client invoices
+      // 2. Revenue from client invoices - this should be the main source for most revenue
       const invoiceRevenue = calculateInvoiceRevenue(clients, params, convert, displayCurrency);
-      totalRevenue += invoiceRevenue;
       console.log('Invoice revenue calculated:', invoiceRevenue);
 
-      // 3. Revenue from fixed-price projects
+      // 3. Revenue from fixed-price projects - only when completed
       const fixedProjectRevenue = calculateFixedProjectRevenue(projects, params, convert, displayCurrency);
-      totalRevenue += fixedProjectRevenue;
       console.log('Fixed project revenue calculated:', fixedProjectRevenue);
+
+      // For most cases, we should primarily use invoice revenue as it represents actual payments
+      // Hourly revenue should only be added if there are no corresponding invoices
+      // Fixed project revenue should only be added when projects are completed
+      
+      // Start with invoice revenue as the primary source
+      totalRevenue = invoiceRevenue;
+      
+      // Add hourly revenue only for unbilled hours (this might need refinement based on your business logic)
+      // For now, let's comment this out to avoid double counting
+      // totalRevenue += hourlyRevenue;
+      
+      // Add fixed project revenue for completed projects
+      totalRevenue += fixedProjectRevenue;
 
       console.log('Total revenue calculated:', totalRevenue);
 
