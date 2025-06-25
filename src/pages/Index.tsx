@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
-import { useAdminCheck } from '@/hooks/useAdminCheck';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { usePeriodFilter } from '@/hooks/usePeriodFilter';
@@ -14,13 +13,11 @@ import MainContentGrid from '@/components/MainContentGrid';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
-import AdminSetupNotice from '@/components/AdminSetupNotice';
 import { Loader2 } from 'lucide-react';
 
 const Index = () => {
   const { isMobile } = useSidebar();
-  const { loading: authLoading, profile } = useAuth();
-  const { isCheckingAdmin, needsAdminSetup, isAdmin } = useAdminCheck();
+  const { loading: authLoading, profile, isAdmin } = useAuth();
   const { displayCurrency } = useCurrency();
   
   // Period filtering
@@ -41,25 +38,13 @@ const Index = () => {
   const { milestones } = useMilestones();
   const { clients } = useClients();
 
-  const handleRefresh = () => {
-    window.location.reload();
-  };
-
-  if (authLoading || isCheckingAdmin) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F3F3F2' }}>
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
           <p className="text-slate-600">Loading...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (needsAdminSetup) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F3F3F2' }}>
-        <AdminSetupNotice onRefresh={handleRefresh} />
       </div>
     );
   }
@@ -76,23 +61,26 @@ const Index = () => {
 
         <DashboardHeader />
         
-        <AnalyticsSection 
-          totalClients={analytics.totalClients}
-          activeClients={analytics.activeClients}
-          totalHours={analytics.totalHours}
-          totalRevenue={analytics.totalRevenue}
-          monthlySubscriptionCost={analytics.monthlySubscriptionCost}
-          totalPaidToDate={analytics.totalPaidToDate}
-          clients={analytics.clients}
-          displayCurrency={analytics.displayCurrency}
-          formatCurrency={analytics.formatCurrency}
-          timeBreakdown={analytics.timeBreakdown}
-          revenueBreakdown={analytics.revenueBreakdown}
-          selectedPeriod={selectedPeriod}
-          onPeriodChange={setSelectedPeriod}
-          customDateRange={customDateRange}
-          onCustomDateChange={setCustomDateRange}
-        />
+        {/* Only show analytics for admin users */}
+        {isAdmin && (
+          <AnalyticsSection 
+            totalClients={analytics.totalClients}
+            activeClients={analytics.activeClients}
+            totalHours={analytics.totalHours}
+            totalRevenue={analytics.totalRevenue}
+            monthlySubscriptionCost={analytics.monthlySubscriptionCost}
+            totalPaidToDate={analytics.totalPaidToDate}
+            clients={analytics.clients}
+            displayCurrency={analytics.displayCurrency}
+            formatCurrency={analytics.formatCurrency}
+            timeBreakdown={analytics.timeBreakdown}
+            revenueBreakdown={analytics.revenueBreakdown}
+            selectedPeriod={selectedPeriod}
+            onPeriodChange={setSelectedPeriod}
+            customDateRange={customDateRange}
+            onCustomDateChange={setCustomDateRange}
+          />
+        )}
 
         <DashboardTasksTimeline
           projects={projects}
@@ -103,6 +91,7 @@ const Index = () => {
           onUpdateTask={updateTask}
           onDeleteTask={deleteTask}
           onEditTask={editTask}
+          hideFinancialColumns={!isAdmin}
         />
       </div>
     </div>

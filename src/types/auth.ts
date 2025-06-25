@@ -1,3 +1,4 @@
+
 import { User, Session } from '@supabase/supabase-js';
 
 export type UserRole = 'admin' | 'standard';
@@ -20,13 +21,15 @@ export interface AuthContextType {
   isAdmin: boolean;
 }
 
-export interface InviteCode {
+export interface UserInvite {
   id: string;
-  code: string;
+  email: string;
   role: UserRole;
+  token: string;
+  invited_by?: string;
   created_at: string;
-  created_by?: string;
-  expires_at?: string;
+  expires_at: string;
+  used: boolean;
+  used_at?: string;
   used_by?: string;
-  is_used: boolean;
 }

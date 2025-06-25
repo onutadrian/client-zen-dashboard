@@ -3,7 +3,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import React from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { UserProfile, AuthContextType, UserRole } from '@/types/auth';
+import { UserProfile, AuthContextType } from '@/types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -46,17 +46,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Fetch user profile from the profiles table with timeout
   const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
       console.log('Fetching user profile for:', userId);
       
-      // Create a timeout promise
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 10000); // 10 second timeout
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 10000);
       });
 
-      // Race between the actual query and timeout
       const profilePromise = supabase
         .from('profiles')
         .select('*')
@@ -67,7 +64,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching user profile:', error);
-        console.log('Profile fetch failed, but continuing with default values');
         return null;
       }
 
@@ -75,7 +71,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return data as UserProfile;
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
-      console.log('Profile fetch threw exception, but continuing with default values');
       return null;
     }
   };
@@ -83,7 +78,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     console.log('Setting up auth state listener...');
     
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
@@ -103,7 +97,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setProfile(null);
             setIsAdmin(false);
           } finally {
-            // Always set loading to false after attempting to fetch profile
             console.log('Setting loading to false after profile fetch attempt');
             setLoading(false);
           }
@@ -117,7 +110,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Check for existing session
     const checkSession = async () => {
       try {
         console.log('Checking for existing session...');
@@ -128,7 +120,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('No existing session, setting loading to false');
           setLoading(false);
         }
-        // If session exists, the onAuthStateChange will handle it
       } catch (error) {
         console.error('Error checking session:', error);
         console.log('Session check failed, setting loading to false');

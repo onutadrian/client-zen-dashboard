@@ -1,155 +1,151 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, User, FileText, Link as LinkIcon, CheckCircle, Play } from 'lucide-react';
-import CaptureWorkedHoursModal from './CaptureWorkedHoursModal';
-import { Task } from '@/types/task';
-import { useAuth } from '@/hooks/useAuth';
+import { Badge } from '@/components/ui/badge';
+import { Task, Project, Client } from '@/types';
+import { CheckCircle, Clock, Edit2, Trash2, PlayCircle, PauseCircle } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 
 interface TaskCardProps {
   task: Task;
-  onUpdateStatus: (taskId: number, status: Task['status'], actualHours?: number) => void;
-  isHourlyClient: boolean;
+  project?: Project;
+  client?: Client;
+  onUpdateTask: (taskId: number, updates: Partial<Task>) => void;
+  onDeleteTask: (taskId: number) => void;
+  onEditTask: (task: Task) => void;
+  hideFinancialInfo?: boolean;
 }
 
-const TaskCard = ({ task, onUpdateStatus, isHourlyClient }: TaskCardProps) => {
-  const [showHoursModal, setShowHoursModal] = useState(false);
-  const { isAdmin } = useAuth();
+const TaskCard = ({ 
+  task, 
+  project, 
+  client, 
+  onUpdateTask, 
+  onDeleteTask, 
+  onEditTask,
+  hideFinancialInfo = false
+}: TaskCardProps) => {
+  const handleStatusUpdate = (newStatus: Task['status']) => {
+    const updates: Partial<Task> = { status: newStatus };
+    
+    if (newStatus === 'completed') {
+      updates.completedDate = new Date().toISOString();
+    }
+    
+    onUpdateTask(task.id, updates);
+  };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getStatusIcon = () => {
+    switch (task.status) {
       case 'completed':
-        return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-100';
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
       case 'in-progress':
-        return 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100';
+        return <Clock className="w-4 h-4 text-blue-600" />;
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100';
+        return <Clock className="w-4 h-4 text-slate-400" />;
     }
   };
 
-  const handleCompleteTask = () => {
-    setShowHoursModal(true);
-  };
-
-  const handleWorkedHoursSubmit = (workedHours: number) => {
-    onUpdateStatus(task.id, 'completed', workedHours);
-  };
-
-  const handleStartTask = () => {
-    onUpdateStatus(task.id, 'in-progress');
+  const getStatusColor = () => {
+    switch (task.status) {
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'in-progress':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-slate-100 text-slate-800';
+    }
   };
 
   return (
-    <>
-      <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h3 className="font-semibold text-slate-800 mb-1">{task.title}</h3>
-              <div className="flex items-center space-x-4 text-sm text-slate-600">
-                <div className="flex items-center">
-                  <User className="w-4 h-4 mr-1" />
-                  <span>{task.clientName}</span>
-                </div>
-                {task.workedHours && task.workedHours > 0 && (
-                  <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-1" />
-                    <span className="text-green-600">{task.workedHours}h worked</span>
-                  </div>
-                )}
-                <Badge className={getStatusColor(task.status)}>
-                  {task.status.replace('-', ' ')}
-                </Badge>
-              </div>
+    <Card className="border border-slate-200 hover:shadow-sm transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center space-x-2 mb-2">
+              {getStatusIcon()}
+              <h4 className="font-medium text-slate-900">{task.title}</h4>
+              <Badge className={getStatusColor()}>
+                {task.status}
+              </Badge>
             </div>
-            {isAdmin && (
-              <div className="flex items-center space-x-2">
-                {task.status === 'pending' && (
-                  <Button size="sm" variant="outline" onClick={handleStartTask}>
-                    <Play className="w-3 h-3 mr-1" />
-                    Start
-                  </Button>
-                )}
-                {task.status === 'in-progress' && (
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleCompleteTask}>
-                    <CheckCircle className="w-3 h-3 mr-1" />
-                    Complete
-                  </Button>
-                )}
-              </div>
+            
+            {task.description && (
+              <p className="text-sm text-slate-600 mb-3">{task.description}</p>
             )}
+            
+            <div className="flex items-center space-x-4 text-sm text-slate-500">
+              <span>📋 {project?.name || 'Unknown Project'}</span>
+              <span>👤 {client?.name || 'Unknown Client'}</span>
+              
+              {task.estimatedHours && (
+                <span>⏱️ {task.estimatedHours}h estimated</span>
+              )}
+              
+              {task.workedHours && task.workedHours > 0 && (
+                <span>✅ {task.workedHours}h worked</span>
+              )}
+              
+              {task.endDate && (
+                <span>📅 Due {format(parseISO(task.endDate), 'MMM d')}</span>
+              )}
+            </div>
           </div>
-        </CardHeader>
-        
-        <CardContent className="pt-0">
-          {task.description && (
-            <p className="text-slate-600 text-sm mb-3 line-clamp-2">{task.description}</p>
-          )}
           
-          {task.notes && (
-            <div className="mb-3">
-              <div className="flex items-center mb-1">
-                <FileText className="w-4 h-4 mr-1 text-slate-500" />
-                <span className="text-sm font-medium text-slate-700">Notes</span>
-              </div>
-              <p className="text-sm text-slate-600 bg-slate-50 p-2 rounded line-clamp-2">{task.notes}</p>
-            </div>
-          )}
-          
-          {task.assets.length > 0 && (
-            <div className="mb-3">
-              <div className="flex items-center mb-2">
-                <LinkIcon className="w-4 h-4 mr-1 text-slate-500" />
-                <span className="text-sm font-medium text-slate-700">Assets ({task.assets.length})</span>
-              </div>
-              <div className="space-y-1">
-                {task.assets.slice(0, 2).map((asset, index) => (
-                  <div key={index} className="text-sm">
-                    {asset.startsWith('http') ? (
-                      <a 
-                        href={asset} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 hover:underline line-clamp-1"
-                      >
-                        {asset}
-                      </a>
-                    ) : (
-                      <span className="text-slate-600 line-clamp-1">{asset}</span>
-                    )}
-                  </div>
-                ))}
-                {task.assets.length > 2 && (
-                  <div className="text-xs text-slate-500">
-                    +{task.assets.length - 2} more assets
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          
-          <div className="text-xs text-slate-500 pt-2 border-t">
-            Created: {new Date(task.createdDate).toLocaleDateString()}
-            {task.completedDate && (
+          <div className="flex items-center space-x-2 ml-4">
+            {task.status === 'pending' && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleStatusUpdate('in-progress')}
+                className="text-blue-600 hover:text-blue-700"
+              >
+                <PlayCircle className="w-4 h-4" />
+              </Button>
+            )}
+            
+            {task.status === 'in-progress' && (
               <>
-                {' • '}
-                Completed: {new Date(task.completedDate).toLocaleDateString()}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleStatusUpdate('pending')}
+                  className="text-amber-600 hover:text-amber-700"
+                >
+                  <PauseCircle className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleStatusUpdate('completed')}
+                  className="text-green-600 hover:text-green-700"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                </Button>
               </>
             )}
+            
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onEditTask(task)}
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
+            
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onDeleteTask(task.id)}
+              className="text-red-600 hover:text-red-700"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
           </div>
-        </CardContent>
-      </Card>
-
-      <CaptureWorkedHoursModal
-        isOpen={showHoursModal}
-        onClose={() => setShowHoursModal(false)}
-        task={task}
-        onComplete={handleWorkedHoursSubmit}
-      />
-    </>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

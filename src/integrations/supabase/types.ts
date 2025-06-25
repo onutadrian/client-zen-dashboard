@@ -124,39 +124,6 @@ export type Database = {
           },
         ]
       }
-      invite_codes: {
-        Row: {
-          code: string
-          created_at: string
-          created_by: string | null
-          expires_at: string | null
-          id: string
-          is_used: boolean
-          role: Database["public"]["Enums"]["user_role"]
-          used_by: string | null
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          created_by?: string | null
-          expires_at?: string | null
-          id?: string
-          is_used?: boolean
-          role?: Database["public"]["Enums"]["user_role"]
-          used_by?: string | null
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          created_by?: string | null
-          expires_at?: string | null
-          id?: string
-          is_used?: boolean
-          role?: Database["public"]["Enums"]["user_role"]
-          used_by?: string | null
-        }
-        Relationships: []
-      }
       invoices: {
         Row: {
           amount: number
@@ -286,7 +253,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
-          role: Database["public"]["Enums"]["user_role"]
+          role: string
           updated_at: string
         }
         Insert: {
@@ -294,7 +261,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
-          role?: Database["public"]["Enums"]["user_role"]
+          role?: string
           updated_at?: string
         }
         Update: {
@@ -302,7 +269,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["user_role"]
+          role?: string
           updated_at?: string
         }
         Relationships: []
@@ -513,6 +480,45 @@ export type Database = {
           },
         ]
       }
+      user_invites: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          role: string
+          token: string
+          used: boolean
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          role: string
+          token: string
+          used?: boolean
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: string
+          token?: string
+          used?: boolean
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -521,7 +527,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      user_role: "admin" | "standard"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -636,8 +642,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      user_role: ["admin", "standard"],
-    },
+    Enums: {},
   },
 } as const
