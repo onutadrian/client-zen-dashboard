@@ -54,25 +54,56 @@ export const fetchHourEntriesData = async (params?: any) => {
 };
 
 export const fetchInvoicesData = async (params?: any) => {
-  console.log('Fetching invoices...');
-  let invoicesQuery = supabase.from('invoices').select('*');
+  console.log('Fetching invoices from client arrays...');
   
-  if (params?.dateRange?.from) {
-    invoicesQuery = invoicesQuery.gte('date', params.dateRange.from.toISOString().split('T')[0]);
-  }
-  if (params?.dateRange?.to) {
-    invoicesQuery = invoicesQuery.lte('date', params.dateRange.to.toISOString().split('T')[0]);
+  // Fetch all clients with their invoices
+  const { data: clients, error: clientsError } = await supabase
+    .from('clients')
+    .select('id, name, currency, invoices');
+
+  if (clientsError) {
+    console.error('Error fetching clients for invoices:', clientsError);
+    throw clientsError;
   }
 
-  const { data: invoices, error: invoicesError } = await invoicesQuery;
-
-  if (invoicesError) {
-    console.error('Error fetching invoices:', invoicesError);
-    throw invoicesError;
+  // Extract all invoices from client arrays
+  const allInvoices = [];
+  
+  if (clients) {
+    for (const client of clients) {
+      if (client.invoices && Array.isArray(client.invoices)) {
+        for (const invoice of client.invoices) {
+          // Add client info to each invoice for processing
+          const enrichedInvoice = {
+            ...invoice,
+            client_id: client.id,
+            client_name: client.name,
+            client_currency: client.currency
+          };
+          
+          // Apply date filtering if specified
+          if (params?.dateRange?.from || params?.dateRange?.to) {
+            const invoiceDate = new Date(invoice.date);
+            
+            if (params.dateRange.from && invoiceDate < params.dateRange.from) continue;
+            if (params.dateRange.to && invoiceDate > params.dateRange.to) continue;
+          }
+          
+          allInvoices.push(enrichedInvoice);
+        }
+      }
+    }
   }
   
-  console.log('Invoices fetched:', invoices?.length || 0);
-  return invoices;
+  console.log('Invoices extracted from clients:', allInvoices.length);
+  console.log('Invoice details:', allInvoices.map(inv => ({
+    amount: inv.amount,
+    currency: inv.currency || inv.client_currency,
+    status: inv.status,
+    date: inv.date
+  })));
+  
+  return allInvoices;
 };
 
 export const fetchSubscriptionsData = async (params?: any) => {

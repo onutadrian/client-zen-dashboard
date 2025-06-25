@@ -38,14 +38,23 @@ export const calculateInvoiceRevenue = (
 ) => {
   if (!invoices) return 0;
 
+  console.log('Calculating invoice revenue for', invoices.length, 'invoices');
+
   return invoices.reduce((sum, invoice) => {
     // Only count paid invoices
     if (invoice.status === 'paid') {
       const amount = parseFloat(invoice.amount?.toString() || '0');
-      if (isNaN(amount)) return sum;
+      if (isNaN(amount)) {
+        console.warn('Invalid amount for invoice:', invoice);
+        return sum;
+      }
       
-      const invoiceCurrency = invoice.currency || 'USD';
+      // Use invoice currency, fallback to client currency, then USD
+      const invoiceCurrency = invoice.currency || invoice.client_currency || 'USD';
       const convertedAmount = convert(amount, invoiceCurrency, displayCurrency);
+      
+      console.log(`Invoice: ${amount} ${invoiceCurrency} -> ${convertedAmount} ${displayCurrency}`);
+      
       return sum + convertedAmount;
     }
     
