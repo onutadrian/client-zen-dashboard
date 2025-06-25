@@ -12,7 +12,7 @@ interface AnalyticsParams {
 
 export const useAnalytics = (params?: AnalyticsParams) => {
   const { user } = useAuth();
-  const { displayCurrency } = useCurrency();
+  const { displayCurrency, convert } = useCurrency();
   const [analytics, setAnalytics] = useState({
     totalClients: 0,
     activeClients: 0,
@@ -108,11 +108,12 @@ export const useAnalytics = (params?: AnalyticsParams) => {
         return sum + hours;
       }, 0) || 0;
 
-      // Calculate revenue based on currency
+      // Calculate revenue from multiple sources
       let totalRevenue = 0;
       
+      // 1. Revenue from hour entries (hourly work)
       if (clients && hourEntries && projects) {
-        totalRevenue = hourEntries.reduce((sum, entry) => {
+        const hourlyRevenue = hourEntries.reduce((sum, entry) => {
           const hours = parseFloat(entry.hours?.toString() || '0');
           const project = projects.find(p => p.id === entry.project_id);
           const client = clients.find(c => c.id === entry.client_id);
@@ -124,18 +125,85 @@ export const useAnalytics = (params?: AnalyticsParams) => {
             rate = parseFloat(client.price?.toString() || '0');
           }
           
-          return sum + (hours * rate);
+          const entryRevenue = hours * rate;
+          
+          // Convert to display currency if needed
+          const projectCurrency = project?.currency || client?.currency || 'USD';
+          const convertedRevenue = convert(entryRevenue, projectCurrency, displayCurrency);
+          
+          return sum + convertedRevenue;
         }, 0);
+        
+        totalRevenue += hourlyRevenue;
+        console.log('Hourly revenue calculated:', hourlyRevenue);
       }
+
+      // 2. Revenue from client invoices (if within date range)
+      if (clients) {
+        const invoiceRevenue = clients.reduce((sum, client) => {
+          if (!client.invoices || !Array.isArray(client.invoices)) return sum;
+          
+          const clientInvoiceRevenue = client.invoices.reduce((clientSum, invoice) => {
+            const invoiceDate = new Date(invoice.date);
+            
+            // Check if invoice is within date range
+            if (params?.dateRange?.from && invoiceDate < params.dateRange.from) return clientSum;
+            if (params?.dateRange?.to && invoiceDate > params.dateRange.to) return clientSum;
+            
+            // Only count paid invoices
+            if (invoice.status === 'paid') {
+              const amount = parseFloat(invoice.amount?.toString() || '0');
+              const invoiceCurrency = invoice.currency || client.currency || 'USD';
+              const convertedAmount = convert(amount, invoiceCurrency, displayCurrency);
+              return clientSum + convertedAmount;
+            }
+            
+            return clientSum;
+          }, 0);
+          
+          return sum + clientInvoiceRevenue;
+        }, 0);
+        
+        totalRevenue += invoiceRevenue;
+        console.log('Invoice revenue calculated:', invoiceRevenue);
+      }
+
+      // 3. Revenue from fixed-price projects (if completed within date range)
+      if (projects && clients) {
+        const fixedProjectRevenue = projects.reduce((sum, project) => {
+          if (project.pricing_type === 'fixed' && project.fixed_price && project.status === 'completed') {
+            // Check if project was completed within date range
+            const completedDate = project.end_date ? new Date(project.end_date) : new Date();
+            
+            if (params?.dateRange?.from && completedDate < params.dateRange.from) return sum;
+            if (params?.dateRange?.to && completedDate > params.dateRange.to) return sum;
+            
+            const amount = parseFloat(project.fixed_price.toString());
+            const projectCurrency = project.currency || 'USD';
+            const convertedAmount = convert(amount, projectCurrency, displayCurrency);
+            return sum + convertedAmount;
+          }
+          return sum;
+        }, 0);
+        
+        totalRevenue += fixedProjectRevenue;
+        console.log('Fixed project revenue calculated:', fixedProjectRevenue);
+      }
+
+      console.log('Total revenue calculated:', totalRevenue);
 
       const monthlySubscriptionCost = subscriptions?.reduce((sum, sub) => {
         const price = parseFloat(sub.price?.toString() || '0');
-        return sum + price;
+        const subCurrency = sub.currency || 'USD';
+        const convertedPrice = convert(price, subCurrency, displayCurrency);
+        return sum + convertedPrice;
       }, 0) || 0;
 
       const totalPaidToDate = subscriptions?.reduce((sum, sub) => {
         const totalPaid = parseFloat(sub.total_paid?.toString() || '0');
-        return sum + totalPaid;
+        const subCurrency = sub.currency || 'USD';
+        const convertedPaid = convert(totalPaid, subCurrency, displayCurrency);
+        return sum + convertedPaid;
       }, 0) || 0;
 
       // Time breakdown by client
@@ -154,7 +222,10 @@ export const useAnalytics = (params?: AnalyticsParams) => {
 
       // Revenue breakdown by client
       const revenueBreakdown = clients?.map(client => {
-        const clientRevenue = hourEntries?.filter(entry => entry.client_id === client.id)
+        let clientRevenue = 0;
+        
+        // Revenue from hourly work
+        const hourlyClientRevenue = hourEntries?.filter(entry => entry.client_id === client.id)
           .reduce((sum, entry) => {
             const hours = parseFloat(entry.hours?.toString() || '0');
             const project = projects?.find(p => p.id === entry.project_id);
@@ -166,8 +237,31 @@ export const useAnalytics = (params?: AnalyticsParams) => {
               rate = parseFloat(client.price?.toString() || '0');
             }
             
-            return sum + (hours * rate);
+            const entryRevenue = hours * rate;
+            const projectCurrency = project?.currency || client.currency || 'USD';
+            return sum + convert(entryRevenue, projectCurrency, displayCurrency);
           }, 0) || 0;
+        
+        clientRevenue += hourlyClientRevenue;
+        
+        // Revenue from client invoices
+        if (client.invoices && Array.isArray(client.invoices)) {
+          const invoiceClientRevenue = client.invoices.reduce((sum, invoice) => {
+            const invoiceDate = new Date(invoice.date);
+            
+            if (params?.dateRange?.from && invoiceDate < params.dateRange.from) return sum;
+            if (params?.dateRange?.to && invoiceDate > params.dateRange.to) return sum;
+            
+            if (invoice.status === 'paid') {
+              const amount = parseFloat(invoice.amount?.toString() || '0');
+              const invoiceCurrency = invoice.currency || client.currency || 'USD';
+              return sum + convert(amount, invoiceCurrency, displayCurrency);
+            }
+            return sum;
+          }, 0);
+          
+          clientRevenue += invoiceClientRevenue;
+        }
 
         return {
           name: client.name,
