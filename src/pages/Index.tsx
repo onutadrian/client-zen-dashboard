@@ -51,16 +51,16 @@ const Index = () => {
     clientId: task.client_id,
     clientName: task.client_name,
     projectId: task.project_id,
-    estimatedHours: task.estimated_hours,
-    actualHours: task.actual_hours,
-    workedHours: task.worked_hours,
+    estimatedHours: task.estimated_hours || 0,
+    actualHours: task.actual_hours || 0,
+    workedHours: task.worked_hours || 0,
     status: task.status,
     notes: task.notes || '',
     assets: task.assets || [],
     createdDate: task.created_date,
-    completedDate: task.completed_date,
-    startDate: task.start_date,
-    endDate: task.end_date
+    completedDate: task.completed_date || '',
+    startDate: task.start_date || '',
+    endDate: task.end_date || ''
   });
 
   // Transform data for ProjectTimeline component
@@ -141,7 +141,7 @@ const Index = () => {
   };
 
   // Handle task table update - fix function signature to match TaskTable expectation
-  const handleTaskTableUpdate = (taskId: number, updates: any) => {
+  const handleTaskTableUpdate = (taskId: number, updates: Partial<import('@/types/task').Task>) => {
     // Convert updates to the expected format for the main updateTask function
     if (updates.status) {
       updateTask(taskId, updates.status, updates.actualHours);
@@ -234,11 +234,11 @@ const Index = () => {
           <div className="space-y-6">
             {/* Tasks Table for Admin */}
             <TaskTable
-              tasks={tasks.map(transformTaskForTaskTable)}
+              tasks={tasks.map((task: Task) => transformTaskForTaskTable(task))}
               clients={clients.map(client => ({
                 id: client.id,
                 name: client.name,
-                priceType: client.price_type || 'hour',
+                priceType: client.priceType || 'hour',
                 hourEntries: [] // TODO: Add hour entries data
               }))}
               projects={projects.map(project => ({
