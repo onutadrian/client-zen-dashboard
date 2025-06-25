@@ -1,5 +1,7 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { fallbackExchangeRates, convertCurrency as convertCurrencyUtil } from '@/lib/currency';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ExchangeRates {
   [currency: string]: {
@@ -17,7 +19,7 @@ export const useCurrency = () => {
   const [loadingRates, setLoadingRates] = useState(true);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
 
-  // Fetch exchange rates from the API
+  // Fetch exchange rates from our edge function
   const fetchExchangeRates = useCallback(async () => {
     try {
       setLoadingRates(true);
@@ -40,69 +42,27 @@ export const useCurrency = () => {
         }
       }
       
-      // Fetch new rates
-      const apiKey = import.meta.env.VITE_APILAYER_API_KEY;
-      if (!apiKey || apiKey === 'your_actual_api_key_here') {
-        console.warn('API key not configured properly. Please set VITE_APILAYER_API_KEY in .env file with your actual APILayer API key.');
-        throw new Error('API key not configured');
+      // Fetch new rates from our edge function
+      console.log('Fetching fresh exchange rates from edge function...');
+      const { data, error } = await supabase.functions.invoke('fetch-exchange-rates');
+      
+      if (error) {
+        console.error('Error calling edge function:', error);
+        throw new Error(`Edge function error: ${error.message}`);
       }
-      
-      // Use the correct currencylayer API endpoint
-      const response = await fetch(`https://api.currencylayer.com/live?access_key=${apiKey}&source=EUR&currencies=USD,RON,GBP`);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Response Error:', response.status, errorText);
-        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
-      }
-      
-      const data = await response.json();
       
       if (!data.success) {
-        console.error('API Error Response:', data);
-        throw new Error(`API request failed: ${data.error?.info || JSON.stringify(data)}`);
+        console.error('Edge function returned error:', data.error);
+        throw new Error(`API error: ${data.error}`);
       }
       
-      // Format the rates into our expected structure
-      // The API returns rates relative to EUR, so we need to calculate cross-rates
-      const eurToUsd = data.quotes.EURUSD;
-      const eurToRon = data.quotes.EURRON;
-      const eurToGbp = data.quotes.EURGBP || 0.85; // Fallback if GBP not available
-      
-      const rates: ExchangeRates = {
-        EUR: {
-          EUR: 1,
-          USD: eurToUsd,
-          RON: eurToRon,
-          GBP: eurToGbp
-        },
-        USD: {
-          EUR: 1 / eurToUsd,
-          USD: 1,
-          RON: eurToRon / eurToUsd,
-          GBP: eurToGbp / eurToUsd
-        },
-        RON: {
-          EUR: 1 / eurToRon,
-          USD: eurToUsd / eurToRon,
-          RON: 1,
-          GBP: eurToGbp / eurToRon
-        },
-        GBP: {
-          EUR: 1 / eurToGbp,
-          USD: eurToUsd / eurToGbp,
-          RON: eurToRon / eurToGbp,
-          GBP: 1
-        }
-      };
-      
-      console.log('Fetched live exchange rates:', rates);
+      console.log('Fetched live exchange rates:', data.rates);
       
       // Cache the rates
-      localStorage.setItem('exchangeRates', JSON.stringify(rates));
+      localStorage.setItem('exchangeRates', JSON.stringify(data.rates));
       localStorage.setItem('exchangeRatesTimestamp', new Date().toISOString());
       
-      setLiveExchangeRates(rates);
+      setLiveExchangeRates(data.rates);
       setLastFetched(new Date());
     } catch (error) {
       console.error('Error fetching exchange rates:', error);
