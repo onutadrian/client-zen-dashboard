@@ -7,13 +7,20 @@ export const useAdminCheck = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
   const [needsAdminSetup, setNeedsAdminSetup] = useState(false);
+  const [hasChecked, setHasChecked] = useState(false);
 
   useEffect(() => {
     const checkAndSetupAdmin = async () => {
-      if (authLoading || !user) {
-        setIsCheckingAdmin(false);
+      console.log('Admin check - authLoading:', authLoading, 'user:', user?.email, 'profile:', profile, 'hasChecked:', hasChecked);
+      
+      if (authLoading || !user || hasChecked) {
+        if (!authLoading && hasChecked) {
+          setIsCheckingAdmin(false);
+        }
         return;
       }
+
+      setHasChecked(true);
 
       // Check if this is the main admin account that needs to be setup
       if (user.email === 'adrian@furtuna.ro' && profile?.role !== 'admin') {
@@ -37,11 +44,12 @@ export const useAdminCheck = () => {
         }
       }
 
+      console.log('Admin check complete, setting isCheckingAdmin to false');
       setIsCheckingAdmin(false);
     };
 
     checkAndSetupAdmin();
-  }, [user, profile, authLoading]);
+  }, [user, profile, authLoading, hasChecked]);
 
   return {
     isCheckingAdmin,

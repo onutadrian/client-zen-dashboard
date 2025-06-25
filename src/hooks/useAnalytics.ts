@@ -22,36 +22,63 @@ export const useAnalytics = () => {
   const [loading, setLoading] = useState(true);
 
   const calculateAnalytics = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user, skipping analytics calculation');
+      setLoading(false);
+      return;
+    }
+
+    console.log('Calculating analytics for user:', user.email);
+    setLoading(true);
 
     try {
       // Fetch clients
+      console.log('Fetching clients...');
       const { data: clients, error: clientsError } = await supabase
         .from('clients')
         .select('*');
 
-      if (clientsError) throw clientsError;
+      if (clientsError) {
+        console.error('Error fetching clients:', clientsError);
+        throw clientsError;
+      }
+      console.log('Clients fetched:', clients?.length || 0);
 
       // Fetch projects
+      console.log('Fetching projects...');
       const { data: projects, error: projectsError } = await supabase
         .from('projects')
         .select('*');
 
-      if (projectsError) throw projectsError;
+      if (projectsError) {
+        console.error('Error fetching projects:', projectsError);
+        throw projectsError;
+      }
+      console.log('Projects fetched:', projects?.length || 0);
 
       // Fetch hour entries
+      console.log('Fetching hour entries...');
       const { data: hourEntries, error: hoursError } = await supabase
         .from('hour_entries')
         .select('*');
 
-      if (hoursError) throw hoursError;
+      if (hoursError) {
+        console.error('Error fetching hour entries:', hoursError);
+        throw hoursError;
+      }
+      console.log('Hour entries fetched:', hourEntries?.length || 0);
 
       // Fetch subscriptions
+      console.log('Fetching subscriptions...');
       const { data: subscriptions, error: subscriptionsError } = await supabase
         .from('subscriptions')
         .select('*');
 
-      if (subscriptionsError) throw subscriptionsError;
+      if (subscriptionsError) {
+        console.error('Error fetching subscriptions:', subscriptionsError);
+        throw subscriptionsError;
+      }
+      console.log('Subscriptions fetched:', subscriptions?.length || 0);
 
       // Calculate metrics
       const totalClients = clients?.length || 0;
@@ -129,7 +156,7 @@ export const useAnalytics = () => {
         };
       }).filter(item => item.revenue > 0) || [];
 
-      setAnalytics({
+      const newAnalytics = {
         totalClients,
         activeClients,
         totalHours,
@@ -139,16 +166,23 @@ export const useAnalytics = () => {
         clients: clients || [],
         timeBreakdown,
         revenueBreakdown
-      });
+      };
+
+      console.log('Analytics calculated:', newAnalytics);
+      setAnalytics(newAnalytics);
     } catch (error) {
       console.error('Error calculating analytics:', error);
     } finally {
+      console.log('Analytics calculation complete, setting loading to false');
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    calculateAnalytics();
+    if (user) {
+      console.log('User changed, recalculating analytics');
+      calculateAnalytics();
+    }
   }, [user, displayCurrency]);
 
   return {
