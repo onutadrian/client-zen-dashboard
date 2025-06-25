@@ -21,6 +21,11 @@ interface ProjectTimelineProps {
   clients: Client[];
 }
 
+interface TaskWithPosition extends Task {
+  position: { left: number; width: number };
+  trackIndex: number;
+}
+
 type ZoomLevel = 'daily' | 'weekly' | 'monthly';
 
 const ProjectTimeline = ({ projects, tasks, milestones, clients }: ProjectTimelineProps) => {
@@ -89,6 +94,51 @@ const ProjectTimeline = ({ projects, tasks, milestones, clients }: ProjectTimeli
     return { left: Math.max(0, left), width: Math.max(2, width) };
   };
 
+  // Function to detect overlapping tasks and assign them to tracks
+  const getTaskTracks = (projectTasks: Task[], project: Project): TaskWithPosition[] => {
+    // Filter tasks with valid dates and calculate positions
+    const tasksWithPositions = projectTasks
+      .filter(task => task.startDate && task.endDate)
+      .map(task => ({
+        ...task,
+        position: getTaskPosition(task, project),
+        trackIndex: 0
+      }))
+      .filter(task => task.position.width > 0)
+      .sort((a, b) => a.position.left - b.position.left);
+
+    if (tasksWithPositions.length === 0) return [];
+
+    // Assign tracks using interval scheduling algorithm
+    const tracks: Array<{ endPosition: number }> = [];
+    
+    tasksWithPositions.forEach(task => {
+      const taskStart = task.position.left;
+      const taskEnd = task.position.left + task.position.width;
+      
+      // Find the first available track
+      let assignedTrack = -1;
+      for (let i = 0; i < tracks.length; i++) {
+        if (tracks[i].endPosition <= taskStart) {
+          assignedTrack = i;
+          break;
+        }
+      }
+      
+      // If no available track found, create a new one
+      if (assignedTrack === -1) {
+        assignedTrack = tracks.length;
+        tracks.push({ endPosition: taskEnd });
+      } else {
+        tracks[assignedTrack].endPosition = taskEnd;
+      }
+      
+      task.trackIndex = assignedTrack;
+    });
+
+    return tasksWithPositions;
+  };
+
   const getMilestonePosition = (milestone: Milestone, project: Project) => {
     const projectStart = new Date(project.startDate);
     const projectEnd = new Date(project.estimatedEndDate);
@@ -154,6 +204,11 @@ const ProjectTimeline = ({ projects, tasks, milestones, clients }: ProjectTimeli
               const projectTasks = getProjectTasks(project.id);
               const projectMilestones = getProjectMilestones(project.id);
               const duration = calculateProjectDuration(project);
+              const tasksWithTracks = getTaskTracks(projectTasks, project);
+              const maxTracks = Math.max(1, Math.max(...tasksWithTracks.map(t => t.trackIndex + 1), 0));
+              const trackHeight = 22; // Height per track in pixels
+              const baseHeight = 32; // Base timeline height
+              const totalHeight = baseHeight + (maxTracks > 1 ? (maxTracks - 1) * trackHeight : 0);
               
               return (
                 <div key={project.id} className="space-y-3">
@@ -173,23 +228,26 @@ const ProjectTimeline = ({ projects, tasks, milestones, clients }: ProjectTimeli
                   {/* Timeline Bar */}
                   <div className="relative">
                     {/* Project Timeline Base */}
-                    <div className="h-8 bg-slate-200 rounded-md relative overflow-hidden">
+                    <div 
+                      className="bg-slate-200 rounded-md relative overflow-hidden"
+                      style={{ height: `${totalHeight}px` }}
+                    >
                       <div 
-                        className={`h-full ${getStatusColor(project.status)} opacity-30 rounded-md`}
+                        className={`h-8 ${getStatusColor(project.status)} opacity-30 rounded-md`}
                       />
                       
-                      {/* Tasks */}
-                      {projectTasks.map((task) => {
-                        const position = getTaskPosition(task, project);
-                        if (position.width === 0) return null;
+                      {/* Tasks with Track-based Positioning */}
+                      {tasksWithTracks.map((task) => {
+                        const topOffset = 4 + (task.trackIndex * trackHeight); // 4px initial offset + track spacing
                         
                         return (
                           <div
                             key={task.id}
-                            className={`absolute top-1 h-6 ${getStatusColor(task.status)} rounded-sm opacity-80`}
+                            className={`absolute h-5 ${getStatusColor(task.status)} rounded-sm opacity-90 border border-white shadow-sm`}
                             style={{
-                              left: `${position.left}%`,
-                              width: `${position.width}%`
+                              left: `${task.position.left}%`,
+                              width: `${task.position.width}%`,
+                              top: `${topOffset}px`
                             }}
                             title={`${task.title} (${task.status})`}
                           />
@@ -203,8 +261,12 @@ const ProjectTimeline = ({ projects, tasks, milestones, clients }: ProjectTimeli
                         return (
                           <div
                             key={milestone.id}
-                            className="absolute top-0 h-8 w-1 bg-red-500 flex items-center justify-center"
-                            style={{ left: `${position}%` }}
+                            className="absolute w-1 bg-red-500 flex items-center justify-center"
+                            style={{ 
+                              left: `${position}%`,
+                              top: '0px',
+                              height: `${totalHeight}px`
+                            }}
                             title={`${milestone.title} - ${new Date(milestone.targetDate).toLocaleDateString()}`}
                           >
                             <Flag className="w-3 h-3 text-red-500 absolute -top-1" />
