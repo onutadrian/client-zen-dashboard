@@ -24,8 +24,9 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { email, role, token, invitedBy }: InviteEmailRequest = await req.json();
     
-    const appUrl = Deno.env.get("SUPABASE_URL")?.replace("https://", "https://app.");
-    const inviteUrl = `${appUrl || "http://localhost:5173"}/auth?invite=${token}`;
+    // Use APP_URL environment variable if set, otherwise fall back to localhost for development
+    const appUrl = Deno.env.get("APP_URL") || "http://localhost:5173";
+    const inviteUrl = `${appUrl}/auth?invite=${token}`;
 
     const emailResponse = await resend.emails.send({
       from: "Project Manager <noreply@furtuna.ro>",
