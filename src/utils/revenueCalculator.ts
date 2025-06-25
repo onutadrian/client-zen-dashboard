@@ -32,46 +32,24 @@ export const calculateHourlyRevenue = (
 };
 
 export const calculateInvoiceRevenue = (
-  clients: any[],
-  params: any,
+  invoices: any[],
   convert: (amount: number, from: string, to: string) => number,
   displayCurrency: string
 ) => {
-  if (!clients) return 0;
+  if (!invoices) return 0;
 
-  return clients.reduce((sum, client) => {
-    if (!client.invoices || !Array.isArray(client.invoices)) return sum;
+  return invoices.reduce((sum, invoice) => {
+    // Only count paid invoices
+    if (invoice.status === 'paid') {
+      const amount = parseFloat(invoice.amount?.toString() || '0');
+      if (isNaN(amount)) return sum;
+      
+      const invoiceCurrency = invoice.currency || 'USD';
+      const convertedAmount = convert(amount, invoiceCurrency, displayCurrency);
+      return sum + convertedAmount;
+    }
     
-    const clientInvoiceRevenue = client.invoices.reduce((clientSum: number, invoiceJson: any) => {
-      try {
-        // Safe type conversion with validation
-        const invoice = invoiceJson as unknown as Invoice;
-        if (!invoice || typeof invoice !== 'object' || !invoice.date) return clientSum;
-        
-        const invoiceDate = new Date(invoice.date);
-        
-        // Check if invoice is within date range
-        if (params?.dateRange?.from && invoiceDate < params.dateRange.from) return clientSum;
-        if (params?.dateRange?.to && invoiceDate > params.dateRange.to) return clientSum;
-        
-        // Only count paid invoices
-        if (invoice.status === 'paid') {
-          const amount = parseFloat(invoice.amount?.toString() || '0');
-          if (isNaN(amount)) return clientSum;
-          
-          const invoiceCurrency = invoice.currency || client.currency || 'USD';
-          const convertedAmount = convert(amount, invoiceCurrency, displayCurrency);
-          return clientSum + convertedAmount;
-        }
-        
-        return clientSum;
-      } catch (error) {
-        console.warn('Error processing invoice:', error);
-        return clientSum;
-      }
-    }, 0);
-    
-    return sum + clientInvoiceRevenue;
+    return sum;
   }, 0);
 };
 

@@ -53,6 +53,28 @@ export const fetchHourEntriesData = async (params?: any) => {
   return hourEntries;
 };
 
+export const fetchInvoicesData = async (params?: any) => {
+  console.log('Fetching invoices...');
+  let invoicesQuery = supabase.from('invoices').select('*');
+  
+  if (params?.dateRange?.from) {
+    invoicesQuery = invoicesQuery.gte('date', params.dateRange.from.toISOString().split('T')[0]);
+  }
+  if (params?.dateRange?.to) {
+    invoicesQuery = invoicesQuery.lte('date', params.dateRange.to.toISOString().split('T')[0]);
+  }
+
+  const { data: invoices, error: invoicesError } = await invoicesQuery;
+
+  if (invoicesError) {
+    console.error('Error fetching invoices:', invoicesError);
+    throw invoicesError;
+  }
+  
+  console.log('Invoices fetched:', invoices?.length || 0);
+  return invoices;
+};
+
 export const fetchSubscriptionsData = async (params?: any) => {
   console.log('Fetching subscriptions...');
   let subscriptionsQuery = supabase.from('subscriptions').select('*');

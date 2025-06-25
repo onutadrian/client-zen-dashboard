@@ -14,7 +14,6 @@ import MainContentGrid from '@/components/MainContentGrid';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import DashboardTasksTimeline from '@/components/DashboardTasksTimeline';
-import ProjectTimeline from '@/components/ProjectTimeline';
 import AdminSetupNotice from '@/components/AdminSetupNotice';
 import { Loader2 } from 'lucide-react';
 
@@ -104,13 +103,6 @@ const Index = () => {
           onUpdateTask={updateTask}
           onDeleteTask={deleteTask}
           onEditTask={editTask}
-        />
-
-        <ProjectTimeline
-          projects={projects}
-          tasks={tasks}
-          milestones={milestones}
-          clients={clients}
         />
       </div>
     </div>
