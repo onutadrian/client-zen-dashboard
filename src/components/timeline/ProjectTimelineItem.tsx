@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Project } from '@/hooks/useProjects';
@@ -42,6 +41,23 @@ const ProjectTimelineItem = ({ project, tasks, milestones, clients }: ProjectTim
     }
   };
 
+  const getTimelineBackgroundColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100';
+      case 'active':
+        return 'bg-blue-100';
+      case 'on-hold':
+        return 'bg-yellow-100';
+      case 'in-progress':
+        return 'bg-blue-100';
+      case 'pending':
+        return 'bg-gray-100';
+      default:
+        return 'bg-blue-100';
+    }
+  };
+
   const calculateProjectDuration = (project: Project) => {
     const start = new Date(project.startDate);
     const end = new Date(project.estimatedEndDate);
@@ -77,7 +93,7 @@ const ProjectTimelineItem = ({ project, tasks, milestones, clients }: ProjectTim
       {/* Timeline Bar */}
       <div className="relative">
         <div 
-          className="bg-blue-100 rounded-md relative overflow-hidden"
+          className={`${getTimelineBackgroundColor(project.status)} rounded-md relative overflow-hidden`}
           style={{ height: `${totalHeight}px` }}
         >
           {/* Tasks with Track-based Positioning */}
