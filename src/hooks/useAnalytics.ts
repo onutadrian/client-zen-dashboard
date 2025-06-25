@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
 import { formatCurrency } from '@/lib/currency';
 import { AnalyticsData, AnalyticsParams } from '@/utils/analyticsTypes';
-import { calculateHourlyRevenue, calculateInvoiceRevenue, calculateFixedProjectRevenue } from '@/utils/revenueCalculator';
+import { calculateHourlyRevenue, calculateInvoiceRevenue } from '@/utils/revenueCalculator';
 import { calculateTimeBreakdown, calculateRevenueBreakdown } from '@/utils/analyticsBreakdown';
 import { 
   fetchClientsData, 
@@ -59,16 +59,12 @@ export const useAnalytics = (params?: AnalyticsParams) => {
         return sum + hours;
       }, 0) || 0;
 
-      // Calculate revenue from invoices table directly
+      // Calculate revenue ONLY from paid invoices - this is the source of truth
       const invoiceRevenue = calculateInvoiceRevenue(invoices, convert, displayCurrency);
       console.log('Invoice revenue calculated:', invoiceRevenue);
 
-      // Calculate revenue from fixed-price projects when completed
-      const fixedProjectRevenue = calculateFixedProjectRevenue(projects, params, convert, displayCurrency);
-      console.log('Fixed project revenue calculated:', fixedProjectRevenue);
-
-      // Total revenue is the sum of paid invoices and completed fixed projects
-      const totalRevenue = invoiceRevenue + fixedProjectRevenue;
+      // Total revenue is ONLY from paid invoices (no double counting)
+      const totalRevenue = invoiceRevenue;
       console.log('Total revenue calculated:', totalRevenue);
 
       // Calculate subscription costs - multiply price by seats for each subscription

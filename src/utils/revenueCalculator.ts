@@ -52,28 +52,3 @@ export const calculateInvoiceRevenue = (
     return sum;
   }, 0);
 };
-
-export const calculateFixedProjectRevenue = (
-  projects: any[],
-  params: any,
-  convert: (amount: number, from: string, to: string) => number,
-  displayCurrency: string
-) => {
-  if (!projects) return 0;
-
-  return projects.reduce((sum, project) => {
-    if (project.pricing_type === 'fixed' && project.fixed_price && project.status === 'completed') {
-      // Check if project was completed within date range
-      const completedDate = project.end_date ? new Date(project.end_date) : new Date();
-      
-      if (params?.dateRange?.from && completedDate < params.dateRange.from) return sum;
-      if (params?.dateRange?.to && completedDate > params.dateRange.to) return sum;
-      
-      const amount = parseFloat(project.fixed_price.toString());
-      const projectCurrency = project.currency || 'USD';
-      const convertedAmount = convert(amount, projectCurrency, displayCurrency);
-      return sum + convertedAmount;
-    }
-    return sum;
-  }, 0);
-};
