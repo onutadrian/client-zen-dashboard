@@ -43,6 +43,64 @@ const Index = () => {
   // State for task details modal
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
+  // Transform data for TaskTable component which expects different Task type
+  const transformTaskForTaskTable = (task: Task) => ({
+    id: task.id,
+    title: task.title,
+    description: task.description || '',
+    clientId: task.client_id,
+    clientName: task.client_name,
+    projectId: task.project_id,
+    estimatedHours: task.estimated_hours,
+    actualHours: task.actual_hours,
+    workedHours: task.worked_hours,
+    status: task.status,
+    notes: task.notes || '',
+    assets: task.assets || [],
+    createdDate: task.created_date,
+    completedDate: task.completed_date,
+    startDate: task.start_date,
+    endDate: task.end_date
+  });
+
+  // Transform data for ProjectTimeline component
+  const transformProjectForTimeline = (project: any) => ({
+    id: project.id,
+    name: project.name,
+    clientId: project.clientId,
+    startDate: project.startDate,
+    estimatedEndDate: project.estimatedEndDate,
+    endDate: project.endDate,
+    status: project.status,
+    notes: project.notes,
+    documents: project.documents,
+    team: project.team,
+    archived: project.archived,
+    pricingType: project.pricingType,
+    fixedPrice: project.fixedPrice,
+    hourlyRate: project.hourlyRate,
+    dailyRate: project.dailyRate,
+    estimatedHours: project.estimatedHours,
+    currency: project.currency,
+    invoices: project.invoices
+  });
+
+  // Transform data for milestones
+  const transformMilestoneForTimeline = (milestone: any) => ({
+    id: milestone.id,
+    projectId: milestone.projectId,
+    title: milestone.title,
+    description: milestone.description,
+    targetDate: milestone.targetDate,
+    status: milestone.status,
+    amount: milestone.amount,
+    currency: milestone.currency,
+    completionPercentage: milestone.completionPercentage,
+    estimatedHours: milestone.estimatedHours,
+    createdAt: milestone.createdAt,
+    updatedAt: milestone.updatedAt
+  });
+
   // Create wrapper functions to match expected interfaces
   const handleAddTask = (task: Omit<Task, 'id' | 'created_date'>) => {
     // Convert to expected format for the hook, adding missing required properties
@@ -65,21 +123,66 @@ const Index = () => {
     updateTask(taskId, status, actualHours);
   };
 
-  const handleEditTask = (task: Task) => {
+  const handleEditTask = (task: any) => {
     // Convert to expected format for the hook
     const taskData = {
       title: task.title,
       description: task.description || '',
-      clientId: task.client_id,
-      clientName: task.client_name,
-      projectId: task.project_id,
-      estimatedHours: task.estimated_hours || 0,
-      startDate: task.start_date || '',
-      endDate: task.end_date || '',
+      clientId: task.clientId,
+      clientName: task.clientName,
+      projectId: task.projectId,
+      estimatedHours: task.estimatedHours || 0,
+      startDate: task.startDate || '',
+      endDate: task.endDate || '',
       notes: task.notes || '',
       assets: task.assets || []
     };
     editTask(task.id, taskData);
+  };
+
+  // Handle task table update (different signature for TaskTable)
+  const handleTaskTableUpdate = (taskId: number, updates: any) => {
+    // Convert updates to the expected format
+    if (updates.status) {
+      updateTask(taskId, updates.status, updates.actualHours);
+    }
+  };
+
+  const handleTaskTableEdit = (task: any) => {
+    // Transform back to main Task type
+    const transformedTask: Task = {
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      client_id: task.clientId,
+      client_name: task.clientName,
+      project_id: task.projectId,
+      user_id: task.user_id,
+      estimated_hours: task.estimatedHours,
+      worked_hours: task.workedHours,
+      actual_hours: task.actualHours,
+      start_date: task.startDate,
+      end_date: task.endDate,
+      completed_date: task.completedDate,
+      created_date: task.createdDate,
+      notes: task.notes,
+      assets: task.assets
+    };
+    
+    const taskData = {
+      title: transformedTask.title,
+      description: transformedTask.description || '',
+      clientId: transformedTask.client_id,
+      clientName: transformedTask.client_name,
+      projectId: transformedTask.project_id,
+      estimatedHours: transformedTask.estimated_hours || 0,
+      startDate: transformedTask.start_date || '',
+      endDate: transformedTask.end_date || '',
+      notes: transformedTask.notes || '',
+      assets: transformedTask.assets || []
+    };
+    editTask(transformedTask.id, taskData);
   };
 
   if (authLoading) {
@@ -131,21 +234,47 @@ const Index = () => {
           <div className="space-y-6">
             {/* Tasks Table for Admin */}
             <TaskTable
-              tasks={tasks as unknown as Task[]}
-              clients={clients as unknown as any[]}
-              projects={projects as unknown as any[]}
-              onTaskClick={setSelectedTask}
-              onUpdateTask={handleUpdateTask}
+              tasks={tasks.map(transformTaskForTaskTable)}
+              clients={clients.map(client => ({
+                id: client.id,
+                name: client.name,
+                priceType: client.price_type || 'hour',
+                hourEntries: [] // TODO: Add hour entries data
+              }))}
+              projects={projects.map(project => ({
+                id: project.id,
+                name: project.name,
+                clientId: project.clientId
+              }))}
+              onTaskClick={(task) => setSelectedTask({
+                id: task.id,
+                title: task.title,
+                description: task.description,
+                status: task.status,
+                client_id: task.clientId,
+                client_name: task.clientName,
+                project_id: task.projectId || '',
+                estimated_hours: task.estimatedHours,
+                worked_hours: task.workedHours,
+                actual_hours: task.actualHours,
+                start_date: task.startDate,
+                end_date: task.endDate,
+                completed_date: task.completedDate,
+                created_date: task.createdDate,
+                notes: task.notes,
+                assets: task.assets
+              })}
+              onUpdateTask={handleTaskTableUpdate}
               onDeleteTask={deleteTask}
-              onEditTask={handleEditTask}
+              onEditTask={handleTaskTableEdit}
             />
 
             {/* Project Timeline for Admin */}
             <ProjectTimeline
-              projects={projects as unknown as Project[]}
-              tasks={tasks as unknown as Task[]}
-              milestones={milestones as unknown as Milestone[]}
-              clients={clients as unknown as Client[]}
+              projects={projects.map(transformProjectForTimeline)}
+              tasks={tasks}
+              milestones={milestones.map(transformMilestoneForTimeline)}
+              clients={clients}
             />
 
             {/* Main Content Grid for Admin */}
