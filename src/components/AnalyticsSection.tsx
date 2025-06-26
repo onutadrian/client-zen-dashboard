@@ -67,6 +67,13 @@ const AnalyticsSection = ({
     return rounded.toString();
   };
 
+  // Special formatting for hours - always show actual hours, not abbreviated
+  const formatHours = (hours) => {
+    const numHours = typeof hours === 'string' ? parseFloat(hours.replace(/[^0-9.-]/g, '')) : hours;
+    if (isNaN(numHours)) return hours;
+    return `${Math.round(numHours)}h`;
+  };
+
   const getOriginalValue = (value, isCurrency = false) => {
     if (isCurrency) {
       return value;
@@ -111,6 +118,7 @@ const AnalyticsSection = ({
       value: totalClients,
       originalValue: totalClients.toString(),
       isCurrency: false,
+      isTime: false,
       subtitle: "client accounts",
       statusRows: getClientStatusRows(),
       details: clients.slice(0, 3).map(client => client.name)
@@ -120,6 +128,7 @@ const AnalyticsSection = ({
       value: totalHours,
       originalValue: `${totalHours.toFixed(1)} hours`,
       isCurrency: false,
+      isTime: true,
       subtitle: "tracked hours",
       statusRows: [],
       details: timeBreakdown.slice(0, 3)
@@ -129,6 +138,7 @@ const AnalyticsSection = ({
       value: formatCurrency(totalRevenue, displayCurrency),
       originalValue: formatCurrency(totalRevenue, displayCurrency),
       isCurrency: true,
+      isTime: false,
       subtitle: "from paid invoices",
       statusRows: [],
       details: revenueBreakdown.slice(0, 3)
@@ -138,6 +148,7 @@ const AnalyticsSection = ({
       value: formatCurrency(monthlySubscriptionCost, displayCurrency),
       originalValue: formatCurrency(monthlySubscriptionCost, displayCurrency),
       isCurrency: true,
+      isTime: false,
       subtitle: "subscription expenses",
       statusRows: [],
       details: null
@@ -147,6 +158,7 @@ const AnalyticsSection = ({
       value: formatCurrency(totalPaidToDate, displayCurrency),
       originalValue: formatCurrency(totalPaidToDate, displayCurrency),
       isCurrency: true,
+      isTime: false,
       subtitle: "all subscriptions",
       statusRows: [],
       details: null
@@ -156,6 +168,7 @@ const AnalyticsSection = ({
       value: formatCurrency(netProfitAnnual, displayCurrency),
       originalValue: formatCurrency(netProfitAnnual, displayCurrency),
       isCurrency: true,
+      isTime: false,
       subtitle: "annual estimate",
       statusRows: [],
       details: revenueBreakdown.slice(0, 3)
@@ -181,7 +194,12 @@ const AnalyticsSection = ({
           {stats.map((stat, index) => {
             const trend = getTrendData(stat.title);
             const TrendIcon = trend.isIncrease ? TrendingUp : TrendingDown;
-            const formattedValue = formatMetric(stat.value, stat.isCurrency, displayCurrency);
+            
+            // Use special formatting for time, regular formatting for others
+            const formattedValue = stat.isTime 
+              ? formatHours(stat.value)
+              : formatMetric(stat.value, stat.isCurrency, displayCurrency);
+            
             const needsTooltip = typeof stat.value === 'number' ? stat.value >= 1000 : 
               (typeof stat.value === 'string' && parseFloat(stat.value.replace(/[^0-9.-]/g, '')) >= 1000);
             
@@ -241,7 +259,7 @@ const AnalyticsSection = ({
 
                   {/* Section 2: Bottom metric */}
                   <div className="mt-2 lg:mt-4">
-                    {needsTooltip ? (
+                    {needsTooltip && !stat.isTime ? (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <p 
