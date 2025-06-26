@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Client } from '@/types/client';
@@ -17,10 +18,12 @@ export const useClients = () => {
 
   const loadClients = async () => {
     try {
+      console.log('useClients - Loading clients...');
       const clientsData = await loadClientsFromSupabase();
+      console.log('useClients - Loaded clients:', clientsData);
       setClients(clientsData);
     } catch (error) {
-      console.error('Error loading clients:', error);
+      console.error('useClients - Error loading clients:', error);
       toast({
         title: "Error",
         description: "Failed to load clients",

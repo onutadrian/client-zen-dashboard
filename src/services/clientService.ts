@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Client } from '@/types/client';
 import { transformSupabaseClient, transformClientForSupabase, mapPriceType } from '@/utils/clientUtils';
@@ -6,18 +5,41 @@ import { transformSupabaseClient, transformClientForSupabase, mapPriceType } fro
 export const loadClientsFromSupabase = async (): Promise<Client[]> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
+    console.log('loadClientsFromSupabase - No user found');
     return [];
   }
 
+  console.log('loadClientsFromSupabase - User ID:', user.id);
+
+  // Check user role first
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError) {
+    console.error('loadClientsFromSupabase - Profile error:', profileError);
+    throw profileError;
+  }
+
+  console.log('loadClientsFromSupabase - User role:', profile.role);
+
+  // Get clients based on RLS policies
   const { data, error } = await supabase
     .from('clients')
     .select('*')
-    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
+
+  console.log('loadClientsFromSupabase - Raw clients from DB:', data);
+  console.log('loadClientsFromSupabase - DB error:', error);
 
   if (error) throw error;
 
-  return data.map(transformSupabaseClient);
+  const transformedClients = data.map(transformSupabaseClient);
+  console.log('loadClientsFromSupabase - Transformed clients:', transformedClients);
+
+  return transformedClients;
 };
 
 export const addClientToSupabase = async (newClient: any): Promise<Client> => {
