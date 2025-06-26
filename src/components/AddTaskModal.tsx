@@ -151,6 +151,12 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
     onClose();
   };
 
+  // Debug logging to see what clients and projects are available
+  console.log('AddTaskModal - Available clients:', clients);
+  console.log('AddTaskModal - Available projects:', projects);
+  console.log('AddTaskModal - Selected client ID:', clientId);
+  console.log('AddTaskModal - Available projects for client:', availableProjects);
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -189,14 +195,20 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
                 setProjectId(null); // Reset project when client changes
               }}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a client" />
+                  <SelectValue placeholder={clients.length === 0 ? "No clients available" : "Select a client"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id.toString()}>
-                      {client.name}
+                  {clients.length === 0 ? (
+                    <SelectItem value="no-clients" disabled>
+                      No clients available
                     </SelectItem>
-                  ))}
+                  ) : (
+                    clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id.toString()}>
+                        {client.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -205,14 +217,20 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
               <Label htmlFor="project">Project *</Label>
               <Select value={projectId || ''} onValueChange={setProjectId} disabled={!clientId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a project" />
+                  <SelectValue placeholder={!clientId ? "Select a client first" : availableProjects.length === 0 ? "No projects available" : "Select a project"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableProjects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.name}
+                  {availableProjects.length === 0 ? (
+                    <SelectItem value="no-projects" disabled>
+                      {!clientId ? "Select a client first" : "No projects available"}
                     </SelectItem>
-                  ))}
+                  ) : (
+                    availableProjects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -285,7 +303,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={clients.length === 0}>
               {task ? 'Update Task' : 'Add Task'}
             </Button>
           </div>
