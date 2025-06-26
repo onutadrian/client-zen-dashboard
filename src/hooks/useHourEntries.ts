@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -260,11 +261,11 @@ export const useHourEntries = () => {
 
       console.log('Authenticated user confirmed, proceeding with delete for user:', user.id);
 
+      // For admin users, don't restrict by user_id - let RLS policies handle the authorization
       const { error } = await supabase
         .from('hour_entries')
         .delete()
-        .eq('id', entryId)
-        .eq('user_id', user.id); // Ensure we only delete entries belonging to the current user
+        .eq('id', entryId);
 
       if (error) {
         console.error('Supabase delete error:', error);
