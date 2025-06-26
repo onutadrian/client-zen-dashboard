@@ -45,7 +45,17 @@ export function ValidatedForm<T>({
 
     const validation = validateData(schema, data);
     
-    if (!validation.success) {
+    if (validation.success) {
+      try {
+        await onSubmit(validation.data);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "An error occurred while submitting the form. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } else {
       // Track validation errors for security monitoring
       validation.errors.forEach(error => {
         const fieldMatch = error.match(/^([^:]+):/);
@@ -62,17 +72,6 @@ export function ValidatedForm<T>({
           variant: "destructive",
         });
       }
-      return;
-    }
-
-    try {
-      await onSubmit(validation.data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred while submitting the form. Please try again.",
-        variant: "destructive",
-      });
     }
   };
 
