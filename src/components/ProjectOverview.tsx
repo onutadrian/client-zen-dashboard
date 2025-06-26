@@ -3,7 +3,6 @@ import React from 'react';
 import ProjectTimeTrackingSection from './ProjectTimeTrackingSection';
 import ProjectMilestoneSection from './ProjectMilestoneSection';
 import ProjectTaskSection from './ProjectTaskSection';
-import TimeEntryDebugTable from './TimeEntryDebugTable';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/types/client';
 import { Milestone } from '@/hooks/useMilestones';
@@ -36,9 +35,6 @@ const ProjectOverview = ({
 }: ProjectOverviewProps) => {
   return (
     <div className="space-y-6">
-      {/* Debug Table - Remove this after fixing the issue */}
-      <TimeEntryDebugTable projectId={project.id} />
-
       {/* Project Hours/Revenue Section */}
       <ProjectTimeTrackingSection 
         project={project}
