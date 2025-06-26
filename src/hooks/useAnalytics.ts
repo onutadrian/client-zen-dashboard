@@ -50,14 +50,31 @@ export const useAnalytics = (params?: AnalyticsParams) => {
         fetchSubscriptionsData(params)
       ]);
 
+      // Debug hour entries
+      console.log('Raw hour entries:', hourEntries);
+      console.log('Number of hour entries:', hourEntries?.length || 0);
+      
       // Calculate basic metrics
       const totalClients = clients?.length || 0;
       const activeClients = clients?.filter(client => client.status === 'active').length || 0;
       
       const totalHours = hourEntries?.reduce((sum, entry) => {
         const hours = parseFloat(entry.hours?.toString() || '0');
+        console.log(`Entry ${entry.id}: ${hours} hours on ${entry.date} for client ${entry.client_id}`);
         return sum + hours;
       }, 0) || 0;
+
+      console.log('Total hours calculated:', totalHours);
+      
+      // Show breakdown by client
+      const hoursByClient = hourEntries?.reduce((acc, entry) => {
+        const clientId = entry.client_id;
+        const hours = parseFloat(entry.hours?.toString() || '0');
+        acc[clientId] = (acc[clientId] || 0) + hours;
+        return acc;
+      }, {} as Record<number, number>) || {};
+      
+      console.log('Hours by client:', hoursByClient);
 
       // Calculate revenue ONLY from paid invoices - this is the source of truth
       const invoiceRevenue = calculateInvoiceRevenue(invoices, convert, displayCurrency);
