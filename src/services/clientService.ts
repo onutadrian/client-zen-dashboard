@@ -6,7 +6,6 @@ import { transformSupabaseClient, transformClientForSupabase, mapPriceType } fro
 export const loadClientsFromSupabase = async (): Promise<Client[]> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    console.log('User not authenticated');
     return [];
   }
 
@@ -48,7 +47,6 @@ export const updateClientInSupabase = async (clientId: number, updatedClient: an
 
   // Transform to Supabase format with explicit price type mapping
   const mappedPriceType = mapPriceType(updatedClient.priceType);
-  console.log('Updating client with price type:', updatedClient.priceType, 'mapped to:', mappedPriceType);
   
   const supabaseUpdate = {
     name: updatedClient.name,
@@ -63,8 +61,6 @@ export const updateClientInSupabase = async (clientId: number, updatedClient: an
     currency: updatedClient.currency
   };
 
-  console.log('Supabase update payload:', supabaseUpdate);
-
   const { error } = await supabase
     .from('clients')
     .update(supabaseUpdate)
@@ -72,7 +68,6 @@ export const updateClientInSupabase = async (clientId: number, updatedClient: an
     .eq('user_id', user.id); // Ensure user can only update their own clients
 
   if (error) {
-    console.error('Supabase update error:', error);
     throw error;
   }
 };

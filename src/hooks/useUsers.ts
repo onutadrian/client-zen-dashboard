@@ -18,11 +18,8 @@ export const useUsers = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Supabase error:', error);
         throw error;
       }
-
-      console.log('Fetched users:', data);
       
       // Type assertion to ensure role is properly typed
       const typedUsers = (data || []).map(user => ({
@@ -33,14 +30,12 @@ export const useUsers = () => {
       setUsers(typedUsers);
       
       if (typedUsers.length === 0) {
-        console.log('No users found in database');
         toast({
           title: "No Users",
           description: "No users found in the system",
         });
       }
     } catch (error) {
-      console.error('Error fetching users:', error);
       toast({
         title: "Error",
         description: `Failed to load users: ${error.message}`,
@@ -67,7 +62,6 @@ export const useUsers = () => {
 
       await fetchUsers();
     } catch (error) {
-      console.error('Error updating user role:', error);
       toast({
         title: "Error",
         description: "Failed to update user role",

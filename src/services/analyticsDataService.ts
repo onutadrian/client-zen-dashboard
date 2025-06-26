@@ -2,37 +2,30 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export const fetchClientsData = async () => {
-  console.log('Fetching clients...');
   const { data: clients, error: clientsError } = await supabase
     .from('clients')
     .select('*');
 
   if (clientsError) {
-    console.error('Error fetching clients:', clientsError);
     throw clientsError;
   }
   
-  console.log('Clients fetched:', clients?.length || 0);
   return clients;
 };
 
 export const fetchProjectsData = async () => {
-  console.log('Fetching projects...');
   const { data: projects, error: projectsError } = await supabase
     .from('projects')
     .select('*');
 
   if (projectsError) {
-    console.error('Error fetching projects:', projectsError);
     throw projectsError;
   }
   
-  console.log('Projects fetched:', projects?.length || 0);
   return projects;
 };
 
 export const fetchHourEntriesData = async (params?: any) => {
-  console.log('Fetching hour entries...');
   let hourEntriesQuery = supabase.from('hour_entries').select('*');
   
   if (params?.dateRange?.from) {
@@ -45,24 +38,19 @@ export const fetchHourEntriesData = async (params?: any) => {
   const { data: hourEntries, error: hoursError } = await hourEntriesQuery;
 
   if (hoursError) {
-    console.error('Error fetching hour entries:', hoursError);
     throw hoursError;
   }
   
-  console.log('Hour entries fetched:', hourEntries?.length || 0);
   return hourEntries;
 };
 
 export const fetchInvoicesData = async (params?: any) => {
-  console.log('Fetching invoices from client arrays...');
-  
   // Fetch all clients with their invoices
   const { data: clients, error: clientsError } = await supabase
     .from('clients')
     .select('id, name, currency, invoices');
 
   if (clientsError) {
-    console.error('Error fetching clients for invoices:', clientsError);
     throw clientsError;
   }
 
@@ -107,19 +95,10 @@ export const fetchInvoicesData = async (params?: any) => {
     }
   }
   
-  console.log('Invoices extracted from clients:', allInvoices.length);
-  console.log('Invoice details:', allInvoices.map(inv => ({
-    amount: inv.amount,
-    currency: inv.currency || inv.client_currency,
-    status: inv.status,
-    date: inv.date
-  })));
-  
   return allInvoices;
 };
 
 export const fetchSubscriptionsData = async (params?: any) => {
-  console.log('Fetching subscriptions...');
   let subscriptionsQuery = supabase.from('subscriptions').select('*');
   
   if (params?.dateRange?.from) {
@@ -132,10 +111,8 @@ export const fetchSubscriptionsData = async (params?: any) => {
   const { data: subscriptions, error: subscriptionsError } = await subscriptionsQuery;
 
   if (subscriptionsError) {
-    console.error('Error fetching subscriptions:', subscriptionsError);
     throw subscriptionsError;
   }
   
-  console.log('Subscriptions fetched:', subscriptions?.length || 0);
   return subscriptions;
 };

@@ -14,7 +14,6 @@ export const mapPriceType = (priceType: string) => {
   };
   
   const mappedType = mapping[priceType] || 'hour';
-  console.log('Mapping price type:', priceType, 'to:', mappedType);
   return mappedType;
 };
 
@@ -36,10 +35,6 @@ export const transformSupabaseClient = (client: any) => ({
 // Transform client data for Supabase format
 export const transformClientForSupabase = (client: any, userId: string) => {
   const mappedPriceType = mapPriceType(client.priceType);
-  console.log('Transforming client for Supabase:', {
-    originalPriceType: client.priceType,
-    mappedPriceType: mappedPriceType
-  });
   
   return {
     name: client.name,

@@ -10,13 +10,6 @@ export const createHourEntryForCompletedTask = async (
     throw new Error('Task must have a project ID to create hour entry');
   }
 
-  console.log('Creating hour entry for completed task:', {
-    taskId: task.id,
-    projectId: task.projectId,
-    clientId: task.clientId,
-    hours: workedHours
-  });
-
   // Get the current authenticated user
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   
@@ -36,8 +29,6 @@ export const createHourEntryForCompletedTask = async (
     user_id: user.id
   };
 
-  console.log('Inserting hour entry:', supabaseEntry);
-
   const { data, error } = await supabase
     .from('hour_entries')
     .insert([supabaseEntry])
@@ -45,8 +36,6 @@ export const createHourEntryForCompletedTask = async (
     .single();
 
   if (error) throw error;
-
-  console.log('Hour entry created successfully:', data);
   
   return data;
 };

@@ -46,8 +46,6 @@ export function ValidatedForm<T>({
     const validation = validateData(schema, data);
     
     if (!validation.success) {
-      console.warn(`Validation failed for ${formName}:`, validation.errors);
-      
       // Track validation errors for security monitoring
       validation.errors.forEach(error => {
         const fieldMatch = error.match(/^([^:]+):/);
@@ -70,7 +68,6 @@ export function ValidatedForm<T>({
     try {
       await onSubmit(validation.data);
     } catch (error) {
-      console.error(`Form submission error for ${formName}:`, error);
       toast({
         title: "Error",
         description: "An error occurred while submitting the form. Please try again.",

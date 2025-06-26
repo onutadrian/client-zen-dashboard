@@ -30,14 +30,8 @@ export const useSecurityAudit = () => {
     details?: Record<string, any>
   ) => {
     try {
-      console.log(`Security Audit: ${action} on ${resourceType}`, {
-        resourceId,
-        details,
-        timestamp: new Date().toISOString()
-      });
-
       // In a production environment, you would send this to a secure audit log
-      // For now, we'll just log to console and show a toast for critical actions
+      // For now, we'll just show a toast for critical actions
       if (['user_role_changed', 'admin_access', 'bulk_delete', 'data_export'].includes(action)) {
         toast({
           title: "Security Action Logged",
@@ -45,7 +39,7 @@ export const useSecurityAudit = () => {
         });
       }
     } catch (error) {
-      console.error('Failed to log security action:', error);
+      // Silent fail for audit logging to not disrupt user experience
     }
   };
 
@@ -59,12 +53,11 @@ export const useSecurityAudit = () => {
       // - Unusual access times
       // - Access from new locations
       // - Bulk operations
-      console.log('Checking access patterns for security anomalies...');
       
       // Placeholder for real security monitoring
       // In production, this would connect to your security monitoring service
     } catch (error) {
-      console.error('Security pattern check failed:', error);
+      // Silent fail for security monitoring
     }
   };
 
@@ -80,7 +73,6 @@ export const useSecurityAudit = () => {
 
     for (const pattern of xssPatterns) {
       if (pattern.test(input)) {
-        console.warn(`Potential XSS attempt detected in ${context}:`, input);
         logSecurityAction('xss_attempt', context, undefined, { input, pattern: pattern.toString() });
         return false;
       }
@@ -94,7 +86,6 @@ export const useSecurityAudit = () => {
 
     for (const pattern of sqlPatterns) {
       if (pattern.test(input)) {
-        console.warn(`Potential SQL injection attempt detected in ${context}:`, input);
         logSecurityAction('sql_injection_attempt', context, undefined, { input, pattern: pattern.toString() });
         return false;
       }
@@ -105,8 +96,6 @@ export const useSecurityAudit = () => {
 
   // Track validation errors for security monitoring
   const trackValidationError = (field: string, error: string, data: any) => {
-    console.log(`Validation error on ${field}: ${error}`);
-    
     // Log repeated validation errors as potential attack attempts
     const errorKey = `validation_error_${field}`;
     const errorCount = parseInt(sessionStorage.getItem(errorKey) || '0') + 1;
