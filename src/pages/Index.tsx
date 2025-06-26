@@ -1,69 +1,35 @@
 
 import React, { useState } from 'react';
-import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
-import { useAuth } from '@/hooks/useAuth';
-import { useAnalytics } from '@/hooks/useAnalytics';
-import { usePeriodFilter } from '@/hooks/usePeriodFilter';
-import { useProjects } from '@/hooks/useProjects';
-import { useTasks } from '@/hooks/useTasks';
-import { useMilestones } from '@/hooks/useMilestones';
-import { useClients } from '@/hooks/useClients';
+import DashboardContainer from '@/components/dashboard/DashboardContainer';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import UserAnalyticsSection from '@/components/UserAnalyticsSection';
-import TaskTable from '@/components/TaskTable';
-import ProjectTimeline from '@/components/ProjectTimeline';
-import AddTaskModal from '@/components/AddTaskModal';
-import { Loader2 } from 'lucide-react';
+import TaskManagementSection from '@/components/dashboard/TaskManagementSection';
+import TimelineSection from '@/components/dashboard/TimelineSection';
+import { useDashboardData } from '@/hooks/dashboard/useDashboardData';
 import type { Task as HookTask } from '@/types/task';
 
 const Index = () => {
-  const { isMobile } = useSidebar();
-  const { loading: authLoading, profile, isAdmin } = useAuth();
-  
-  // Period filtering
   const {
+    authLoading,
+    isAdmin,
     selectedPeriod,
     setSelectedPeriod,
     customDateRange,
     setCustomDateRange,
-    dateRange
-  } = usePeriodFilter();
-  
-  // Analytics with period support
-  const analytics = useAnalytics({ dateRange });
-  
-  // Data hooks for dashboard sections
-  const { projects } = useProjects();
-  const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks();
-  const { milestones } = useMilestones();
-  const { clients } = useClients();
+    analytics,
+    projects,
+    tasks,
+    addTask,
+    updateTask,
+    deleteTask,
+    editTask,
+    milestones,
+    clients
+  } = useDashboardData();
 
-  // State for modals
   const [selectedTask, setSelectedTask] = useState<HookTask | null>(null);
-  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
 
-  // Transform data for TaskTable component
-  const transformTaskForTaskTable = (task: HookTask) => ({
-    id: task.id,
-    title: task.title,
-    description: task.description || '',
-    clientId: task.clientId,
-    clientName: task.clientName,
-    projectId: task.projectId || '',
-    estimatedHours: task.estimatedHours || 0,
-    actualHours: task.actualHours || 0,
-    workedHours: task.workedHours || 0,
-    status: task.status,
-    notes: task.notes || '',
-    assets: task.assets || [],
-    createdDate: task.createdDate,
-    completedDate: task.completedDate || '',
-    startDate: task.startDate || '',
-    endDate: task.endDate || ''
-  });
-
-  // Create wrapper functions to match expected interfaces
   const handleAddTask = (task: Omit<HookTask, 'id' | 'createdDate'>) => {
     const taskData = {
       title: task.title,
@@ -100,20 +66,15 @@ const Index = () => {
     editTask(task.id, taskData);
   };
 
-  // Handle task table update - TaskTable expects this signature
-  const handleTaskTableUpdate = (taskId: number, status: import('@/types/task').Task['status'], actualHours?: number) => {
-    updateTask(taskId, status, actualHours);
-  };
-
-  const handleTaskTableEdit = (task: any) => {
-    const transformedTask: HookTask = {
+  const handleTaskClick = (task: any) => {
+    setSelectedTask({
       id: task.id,
       title: task.title,
       description: task.description,
       status: task.status,
       clientId: task.clientId,
       clientName: task.clientName,
-      projectId: task.projectId,
+      projectId: task.projectId || '',
       estimatedHours: task.estimatedHours,
       workedHours: task.workedHours,
       actualHours: task.actualHours,
@@ -123,192 +84,64 @@ const Index = () => {
       createdDate: task.createdDate,
       notes: task.notes,
       assets: task.assets
-    };
-    
-    const taskData = {
-      title: transformedTask.title,
-      description: transformedTask.description || '',
-      clientId: transformedTask.clientId,
-      clientName: transformedTask.clientName,
-      projectId: transformedTask.projectId,
-      estimatedHours: transformedTask.estimatedHours || 0,
-      startDate: transformedTask.startDate || '',
-      endDate: transformedTask.endDate || '',
-      notes: transformedTask.notes || '',
-      assets: transformedTask.assets || []
-    };
-    editTask(transformedTask.id, taskData);
+    });
   };
 
   if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F3F3F2' }}>
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <DashboardContainer><div /></DashboardContainer>;
   }
 
   return (
-    <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            {isMobile && <SidebarTrigger />}
-            <h1 className="text-3xl font-bold text-slate-800">Dashboard</h1>
-          </div>
-        </div>
-
-        <DashboardHeader />
-        
-        {/* Show analytics based on user role */}
-        {isAdmin ? (
-          <AnalyticsSection 
-            totalClients={analytics.totalClients}
-            activeClients={analytics.activeClients}
-            totalHours={analytics.totalHours}
-            totalRevenue={analytics.totalRevenue}
-            monthlySubscriptionCost={analytics.monthlySubscriptionCost}
-            totalPaidToDate={analytics.totalPaidToDate}
-            clients={analytics.clients}
-            displayCurrency={analytics.displayCurrency}
-            formatCurrency={analytics.formatCurrency}
-            timeBreakdown={analytics.timeBreakdown}
-            revenueBreakdown={analytics.revenueBreakdown}
-            selectedPeriod={selectedPeriod}
-            onPeriodChange={setSelectedPeriod}
-            customDateRange={customDateRange}
-            onCustomDateChange={setCustomDateRange}
-          />
-        ) : (
-          <UserAnalyticsSection
-            tasks={tasks}
-            projects={projects}
-            selectedPeriod={selectedPeriod}
-            onPeriodChange={setSelectedPeriod}
-            customDateRange={customDateRange}
-            onCustomDateChange={setCustomDateRange}
-          />
-        )}
-
-        {/* Task Management Table with Add Task button - Available to all users */}
-        <TaskTable
-          tasks={tasks.map(transformTaskForTaskTable)}
-          clients={clients.map(client => ({
-            id: client.id,
-            name: client.name,
-            priceType: client.priceType || 'hour',
-            hourEntries: []
-          }))}
-          projects={projects.map(project => ({
-            id: project.id,
-            name: project.name,
-            clientId: project.clientId
-          }))}
-          onTaskClick={(task) => setSelectedTask({
-            id: task.id,
-            title: task.title,
-            description: task.description,
-            status: task.status,
-            clientId: task.clientId,
-            clientName: task.clientName,
-            projectId: task.projectId || '',
-            estimatedHours: task.estimatedHours,
-            workedHours: task.workedHours,
-            actualHours: task.actualHours,
-            startDate: task.startDate,
-            endDate: task.endDate,
-            completedDate: task.completedDate,
-            createdDate: task.createdDate,
-            notes: task.notes,
-            assets: task.assets
-          })}
-          onUpdateTask={handleUpdateTask}
-          onDeleteTask={deleteTask}
-          onEditTask={handleEditTask}
-          onAddTaskClick={() => setShowAddTaskModal(true)}
+    <DashboardContainer>
+      <DashboardHeader />
+      
+      {isAdmin ? (
+        <AnalyticsSection 
+          totalClients={analytics.totalClients}
+          activeClients={analytics.activeClients}
+          totalHours={analytics.totalHours}
+          totalRevenue={analytics.totalRevenue}
+          monthlySubscriptionCost={analytics.monthlySubscriptionCost}
+          totalPaidToDate={analytics.totalPaidToDate}
+          clients={analytics.clients}
+          displayCurrency={analytics.displayCurrency}
+          formatCurrency={analytics.formatCurrency}
+          timeBreakdown={analytics.timeBreakdown}
+          revenueBreakdown={analytics.revenueBreakdown}
+          selectedPeriod={selectedPeriod}
+          onPeriodChange={setSelectedPeriod}
+          customDateRange={customDateRange}
+          onCustomDateChange={setCustomDateRange}
         />
-
-        {/* Gantt Chart Timeline View - Available to all users */}
-        <ProjectTimeline
-          projects={projects.map(project => ({
-            id: project.id,
-            name: project.name,
-            clientId: project.clientId,
-            startDate: project.startDate,
-            estimatedEndDate: project.estimatedEndDate,
-            endDate: project.endDate,
-            status: project.status,
-            notes: project.notes,
-            documents: project.documents,
-            team: project.team,
-            archived: project.archived,
-            pricingType: project.pricingType,
-            fixedPrice: project.fixedPrice,
-            hourlyRate: project.hourlyRate,
-            dailyRate: project.dailyRate,
-            estimatedHours: project.estimatedHours,
-            currency: project.currency,
-            invoices: project.invoices
-          }))}
-          tasks={tasks.map(task => ({
-            id: task.id,
-            title: task.title,
-            description: task.description || '',
-            status: task.status,
-            projectId: task.projectId || '',
-            clientId: task.clientId,
-            clientName: task.clientName,
-            estimatedHours: task.estimatedHours,
-            actualHours: task.actualHours,
-            workedHours: task.workedHours,
-            startDate: task.startDate,
-            endDate: task.endDate,
-            completedDate: task.completedDate,
-            createdDate: task.createdDate,
-            notes: task.notes,
-            assets: task.assets
-          }))}
-          milestones={milestones.map(milestone => ({
-            id: milestone.id,
-            title: milestone.title,
-            description: milestone.description || '',
-            projectId: milestone.projectId,
-            status: milestone.status,
-            targetDate: milestone.targetDate,
-            amount: milestone.amount,
-            currency: milestone.currency || 'USD',
-            estimatedHours: milestone.estimatedHours,
-            completionPercentage: milestone.completionPercentage,
-            createdAt: milestone.createdAt,
-            updatedAt: milestone.updatedAt
-          }))}
-          clients={clients.map(client => ({
-            id: client.id,
-            name: client.name
-          }))}
+      ) : (
+        <UserAnalyticsSection
+          tasks={tasks}
+          projects={projects}
+          selectedPeriod={selectedPeriod}
+          onPeriodChange={setSelectedPeriod}
+          customDateRange={customDateRange}
+          onCustomDateChange={setCustomDateRange}
         />
+      )}
 
-        {/* Add Task Modal */}
-        <AddTaskModal
-          isOpen={showAddTaskModal}
-          onClose={() => setShowAddTaskModal(false)}
-          onAdd={handleAddTask}
-          clients={clients.map(client => ({
-            id: client.id,
-            name: client.name,
-            priceType: client.priceType || 'hour'
-          }))}
-          projects={projects.map(project => ({
-            id: project.id,
-            name: project.name,
-            clientId: project.clientId
-          }))}
-        />
-      </div>
-    </div>
+      <TaskManagementSection
+        tasks={tasks}
+        clients={clients}
+        projects={projects}
+        onTaskClick={handleTaskClick}
+        onUpdateTask={handleUpdateTask}
+        onDeleteTask={deleteTask}
+        onEditTask={handleEditTask}
+        onAddTask={handleAddTask}
+      />
+
+      <TimelineSection
+        projects={projects}
+        tasks={tasks}
+        milestones={milestones}
+        clients={clients}
+      />
+    </DashboardContainer>
   );
 };
 

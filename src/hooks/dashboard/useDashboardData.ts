@@ -1,0 +1,45 @@
+
+import { useAuth } from '@/hooks/useAuth';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { usePeriodFilter } from '@/hooks/usePeriodFilter';
+import { useProjects } from '@/hooks/useProjects';
+import { useTasks } from '@/hooks/useTasks';
+import { useMilestones } from '@/hooks/useMilestones';
+import { useClients } from '@/hooks/useClients';
+
+export const useDashboardData = () => {
+  const { loading: authLoading, profile, isAdmin } = useAuth();
+  
+  const {
+    selectedPeriod,
+    setSelectedPeriod,
+    customDateRange,
+    setCustomDateRange,
+    dateRange
+  } = usePeriodFilter();
+  
+  const analytics = useAnalytics({ dateRange });
+  const { projects } = useProjects();
+  const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks();
+  const { milestones } = useMilestones();
+  const { clients } = useClients();
+
+  return {
+    authLoading,
+    profile,
+    isAdmin,
+    selectedPeriod,
+    setSelectedPeriod,
+    customDateRange,
+    setCustomDateRange,
+    analytics,
+    projects,
+    tasks,
+    addTask,
+    updateTask,
+    deleteTask,
+    editTask,
+    milestones,
+    clients
+  };
+};
