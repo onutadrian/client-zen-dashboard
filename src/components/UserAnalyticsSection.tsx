@@ -6,14 +6,15 @@ import PeriodFilter from '@/components/PeriodFilter';
 import { CheckCircle, Clock, AlertCircle, BarChart3, Calendar, Target } from 'lucide-react';
 import { Task } from '@/types/task';
 import { Project } from '@/hooks/useProjects';
+import { PeriodOption } from '@/hooks/usePeriodFilter';
 
 interface UserAnalyticsSectionProps {
   tasks: Task[];
   projects: Project[];
-  selectedPeriod: string;
-  onPeriodChange: (period: string) => void;
-  customDateRange: { start: Date; end: Date } | null;
-  onCustomDateChange: (range: { start: Date; end: Date } | null) => void;
+  selectedPeriod: PeriodOption;
+  onPeriodChange: (period: PeriodOption) => void;
+  customDateRange: { from: Date | undefined; to: Date | undefined };
+  onCustomDateChange: (range: { from: Date | undefined; to: Date | undefined }) => void;
 }
 
 const UserAnalyticsSection = ({
