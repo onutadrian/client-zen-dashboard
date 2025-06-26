@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -42,11 +41,47 @@ export const useProjects = () => {
 
   const loadProjects = async () => {
     try {
-      const { data, error } = await supabase
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Get user profile to check role
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      let projectsQuery = supabase
         .from('projects')
         .select('*')
         .order('created_at', { ascending: false });
 
+      // If user is not admin, filter projects based on assignments
+      if (profile.role !== 'admin') {
+        // Get user's assigned projects
+        const { data: assignments, error: assignmentError } = await supabase
+          .from('user_project_assignments')
+          .select('project_id')
+          .eq('user_id', user.id);
+
+        if (assignmentError) throw assignmentError;
+
+        const assignedProjectIds = assignments.map(a => a.project_id);
+        
+        // If no assignments, return empty array
+        if (assignedProjectIds.length === 0) {
+          setProjects([]);
+          return;
+        }
+
+        // Filter projects to only assigned ones
+        projectsQuery = projectsQuery.in('id', assignedProjectIds);
+      }
+
+      const { data, error } = await projectsQuery;
       if (error) throw error;
 
       // Transform Supabase data to match our Project interface

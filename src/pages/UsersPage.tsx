@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -6,19 +5,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserPlus, Loader2, Trash2, Users, Mail, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { UserPlus, Loader2, Trash2, Users, Mail, CheckCircle, XCircle, Clock, Edit } from 'lucide-react';
 import { useUsers } from '@/hooks/useUsers';
 import { useUserInvites } from '@/hooks/useUserInvites';
+import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
 import InviteUserModal from '@/components/InviteUserModal';
+import EditUserModal from '@/components/EditUserModal';
 import { format } from 'date-fns';
+import { UserProfile } from '@/types/auth';
 
 const UsersPage = () => {
   const { isMobile } = useSidebar();
   const { users, loading: usersLoading } = useUsers();
   const { invites, loading: invitesLoading, createInvite, deleteInvite } = useUserInvites();
+  const { projects } = useProjects();
   const { isAdmin } = useAuth();
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
 
   if (!isAdmin) {
     return (
@@ -33,6 +38,11 @@ const UsersPage = () => {
 
   const handleInviteUser = async (email: string, role: 'admin' | 'standard') => {
     await createInvite(email, role);
+  };
+
+  const handleEditUser = (user: UserProfile) => {
+    setSelectedUser(user);
+    setShowEditModal(true);
   };
 
   const activeInvites = invites.filter(invite => !invite.used && new Date(invite.expires_at) > new Date());
@@ -104,6 +114,7 @@ const UsersPage = () => {
                           <TableHead>Email</TableHead>
                           <TableHead>Role</TableHead>
                           <TableHead>Joined</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -120,6 +131,16 @@ const UsersPage = () => {
                             </TableCell>
                             <TableCell>
                               {format(new Date(user.created_at), 'MMM d, yyyy')}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditUser(user)}
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -248,6 +269,13 @@ const UsersPage = () => {
           isOpen={showInviteModal}
           onClose={() => setShowInviteModal(false)}
           onInvite={handleInviteUser}
+        />
+
+        <EditUserModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          user={selectedUser}
+          projects={projects}
         />
       </div>
     </div>

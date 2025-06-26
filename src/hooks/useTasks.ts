@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Task, CreateTaskData, UpdateTaskData } from '@/types/task';
@@ -10,6 +9,7 @@ import {
   editTaskInDatabase 
 } from '@/services/taskService';
 import { createHourEntryForCompletedTask } from '@/services/taskCompletionService';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useTasks = (onHourEntryCreated?: () => void) => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -22,8 +22,40 @@ export const useTasks = (onHourEntryCreated?: () => void) => {
 
   const loadTasks = async () => {
     try {
-      const transformedTasks = await loadTasksFromDatabase();
-      setTasks(transformedTasks);
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Get user profile to check role
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      let allTasks = await loadTasksFromDatabase();
+
+      // If user is not admin, filter tasks based on project assignments
+      if (profile.role !== 'admin') {
+        // Get user's assigned projects
+        const { data: assignments, error: assignmentError } = await supabase
+          .from('user_project_assignments')
+          .select('project_id')
+          .eq('user_id', user.id);
+
+        if (assignmentError) throw assignmentError;
+
+        const assignedProjectIds = assignments.map(a => a.project_id);
+        
+        // Filter tasks to only those from assigned projects
+        allTasks = allTasks.filter(task => 
+          task.projectId && assignedProjectIds.includes(task.projectId)
+        );
+      }
+
+      setTasks(allTasks);
     } catch (error) {
       console.error('Error loading tasks:', error);
       toast({
