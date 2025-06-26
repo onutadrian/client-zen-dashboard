@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { UserPlus, Users, Mail } from 'lucide-react';
 import { useUsers } from '@/hooks/useUsers';
 import { useUserInvites } from '@/hooks/useUserInvites';
 import { useProjects } from '@/hooks/useProjects';
+import { useClients } from '@/hooks/useClients';
 import { useAuth } from '@/hooks/useAuth';
 import InviteUserModal from '@/components/InviteUserModal';
 import EditUserModal from '@/components/EditUserModal';
@@ -20,6 +20,7 @@ const UsersPage = () => {
   const { users, loading: usersLoading } = useUsers();
   const { invites, loading: invitesLoading, createInvite, deleteInvite } = useUserInvites();
   const { projects } = useProjects();
+  const { clients } = useClients();
   const { isAdmin } = useAuth();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -133,6 +134,7 @@ const UsersPage = () => {
           onClose={() => setShowEditModal(false)}
           user={selectedUser}
           projects={projects}
+          clients={clients}
         />
       </div>
     </div>
