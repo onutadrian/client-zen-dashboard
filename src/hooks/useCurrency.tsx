@@ -39,7 +39,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       setLoadingRates(true);
       
-      // Check if we have a cached version less than 1 hour old
+      // Check if we have a cached version less than 24 hours old
       const cachedRates = localStorage.getItem('exchangeRates');
       const cachedTimestamp = localStorage.getItem('exchangeRatesTimestamp');
       
@@ -48,7 +48,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const now = new Date();
         const hoursSinceLastFetch = (now.getTime() - timestamp.getTime()) / (1000 * 60 * 60);
         
-        if (hoursSinceLastFetch < 1) {
+        if (hoursSinceLastFetch < 24) {
           console.log('Using cached exchange rates from', timestamp);
           setLiveExchangeRates(JSON.parse(cachedRates));
           setLastFetched(timestamp);
@@ -93,8 +93,8 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     fetchExchangeRates();
     
-    // Refresh rates every hour
-    const interval = setInterval(fetchExchangeRates, 60 * 60 * 1000);
+    // Refresh rates every 24 hours
+    const interval = setInterval(fetchExchangeRates, 24 * 60 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, [fetchExchangeRates]);
