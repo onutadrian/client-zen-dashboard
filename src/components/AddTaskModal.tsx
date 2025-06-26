@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import ClientSelectDropdown from '@/components/forms/ClientSelectDropdown';
 import ProjectSelectDropdown from '@/components/forms/ProjectSelectDropdown';
+import TaskFormFields from './task/TaskFormFields';
 
 interface Client {
   id: number;
@@ -49,115 +50,111 @@ interface AddTaskModalProps {
 }
 
 const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTaskModalProps) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [clientId, setClientId] = useState<number | null>(null);
-  const [projectId, setProjectId] = useState<string | null>(null);
-  const [estimatedHours, setEstimatedHours] = useState<number | undefined>(undefined);
-  const [notes, setNotes] = useState('');
-  const [assetsInput, setAssetsInput] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-
-  console.log('AddTaskModal - Received clients:', clients);
-  console.log('AddTaskModal - Received projects:', projects);
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    clientId: null as number | null,
+    projectId: null as string | null,
+    estimatedHours: undefined as number | undefined,
+    notes: '',
+    assetsInput: '',
+    startDate: '',
+    endDate: ''
+  });
 
   // Populate form when editing
   useEffect(() => {
     if (task) {
-      setTitle(task.title);
-      setDescription(task.description);
-      setClientId(task.clientId);
-      setProjectId(task.projectId || null);
-      setEstimatedHours(task.estimatedHours);
-      setNotes(task.notes);
-      setAssetsInput(task.assets.join('\n'));
-      setStartDate(task.startDate || '');
-      setEndDate(task.endDate || '');
+      setFormData({
+        title: task.title,
+        description: task.description,
+        clientId: task.clientId,
+        projectId: task.projectId || null,
+        estimatedHours: task.estimatedHours,
+        notes: task.notes,
+        assetsInput: task.assets.join('\n'),
+        startDate: task.startDate || '',
+        endDate: task.endDate || ''
+      });
     } else {
       // Reset form for new task
-      setTitle('');
-      setDescription('');
-      setClientId(null);
-      setProjectId(null);
-      setEstimatedHours(undefined);
-      setNotes('');
-      setAssetsInput('');
-      setStartDate('');
-      setEndDate('');
+      setFormData({
+        title: '',
+        description: '',
+        clientId: null,
+        projectId: null,
+        estimatedHours: undefined,
+        notes: '',
+        assetsInput: '',
+        startDate: '',
+        endDate: ''
+      });
     }
   }, [task]);
 
-  const selectedClient = clients.find(c => c.id === clientId);
-  const availableProjects = projects.filter(p => !clientId || p.clientId === clientId);
+  const selectedClient = clients.find(c => c.id === formData.clientId);
+  const availableProjects = projects.filter(p => !formData.clientId || p.clientId === formData.clientId);
 
   const handleClientChange = (newClientId: number | null) => {
-    console.log('AddTaskModal - Client changed to:', newClientId);
-    setClientId(newClientId);
-    setProjectId(null); // Reset project when client changes
+    setFormData(prev => ({
+      ...prev,
+      clientId: newClientId,
+      projectId: null
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim()) {
+    if (!formData.title.trim()) {
       toast.error('Task title is required');
       return;
     }
     
-    if (!clientId) {
+    if (!formData.clientId) {
       toast.error('Please select a client');
       return;
     }
 
-    if (!projectId) {
+    if (!formData.projectId) {
       toast.error('Please select a project');
       return;
     }
 
-    const assets = assetsInput
+    const assets = formData.assetsInput
       .split('\n')
       .map(asset => asset.trim())
       .filter(asset => asset.length > 0);
 
     onAdd({
-      title: title.trim(),
-      description: description.trim(),
-      clientId,
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      clientId: formData.clientId,
       clientName: selectedClient?.name || '',
-      projectId,
-      estimatedHours,
-      notes: notes.trim(),
+      projectId: formData.projectId,
+      estimatedHours: formData.estimatedHours,
+      notes: formData.notes.trim(),
       assets,
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
+      startDate: formData.startDate || undefined,
+      endDate: formData.endDate || undefined,
     });
 
-    // Reset form
-    setTitle('');
-    setDescription('');
-    setClientId(null);
-    setProjectId(null);
-    setEstimatedHours(undefined);
-    setNotes('');
-    setAssetsInput('');
-    setStartDate('');
-    setEndDate('');
-    
-    onClose();
+    handleClose();
     toast.success(task ? 'Task updated successfully' : 'Task added successfully');
   };
 
   const handleClose = () => {
-    setTitle('');
-    setDescription('');
-    setClientId(null);
-    setProjectId(null);
-    setEstimatedHours(undefined);
-    setNotes('');
-    setAssetsInput('');
-    setStartDate('');
-    setEndDate('');
+    setFormData({
+      title: '',
+      description: '',
+      clientId: null,
+      projectId: null,
+      estimatedHours: undefined,
+      notes: '',
+      assetsInput: '',
+      startDate: '',
+      endDate: ''
+    });
     onClose();
   };
 
@@ -169,108 +166,14 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="title">Task Title *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter task title"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter task description"
-              rows={3}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <ClientSelectDropdown
-              clients={clients}
-              selectedClientId={clientId}
-              onClientChange={handleClientChange}
-              required={true}
-            />
-
-            <ProjectSelectDropdown
-              projects={availableProjects}
-              selectedProjectId={projectId}
-              onProjectChange={setProjectId}
-              disabled={!clientId}
-              clientSelected={!!clientId}
-              required={true}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="startDate">Start Date</Label>
-              <Input
-                id="startDate"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="endDate">End Date</Label>
-              <Input
-                id="endDate"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                min={startDate || undefined}
-              />
-            </div>
-          </div>
-
-          {selectedClient?.priceType === 'hour' && (
-            <div>
-              <Label htmlFor="estimatedHours">Estimated Hours</Label>
-              <Input
-                id="estimatedHours"
-                type="number"
-                step="0.5"
-                min="0"
-                value={estimatedHours || ''}
-                onChange={(e) => setEstimatedHours(e.target.value ? Number(e.target.value) : undefined)}
-                placeholder="Enter estimated hours"
-              />
-            </div>
-          )}
-
-          <div>
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any additional notes"
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="assets">Assets (one per line)</Label>
-            <Textarea
-              id="assets"
-              value={assetsInput}
-              onChange={(e) => setAssetsInput(e.target.value)}
-              placeholder="https://example.com/file1.pdf&#10;https://example.com/file2.jpg&#10;Local file: document.docx"
-              rows={4}
-            />
-            <p className="text-sm text-slate-500 mt-1">
-              Add links to files, documents, or other assets related to this task
-            </p>
-          </div>
+          <TaskFormFields
+            formData={formData}
+            setFormData={setFormData}
+            clients={clients}
+            availableProjects={availableProjects}
+            selectedClient={selectedClient}
+            onClientChange={handleClientChange}
+          />
 
           <div className="flex justify-end space-x-3 pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>

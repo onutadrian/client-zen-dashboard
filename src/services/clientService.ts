@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Client } from '@/types/client';
 import { transformSupabaseClient, transformClientForSupabase, mapPriceType } from '@/utils/clientUtils';
@@ -5,13 +6,9 @@ import { transformSupabaseClient, transformClientForSupabase, mapPriceType } fro
 export const loadClientsFromSupabase = async (): Promise<Client[]> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    console.log('loadClientsFromSupabase - No user found');
     return [];
   }
 
-  console.log('loadClientsFromSupabase - User ID:', user.id);
-
-  // Check user role first
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('role')
@@ -19,27 +16,17 @@ export const loadClientsFromSupabase = async (): Promise<Client[]> => {
     .single();
 
   if (profileError) {
-    console.error('loadClientsFromSupabase - Profile error:', profileError);
     throw profileError;
   }
 
-  console.log('loadClientsFromSupabase - User role:', profile.role);
-
-  // Get clients based on RLS policies
   const { data, error } = await supabase
     .from('clients')
     .select('*')
     .order('created_at', { ascending: false });
 
-  console.log('loadClientsFromSupabase - Raw clients from DB:', data);
-  console.log('loadClientsFromSupabase - DB error:', error);
-
   if (error) throw error;
 
-  const transformedClients = data.map(transformSupabaseClient);
-  console.log('loadClientsFromSupabase - Transformed clients:', transformedClients);
-
-  return transformedClients;
+  return data.map(transformSupabaseClient);
 };
 
 export const addClientToSupabase = async (newClient: any): Promise<Client> => {
@@ -57,7 +44,6 @@ export const addClientToSupabase = async (newClient: any): Promise<Client> => {
     .single();
 
   if (error) throw error;
-
   return transformSupabaseClient(data);
 };
 
@@ -67,7 +53,6 @@ export const updateClientInSupabase = async (clientId: number, updatedClient: an
     throw new Error('User not authenticated');
   }
 
-  // Transform to Supabase format with explicit price type mapping
   const mappedPriceType = mapPriceType(updatedClient.priceType);
   
   const supabaseUpdate = {
@@ -87,7 +72,7 @@ export const updateClientInSupabase = async (clientId: number, updatedClient: an
     .from('clients')
     .update(supabaseUpdate)
     .eq('id', clientId)
-    .eq('user_id', user.id); // Ensure user can only update their own clients
+    .eq('user_id', user.id);
 
   if (error) {
     throw error;

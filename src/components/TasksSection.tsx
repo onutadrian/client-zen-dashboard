@@ -1,12 +1,13 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, CheckSquare } from 'lucide-react';
 import TaskTable from './TaskTable';
 import TaskDetailsSheet from './TaskDetailsSheet';
 import AddTaskModal from './AddTaskModal';
+import TaskFilters from './task/TaskFilters';
+import TaskStats from './task/TaskStats';
 import { Task } from '@/types/task';
 
 interface Client {
@@ -52,10 +53,6 @@ const TasksSection = ({
   const assignedClientIds = projects.map(p => p.clientId);
   // Filter clients to only include those that have projects assigned to the user
   const availableClients = clients.filter(client => assignedClientIds.includes(client.id));
-
-  console.log('TasksSection - All clients:', clients);
-  console.log('TasksSection - Assigned client IDs:', assignedClientIds);
-  console.log('TasksSection - Available clients for modal:', availableClients);
 
   const filteredTasks = tasks.filter(task => {
     const statusMatch = statusFilter === 'all' || task.status === statusFilter;
@@ -118,64 +115,18 @@ const TasksSection = ({
             </Button>
           </div>
 
-          {/* Stats */}
-          <div className="flex items-center space-x-4 pt-2">
-            <Badge variant="secondary" className="hover:bg-secondary">{taskStats.pending} Pending</Badge>
-            <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">{taskStats.inProgress} In Progress</Badge>
-            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{taskStats.completed} Completed</Badge>
-          </div>
+          <TaskStats stats={taskStats} />
 
-          {/* Filters */}
-          <div className="flex items-center space-x-4 pt-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-slate-600">Status:</span>
-              <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="in-progress">In Progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-slate-600">Client:</span>
-              <Select value={clientFilter} onValueChange={setClientFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Clients</SelectItem>
-                  {availableClients.map(client => (
-                    <SelectItem key={client.id} value={client.id.toString()}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-slate-600">Project:</span>
-              <Select value={projectFilter} onValueChange={setProjectFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Projects</SelectItem>
-                  {projects.map(project => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <TaskFilters
+            statusFilter={statusFilter}
+            clientFilter={clientFilter}
+            projectFilter={projectFilter}
+            onStatusFilterChange={setStatusFilter}
+            onClientFilterChange={setClientFilter}
+            onProjectFilterChange={setProjectFilter}
+            availableClients={availableClients}
+            projects={projects}
+          />
         </CardHeader>
 
         <CardContent>

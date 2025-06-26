@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, ReactNode, useEffect } from 'react';
-import { useSecurityAudit } from '@/hooks/useSecurityAudit';
 import { useAuth } from '@/hooks/useAuth';
 
 interface SecurityContextType {
@@ -24,39 +23,62 @@ interface SecurityProviderProps {
 }
 
 export const SecurityProvider = ({ children }: SecurityProviderProps) => {
-  const { logSecurityAction, validateInput, trackValidationError } = useSecurityAudit();
   const { user, isAdmin } = useAuth();
 
-  // Log significant security events
-  useEffect(() => {
-    if (user) {
-      logSecurityAction('user_session_start', 'authentication', user.id, {
-        email: user.email,
-        isAdmin
-      });
+  const logSecurityAction = async (
+    action: string,
+    resourceType: string,
+    resourceId?: string,
+    details?: Record<string, any>
+  ) => {
+    // In production, this would send to a secure audit service
+    if (['user_role_changed', 'admin_access', 'bulk_delete', 'data_export'].includes(action)) {
+      console.warn(`Security Action: ${action} on ${resourceType}`, { resourceId, details });
+    }
+  };
+
+  const validateInput = (input: string, context: string): boolean => {
+    const xssPatterns = [
+      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+      /javascript:/gi,
+      /on\w+\s*=/gi,
+      /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi
+    ];
+
+    for (const pattern of xssPatterns) {
+      if (pattern.test(input)) {
+        logSecurityAction('xss_attempt', context, undefined, { input });
+        return false;
+      }
     }
 
-    // Cleanup function to log session end
-    return () => {
-      if (user) {
-        logSecurityAction('user_session_end', 'authentication', user.id);
-      }
-    };
-  }, [user?.id, isAdmin]);
+    const sqlPatterns = [
+      /('|(\\')|(;|\/\*|\*\/|--|\+))/gi,
+      /(union|select|insert|update|delete|drop|create|alter|exec|execute)/gi
+    ];
 
-  // Monitor for tab/window focus changes (potential security concern)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && user && isAdmin) {
-        logSecurityAction('admin_tab_hidden', 'session_management', user.id, {
-          timestamp: new Date().toISOString()
-        });
+    for (const pattern of sqlPatterns) {
+      if (pattern.test(input)) {
+        logSecurityAction('sql_injection_attempt', context, undefined, { input });
+        return false;
       }
-    };
+    }
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user, isAdmin]);
+    return true;
+  };
+
+  const trackValidationError = (field: string, error: string, data: any) => {
+    const errorKey = `validation_error_${field}`;
+    const errorCount = parseInt(sessionStorage.getItem(errorKey) || '0') + 1;
+    sessionStorage.setItem(errorKey, errorCount.toString());
+
+    if (errorCount > 5) {
+      logSecurityAction('repeated_validation_errors', field, undefined, {
+        error,
+        count: errorCount
+      });
+    }
+  };
 
   const value: SecurityContextType = {
     logSecurityAction,

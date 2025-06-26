@@ -4,23 +4,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Client } from '@/types/client';
 import { loadClientsFromSupabase, addClientToSupabase, updateClientInSupabase } from '@/services/clientService';
 
-// Export Client type for backward compatibility
-export type { Client } from '@/types/client';
-
 export const useClients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const { toast } = useToast();
 
-  // Load clients from Supabase on mount
-  useEffect(() => {
-    loadClients();
-  }, []);
-
   const loadClients = async () => {
     try {
-      console.log('useClients - Loading clients...');
       const clientsData = await loadClientsFromSupabase();
-      console.log('useClients - Loaded clients:', clientsData);
       setClients(clientsData);
     } catch (error) {
       console.error('useClients - Error loading clients:', error);
@@ -31,6 +21,10 @@ export const useClients = () => {
       });
     }
   };
+
+  useEffect(() => {
+    loadClients();
+  }, []);
 
   const addClient = async (newClient: any) => {
     try {
@@ -55,7 +49,6 @@ export const useClients = () => {
     try {
       await updateClientInSupabase(clientId, updatedClient);
 
-      // Update local state
       setClients(prev => prev.map(client => 
         client.id === clientId ? updatedClient : client
       ));
