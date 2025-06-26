@@ -98,7 +98,7 @@ const TaskTable = ({
               {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} total
             </p>
           </div>
-          {onAddTaskClick && (
+          {onAddTaskClick && isAdmin && (
             <Button 
               onClick={onAddTaskClick}
               className="bg-blue-600 hover:bg-blue-700"
@@ -150,7 +150,6 @@ const TaskTable = ({
                       <Select
                         value={task.status}
                         onValueChange={(value: Task['status']) => handleStatusChange(task, value)}
-                        disabled={!isAdmin}
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />
