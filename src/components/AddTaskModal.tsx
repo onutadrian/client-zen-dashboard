@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import ClientSelectDropdown from '@/components/forms/ClientSelectDropdown';
+import ProjectSelectDropdown from '@/components/forms/ProjectSelectDropdown';
 
 interface Client {
   id: number;
@@ -87,6 +87,11 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
   const selectedClient = clients.find(c => c.id === clientId);
   const availableProjects = projects.filter(p => !clientId || p.clientId === clientId);
 
+  const handleClientChange = (newClientId: number | null) => {
+    setClientId(newClientId);
+    setProjectId(null); // Reset project when client changes
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -151,12 +156,6 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
     onClose();
   };
 
-  // Debug logging to see what clients and projects are available
-  console.log('AddTaskModal - Available clients:', clients);
-  console.log('AddTaskModal - Available projects:', projects);
-  console.log('AddTaskModal - Selected client ID:', clientId);
-  console.log('AddTaskModal - Available projects for client:', availableProjects);
-
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -188,52 +187,21 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="client">Client *</Label>
-              <Select value={clientId?.toString()} onValueChange={(value) => {
-                setClientId(Number(value));
-                setProjectId(null); // Reset project when client changes
-              }}>
-                <SelectTrigger>
-                  <SelectValue placeholder={clients.length === 0 ? "No clients available" : "Select a client"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.length === 0 ? (
-                    <SelectItem value="no-clients" disabled>
-                      No clients available
-                    </SelectItem>
-                  ) : (
-                    clients.map((client) => (
-                      <SelectItem key={client.id} value={client.id.toString()}>
-                        {client.name}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+            <ClientSelectDropdown
+              clients={clients}
+              selectedClientId={clientId}
+              onClientChange={handleClientChange}
+              required={true}
+            />
 
-            <div>
-              <Label htmlFor="project">Project *</Label>
-              <Select value={projectId || ''} onValueChange={setProjectId} disabled={!clientId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={!clientId ? "Select a client first" : availableProjects.length === 0 ? "No projects available" : "Select a project"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableProjects.length === 0 ? (
-                    <SelectItem value="no-projects" disabled>
-                      {!clientId ? "Select a client first" : "No projects available"}
-                    </SelectItem>
-                  ) : (
-                    availableProjects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        {project.name}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+            <ProjectSelectDropdown
+              projects={availableProjects}
+              selectedProjectId={projectId}
+              onProjectChange={setProjectId}
+              disabled={!clientId}
+              clientSelected={!!clientId}
+              required={true}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
