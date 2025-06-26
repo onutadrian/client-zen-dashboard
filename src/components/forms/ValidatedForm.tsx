@@ -56,19 +56,22 @@ export function ValidatedForm<T>({
         });
       }
     } else {
+      // Now validation is properly typed as { success: false; errors: string[] }
+      const validationErrors = validation.errors;
+      
       // Track validation errors for security monitoring
-      validation.errors.forEach(error => {
+      validationErrors.forEach(error => {
         const fieldMatch = error.match(/^([^:]+):/);
         const fieldName = fieldMatch ? fieldMatch[1] : 'unknown';
         trackValidationError(fieldName, error, data);
       });
 
       if (onValidationError) {
-        onValidationError(validation.errors);
+        onValidationError(validationErrors);
       } else {
         toast({
           title: "Validation Error",
-          description: validation.errors[0] || "Please check your input and try again.",
+          description: validationErrors[0] || "Please check your input and try again.",
           variant: "destructive",
         });
       }
