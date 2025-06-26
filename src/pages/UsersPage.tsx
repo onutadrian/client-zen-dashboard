@@ -14,43 +14,54 @@ import EditUserModal from '@/components/EditUserModal';
 import UserTable from '@/components/users/UserTable';
 import InviteTable from '@/components/users/InviteTable';
 import { UserProfile } from '@/types/auth';
-
 const UsersPage = () => {
-  const { isMobile } = useSidebar();
-  const { users, loading: usersLoading } = useUsers();
-  const { invites, loading: invitesLoading, createInvite, deleteInvite } = useUserInvites();
-  const { projects } = useProjects();
-  const { clients } = useClients();
-  const { isAdmin } = useAuth();
+  const {
+    isMobile
+  } = useSidebar();
+  const {
+    users,
+    loading: usersLoading
+  } = useUsers();
+  const {
+    invites,
+    loading: invitesLoading,
+    createInvite,
+    deleteInvite
+  } = useUserInvites();
+  const {
+    projects
+  } = useProjects();
+  const {
+    clients
+  } = useClients();
+  const {
+    isAdmin
+  } = useAuth();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-
   if (!isAdmin) {
-    return (
-      <div className="min-h-screen p-6 flex items-center justify-center" style={{ backgroundColor: '#F3F3F2' }}>
+    return <div className="min-h-screen p-6 flex items-center justify-center" style={{
+      backgroundColor: '#F3F3F2'
+    }}>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-slate-800 mb-4">Access Denied</h1>
           <p className="text-slate-600">You don't have permission to access this page.</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   const handleInviteUser = async (email: string, role: 'admin' | 'standard') => {
     await createInvite(email, role);
   };
-
   const handleEditUser = (user: UserProfile) => {
     setSelectedUser(user);
     setShowEditModal(true);
   };
-
   const activeInvites = invites.filter(invite => !invite.used && new Date(invite.expires_at) > new Date());
   const expiredOrUsedInvites = invites.filter(invite => invite.used || new Date(invite.expires_at) <= new Date());
-
-  return (
-    <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
+  return <div className="min-h-screen p-6" style={{
+    backgroundColor: '#F3F3F2'
+  }}>
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -60,7 +71,7 @@ const UsersPage = () => {
               User Management
             </h1>
           </div>
-          <Button onClick={() => setShowInviteModal(true)}>
+          <Button onClick={() => setShowInviteModal(true)} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 rounded-sm transition-colors">
             <UserPlus className="w-4 h-4 mr-2" />
             Invite User
           </Button>
@@ -78,11 +89,7 @@ const UsersPage = () => {
                 <CardTitle>Registered Users</CardTitle>
               </CardHeader>
               <CardContent>
-                <UserTable
-                  users={users}
-                  loading={usersLoading}
-                  onEditUser={handleEditUser}
-                />
+                <UserTable users={users} loading={usersLoading} onEditUser={handleEditUser} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -97,48 +104,26 @@ const UsersPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <InviteTable
-                    invites={activeInvites}
-                    onDeleteInvite={deleteInvite}
-                    showActions={true}
-                  />
+                  <InviteTable invites={activeInvites} onDeleteInvite={deleteInvite} showActions={true} />
                 </CardContent>
               </Card>
 
-              {expiredOrUsedInvites.length > 0 && (
-                <Card>
+              {expiredOrUsedInvites.length > 0 && <Card>
                   <CardHeader>
                     <CardTitle>Expired/Used Invites</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <InviteTable
-                      invites={expiredOrUsedInvites}
-                      onDeleteInvite={deleteInvite}
-                      showActions={false}
-                    />
+                    <InviteTable invites={expiredOrUsedInvites} onDeleteInvite={deleteInvite} showActions={false} />
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
             </div>
           </TabsContent>
         </Tabs>
 
-        <InviteUserModal
-          isOpen={showInviteModal}
-          onClose={() => setShowInviteModal(false)}
-          onInvite={handleInviteUser}
-        />
+        <InviteUserModal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} onInvite={handleInviteUser} />
 
-        <EditUserModal
-          isOpen={showEditModal}
-          onClose={() => setShowEditModal(false)}
-          user={selectedUser}
-          projects={projects}
-          clients={clients}
-        />
+        <EditUserModal isOpen={showEditModal} onClose={() => setShowEditModal(false)} user={selectedUser} projects={projects} clients={clients} />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default UsersPage;
