@@ -56,8 +56,9 @@ export function ValidatedForm<T>({
         });
       }
     } else {
-      // Now validation is properly typed as { success: false; errors: string[] }
-      const validationErrors = validation.errors;
+      // Use type assertion since we know validation.success is false
+      const failedValidation = validation as { success: false; errors: string[] };
+      const validationErrors = failedValidation.errors;
       
       // Track validation errors for security monitoring
       validationErrors.forEach(error => {
