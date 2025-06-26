@@ -30,6 +30,9 @@ const TaskManagementSection = ({
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
+  console.log('TaskManagementSection - Raw clients received:', clients);
+  console.log('TaskManagementSection - Raw projects received:', projects);
+
   const transformTaskForTaskTable = (task: Task) => ({
     id: task.id,
     title: task.title,
@@ -68,18 +71,16 @@ const TaskManagementSection = ({
     handleModalClose();
   };
 
-  // Filter clients to only include those that have projects assigned to the user
-  const assignedProjectIds = projects.map(p => p.id);
-  const assignedClientIds = projects.map(p => p.clientId);
-  const filteredClients = clients.filter(client => assignedClientIds.includes(client.id));
-
-  // Projects are already filtered by the useProjects hook based on user permissions
+  // The clients and projects are already filtered by the parent component based on user permissions
+  // So we can pass them directly to the AddTaskModal
+  console.log('TaskManagementSection - Passing clients to modal:', clients);
+  console.log('TaskManagementSection - Passing projects to modal:', projects);
 
   return (
     <>
       <TaskTable
         tasks={tasks.map(transformTaskForTaskTable)}
-        clients={filteredClients.map(client => ({
+        clients={clients.map(client => ({
           id: client.id,
           name: client.name,
           priceType: client.priceType || 'hour',
@@ -101,7 +102,7 @@ const TaskManagementSection = ({
         isOpen={showAddTaskModal}
         onClose={handleModalClose}
         onAdd={handleTaskSubmit}
-        clients={filteredClients.map(client => ({
+        clients={clients.map(client => ({
           id: client.id,
           name: client.name,
           priceType: client.priceType || 'hour'

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -58,6 +59,9 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
+  console.log('AddTaskModal - Received clients:', clients);
+  console.log('AddTaskModal - Received projects:', projects);
+
   // Populate form when editing
   useEffect(() => {
     if (task) {
@@ -88,6 +92,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
   const availableProjects = projects.filter(p => !clientId || p.clientId === clientId);
 
   const handleClientChange = (newClientId: number | null) => {
+    console.log('AddTaskModal - Client changed to:', newClientId);
     setClientId(newClientId);
     setProjectId(null); // Reset project when client changes
   };
