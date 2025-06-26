@@ -28,6 +28,7 @@ const TaskManagementSection = ({
   onAddTask
 }: TaskManagementSectionProps) => {
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const transformTaskForTaskTable = (task: Task) => ({
     id: task.id,
@@ -48,6 +49,25 @@ const TaskManagementSection = ({
     endDate: task.endDate || ''
   });
 
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setShowAddTaskModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowAddTaskModal(false);
+    setEditingTask(null);
+  };
+
+  const handleTaskSubmit = (taskData: Omit<Task, 'id' | 'createdDate'>) => {
+    if (editingTask) {
+      onEditTask({ ...taskData, id: editingTask.id });
+    } else {
+      onAddTask(taskData);
+    }
+    handleModalClose();
+  };
+
   return (
     <>
       <TaskTable
@@ -66,14 +86,14 @@ const TaskManagementSection = ({
         onTaskClick={onTaskClick}
         onUpdateTask={onUpdateTask}
         onDeleteTask={onDeleteTask}
-        onEditTask={onEditTask}
+        onEditTask={handleEditTask}
         onAddTaskClick={() => setShowAddTaskModal(true)}
       />
 
       <AddTaskModal
         isOpen={showAddTaskModal}
-        onClose={() => setShowAddTaskModal(false)}
-        onAdd={onAddTask}
+        onClose={handleModalClose}
+        onAdd={handleTaskSubmit}
         clients={clients.map(client => ({
           id: client.id,
           name: client.name,
@@ -84,6 +104,7 @@ const TaskManagementSection = ({
           name: project.name,
           clientId: project.clientId
         }))}
+        task={editingTask}
       />
     </>
   );
