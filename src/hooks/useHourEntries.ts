@@ -243,14 +243,46 @@ export const useHourEntries = () => {
 
   const deleteHourEntry = async (entryId: number) => {
     try {
+      console.log('Starting delete operation for entry ID:', entryId);
+      
+      // Verify authentication before deleting
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error('Auth error during delete:', authError);
+        throw authError;
+      }
+      
+      if (!user) {
+        console.error('No authenticated user found during delete');
+        throw new Error('User not authenticated');
+      }
+
+      console.log('Authenticated user confirmed, proceeding with delete for user:', user.id);
+
       const { error } = await supabase
         .from('hour_entries')
         .delete()
-        .eq('id', entryId);
+        .eq('id', entryId)
+        .eq('user_id', user.id); // Ensure we only delete entries belonging to the current user
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase delete error:', error);
+        throw error;
+      }
 
-      setHourEntries(prev => prev.filter(entry => entry.id !== entryId));
+      console.log('Supabase delete successful, updating local state');
+      
+      // Update local state immediately
+      setHourEntries(prev => {
+        const filtered = prev.filter(entry => entry.id !== entryId);
+        console.log('Local state updated, entries before:', prev.length, 'after:', filtered.length);
+        return filtered;
+      });
+      
+      // Force a refresh from the database to ensure consistency
+      console.log('Refreshing data from database to ensure consistency');
+      await loadHourEntries();
       
       toast({
         title: "Success",
@@ -263,6 +295,7 @@ export const useHourEntries = () => {
         description: "Failed to delete hour entry",
         variant: "destructive"
       });
+      throw error; // Re-throw to allow calling code to handle it
     }
   };
 

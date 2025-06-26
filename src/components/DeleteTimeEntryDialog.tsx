@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   AlertDialog,
@@ -25,7 +26,9 @@ const DeleteTimeEntryDialog = ({ isOpen, onClose, timeEntry }: DeleteTimeEntryDi
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
+      console.log('Attempting to delete time entry:', timeEntry.id);
       await deleteHourEntry(timeEntry.id);
+      console.log('Time entry deleted successfully');
       onClose();
     } catch (error) {
       console.error('Error deleting time entry:', error);
@@ -39,18 +42,20 @@ const DeleteTimeEntryDialog = ({ isOpen, onClose, timeEntry }: DeleteTimeEntryDi
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Time Entry</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to delete this time entry?
-            <div className="mt-2 p-3 bg-slate-50 rounded border">
-              <div className="font-medium">{formatDate(timeEntry.date)}</div>
-              <div className="text-sm text-slate-600">
-                {timeEntry.hours} {timeEntry.hours === 1 ? 'hour' : 'hours'}
-                {timeEntry.description && (
-                  <div className="line-clamp-2 mt-1">{timeEntry.description}</div>
-                )}
+          <AlertDialogDescription asChild>
+            <div>
+              Are you sure you want to delete this time entry?
+              <div className="mt-2 p-3 bg-slate-50 rounded border">
+                <div className="font-medium">{formatDate(timeEntry.date)}</div>
+                <div className="text-sm text-slate-600">
+                  {timeEntry.hours} {timeEntry.hours === 1 ? 'hour' : 'hours'}
+                  {timeEntry.description && (
+                    <div className="line-clamp-2 mt-1">{timeEntry.description}</div>
+                  )}
+                </div>
               </div>
+              This action cannot be undone.
             </div>
-            This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
