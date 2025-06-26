@@ -24,7 +24,7 @@ export type Database = {
           price_type: string
           status: string
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -40,7 +40,7 @@ export type Database = {
           price_type: string
           status?: string
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -56,7 +56,7 @@ export type Database = {
           price_type?: string
           status?: string
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -296,7 +296,7 @@ export type Database = {
           status: string
           team: string[] | null
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           archived?: boolean | null
@@ -319,7 +319,7 @@ export type Database = {
           status?: string
           team?: string[] | null
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Update: {
           archived?: boolean | null
@@ -342,7 +342,7 @@ export type Database = {
           status?: string
           team?: string[] | null
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -369,7 +369,7 @@ export type Database = {
           status: string
           total_paid: number
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           billing_date: string
@@ -385,7 +385,7 @@ export type Database = {
           status?: string
           total_paid?: number
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Update: {
           billing_date?: string
@@ -401,7 +401,7 @@ export type Database = {
           status?: string
           total_paid?: number
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -422,7 +422,7 @@ export type Database = {
           start_date: string | null
           status: string
           title: string
-          user_id: string | null
+          user_id: string
           worked_hours: number | null
         }
         Insert: {
@@ -441,7 +441,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           title: string
-          user_id?: string | null
+          user_id?: string
           worked_hours?: number | null
         }
         Update: {
@@ -460,7 +460,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           title?: string
-          user_id?: string | null
+          user_id?: string
           worked_hours?: number | null
         }
         Relationships: [
