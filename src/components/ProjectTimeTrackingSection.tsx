@@ -7,7 +7,7 @@ import MilestoneHoursTracker from './MilestoneHoursTracker';
 import AddMilestoneModal from './AddMilestoneModal';
 import TimeEntryManagement from './TimeEntryManagement';
 import { Project } from '@/hooks/useProjects';
-import { Client } from '@/hooks/useClients';
+import { Client } from '@/types/client';
 import { Milestone } from '@/hooks/useMilestones';
 import { useHourEntries } from '@/hooks/useHourEntries';
 import { useCurrency } from '@/hooks/useCurrency';
