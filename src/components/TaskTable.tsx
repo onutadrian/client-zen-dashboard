@@ -98,7 +98,7 @@ const TaskTable = ({
               {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} total
             </p>
           </div>
-          {onAddTaskClick && isAdmin && (
+          {onAddTaskClick && (
             <Button 
               onClick={onAddTaskClick}
               className="bg-blue-600 hover:bg-blue-700"
