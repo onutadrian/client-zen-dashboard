@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useAuthState } from './useAuthState';
 import { useHourEntriesOperations } from './useHourEntriesOperations';
 
-export { HourEntry } from '@/types/hourEntry';
+export type { HourEntry } from '@/types/hourEntry';
 
 export const useHourEntries = () => {
   const { isAuthenticated } = useAuthState();
