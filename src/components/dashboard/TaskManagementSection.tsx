@@ -68,11 +68,18 @@ const TaskManagementSection = ({
     handleModalClose();
   };
 
+  // Filter clients to only include those that have projects assigned to the user
+  const assignedProjectIds = projects.map(p => p.id);
+  const assignedClientIds = projects.map(p => p.clientId);
+  const filteredClients = clients.filter(client => assignedClientIds.includes(client.id));
+
+  // Projects are already filtered by the useProjects hook based on user permissions
+
   return (
     <>
       <TaskTable
         tasks={tasks.map(transformTaskForTaskTable)}
-        clients={clients.map(client => ({
+        clients={filteredClients.map(client => ({
           id: client.id,
           name: client.name,
           priceType: client.priceType || 'hour',
@@ -94,7 +101,7 @@ const TaskManagementSection = ({
         isOpen={showAddTaskModal}
         onClose={handleModalClose}
         onAdd={handleTaskSubmit}
-        clients={clients.map(client => ({
+        clients={filteredClients.map(client => ({
           id: client.id,
           name: client.name,
           priceType: client.priceType || 'hour'

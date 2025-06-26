@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,6 +48,10 @@ const TasksSection = ({
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  // Filter clients to only include those that have projects assigned to the user
+  const assignedClientIds = projects.map(p => p.clientId);
+  const filteredClientsForModal = clients.filter(client => assignedClientIds.includes(client.id));
 
   const filteredTasks = tasks.filter(task => {
     const statusMatch = statusFilter === 'all' || task.status === statusFilter;
@@ -141,7 +146,7 @@ const TasksSection = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Clients</SelectItem>
-                  {clients.map(client => (
+                  {filteredClientsForModal.map(client => (
                     <SelectItem key={client.id} value={client.id.toString()}>
                       {client.name}
                     </SelectItem>
@@ -185,7 +190,7 @@ const TasksSection = ({
           ) : (
             <TaskTable
               tasks={filteredTasks}
-              clients={clients}
+              clients={filteredClientsForModal}
               projects={projects}
               onTaskClick={handleTaskClick}
               onUpdateTask={onUpdateTask}
@@ -199,7 +204,7 @@ const TasksSection = ({
           isOpen={showAddModal} 
           onClose={handleModalClose} 
           onAdd={handleTaskSubmit} 
-          clients={clients}
+          clients={filteredClientsForModal}
           projects={projects}
           task={editingTask}
         />
