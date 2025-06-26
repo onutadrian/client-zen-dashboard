@@ -10,6 +10,7 @@ import { useMilestones } from '@/hooks/useMilestones';
 import { useClients } from '@/hooks/useClients';
 import DashboardHeader from '@/components/DashboardHeader';
 import AnalyticsSection from '@/components/AnalyticsSection';
+import UserAnalyticsSection from '@/components/UserAnalyticsSection';
 import TaskTable from '@/components/TaskTable';
 import ProjectTimeline from '@/components/ProjectTimeline';
 import AddTaskModal from '@/components/AddTaskModal';
@@ -162,8 +163,8 @@ const Index = () => {
 
         <DashboardHeader />
         
-        {/* Show analytics for admin users */}
-        {isAdmin && (
+        {/* Show analytics based on user role */}
+        {isAdmin ? (
           <AnalyticsSection 
             totalClients={analytics.totalClients}
             activeClients={analytics.activeClients}
@@ -181,9 +182,18 @@ const Index = () => {
             customDateRange={customDateRange}
             onCustomDateChange={setCustomDateRange}
           />
+        ) : (
+          <UserAnalyticsSection
+            tasks={tasks}
+            projects={projects}
+            selectedPeriod={selectedPeriod}
+            onPeriodChange={setSelectedPeriod}
+            customDateRange={customDateRange}
+            onCustomDateChange={setCustomDateRange}
+          />
         )}
 
-        {/* Task Management Table with Add Task button */}
+        {/* Task Management Table with Add Task button - Available to all users */}
         <TaskTable
           tasks={tasks.map(transformTaskForTaskTable)}
           clients={clients.map(client => ({
@@ -221,7 +231,7 @@ const Index = () => {
           onAddTaskClick={() => setShowAddTaskModal(true)}
         />
 
-        {/* Gantt Chart Timeline View */}
+        {/* Gantt Chart Timeline View - Available to all users */}
         <ProjectTimeline
           projects={projects.map(project => ({
             id: project.id,
