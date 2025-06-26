@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { useInvoices } from '@/hooks/useInvoices';
 import { useToast } from '@/hooks/use-toast';
 import { Project } from '@/hooks/useProjects';
 import { Milestone } from '@/hooks/useMilestones';
-import { Client } from '@/hooks/useClients';
+import { Client } from '@/types/client';
 
 interface AddInvoiceModalProps {
   isOpen: boolean;

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import AddProjectTaskModal from './AddProjectTaskModal';
 import { Project } from '@/hooks/useProjects';
-import { Client } from '@/hooks/useClients';
+import { Client } from '@/types/client';
 import { Task } from '@/types/task';
 
 interface ProjectTaskSectionProps {

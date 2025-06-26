@@ -7,7 +7,7 @@ import AddMilestoneModal from './AddMilestoneModal';
 import EditMilestoneModal from './EditMilestoneModal';
 import MilestonesList from './MilestonesList';
 import { Project } from '@/hooks/useProjects';
-import { Client } from '@/hooks/useClients';
+import { Client } from '@/types/client';
 import { Milestone } from '@/hooks/useMilestones';
 
 interface ProjectMilestoneSectionProps {

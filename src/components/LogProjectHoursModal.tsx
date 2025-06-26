@@ -3,7 +3,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Clock } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
-import { Client } from '@/hooks/useClients';
+import { Client } from '@/types/client';
 import { Milestone } from '@/hooks/useMilestones';
 import LogHoursForm from './LogHoursForm';
 import { getButtonText } from '@/utils/pricingUtils';

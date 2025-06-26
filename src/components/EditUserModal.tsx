@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserProfile } from '@/types/auth';
 import { Project } from '@/hooks/useProjects';
-import { Client } from '@/hooks/useClients';
+import { Client } from '@/types/client';
 import { useUserProjectAssignments } from '@/hooks/useUserProjectAssignments';
 import { Loader2, User, Briefcase, Users } from 'lucide-react';
 

@@ -4,7 +4,7 @@ import ProjectTimeTrackingSection from './ProjectTimeTrackingSection';
 import ProjectMilestoneSection from './ProjectMilestoneSection';
 import ProjectTaskSection from './ProjectTaskSection';
 import { Project } from '@/hooks/useProjects';
-import { Client } from '@/hooks/useClients';
+import { Client } from '@/types/client';
 import { Milestone } from '@/hooks/useMilestones';
 import { Task } from '@/types/task';
 

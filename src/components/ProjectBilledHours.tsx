@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign } from 'lucide-react';
 import ProjectMetricsCards from './ProjectMetricsCards';
 import { Project } from '@/hooks/useProjects';
-import { Client } from '@/hooks/useClients';
+import { Client } from '@/types/client';
 import { Milestone } from '@/hooks/useMilestones';
 import { useHourEntries } from '@/hooks/useHourEntries';
 import { useInvoices } from '@/hooks/useInvoices';

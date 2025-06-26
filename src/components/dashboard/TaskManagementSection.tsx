@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import TaskTable from '@/components/TaskTable';
 import AddTaskModal from '@/components/AddTaskModal';
 import { Task } from '@/types/task';
 import { Project } from '@/hooks/useProjects';
-import { Client } from '@/hooks/useClients';
+import { Client } from '@/types/client';
 
 interface TaskManagementSectionProps {
   tasks: Task[];
