@@ -61,10 +61,10 @@ export const useDocumentGeneration = (template: ContractTemplate) => {
   }, [variables, savedVariables]);
 
   const populateVariablesFromData = async () => {
-    if (!selectedProjectId || !selectedClientId) {
+    if (!selectedClientId) {
       toast({
         title: "Selection Required",
-        description: "Please select both a project and client first",
+        description: "Please select a client first",
         variant: "destructive"
       });
       return;
@@ -73,50 +73,86 @@ export const useDocumentGeneration = (template: ContractTemplate) => {
     setIsPopulating(true);
     
     try {
-      const project = projects.find(p => p.id === selectedProjectId);
       const client = clients.find(c => c.id.toString() === selectedClientId);
       
-      if (project && client) {
-        const projectTasks = tasks.filter(t => t.projectId === selectedProjectId);
-        const completedTasks = projectTasks.filter(t => t.status === 'completed');
+      if (client) {
+        // Only populate client-related variables from the saved variables
+        const updatedVariables = { ...savedVariables };
         
-        // Calculate totals
-        const totalHours = completedTasks.reduce((sum, task) => sum + (task.workedHours || 0), 0);
-        const hourlyRate = project.hourlyRate || client.price;
-        const totalAmount = totalHours * hourlyRate;
-        
-        // Build task list for the document
-        const taskList = completedTasks.map(task => 
-          `${task.title} - ${task.workedHours || 0} hours`
-        ).join('\n');
+        // Map client data to common variable names
+        if (savedVariables.hasOwnProperty('client_name')) {
+          updatedVariables.client_name = client.name;
+        }
+        if (savedVariables.hasOwnProperty('client_currency') || savedVariables.hasOwnProperty('currency')) {
+          if (savedVariables.hasOwnProperty('client_currency')) updatedVariables.client_currency = client.currency || 'USD';
+          if (savedVariables.hasOwnProperty('currency')) updatedVariables.currency = client.currency || 'USD';
+        }
+        if (savedVariables.hasOwnProperty('hourly_rate') && client.priceType === 'hour') {
+          updatedVariables.hourly_rate = client.price?.toString() || '0';
+        }
+        if (savedVariables.hasOwnProperty('daily_rate') && client.priceType === 'day') {
+          updatedVariables.daily_rate = client.price?.toString() || '0';
+        }
+        if (savedVariables.hasOwnProperty('current_date')) {
+          updatedVariables.current_date = new Date().toLocaleDateString('ro-RO');
+        }
+        if (savedVariables.hasOwnProperty('current_month')) {
+          updatedVariables.current_month = new Date().toLocaleDateString('ro-RO', { month: 'long', year: 'numeric' });
+        }
 
-        const updatedVariables = {
-          ...variables,
-          client_name: client.name,
-          project_name: project.name,
-          project_start_date: project.startDate,
-          project_end_date: project.endDate || 'Ongoing',
-          total_hours: totalHours.toString(),
-          hourly_rate: hourlyRate?.toString() || '0',
-          total_amount: totalAmount.toString(),
-          currency: client.currency || 'EUR',
-          task_list: taskList,
-          current_date: new Date().toLocaleDateString('ro-RO'),
-          current_month: new Date().toLocaleDateString('ro-RO', { month: 'long', year: 'numeric' })
-        };
+        // Only add project-related data if a project is selected
+        if (selectedProjectId) {
+          const project = projects.find(p => p.id === selectedProjectId);
+          if (project) {
+            const projectTasks = tasks.filter(t => t.projectId === selectedProjectId);
+            const completedTasks = projectTasks.filter(t => t.status === 'completed');
+            
+            // Calculate totals
+            const totalHours = completedTasks.reduce((sum, task) => sum + (task.workedHours || 0), 0);
+            const hourlyRate = project.hourlyRate || client.price;
+            const totalAmount = totalHours * hourlyRate;
+            
+            // Build task list for the document
+            const taskList = completedTasks.map(task => 
+              `${task.title} - ${task.workedHours || 0} hours`
+            ).join('\n');
+
+            if (savedVariables.hasOwnProperty('project_name')) {
+              updatedVariables.project_name = project.name;
+            }
+            if (savedVariables.hasOwnProperty('project_start_date')) {
+              updatedVariables.project_start_date = project.startDate;
+            }
+            if (savedVariables.hasOwnProperty('project_end_date')) {
+              updatedVariables.project_end_date = project.endDate || 'Ongoing';
+            }
+            if (savedVariables.hasOwnProperty('total_hours')) {
+              updatedVariables.total_hours = totalHours.toString();
+            }
+            if (savedVariables.hasOwnProperty('total_amount')) {
+              updatedVariables.total_amount = totalAmount.toString();
+            }
+            if (savedVariables.hasOwnProperty('task_list')) {
+              updatedVariables.task_list = taskList;
+            }
+            if (savedVariables.hasOwnProperty('hourly_rate') && project.hourlyRate) {
+              updatedVariables.hourly_rate = project.hourlyRate.toString();
+            }
+          }
+        }
 
         setVariables(updatedVariables);
         
         toast({
           title: "Data Populated",
-          description: "Template variables have been filled with project and client data. Click 'Save & Update Preview' to apply changes.",
+          description: "Template variables have been filled with client data. Click 'Save & Update Preview' to apply changes.",
         });
       }
     } catch (error) {
       console.error('Error populating variables:', error);
       toast({
         title: "Error",
-        description: "Failed to populate variables from project data",
+        description: "Failed to populate variables from client data",
         variant: "destructive"
       });
     } finally {

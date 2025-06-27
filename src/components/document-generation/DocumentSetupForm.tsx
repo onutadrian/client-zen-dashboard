@@ -79,7 +79,7 @@ const DocumentSetupForm = ({
       </div>
 
       <div className="flex items-end space-x-2">
-        {selectedProjectId && selectedClientId && (
+        {selectedClientId && (
           <Button 
             type="button" 
             variant="outline" 
