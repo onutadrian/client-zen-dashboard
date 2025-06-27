@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import DashboardContainer from '@/components/dashboard/DashboardContainer';
-import DashboardHeader from '@/components/DashboardHeader';
+import Greeting from '@/components/Greeting';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import UserAnalyticsSection from '@/components/UserAnalyticsSection';
 import TaskManagementSection from '@/components/dashboard/TaskManagementSection';
@@ -95,7 +95,7 @@ const Index = () => {
     <DashboardContainer>
       <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
         <div className="max-w-7xl mx-auto space-y-6">
-          <DashboardHeader />
+          <Greeting />
           
           {isAdmin ? (
             <AnalyticsSection 
