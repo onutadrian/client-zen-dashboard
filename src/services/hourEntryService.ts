@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { HourEntry } from '@/types/hourEntry';
 
@@ -42,9 +41,8 @@ export const hourEntryService = {
         // Check if it's a malformed object
         if (typeof entry.milestone_id === 'object' && 
             entry.milestone_id !== null && 
-            typeof entry.milestone_id === 'object' && 
             '_type' in entry.milestone_id && 
-            entry.milestone_id._type === 'undefined') {
+            (entry.milestone_id as any)._type === 'undefined') {
           milestoneId = undefined;
         } else if (typeof entry.milestone_id === 'string') {
           milestoneId = entry.milestone_id;
