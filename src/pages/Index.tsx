@@ -93,7 +93,7 @@ const Index = () => {
 
   return (
     <DashboardContainer>
-      <div className="min-h-screen" style={{ backgroundColor: '#F3F3F2' }}>
+      <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
         <div className="max-w-7xl mx-auto space-y-6">
           <DashboardHeader />
           

@@ -12,7 +12,7 @@ const DashboardContainer = ({ children }: DashboardContainerProps) => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
-        <SidebarInset className="flex-1 p-6">
+        <SidebarInset className="flex-1">
           {children}
         </SidebarInset>
       </div>
