@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -207,6 +206,9 @@ const GenerateDocumentModal = ({ open, onOpenChange, template }: GenerateDocumen
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Generate Document from {template.name}</DialogTitle>
+          <DialogDescription>
+            Fill in the template variables and generate a document based on your template.
+          </DialogDescription>
         </DialogHeader>
         
         <Tabs defaultValue="setup" className="space-y-4">

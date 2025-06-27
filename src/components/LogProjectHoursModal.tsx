@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Clock } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/types/client';
@@ -33,6 +32,9 @@ const LogProjectHoursModal = ({
             <Clock className="w-5 h-5 mr-2" />
             {getButtonText(project.pricingType)} for {project.name}
           </DialogTitle>
+          <DialogDescription>
+            Log hours worked on this project and track your progress.
+          </DialogDescription>
         </DialogHeader>
         <LogHoursForm
           project={project}

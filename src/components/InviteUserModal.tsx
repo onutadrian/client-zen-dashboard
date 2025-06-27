@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -49,6 +48,9 @@ const InviteUserModal = ({ isOpen, onClose, onInvite }: InviteUserModalProps) =>
             <Mail className="w-5 h-5 mr-2" />
             Invite New User
           </DialogTitle>
+          <DialogDescription>
+            Send an invitation to a new user to join your workspace.
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
