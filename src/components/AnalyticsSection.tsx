@@ -94,7 +94,47 @@ const AnalyticsSection = ({
     return trends[metric] || { change: 0, isIncrease: true };
   };
 
-  const netProfitAnnual = totalRevenue - monthlySubscriptionCost * 12;
+  // Calculate period-aware net profit
+  const calculateNetProfit = () => {
+    let netProfit = 0;
+    let subtitle = '';
+    
+    switch (selectedPeriod) {
+      case 'this-month':
+      case 'last-month':
+        // Monthly comparison: monthly revenue vs monthly costs
+        netProfit = totalRevenue - monthlySubscriptionCost;
+        subtitle = "monthly estimate";
+        break;
+      case 'this-year':
+      case 'last-year':
+        // Annual comparison: annual revenue vs annual costs
+        netProfit = totalRevenue - (monthlySubscriptionCost * 12);
+        subtitle = "annual estimate";
+        break;
+      case 'custom':
+        // For custom periods, calculate based on the duration
+        if (customDateRange.from && customDateRange.to) {
+          const daysDiff = Math.ceil((customDateRange.to.getTime() - customDateRange.from.getTime()) / (1000 * 60 * 60 * 24));
+          const monthsInPeriod = daysDiff / 30.44; // Average days per month
+          netProfit = totalRevenue - (monthlySubscriptionCost * monthsInPeriod);
+          subtitle = "period estimate";
+        } else {
+          netProfit = totalRevenue - (monthlySubscriptionCost * 12);
+          subtitle = "estimate";
+        }
+        break;
+      default: // 'all-time'
+        // All-time: total revenue vs annualized current costs
+        netProfit = totalRevenue - (monthlySubscriptionCost * 12);
+        subtitle = "annual estimate";
+        break;
+    }
+    
+    return { netProfit, subtitle };
+  };
+
+  const { netProfit, netProfitSubtitle } = calculateNetProfit();
   const inactiveClients = totalClients - activeClients;
   const pendingClients = clients.filter(c => c.status === 'pending').length;
 
@@ -165,11 +205,11 @@ const AnalyticsSection = ({
     },
     {
       title: "Net Profit",
-      value: formatCurrency(netProfitAnnual, displayCurrency),
-      originalValue: formatCurrency(netProfitAnnual, displayCurrency),
+      value: formatCurrency(netProfit, displayCurrency),
+      originalValue: formatCurrency(netProfit, displayCurrency),
       isCurrency: true,
       isTime: false,
-      subtitle: "annual estimate",
+      subtitle: netProfitSubtitle,
       statusRows: [],
       details: revenueBreakdown.slice(0, 3)
     }

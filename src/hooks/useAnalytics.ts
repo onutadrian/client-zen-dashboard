@@ -41,13 +41,13 @@ export const useAnalytics = (params?: AnalyticsParams) => {
     setLoading(true);
 
     try {
-      // Fetch all data
-      const [clients, projects, hourEntries, invoices, subscriptions] = await Promise.all([
+      // Fetch all data - but don't filter subscriptions by date for cost calculation
+      const [clients, projects, hourEntries, invoices, allSubscriptions] = await Promise.all([
         fetchClientsData(),
         fetchProjectsData(),
         fetchHourEntriesData(params),
         fetchInvoicesData(params),
-        fetchSubscriptionsData(params)
+        fetchSubscriptionsData() // Get all subscriptions, not filtered by date
       ]);
 
       // Debug hour entries
@@ -84,16 +84,17 @@ export const useAnalytics = (params?: AnalyticsParams) => {
       const totalRevenue = invoiceRevenue;
       console.log('Total revenue calculated:', totalRevenue);
 
-      // Calculate subscription costs - multiply price by seats for each subscription
-      const monthlySubscriptionCost = subscriptions?.reduce((sum, sub) => {
+      // Calculate subscription costs - only active subscriptions
+      const activeSubscriptions = allSubscriptions?.filter(sub => sub.status === 'active') || [];
+      const monthlySubscriptionCost = activeSubscriptions.reduce((sum, sub) => {
         const price = parseFloat(sub.price?.toString() || '0');
         const seats = parseInt(sub.seats?.toString() || '1');
         const subCurrency = sub.currency || 'USD';
         const convertedPrice = convert(price, subCurrency, displayCurrency);
         return sum + (convertedPrice * seats);
-      }, 0) || 0;
+      }, 0);
 
-      const totalPaidToDate = subscriptions?.reduce((sum, sub) => {
+      const totalPaidToDate = allSubscriptions?.reduce((sum, sub) => {
         const totalPaid = parseFloat(sub.total_paid?.toString() || '0');
         const subCurrency = sub.currency || 'USD';
         const convertedPaid = convert(totalPaid, subCurrency, displayCurrency);
