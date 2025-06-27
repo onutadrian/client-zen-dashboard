@@ -12,7 +12,8 @@ import { createHourEntryForCompletedTask } from '@/services/taskCompletionServic
 export const useTasksOperations = (
   tasks: Task[],
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>,
-  onHourEntryCreated?: () => void
+  onHourEntryCreated?: () => void,
+  onTaskDeleted?: () => void
 ) => {
   const { toast } = useToast();
 
@@ -110,6 +111,11 @@ export const useTasksOperations = (
         console.log('Local state updated. Tasks before:', prev.length, 'Tasks after:', newTasks.length);
         return newTasks;
       });
+      
+      // Trigger callback to refresh analytics
+      if (onTaskDeleted) {
+        onTaskDeleted();
+      }
       
       toast({
         title: "Success",

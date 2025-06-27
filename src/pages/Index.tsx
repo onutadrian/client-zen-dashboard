@@ -50,6 +50,14 @@ const Index = () => {
     updateTask(taskId, status, actualHours);
   };
 
+  const handleDeleteTask = (taskId: number) => {
+    deleteTask(taskId);
+    // Trigger analytics refresh after task deletion
+    if (isAdmin && analytics.refetch) {
+      analytics.refetch();
+    }
+  };
+
   const handleEditTask = (task: any) => {
     const taskData = {
       title: task.title,
@@ -132,7 +140,7 @@ const Index = () => {
             projects={projects}
             onTaskClick={handleTaskClick}
             onUpdateTask={handleUpdateTask}
-            onDeleteTask={deleteTask}
+            onDeleteTask={handleDeleteTask}
             onEditTask={handleEditTask}
             onAddTask={handleAddTask}
           />
