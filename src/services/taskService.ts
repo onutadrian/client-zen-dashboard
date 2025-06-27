@@ -115,12 +115,29 @@ export const updateTaskInDatabase = async (
 };
 
 export const deleteTaskFromDatabase = async (taskId: number) => {
-  const { error } = await supabase
+  console.log('Attempting to delete task with ID:', taskId);
+  
+  const { data, error } = await supabase
     .from('tasks')
     .delete()
-    .eq('id', taskId);
+    .eq('id', taskId)
+    .select(); // Return the deleted rows to confirm deletion
 
-  if (error) throw error;
+  console.log('Delete operation result:', { data, error });
+
+  if (error) {
+    console.error('Database deletion error:', error);
+    throw new Error(`Failed to delete task: ${error.message}`);
+  }
+
+  // Check if any rows were actually deleted
+  if (!data || data.length === 0) {
+    console.warn('No rows were deleted. Task may not exist or user may not have permission.');
+    throw new Error('Task not found or insufficient permissions to delete');
+  }
+
+  console.log('Task successfully deleted from database:', data);
+  return data;
 };
 
 export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTaskData) => {

@@ -97,9 +97,19 @@ export const useTasksOperations = (
   };
 
   const deleteTask = async (taskId: number) => {
+    console.log('useTasksOperations: deleteTask called with ID:', taskId);
+    
     try {
+      // First delete from database
       await deleteTaskFromDatabase(taskId);
-      setTasks(prev => prev.filter(task => task.id !== taskId));
+      console.log('Database deletion successful, updating local state');
+      
+      // Then update local state
+      setTasks(prev => {
+        const newTasks = prev.filter(task => task.id !== taskId);
+        console.log('Local state updated. Tasks before:', prev.length, 'Tasks after:', newTasks.length);
+        return newTasks;
+      });
       
       toast({
         title: "Success",
@@ -109,9 +119,12 @@ export const useTasksOperations = (
       console.error('Error deleting task:', error);
       toast({
         title: "Error",
-        description: "Failed to delete task",
+        description: error instanceof Error ? error.message : "Failed to delete task",
         variant: "destructive"
       });
+      
+      // Don't update local state if database deletion failed
+      throw error;
     }
   };
 
