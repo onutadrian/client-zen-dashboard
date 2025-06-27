@@ -15,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 
 const ContractTemplatesPage = () => {
-  const { templates, generatedDocuments, loading, deleteTemplate } = useContractTemplates();
+  const { templates, generatedDocuments, loading, deleteTemplate, deleteGeneratedDocument } = useContractTemplates();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
@@ -43,6 +43,10 @@ const ContractTemplatesPage = () => {
 
   const handleDeleteTemplate = async (templateId: string) => {
     await deleteTemplate(templateId);
+  };
+
+  const handleDeleteGeneratedDocument = async (documentId: string) => {
+    await deleteGeneratedDocument(documentId);
   };
 
   const downloadDocument = async (document: GeneratedDocument) => {
@@ -236,6 +240,27 @@ const ContractTemplatesPage = () => {
                           <Download className="w-4 h-4 mr-1" />
                           Download Word
                         </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Document</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{document.document_name}"? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteGeneratedDocument(document.id)}>
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </CardContent>
                   </Card>

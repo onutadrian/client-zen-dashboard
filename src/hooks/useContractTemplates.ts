@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ContractTemplate, GeneratedDocument } from '@/services/contractTemplateService';
@@ -8,7 +7,8 @@ import {
   updateContractTemplateInSupabase,
   deleteContractTemplateFromSupabase,
   saveGeneratedDocumentToSupabase,
-  loadGeneratedDocumentsFromSupabase
+  loadGeneratedDocumentsFromSupabase,
+  deleteGeneratedDocumentFromSupabase
 } from '@/services/contractTemplateService';
 
 export const useContractTemplates = () => {
@@ -113,6 +113,25 @@ export const useContractTemplates = () => {
     }
   };
 
+  const deleteGeneratedDocument = async (id: string) => {
+    try {
+      await deleteGeneratedDocumentFromSupabase(id);
+      setGeneratedDocuments(prev => prev.filter(doc => doc.id !== id));
+      
+      toast({
+        title: "Success",
+        description: "Generated document deleted successfully"
+      });
+    } catch (error) {
+      console.error('Error deleting generated document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete generated document",
+        variant: "destructive"
+      });
+    }
+  };
+
   const generateDocument = async (templateId: string, variables: Record<string, any>, documentName: string, projectId?: string, clientId?: number) => {
     try {
       const template = templates.find(t => t.id === templateId);
@@ -164,6 +183,7 @@ export const useContractTemplates = () => {
     addTemplate,
     updateTemplate,
     deleteTemplate,
+    deleteGeneratedDocument,
     generateDocument,
     refreshTemplates: loadTemplates,
     refreshGeneratedDocuments: loadGeneratedDocuments

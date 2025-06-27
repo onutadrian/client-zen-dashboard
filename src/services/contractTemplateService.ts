@@ -125,3 +125,15 @@ export const loadGeneratedDocumentsFromSupabase = async (): Promise<GeneratedDoc
     variables_used: typeof item.variables_used === 'object' && item.variables_used !== null ? item.variables_used as Record<string, any> : {}
   }));
 };
+
+export const deleteGeneratedDocumentFromSupabase = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('generated_documents')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting generated document:', error);
+    throw error;
+  }
+};
