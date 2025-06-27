@@ -34,19 +34,33 @@ export const hourEntryService = {
     console.log('hourEntryService: Raw data from Supabase:', data);
 
     // Transform Supabase data to match our HourEntry interface
-    const transformedEntries: HourEntry[] = data.map(entry => ({
-      id: entry.id,
-      projectId: entry.project_id,
-      clientId: entry.client_id,
-      hours: Number(entry.hours),
-      description: entry.description || undefined,
-      date: entry.date,
-      billed: entry.billed,
-      createdAt: entry.created_at,
-      updatedAt: entry.updated_at,
-      userId: entry.user_id || undefined,
-      milestoneId: entry.milestone_id || undefined
-    }));
+    const transformedEntries: HourEntry[] = data.map(entry => {
+      // Handle malformed milestone_id values
+      let milestoneId: string | undefined = undefined;
+      
+      if (entry.milestone_id) {
+        // Check if it's a malformed object
+        if (typeof entry.milestone_id === 'object' && entry.milestone_id._type === 'undefined') {
+          milestoneId = undefined;
+        } else if (typeof entry.milestone_id === 'string') {
+          milestoneId = entry.milestone_id;
+        }
+      }
+
+      return {
+        id: entry.id,
+        projectId: entry.project_id,
+        clientId: entry.client_id,
+        hours: Number(entry.hours),
+        description: entry.description || undefined,
+        date: entry.date,
+        billed: entry.billed,
+        createdAt: entry.created_at,
+        updatedAt: entry.updated_at,
+        userId: entry.user_id || undefined,
+        milestoneId: milestoneId
+      };
+    });
 
     console.log('hourEntryService: Transformed entries:', transformedEntries);
     return transformedEntries;
