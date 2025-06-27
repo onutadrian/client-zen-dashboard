@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,16 @@ const GenerateDocumentModal = ({ open, onOpenChange, template }: GenerateDocumen
   const [isPopulating, setIsPopulating] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
+  // Function to generate preview content
+  const generatePreviewContent = (templateContent: string, variablesData: Record<string, string>) => {
+    let preview = templateContent;
+    Object.entries(variablesData).forEach(([key, value]) => {
+      const regex = new RegExp(`{{${key}}}`, 'g');
+      preview = preview.replace(regex, value);
+    });
+    return preview;
+  };
+
   useEffect(() => {
     if (template) {
       // Initialize variables
@@ -50,6 +61,10 @@ const GenerateDocumentModal = ({ open, onOpenChange, template }: GenerateDocumen
       setSavedVariables(initialVariables);
       setDocumentName(`${template.name} - ${new Date().toLocaleDateString()}`);
       setHasUnsavedChanges(false);
+      
+      // Generate initial preview
+      const initialPreview = generatePreviewContent(template.template_content, initialVariables);
+      setGeneratedContent(initialPreview);
     }
   }, [template]);
 
@@ -127,14 +142,11 @@ const GenerateDocumentModal = ({ open, onOpenChange, template }: GenerateDocumen
 
   const saveAndUpdatePreview = () => {
     // Save the current variables
-    setSavedVariables({ ...variables });
+    const newSavedVariables = { ...variables };
+    setSavedVariables(newSavedVariables);
     
-    // Generate preview with saved variables
-    let preview = template.template_content;
-    Object.entries(variables).forEach(([key, value]) => {
-      const regex = new RegExp(`{{${key}}}`, 'g');
-      preview = preview.replace(regex, value);
-    });
+    // Generate preview with saved variables immediately
+    const preview = generatePreviewContent(template.template_content, newSavedVariables);
     setGeneratedContent(preview);
     setHasUnsavedChanges(false);
     
@@ -150,18 +162,6 @@ const GenerateDocumentModal = ({ open, onOpenChange, template }: GenerateDocumen
       [variableName]: value
     }));
   };
-
-  // Initial preview generation with saved variables only
-  useEffect(() => {
-    if (template && Object.keys(savedVariables).length > 0) {
-      let preview = template.template_content;
-      Object.entries(savedVariables).forEach(([key, value]) => {
-        const regex = new RegExp(`{{${key}}}`, 'g');
-        preview = preview.replace(regex, value);
-      });
-      setGeneratedContent(preview);
-    }
-  }, [template, savedVariables]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,7 +180,7 @@ const GenerateDocumentModal = ({ open, onOpenChange, template }: GenerateDocumen
     try {
       await generateDocument(
         template.id,
-        savedVariables, // Use saved variables instead of current variables
+        savedVariables,
         documentName.trim(),
         selectedProjectId || undefined,
         selectedClientId ? parseInt(selectedClientId) : undefined
