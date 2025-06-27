@@ -134,7 +134,7 @@ const AnalyticsSection = ({
     return { netProfit, subtitle };
   };
 
-  const { netProfit, netProfitSubtitle } = calculateNetProfit();
+  const { netProfit, subtitle: netProfitSubtitle } = calculateNetProfit();
   const inactiveClients = totalClients - activeClients;
   const pendingClients = clients.filter(c => c.status === 'pending').length;
 
