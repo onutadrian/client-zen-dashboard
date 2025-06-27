@@ -40,7 +40,11 @@ export const hourEntryService = {
       
       if (entry.milestone_id !== null && entry.milestone_id !== undefined) {
         // Check if it's a malformed object
-        if (typeof entry.milestone_id === 'object' && entry.milestone_id._type === 'undefined') {
+        if (typeof entry.milestone_id === 'object' && 
+            entry.milestone_id !== null && 
+            typeof entry.milestone_id === 'object' && 
+            '_type' in entry.milestone_id && 
+            entry.milestone_id._type === 'undefined') {
           milestoneId = undefined;
         } else if (typeof entry.milestone_id === 'string') {
           milestoneId = entry.milestone_id;
