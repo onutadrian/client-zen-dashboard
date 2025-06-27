@@ -32,7 +32,14 @@ const ProjectDetailsPage = () => {
   const { projects, updateProject, archiveProject, deleteProject } = useProjects();
   const { clients } = useClients();
   const { refreshHourEntries } = useHourEntries();
-  const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks(refreshHourEntries);
+  
+  // Create refresh callback that forces component re-renders
+  const handleDataChange = () => {
+    setForceRefresh(prev => prev + 1);
+    refreshHourEntries();
+  };
+  
+  const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks(refreshHourEntries, handleDataChange);
   const { milestones, addMilestone, updateMilestone, deleteMilestone } = useMilestones();
 
   const project = projects.find(p => p.id === id);
@@ -118,6 +125,7 @@ const ProjectDetailsPage = () => {
           </div>
 
           <ProjectHeader 
+            key={`header-${forceRefresh}`}
             project={project} 
             client={client} 
             tasks={projectTasks}
@@ -153,6 +161,7 @@ const ProjectDetailsPage = () => {
 
             <TabsContent value="team" className="mt-6">
               <ProjectTeamMembers 
+                key={`team-${forceRefresh}`}
                 project={project}
                 client={client}
                 onUpdateProject={updateProject}
@@ -173,6 +182,7 @@ const ProjectDetailsPage = () => {
 
             <TabsContent value="settings" className="mt-6">
               <ProjectSettings 
+                key={`settings-${forceRefresh}`}
                 project={project}
                 onUpdateProject={updateProject}
                 onArchiveProject={archiveProject}
