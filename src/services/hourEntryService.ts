@@ -38,7 +38,7 @@ export const hourEntryService = {
       // Handle malformed milestone_id values
       let milestoneId: string | undefined = undefined;
       
-      if (entry.milestone_id) {
+      if (entry.milestone_id !== null && entry.milestone_id !== undefined) {
         // Check if it's a malformed object
         if (typeof entry.milestone_id === 'object' && entry.milestone_id._type === 'undefined') {
           milestoneId = undefined;
