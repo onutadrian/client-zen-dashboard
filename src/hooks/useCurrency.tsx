@@ -57,32 +57,42 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       }
       
-      // Fetch new rates from our edge function
-      console.log('Fetching fresh exchange rates from edge function...');
-      const { data, error } = await supabase.functions.invoke('fetch-exchange-rates');
+      // Try to fetch new rates from our edge function
+      console.log('Attempting to fetch fresh exchange rates from edge function...');
       
-      if (error) {
-        console.error('Error calling edge function:', error);
-        throw new Error(`Edge function error: ${error.message}`);
+      try {
+        const { data, error } = await supabase.functions.invoke('fetch-exchange-rates');
+        
+        if (error) {
+          console.warn('Edge function error:', error);
+          throw new Error(`Edge function error: ${error.message}`);
+        }
+        
+        if (!data || !data.success) {
+          console.warn('Edge function returned error or no data:', data);
+          throw new Error(`API error: ${data?.error || 'No data received'}`);
+        }
+        
+        console.log('Successfully fetched live exchange rates:', data.rates);
+        
+        // Cache the rates
+        localStorage.setItem('exchangeRates', JSON.stringify(data.rates));
+        localStorage.setItem('exchangeRatesTimestamp', new Date().toISOString());
+        
+        setLiveExchangeRates(data.rates);
+        setLastFetched(new Date());
+        
+      } catch (edgeFunctionError) {
+        console.warn('Edge function failed, falling back to static rates:', edgeFunctionError);
+        // Fall back to static rates when edge function fails
+        setLiveExchangeRates(fallbackExchangeRates);
+        // Don't cache fallback rates
       }
       
-      if (!data.success) {
-        console.error('Edge function returned error:', data.error);
-        throw new Error(`API error: ${data.error}`);
-      }
-      
-      console.log('Fetched live exchange rates:', data.rates);
-      
-      // Cache the rates
-      localStorage.setItem('exchangeRates', JSON.stringify(data.rates));
-      localStorage.setItem('exchangeRatesTimestamp', new Date().toISOString());
-      
-      setLiveExchangeRates(data.rates);
-      setLastFetched(new Date());
     } catch (error) {
-      console.error('Error fetching exchange rates:', error);
-      // Fall back to static rates
-      console.log('Using fallback exchange rates');
+      console.error('Error in fetchExchangeRates:', error);
+      // Final fallback to static rates
+      console.log('Using fallback exchange rates due to error');
       setLiveExchangeRates(fallbackExchangeRates);
     } finally {
       setLoadingRates(false);
