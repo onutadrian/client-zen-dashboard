@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "@/components/ui/toaster"
+import { AuthProvider } from '@/hooks/useAuth';
 import AuthPage from '@/pages/AuthPage';
 import Index from '@/pages/Index';
 import ProjectsPage from '@/pages/ProjectsPage';
@@ -21,57 +22,59 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <div className="min-h-screen bg-background">
-          <Router>
-            <Routes>
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              } />
-              <Route path="/projects" element={
-                <ProtectedRoute>
-                  <ProjectsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/projects/:id" element={
-                <ProtectedRoute>
-                  <ProjectDetailsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/clients" element={
-                <ProtectedRoute>
-                  <ClientsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/clients/:id" element={
-                <ProtectedRoute>
-                  <ClientDetailsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/subscriptions" element={
-                <ProtectedRoute>
-                  <SubscriptionsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/users" element={
-                <ProtectedRoute>
-                  <UsersPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/contracts" element={
-                <ProtectedRoute>
-                  <ContractTemplatesPage />
-                </ProtectedRoute>
-              } />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Router>
-        </div>
-        <Toaster />
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <div className="min-h-screen bg-background">
+            <Router>
+              <Routes>
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                } />
+                <Route path="/projects" element={
+                  <ProtectedRoute>
+                    <ProjectsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/projects/:id" element={
+                  <ProtectedRoute>
+                    <ProjectDetailsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/clients" element={
+                  <ProtectedRoute>
+                    <ClientsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/clients/:id" element={
+                  <ProtectedRoute>
+                    <ClientDetailsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/subscriptions" element={
+                  <ProtectedRoute>
+                    <SubscriptionsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/users" element={
+                  <ProtectedRoute>
+                    <UsersPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/contracts" element={
+                  <ProtectedRoute>
+                    <ContractTemplatesPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Router>
+          </div>
+          <Toaster />
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
