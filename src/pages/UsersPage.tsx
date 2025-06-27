@@ -43,7 +43,7 @@ const UsersPage = () => {
   if (!isAdmin) {
     return (
       <DashboardContainer>
-        <div className="min-h-screen p-6 flex items-center justify-center" style={{
+        <div className="min-h-screen flex items-center justify-center" style={{
           backgroundColor: '#F3F3F2'
         }}>
           <div className="text-center">
@@ -69,7 +69,7 @@ const UsersPage = () => {
 
   return (
     <DashboardContainer>
-      <div className="min-h-screen p-6" style={{
+      <div className="min-h-screen" style={{
         backgroundColor: '#F3F3F2'
       }}>
         <div className="max-w-7xl mx-auto space-y-6">

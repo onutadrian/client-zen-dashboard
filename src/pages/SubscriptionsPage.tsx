@@ -57,7 +57,7 @@ const SubscriptionsPage = () => {
   if (loading) {
     return (
       <DashboardContainer>
-        <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
+        <div className="min-h-screen" style={{ backgroundColor: '#F3F3F2' }}>
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -75,7 +75,7 @@ const SubscriptionsPage = () => {
   
   return (
     <DashboardContainer>
-      <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
+      <div className="min-h-screen" style={{ backgroundColor: '#F3F3F2' }}>
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">

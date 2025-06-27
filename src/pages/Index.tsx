@@ -93,54 +93,58 @@ const Index = () => {
 
   return (
     <DashboardContainer>
-      <DashboardHeader />
-      
-      {isAdmin ? (
-        <AnalyticsSection 
-          totalClients={analytics.totalClients}
-          activeClients={analytics.activeClients}
-          totalHours={analytics.totalHours}
-          totalRevenue={analytics.totalRevenue}
-          monthlySubscriptionCost={analytics.monthlySubscriptionCost}
-          totalPaidToDate={analytics.totalPaidToDate}
-          clients={analytics.clients}
-          displayCurrency={analytics.displayCurrency}
-          formatCurrency={analytics.formatCurrency}
-          timeBreakdown={analytics.timeBreakdown}
-          revenueBreakdown={analytics.revenueBreakdown}
-          selectedPeriod={selectedPeriod}
-          onPeriodChange={setSelectedPeriod}
-          customDateRange={customDateRange}
-          onCustomDateChange={setCustomDateRange}
-        />
-      ) : (
-        <UserAnalyticsSection
-          tasks={tasks}
-          projects={projects}
-          selectedPeriod={selectedPeriod}
-          onPeriodChange={setSelectedPeriod}
-          customDateRange={customDateRange}
-          onCustomDateChange={setCustomDateRange}
-        />
-      )}
+      <div className="min-h-screen" style={{ backgroundColor: '#F3F3F2' }}>
+        <div className="max-w-7xl mx-auto space-y-6">
+          <DashboardHeader />
+          
+          {isAdmin ? (
+            <AnalyticsSection 
+              totalClients={analytics.totalClients}
+              activeClients={analytics.activeClients}
+              totalHours={analytics.totalHours}
+              totalRevenue={analytics.totalRevenue}
+              monthlySubscriptionCost={analytics.monthlySubscriptionCost}
+              totalPaidToDate={analytics.totalPaidToDate}
+              clients={analytics.clients}
+              displayCurrency={analytics.displayCurrency}
+              formatCurrency={analytics.formatCurrency}
+              timeBreakdown={analytics.timeBreakdown}
+              revenueBreakdown={analytics.revenueBreakdown}
+              selectedPeriod={selectedPeriod}
+              onPeriodChange={setSelectedPeriod}
+              customDateRange={customDateRange}
+              onCustomDateChange={setCustomDateRange}
+            />
+          ) : (
+            <UserAnalyticsSection
+              tasks={tasks}
+              projects={projects}
+              selectedPeriod={selectedPeriod}
+              onPeriodChange={setSelectedPeriod}
+              customDateRange={customDateRange}
+              onCustomDateChange={setCustomDateRange}
+            />
+          )}
 
-      <TaskManagementSection
-        tasks={tasks}
-        clients={clients}
-        projects={projects}
-        onTaskClick={handleTaskClick}
-        onUpdateTask={handleUpdateTask}
-        onDeleteTask={deleteTask}
-        onEditTask={handleEditTask}
-        onAddTask={handleAddTask}
-      />
+          <TaskManagementSection
+            tasks={tasks}
+            clients={clients}
+            projects={projects}
+            onTaskClick={handleTaskClick}
+            onUpdateTask={handleUpdateTask}
+            onDeleteTask={deleteTask}
+            onEditTask={handleEditTask}
+            onAddTask={handleAddTask}
+          />
 
-      <TimelineSection
-        projects={projects}
-        tasks={tasks}
-        milestones={milestones}
-        clients={clients}
-      />
+          <TimelineSection
+            projects={projects}
+            tasks={tasks}
+            milestones={milestones}
+            clients={clients}
+          />
+        </div>
+      </div>
     </DashboardContainer>
   );
 };
