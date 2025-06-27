@@ -36,7 +36,7 @@ export const loadContractTemplatesFromSupabase = async (): Promise<ContractTempl
 
   return (data || []).map(item => ({
     ...item,
-    variables: Array.isArray(item.variables) ? item.variables : []
+    variables: Array.isArray(item.variables) ? item.variables.filter((v): v is string => typeof v === 'string') : []
   }));
 };
 
@@ -58,7 +58,7 @@ export const addContractTemplateToSupabase = async (template: Omit<ContractTempl
 
   return {
     ...data,
-    variables: Array.isArray(data.variables) ? data.variables : []
+    variables: Array.isArray(data.variables) ? data.variables.filter((v): v is string => typeof v === 'string') : []
   };
 };
 
@@ -105,7 +105,7 @@ export const saveGeneratedDocumentToSupabase = async (document: Omit<GeneratedDo
 
   return {
     ...data,
-    variables_used: typeof data.variables_used === 'object' ? data.variables_used : {}
+    variables_used: typeof data.variables_used === 'object' && data.variables_used !== null ? data.variables_used as Record<string, any> : {}
   };
 };
 
@@ -122,6 +122,6 @@ export const loadGeneratedDocumentsFromSupabase = async (): Promise<GeneratedDoc
 
   return (data || []).map(item => ({
     ...item,
-    variables_used: typeof item.variables_used === 'object' ? item.variables_used : {}
+    variables_used: typeof item.variables_used === 'object' && item.variables_used !== null ? item.variables_used as Record<string, any> : {}
   }));
 };
