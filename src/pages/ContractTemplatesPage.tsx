@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +12,7 @@ import { ContractTemplate, GeneratedDocument } from '@/services/contractTemplate
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
 
 const ContractTemplatesPage = () => {
   const { templates, generatedDocuments, loading, deleteTemplate } = useContractTemplates();
@@ -45,16 +45,38 @@ const ContractTemplatesPage = () => {
     await deleteTemplate(templateId);
   };
 
-  const downloadDocument = (document: GeneratedDocument) => {
-    const blob = new Blob([document.generated_content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = window.document.createElement('a');
-    link.href = url;
-    link.download = `${document.document_name}.txt`;
-    window.document.body.appendChild(link);
-    link.click();
-    window.document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const downloadDocument = async (document: GeneratedDocument) => {
+    try {
+      // Split content into paragraphs
+      const paragraphs = document.generated_content.split('\n').map(line => 
+        new Paragraph({
+          children: [new TextRun(line || ' ')], // Empty lines need a space
+        })
+      );
+
+      // Create Word document
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: paragraphs,
+        }],
+      });
+
+      // Generate blob
+      const blob = await Packer.toBlob(doc);
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = window.document.createElement('a');
+      link.href = url;
+      link.download = `${document.document_name}.docx`;
+      window.document.body.appendChild(link);
+      link.click();
+      window.document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating Word document:', error);
+    }
   };
 
   if (loading) {
@@ -212,7 +234,7 @@ const ContractTemplatesPage = () => {
                           onClick={() => downloadDocument(document)}
                         >
                           <Download className="w-4 h-4 mr-1" />
-                          Download
+                          Download Word
                         </Button>
                       </div>
                     </CardContent>
