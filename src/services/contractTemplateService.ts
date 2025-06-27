@@ -34,7 +34,10 @@ export const loadContractTemplatesFromSupabase = async (): Promise<ContractTempl
     throw error;
   }
 
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    variables: Array.isArray(item.variables) ? item.variables : []
+  }));
 };
 
 export const addContractTemplateToSupabase = async (template: Omit<ContractTemplate, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<ContractTemplate> => {
@@ -53,7 +56,10 @@ export const addContractTemplateToSupabase = async (template: Omit<ContractTempl
     throw error;
   }
 
-  return data;
+  return {
+    ...data,
+    variables: Array.isArray(data.variables) ? data.variables : []
+  };
 };
 
 export const updateContractTemplateInSupabase = async (id: string, template: Partial<ContractTemplate>): Promise<void> => {
@@ -97,7 +103,10 @@ export const saveGeneratedDocumentToSupabase = async (document: Omit<GeneratedDo
     throw error;
   }
 
-  return data;
+  return {
+    ...data,
+    variables_used: typeof data.variables_used === 'object' ? data.variables_used : {}
+  };
 };
 
 export const loadGeneratedDocumentsFromSupabase = async (): Promise<GeneratedDocument[]> => {
@@ -111,5 +120,8 @@ export const loadGeneratedDocumentsFromSupabase = async (): Promise<GeneratedDoc
     throw error;
   }
 
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    variables_used: typeof item.variables_used === 'object' ? item.variables_used : {}
+  }));
 };

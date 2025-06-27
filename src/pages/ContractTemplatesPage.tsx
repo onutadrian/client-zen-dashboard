@@ -4,7 +4,7 @@ import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, FileText, Eye, Edit, Trash2, Download, Search } from 'lucide-react';
+import { Plus, FileText, Edit, Trash2, Download, Search } from 'lucide-react';
 import { useContractTemplates } from '@/hooks/useContractTemplates';
 import AddTemplateModal from '@/components/AddTemplateModal';
 import EditTemplateModal from '@/components/EditTemplateModal';
@@ -48,12 +48,12 @@ const ContractTemplatesPage = () => {
   const downloadDocument = (document: GeneratedDocument) => {
     const blob = new Blob([document.generated_content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${document.document_name}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const link = window.document.createElement('a');
+    link.href = url;
+    link.download = `${document.document_name}.txt`;
+    window.document.body.appendChild(link);
+    link.click();
+    window.document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
