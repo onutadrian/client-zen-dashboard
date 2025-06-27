@@ -1,57 +1,78 @@
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { ThemeProvider } from "@/components/ui/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+import AuthPage from '@/pages/AuthPage';
+import Index from '@/pages';
+import ProjectsPage from '@/pages/ProjectsPage';
+import ProjectDetailsPage from '@/pages/ProjectDetailsPage';
+import ClientsPage from '@/pages/ClientsPage';
+import ClientDetailsPage from '@/pages/ClientDetailsPage';
+import SubscriptionsPage from '@/pages/SubscriptionsPage';
+import UsersPage from '@/pages/UsersPage';
+import NotFound from '@/pages/NotFound';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import ContractTemplatesPage from '@/pages/ContractTemplatesPage';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
-import { CurrencyProvider } from "@/hooks/useCurrency";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import AuthenticatedLayout from "@/components/AuthenticatedLayout";
-import Index from "./pages/Index";
-import ProjectsPage from "./pages/ProjectsPage";
-import ProjectDetailsPage from "./pages/ProjectDetailsPage";
-import ClientsPage from "./pages/ClientsPage";
-import ClientDetailsPage from "./pages/ClientDetailsPage";
-import SubscriptionsPage from "./pages/SubscriptionsPage";
-import AuthPage from "./pages/AuthPage";
-import UsersPage from "./pages/UsersPage";
+function App() {
+  const queryClient = new QueryClient();
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <CurrencyProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <div className="min-h-screen w-full">
-              <Routes>
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/*" element={
-                  <ProtectedRoute>
-                    <AuthenticatedLayout>
-                      <Routes>
-                        <Route path="/" element={<Index />} />
-                        <Route path="/projects" element={<ProjectsPage />} />
-                        <Route path="/projects/:id" element={<ProjectDetailsPage />} />
-                        <Route path="/clients" element={<ClientsPage />} />
-                        <Route path="/clients/:id" element={<ClientDetailsPage />} />
-                        <Route path="/subscriptions" element={<SubscriptionsPage />} />
-                        <Route path="/users" element={<UsersPage />} />
-                      </Routes>
-                    </AuthenticatedLayout>
-                  </ProtectedRoute>
-                } />
-              </Routes>
-            </div>
-          </BrowserRouter>
-        </TooltipProvider>
-      </CurrencyProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <div className="min-h-screen bg-background">
+          <Router>
+            <Routes>
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              } />
+              <Route path="/projects" element={
+                <ProtectedRoute>
+                  <ProjectsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/projects/:id" element={
+                <ProtectedRoute>
+                  <ProjectDetailsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/clients" element={
+                <ProtectedRoute>
+                  <ClientsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/clients/:id" element={
+                <ProtectedRoute>
+                  <ClientDetailsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/subscriptions" element={
+                <ProtectedRoute>
+                  <SubscriptionsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/users" element={
+                <ProtectedRoute>
+                  <UsersPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/contracts" element={
+                <ProtectedRoute>
+                  <ContractTemplatesPage />
+                </ProtectedRoute>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Router>
+        </div>
+        <Toaster />
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

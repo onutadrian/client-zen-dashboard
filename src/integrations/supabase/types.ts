@@ -60,6 +60,94 @@ export type Database = {
         }
         Relationships: []
       }
+      contract_templates: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          template_content: string
+          updated_at: string
+          user_id: string
+          variables: Json | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          template_content: string
+          updated_at?: string
+          user_id?: string
+          variables?: Json | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          template_content?: string
+          updated_at?: string
+          user_id?: string
+          variables?: Json | null
+        }
+        Relationships: []
+      }
+      generated_documents: {
+        Row: {
+          client_id: number | null
+          created_at: string
+          document_name: string
+          generated_content: string
+          id: string
+          project_id: string | null
+          template_id: string
+          user_id: string
+          variables_used: Json | null
+        }
+        Insert: {
+          client_id?: number | null
+          created_at?: string
+          document_name: string
+          generated_content: string
+          id?: string
+          project_id?: string | null
+          template_id: string
+          user_id?: string
+          variables_used?: Json | null
+        }
+        Update: {
+          client_id?: number | null
+          created_at?: string
+          document_name?: string
+          generated_content?: string
+          id?: string
+          project_id?: string | null
+          template_id?: string
+          user_id?: string
+          variables_used?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_documents_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "contract_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hour_entries: {
         Row: {
           billed: boolean
