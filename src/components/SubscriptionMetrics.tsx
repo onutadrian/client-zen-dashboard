@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,11 +15,6 @@ interface SubscriptionMetricsProps {
 
 const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMetricsProps) => {
   const { convert, demoMode } = useCurrency();
-  
-  // Don't render the component at all in demo mode
-  if (demoMode) {
-    return null;
-  }
   
   const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
   
@@ -95,8 +91,8 @@ const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMet
         {stats.map((stat, index) => {
           const trend = getTrendData(stat.title);
           const TrendIcon = trend.isIncrease ? TrendingUp : TrendingDown;
-          const formattedValue = formatMetric(stat.value, stat.isCurrency);
-          const needsTooltip = typeof stat.value === 'number' ? stat.value >= 1000 : false;
+          const formattedValue = demoMode && stat.isCurrency ? '—' : formatMetric(stat.value, stat.isCurrency);
+          const needsTooltip = !demoMode && typeof stat.value === 'number' ? stat.value >= 1000 : false;
           
           return (
             <Card key={index} className="hover:shadow-none transition-all duration-200 shadow-none w-full min-w-0">
@@ -113,19 +109,21 @@ const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMet
                       {stat.title}
                     </h3>
                     
-                    <div className="flex items-center space-x-1 lg:space-x-2">
-                      <Badge 
-                        className={`text-xs px-1.5 lg:px-2 py-0.5 lg:py-1 flex items-center space-x-1 ${
-                          trend.isIncrease 
-                            ? 'bg-green-100 text-green-800 hover:bg-green-100' 
-                            : 'bg-red-100 text-red-800 hover:bg-red-100'
-                        }`}
-                      >
-                        <TrendIcon className="w-2.5 h-2.5 lg:w-3 lg:h-3" />
-                        <span className="text-xs">{trend.change}%</span>
-                      </Badge>
-                      <span className="text-xs text-slate-500 hidden sm:inline">vs prev 30d</span>
-                    </div>
+                    {!demoMode && (
+                      <div className="flex items-center space-x-1 lg:space-x-2">
+                        <Badge 
+                          className={`text-xs px-1.5 lg:px-2 py-0.5 lg:py-1 flex items-center space-x-1 ${
+                            trend.isIncrease 
+                              ? 'bg-green-100 text-green-800 hover:bg-green-100' 
+                              : 'bg-red-100 text-red-800 hover:bg-red-100'
+                          }`}
+                        >
+                          <TrendIcon className="w-2.5 h-2.5 lg:w-3 lg:h-3" />
+                          <span className="text-xs">{trend.change}%</span>
+                        </Badge>
+                        <span className="text-xs text-slate-500 hidden sm:inline">vs prev 30d</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-1">
