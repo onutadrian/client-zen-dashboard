@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign } from 'lucide-react';
@@ -21,11 +22,6 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
   const { invoices } = useInvoices();
   const { displayCurrency, convert, demoMode } = useCurrency();
   
-  // Don't render the component at all in demo mode
-  if (demoMode) {
-    return null;
-  }
-  
   const projectHours = hourEntries.filter(entry => entry.projectId === project.id);
   const projectInvoices = invoices.filter(invoice => invoice.projectId === project.id);
   
@@ -35,7 +31,7 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
   const unbilledHours = projectHours.filter(entry => !entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
   
   // Calculate paid invoiced revenue (from paid invoices) with currency conversion
-  const paidInvoicedRevenue = projectInvoices
+  const paidInvoicedRevenue = demoMode ? 0 : projectInvoices
     .filter(invoice => invoice.status === 'paid')
     .reduce((sum, invoice) => {
       const convertedAmount = convert(invoice.amount, invoice.currency, displayCurrency);
@@ -44,34 +40,38 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
   
   // Calculate value of billed hours (this is the actual "Billed Revenue" for hourly/daily projects)
   let valueFromBilledHours = 0;
-  if (project.pricingType === 'hourly' && project.hourlyRate) {
-    const convertedRate = convert(project.hourlyRate, project.currency, displayCurrency);
-    valueFromBilledHours = billedHours * convertedRate;
-  } else if (project.pricingType === 'daily' && project.dailyRate) {
-    const convertedRate = convert(project.dailyRate, project.currency, displayCurrency);
-    // Convert hours to days (assuming 8-hour workday)
-    valueFromBilledHours = (billedHours / 8) * convertedRate;
+  if (!demoMode) {
+    if (project.pricingType === 'hourly' && project.hourlyRate) {
+      const convertedRate = convert(project.hourlyRate, project.currency, displayCurrency);
+      valueFromBilledHours = billedHours * convertedRate;
+    } else if (project.pricingType === 'daily' && project.dailyRate) {
+      const convertedRate = convert(project.dailyRate, project.currency, displayCurrency);
+      // Convert hours to days (assuming 8-hour workday)
+      valueFromBilledHours = (billedHours / 8) * convertedRate;
+    }
   }
   
   // Calculate unbilled revenue based on project pricing and unbilled hours with currency conversion
   let unbilledRevenue = 0;
-  if (project.pricingType === 'hourly' && project.hourlyRate) {
-    const convertedRate = convert(project.hourlyRate, project.currency, displayCurrency);
-    unbilledRevenue = unbilledHours * convertedRate;
-  } else if (project.pricingType === 'daily' && project.dailyRate) {
-    const convertedRate = convert(project.dailyRate, project.currency, displayCurrency);
-    // Convert hours to days (assuming 8-hour workday)
-    unbilledRevenue = (unbilledHours / 8) * convertedRate;
+  if (!demoMode) {
+    if (project.pricingType === 'hourly' && project.hourlyRate) {
+      const convertedRate = convert(project.hourlyRate, project.currency, displayCurrency);
+      unbilledRevenue = unbilledHours * convertedRate;
+    } else if (project.pricingType === 'daily' && project.dailyRate) {
+      const convertedRate = convert(project.dailyRate, project.currency, displayCurrency);
+      // Convert hours to days (assuming 8-hour workday)
+      unbilledRevenue = (unbilledHours / 8) * convertedRate;
+    }
   }
   
   // For fixed price projects, calculate milestone values with currency conversion
-  const totalMilestoneValue = milestones.reduce((sum, m) => {
+  const totalMilestoneValue = demoMode ? 0 : milestones.reduce((sum, m) => {
     const amount = m.amount || 0;
     const convertedAmount = convert(amount, project.currency, displayCurrency);
     return sum + convertedAmount;
   }, 0);
   
-  const completedMilestoneValue = milestones
+  const completedMilestoneValue = demoMode ? 0 : milestones
     .filter(m => m.status === 'completed')
     .reduce((sum, m) => {
       const amount = m.amount || 0;
@@ -118,10 +118,11 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
             totalMilestoneValue={totalMilestoneValue}
             completedMilestoneValue={completedMilestoneValue}
             displayCurrency={displayCurrency}
+            demoMode={demoMode}
           />
         </div>
         
-        {unbilledHours > 0 && !isFixedPrice && (
+        {unbilledHours > 0 && !isFixedPrice && !demoMode && (
           <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-sm text-amber-800">
               You have <strong>{unbilledHours.toFixed(2)} hours</strong> of unbilled work worth{' '}

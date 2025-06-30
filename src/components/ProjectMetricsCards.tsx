@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency } from '@/lib/currency';
@@ -13,6 +14,7 @@ interface ProjectMetricsCardsProps {
   totalMilestoneValue?: number;
   completedMilestoneValue?: number;
   displayCurrency: string;
+  demoMode?: boolean;
 }
 
 const ProjectMetricsCards = ({
@@ -25,12 +27,17 @@ const ProjectMetricsCards = ({
   unbilledRevenue,
   totalMilestoneValue = 0,
   completedMilestoneValue = 0,
-  displayCurrency
+  displayCurrency,
+  demoMode = false
 }: ProjectMetricsCardsProps) => {
   const showMilestoneTracking = isFixedPrice && totalMilestoneValue > 0;
 
   // Format numbers: remove decimals and convert 1000+ to K format
   const formatMetric = (value: number, isCurrency = false) => {
+    if (demoMode && isCurrency) {
+      return '—';
+    }
+
     const rounded = Math.round(value);
     
     if (rounded >= 1000) {
@@ -60,7 +67,7 @@ const ProjectMetricsCards = ({
                 </p>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{formatCurrency(unbilledRevenue, displayCurrency)}</p>
+                <p>{demoMode ? '—' : formatCurrency(unbilledRevenue, displayCurrency)}</p>
               </TooltipContent>
             </Tooltip>
             <p className="text-slate-600 py-[24px] text-base">Unbilled Revenue</p>
@@ -74,7 +81,7 @@ const ProjectMetricsCards = ({
                 </p>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{formatCurrency(totalMilestoneValue, displayCurrency)}</p>
+                <p>{demoMode ? '—' : formatCurrency(totalMilestoneValue, displayCurrency)}</p>
               </TooltipContent>
             </Tooltip>
             <p className="text-slate-600 py-[24px] text-base">Total Value</p>
@@ -88,7 +95,7 @@ const ProjectMetricsCards = ({
                 </p>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{formatCurrency(completedMilestoneValue, displayCurrency)}</p>
+                <p>{demoMode ? '—' : formatCurrency(completedMilestoneValue, displayCurrency)}</p>
               </TooltipContent>
             </Tooltip>
             <p className="text-slate-600 py-[24px] text-base">Earned Value</p>
@@ -102,7 +109,7 @@ const ProjectMetricsCards = ({
                 </p>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{formatCurrency(paidInvoicedRevenue, displayCurrency)}</p>
+                <p>{demoMode ? '—' : formatCurrency(paidInvoicedRevenue, displayCurrency)}</p>
               </TooltipContent>
             </Tooltip>
             <p className="text-slate-600 py-[24px] text-base">Paid Invoices</p>
@@ -165,7 +172,7 @@ const ProjectMetricsCards = ({
               </p>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{formatCurrency(valueFromBilledHours, displayCurrency)}</p>
+              <p>{demoMode ? '—' : formatCurrency(valueFromBilledHours, displayCurrency)}</p>
             </TooltipContent>
           </Tooltip>
           <p className="text-slate-600 py-[24px] text-base">Billed Revenue</p>
@@ -179,7 +186,7 @@ const ProjectMetricsCards = ({
               </p>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{formatCurrency(unbilledRevenue, displayCurrency)}</p>
+              <p>{demoMode ? '—' : formatCurrency(unbilledRevenue, displayCurrency)}</p>
             </TooltipContent>
           </Tooltip>
           <p className="text-slate-600 py-[24px] text-base">Unbilled Revenue</p>

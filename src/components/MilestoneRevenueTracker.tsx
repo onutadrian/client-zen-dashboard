@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -17,21 +18,16 @@ const MilestoneRevenueTracker = ({ milestones, projectId, projectCurrency }: Mil
   const { invoices } = useInvoices();
   const { displayCurrency, convert, demoMode } = useCurrency();
   
-  // Don't render the component at all in demo mode
-  if (demoMode) {
-    return null;
-  }
-  
   const projectInvoices = invoices.filter(i => i.projectId === projectId);
   
   // Calculate revenue metrics with currency conversion
-  const totalProjectValue = milestones.reduce((sum, m) => {
+  const totalProjectValue = demoMode ? 0 : milestones.reduce((sum, m) => {
     const amount = m.amount || 0;
     const convertedAmount = convert(amount, projectCurrency, displayCurrency);
     return sum + convertedAmount;
   }, 0);
   
-  const completedValue = milestones
+  const completedValue = demoMode ? 0 : milestones
     .filter(m => m.status === 'completed')
     .reduce((sum, m) => {
       const amount = m.amount || 0;
@@ -39,14 +35,14 @@ const MilestoneRevenueTracker = ({ milestones, projectId, projectCurrency }: Mil
       return sum + convertedAmount;
     }, 0);
   
-  const paidAmount = projectInvoices
+  const paidAmount = demoMode ? 0 : projectInvoices
     .filter(i => i.status === 'paid')
     .reduce((sum, i) => {
       const convertedAmount = convert(i.amount, i.currency, displayCurrency);
       return sum + convertedAmount;
     }, 0);
   
-  const pendingAmount = projectInvoices
+  const pendingAmount = demoMode ? 0 : projectInvoices
     .filter(i => i.status === 'pending')
     .reduce((sum, i) => {
       const convertedAmount = convert(i.amount, i.currency, displayCurrency);
@@ -71,7 +67,9 @@ const MilestoneRevenueTracker = ({ milestones, projectId, projectCurrency }: Mil
               <Target className="w-5 h-5 text-blue-600 mr-1" />
               <span className="text-sm font-medium text-blue-800">Project Value</span>
             </div>
-            <p className="text-2xl font-bold text-blue-900">{formatCurrency(totalProjectValue, displayCurrency)}</p>
+            <p className="text-2xl font-bold text-blue-900">
+              {demoMode ? '—' : formatCurrency(totalProjectValue, displayCurrency)}
+            </p>
           </div>
           
           <div className="text-center p-3 rounded-lg bg-green-50">
@@ -79,7 +77,9 @@ const MilestoneRevenueTracker = ({ milestones, projectId, projectCurrency }: Mil
               <DollarSign className="w-5 h-5 text-green-600 mr-1" />
               <span className="text-sm font-medium text-green-800">Paid Revenue</span>
             </div>
-            <p className="text-2xl font-bold text-green-900">{formatCurrency(paidAmount, displayCurrency)}</p>
+            <p className="text-2xl font-bold text-green-900">
+              {demoMode ? '—' : formatCurrency(paidAmount, displayCurrency)}
+            </p>
           </div>
           
           <div className="text-center p-3 rounded-lg bg-yellow-50">
@@ -87,7 +87,9 @@ const MilestoneRevenueTracker = ({ milestones, projectId, projectCurrency }: Mil
               <Clock className="w-5 h-5 text-yellow-600 mr-1" />
               <span className="text-sm font-medium text-yellow-800">Pending</span>
             </div>
-            <p className="text-2xl font-bold text-yellow-900">{formatCurrency(pendingAmount, displayCurrency)}</p>
+            <p className="text-2xl font-bold text-yellow-900">
+              {demoMode ? '—' : formatCurrency(pendingAmount, displayCurrency)}
+            </p>
           </div>
         </div>
 
@@ -95,21 +97,21 @@ const MilestoneRevenueTracker = ({ milestones, projectId, projectCurrency }: Mil
           <div>
             <div className="flex justify-between text-sm mb-1">
               <span>Work Completion</span>
-              <span>{completionPercentage.toFixed(1)}%</span>
+              <span>{demoMode ? '—' : `${completionPercentage.toFixed(1)}%`}</span>
             </div>
-            <Progress value={completionPercentage} className="h-2" />
+            <Progress value={demoMode ? 0 : completionPercentage} className="h-2" />
           </div>
           
           <div>
             <div className="flex justify-between text-sm mb-1">
               <span>Payment Collection</span>
-              <span>{paymentPercentage.toFixed(1)}%</span>
+              <span>{demoMode ? '—' : `${paymentPercentage.toFixed(1)}%`}</span>
             </div>
-            <Progress value={paymentPercentage} className="h-2" />
+            <Progress value={demoMode ? 0 : paymentPercentage} className="h-2" />
           </div>
         </div>
 
-        {pendingAmount > 0 && (
+        {pendingAmount > 0 && !demoMode && (
           <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-sm text-amber-800">
               <strong>{formatCurrency(pendingAmount, displayCurrency)}</strong> in pending invoices ready for collection
