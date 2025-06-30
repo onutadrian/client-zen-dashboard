@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody } from '@/components/ui/table';
 import CaptureWorkedHoursModal from './CaptureWorkedHoursModal';
 import TaskTableHeader from './TaskTableHeader';
 import TaskTableRow from './TaskTableRow';
@@ -77,18 +77,6 @@ const TaskTable = ({
 
         <div className="rounded-md border bg-white">
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Task</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Project</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Hours Worked</TableHead>
-                {isAdmin && <TableHead>Billed</TableHead>}
-                <TableHead>Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
             <TableBody>
               {tasks.map((task) => (
                 <TaskTableRow
