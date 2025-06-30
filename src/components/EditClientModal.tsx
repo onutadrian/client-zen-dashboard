@@ -11,7 +11,7 @@ import ClientRateForm from '@/components/client/ClientRateForm';
 import ClientDocumentsSection from '@/components/client/ClientDocumentsSection';
 import ClientLinksSection from '@/components/client/ClientLinksSection';
 import ClientPeopleSection from '@/components/client/ClientPeopleSection';
-import ClientInvoicesSection from '@/components/client/ClientInvoicesSection';
+import ClientInvoiceEditSection from '@/components/client/ClientInvoiceEditSection';
 
 interface EditClientModalProps {
   isOpen: boolean;
@@ -120,7 +120,7 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
             setErrors={setErrors}
           />
 
-          <ClientInvoicesSection 
+          <ClientInvoiceEditSection 
             formData={formData}
             setFormData={setFormData}
             newInvoice={newInvoice}

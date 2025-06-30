@@ -1,79 +1,28 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileCheck, ExternalLink, Plus, X } from 'lucide-react';
-import { useCurrency } from '@/hooks/useCurrency';
+import { Badge } from '@/components/ui/badge';
+import { Plus, X } from 'lucide-react';
 
-interface ClientInvoicesSectionProps {
-  // For display mode (ClientDetailsSheet)
-  client?: any;
-  displayCurrency?: string;
-  formatCurrency?: (amount: number, currency: string) => string;
-  // For edit mode (EditClientModal)
-  formData?: any;
-  setFormData?: (data: any) => void;
-  newInvoice?: any;
-  setNewInvoice?: (invoice: any) => void;
-  errors?: {[key: string]: string};
-  setErrors?: (errors: {[key: string]: string}) => void;
+interface ClientInvoiceEditSectionProps {
+  formData: any;
+  setFormData: (data: any) => void;
+  newInvoice: any;
+  setNewInvoice: (invoice: any) => void;
+  errors: {[key: string]: string};
+  setErrors: (errors: {[key: string]: string}) => void;
 }
 
-const ClientInvoicesSection = ({ 
-  client, 
-  displayCurrency, 
-  formatCurrency,
-  formData,
-  setFormData,
-  newInvoice,
-  setNewInvoice,
-  errors,
-  setErrors
-}: ClientInvoicesSectionProps) => {
-  const { convert } = useCurrency();
-  
-  // Display mode (for ClientDetailsSheet)
-  if (client && !formData) {
-    if (!client.invoices || client.invoices.length === 0) return null;
-
-    return (
-      <div>
-        <h4 className="font-medium text-slate-700 mb-3 flex items-center">
-          <FileCheck className="w-4 h-4 mr-2" />
-          Invoices ({client.invoices.length})
-        </h4>
-        <div className="space-y-2">
-          {client.invoices.map((invoice: any) => {
-            const displayAmount = formatCurrency(convert(invoice.amount, invoice.currency || client.currency || 'USD', displayCurrency), displayCurrency);
-            return (
-              <div key={invoice.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
-                <div>
-                  <div className="font-medium text-slate-800">{displayAmount}</div>
-                  <div className="text-sm text-slate-600">{new Date(invoice.date).toLocaleDateString()}</div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge className={invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                    {invoice.status}
-                  </Badge>
-                  {invoice.url && (
-                    <a href={invoice.url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  // Edit mode (for EditClientModal)
-  if (!formData || !setFormData || !newInvoice || !setNewInvoice) return null;
-
+const ClientInvoiceEditSection = ({ 
+  formData, 
+  setFormData, 
+  newInvoice, 
+  setNewInvoice, 
+  errors, 
+  setErrors 
+}: ClientInvoiceEditSectionProps) => {
   const addInvoice = () => {
     if (newInvoice.amount && newInvoice.date) {
       if (isNaN(parseFloat(newInvoice.amount)) || parseFloat(newInvoice.amount) <= 0) {
@@ -109,7 +58,7 @@ const ClientInvoicesSection = ({
             placeholder="Amount"
             value={newInvoice.amount}
             onChange={(e) => setNewInvoice({ ...newInvoice, amount: e.target.value })}
-            className={errors?.invoiceAmount ? 'border-red-500' : ''}
+            className={errors.invoiceAmount ? 'border-red-500' : ''}
           />
           <Input
             type="date"
@@ -133,7 +82,7 @@ const ClientInvoicesSection = ({
             <Plus className="w-4 h-4" />
           </Button>
         </div>
-        {errors?.invoiceAmount && <p className="text-red-500 text-sm">{errors.invoiceAmount}</p>}
+        {errors.invoiceAmount && <p className="text-red-500 text-sm">{errors.invoiceAmount}</p>}
         {formData.invoices.map((invoice: any, index: number) => (
           <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
             <div>
@@ -160,4 +109,4 @@ const ClientInvoicesSection = ({
   );
 };
 
-export default ClientInvoicesSection;
+export default ClientInvoiceEditSection;
