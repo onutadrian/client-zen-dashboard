@@ -17,18 +17,24 @@ interface EditUserModalProps {
   user: UserProfile | null;
   projects: Project[];
   clients?: Client[];
+  onUserUpdate?: (updatedUser: UserProfile) => void;
 }
 
-const EditUserModal = ({ isOpen, onClose, user, projects, clients = [] }: EditUserModalProps) => {
+const EditUserModal = ({ isOpen, onClose, user, projects, clients = [], onUserUpdate }: EditUserModalProps) => {
   const { assignments, loading, assignUserToProject, removeUserFromProject, getUserAssignments } = useUserProjectAssignments();
   const { demoMode } = useCurrency();
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(user);
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [selectedClients, setSelectedClients] = useState<number[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
-    if (user && isOpen) {
-      const userAssignments = getUserAssignments(user.id);
+    setCurrentUser(user);
+  }, [user]);
+
+  useEffect(() => {
+    if (currentUser && isOpen) {
+      const userAssignments = getUserAssignments(currentUser.id);
       const assignedProjectIds = userAssignments.map(a => a.project_id);
       setSelectedProjects(assignedProjectIds);
       
@@ -38,18 +44,18 @@ const EditUserModal = ({ isOpen, onClose, user, projects, clients = [] }: EditUs
         .map(p => p.clientId);
       setSelectedClients([...new Set(assignedClientIds)]);
     }
-  }, [user, assignments, isOpen, projects]);
+  }, [currentUser, assignments, isOpen, projects]);
 
   const handleProjectToggle = async (projectId: string, isChecked: boolean) => {
-    if (!user) return;
+    if (!currentUser) return;
     
     setIsUpdating(true);
     try {
       if (isChecked) {
-        await assignUserToProject(user.id, projectId);
+        await assignUserToProject(currentUser.id, projectId);
         setSelectedProjects(prev => [...prev, projectId]);
       } else {
-        await removeUserFromProject(user.id, projectId);
+        await removeUserFromProject(currentUser.id, projectId);
         setSelectedProjects(prev => prev.filter(id => id !== projectId));
       }
       
@@ -69,7 +75,12 @@ const EditUserModal = ({ isOpen, onClose, user, projects, clients = [] }: EditUs
     }
   };
 
-  if (!user) return null;
+  const handleUserUpdate = (updatedUser: UserProfile) => {
+    setCurrentUser(updatedUser);
+    onUserUpdate?.(updatedUser);
+  };
+
+  if (!currentUser) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -77,15 +88,15 @@ const EditUserModal = ({ isOpen, onClose, user, projects, clients = [] }: EditUs
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <User className="w-5 h-5 mr-2" />
-            Edit User: {user.full_name || (demoMode ? 'Demo User' : user.email)}
+            Edit User: {currentUser.full_name || (demoMode ? 'Demo User' : currentUser.email)}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
-          <UserInfoSection user={user} />
+          <UserInfoSection user={currentUser} onUserUpdate={handleUserUpdate} />
 
           {/* Access Management for Standard Users */}
-          {user.role === 'standard' && (
+          {currentUser.role === 'standard' && (
             <UserAccessTabs
               projects={projects}
               clients={clients}
@@ -97,7 +108,7 @@ const EditUserModal = ({ isOpen, onClose, user, projects, clients = [] }: EditUs
             />
           )}
 
-          {user.role === 'admin' && (
+          {currentUser.role === 'admin' && (
             <div className="p-4 bg-purple-50 rounded-lg">
               <p className="text-purple-800">
                 <strong>Admin users</strong> have access to all clients and projects automatically.

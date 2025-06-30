@@ -19,7 +19,8 @@ import { UserProfile } from '@/types/auth';
 const UsersPage = () => {
   const {
     users,
-    loading: usersLoading
+    loading: usersLoading,
+    refreshUsers
   } = useUsers();
   const {
     invites,
@@ -62,6 +63,11 @@ const UsersPage = () => {
   const handleEditUser = (user: UserProfile) => {
     setSelectedUser(user);
     setShowEditModal(true);
+  };
+
+  const handleUserUpdate = (updatedUser: UserProfile) => {
+    // Refresh the users list to reflect the updated display name
+    refreshUsers();
   };
 
   const activeInvites = invites.filter(invite => !invite.used && new Date(invite.expires_at) > new Date());
@@ -133,7 +139,14 @@ const UsersPage = () => {
 
           <InviteUserModal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} onInvite={handleInviteUser} />
 
-          <EditUserModal isOpen={showEditModal} onClose={() => setShowEditModal(false)} user={selectedUser} projects={projects} clients={clients} />
+          <EditUserModal 
+            isOpen={showEditModal} 
+            onClose={() => setShowEditModal(false)} 
+            user={selectedUser} 
+            projects={projects} 
+            clients={clients}
+            onUserUpdate={handleUserUpdate}
+          />
         </div>
       </div>
     </DashboardContainer>
