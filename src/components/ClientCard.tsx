@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, Edit, Trash2 } from 'lucide-react';
+import { Eye, Edit, Trash2, Clock, FileCheck, Plus } from 'lucide-react';
 import { Client } from '@/types/client';
 import { useCurrency } from '@/hooks/useCurrency';
+import { useHourEntries } from '@/hooks/useHourEntries';
+import { formatCurrency } from '@/lib/currency';
 import ClientCardHeader from '@/components/client/ClientCardHeader';
-import ClientCardStats from '@/components/client/ClientCardStats';
 import ClientDetailsSheet from '@/components/client/ClientDetailsSheet';
 
 interface ClientCardProps {
@@ -17,7 +18,27 @@ interface ClientCardProps {
 
 const ClientCard = ({ client, onEdit, onDelete }: ClientCardProps) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const { demoMode } = useCurrency();
+  const { demoMode, displayCurrency, convert } = useCurrency();
+  const { hourEntries } = useHourEntries();
+
+  // Calculate client stats from hour entries
+  const clientHourEntries = hourEntries.filter(entry => entry.clientId === client.id);
+  const totalHours = clientHourEntries.reduce((sum, entry) => sum + (entry.hours || 0), 0);
+  const unbilledHours = clientHourEntries.filter(entry => !entry.billed).reduce((sum, entry) => sum + (entry.hours || 0), 0);
+  
+  const paidInvoices = client.invoices?.filter(invoice => invoice.status === 'paid').length || 0;
+  const totalInvoices = client.invoices?.length || 0;
+  const totalInvoiceAmount = client.invoices?.reduce((sum, invoice) => {
+    const convertedAmount = convert(invoice.amount, invoice.currency || client.currency, displayCurrency);
+    return sum + convertedAmount;
+  }, 0) || 0;
+
+  const formatDisplayAmount = (amount: number) => formatCurrency(amount, displayCurrency);
+
+  const handleLogTimeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // TODO: Implement log time functionality
+  };
 
   return (
     <>
@@ -26,7 +47,28 @@ const ClientCard = ({ client, onEdit, onDelete }: ClientCardProps) => {
           <div className="space-y-4">
             <ClientCardHeader client={client} demoMode={demoMode} />
             
-            {!demoMode && <ClientCardStats client={client} />}
+            {!demoMode && (
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center space-x-6">
+                  <div className="flex items-center text-slate-600">
+                    <Clock className="w-4 h-4 mr-1" />
+                    <span className="text-sm">{totalHours} hours</span>
+                    {unbilledHours > 0 && <span className="text-xs text-orange-600 ml-1">({unbilledHours} unbilled)</span>}
+                  </div>
+                  <div className="flex items-center text-slate-600">
+                    <FileCheck className="w-4 h-4 mr-1" />
+                    <span className="text-sm">{paidInvoices}/{totalInvoices} invoices paid</span>
+                  </div>
+                  <div className="flex items-center text-green-600">
+                    <span className="text-sm font-medium">{formatDisplayAmount(totalInvoiceAmount)}</span>
+                  </div>
+                </div>
+                <Button size="sm" onClick={handleLogTimeClick} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
+                  <Plus className="w-3 h-3 mr-1" />
+                  Log Time
+                </Button>
+              </div>
+            )}
             
             <div className="flex justify-between items-center pt-4 border-t">
               <Button

@@ -18,6 +18,14 @@ export interface Client {
     amount: number;
     date: string;
     status: string;
+    currency?: string;
   }>;
   currency: string;
+  hourEntries?: Array<{
+    id: number;
+    hours: number;
+    description: string;
+    date: string;
+    billed?: boolean;
+  }>;
 }

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { DollarSign, Clock, Users, FileText } from 'lucide-react';
 import { Client } from '@/types/client';
 import { useCurrency } from '@/hooks/useCurrency';
+import { useHourEntries } from '@/hooks/useHourEntries';
 import { formatCurrency } from '@/lib/currency';
 import ClientHourEntriesSection from './ClientHourEntriesSection';
 import ClientInvoicesSection from './ClientInvoicesSection';
@@ -20,7 +21,8 @@ interface ClientDetailsSheetProps {
 }
 
 const ClientDetailsSheet = ({ client, isOpen, onClose }: ClientDetailsSheetProps) => {
-  const { demoMode } = useCurrency();
+  const { demoMode, displayCurrency, convert } = useCurrency();
+  const { hourEntries, updateHourEntry } = useHourEntries();
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -32,6 +34,18 @@ const ClientDetailsSheet = ({ client, isOpen, onClose }: ClientDetailsSheetProps
         return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
       default:
         return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+    }
+  };
+
+  // Get hour entries for this client
+  const clientHourEntries = hourEntries.filter(entry => entry.clientId === client.id);
+  const billedHours = clientHourEntries.filter(entry => entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
+  const unbilledHours = clientHourEntries.filter(entry => !entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
+
+  const handleToggleBilledStatus = async (entryId: number) => {
+    const entry = clientHourEntries.find(e => e.id === entryId);
+    if (entry) {
+      await updateHourEntry(entryId, { billed: !entry.billed });
     }
   };
 
@@ -70,12 +84,21 @@ const ClientDetailsSheet = ({ client, isOpen, onClose }: ClientDetailsSheetProps
         </SheetHeader>
 
         <div className="space-y-6">
-          {!demoMode && client.hourEntries && client.hourEntries.length > 0 && (
-            <ClientHourEntriesSection hourEntries={client.hourEntries} />
+          {!demoMode && clientHourEntries.length > 0 && (
+            <ClientHourEntriesSection 
+              hourEntries={clientHourEntries}
+              billedHours={billedHours}
+              unbilledHours={unbilledHours}
+              onToggleBilledStatus={handleToggleBilledStatus}
+            />
           )}
 
           {!demoMode && client.invoices && client.invoices.length > 0 && (
-            <ClientInvoicesSection invoices={client.invoices} />
+            <ClientInvoicesSection 
+              client={client}
+              displayCurrency={displayCurrency}
+              formatCurrency={formatCurrency}
+            />
           )}
 
           {client.people && client.people.length > 0 && (

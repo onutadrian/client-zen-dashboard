@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Users, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,6 +26,16 @@ const ClientsSection = ({
   activeClients,
   onAddClient
 }: ClientsSectionProps) => {
+  const handleEditClient = (client: Client) => {
+    // TODO: Implement edit client functionality
+    console.log('Edit client:', client);
+  };
+
+  const handleDeleteClient = (clientId: number) => {
+    // TODO: Implement delete client functionality
+    console.log('Delete client:', clientId);
+  };
+
   return (
     <div className="xl:col-span-2 space-y-6">
       <div className="flex items-center justify-between">
@@ -39,9 +50,8 @@ const ClientsSection = ({
           <ClientCard 
             key={client.id} 
             client={client} 
-            onUpdateClient={onUpdateClient} 
-            displayCurrency={displayCurrency} 
-            formatCurrency={formatCurrency} 
+            onEdit={handleEditClient}
+            onDelete={handleDeleteClient}
           />
         ))}
         
