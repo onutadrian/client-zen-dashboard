@@ -9,6 +9,7 @@ import AddProjectModal from './AddProjectModal';
 import EditProjectSheet from './EditProjectSheet';
 import { Project } from '@/hooks/useProjects';
 import { formatCurrency } from '@/lib/currency';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface Client {
   id: number;
@@ -36,6 +37,7 @@ const ProjectsSection = ({
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const navigate = useNavigate();
+  const { demoMode } = useCurrency();
 
   const getClientName = (clientId: number) => {
     const client = clients.find(c => c.id === clientId);
@@ -58,6 +60,14 @@ const ProjectsSection = ({
   };
 
   const getPricingDisplay = (project: Project) => {
+    if (demoMode) {
+      return {
+        type: project.pricingType === 'fixed' ? 'Fixed' : 'Hourly',
+        amount: '—',
+        color: project.pricingType === 'fixed' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+      };
+    }
+
     if (project.pricingType === 'fixed') {
       return {
         type: 'Fixed',
@@ -74,6 +84,10 @@ const ProjectsSection = ({
   };
 
   const getTotalInvoiced = (project: Project) => {
+    if (demoMode) {
+      return '—';
+    }
+
     const totalPaid = project.invoices
       ?.filter(invoice => invoice.status === 'paid')
       ?.reduce((sum, invoice) => sum + invoice.amount, 0) || 0;
@@ -182,7 +196,9 @@ const ProjectsSection = ({
                         {project.invoices && project.invoices.length > 0 && (
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-slate-600">Invoiced:</span>
-                            <span className="font-medium text-green-600">{totalInvoiced}</span>
+                            <span className={`font-medium ${demoMode ? 'text-slate-600' : 'text-green-600'}`}>
+                              {totalInvoiced}
+                            </span>
                           </div>
                         )}
 
