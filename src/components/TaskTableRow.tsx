@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -110,14 +111,20 @@ const TaskTableRow = ({
           )}
         </div>
       </TableCell>
-      {isAdmin && !demoMode && (
+      {isAdmin && (
         <TableCell>
-          <Badge 
-            variant={isBilled(task) ? "default" : "secondary"}
-            className={isBilled(task) ? "bg-green-100 text-green-800" : ""}
-          >
-            {isBilled(task) ? "Billed" : "Not Billed"}
-          </Badge>
+          {demoMode ? (
+            <Badge variant="secondary">
+              —
+            </Badge>
+          ) : (
+            <Badge 
+              variant={isBilled(task) ? "default" : "secondary"}
+              className={isBilled(task) ? "bg-green-100 text-green-800" : ""}
+            >
+              {isBilled(task) ? "Billed" : "Not Billed"}
+            </Badge>
+          )}
         </TableCell>
       )}
       <TableCell className="text-sm text-slate-600">
