@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
-import { Table, TableBody } from '@/components/ui/table';
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import CaptureWorkedHoursModal from './CaptureWorkedHoursModal';
-import TaskTableHeader from './TaskTableHeader';
 import TaskTableRow from './TaskTableRow';
 import { Task } from '@/types/task';
 import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 interface Client {
   id: number;
@@ -70,13 +71,30 @@ const TaskTable = ({
   return (
     <>
       <div className="space-y-4">
-        <TaskTableHeader 
-          taskCount={tasks.length}
-          onAddTaskClick={onAddTaskClick}
-        />
+        {onAddTaskClick && (
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Tasks ({tasks.length})</h3>
+            <Button onClick={onAddTaskClick} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Task
+            </Button>
+          </div>
+        )}
 
         <div className="rounded-md border bg-white">
           <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[300px]">Task</TableHead>
+                <TableHead>Client</TableHead>
+                <TableHead>Project</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Hours</TableHead>
+                {isAdmin && <TableHead>Billing</TableHead>}
+                <TableHead>Created</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
             <TableBody>
               {tasks.map((task) => (
                 <TaskTableRow
