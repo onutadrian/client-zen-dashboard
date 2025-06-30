@@ -6,6 +6,7 @@ import { Project } from '@/hooks/useProjects';
 import { Milestone } from '@/hooks/useMilestones';
 import { Invoice } from '@/hooks/useInvoices';
 import { formatCurrency } from '@/lib/currency';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface ProjectMilestoneFinancialsProps {
   project: Project;
@@ -22,8 +23,14 @@ const ProjectMilestoneFinancials = ({
   displayCurrency, 
   convert 
 }: ProjectMilestoneFinancialsProps) => {
+  const { demoMode } = useCurrency();
+
   // Format numbers: remove decimals and convert 1000+ to K format
   const formatMetric = (value: number, isCurrency = false) => {
+    if (demoMode && isCurrency) {
+      return '—';
+    }
+
     const rounded = Math.round(value);
     
     if (rounded >= 1000) {
@@ -54,7 +61,7 @@ const ProjectMilestoneFinancials = ({
                 // Check if there's an invoice for this milestone
                 const milestoneInvoice = projectInvoices.find(inv => inv.milestoneId === milestone.id);
                 const invoiceStatus = milestoneInvoice?.status || 'unpaid';
-                const milestoneAmount = convert(milestone.amount || 0, project.currency, displayCurrency);
+                const milestoneAmount = demoMode ? 0 : convert(milestone.amount || 0, project.currency, displayCurrency);
                 
                 return (
                   <div key={milestone.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -74,7 +81,7 @@ const ProjectMilestoneFinancials = ({
                           Due: {new Date(milestone.targetDate).toLocaleDateString()}
                         </p>
                         <p className="text-sm text-slate-600">
-                          {milestone.completionPercentage}% complete
+                          {demoMode ? '—' : `${milestone.completionPercentage}%`} complete
                         </p>
                       </div>
                     </div>
@@ -86,7 +93,7 @@ const ProjectMilestoneFinancials = ({
                           </p>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>{formatCurrency(milestoneAmount, displayCurrency)}</p>
+                          <p>{demoMode ? '—' : formatCurrency(milestoneAmount, displayCurrency)}</p>
                         </TooltipContent>
                       </Tooltip>
                       <p className={`text-sm ${
@@ -94,9 +101,11 @@ const ProjectMilestoneFinancials = ({
                         invoiceStatus === 'pending' ? 'text-yellow-600' :
                         'text-slate-600'
                       }`}>
-                        {invoiceStatus === 'paid' ? 'Paid' :
-                         invoiceStatus === 'pending' ? 'Invoiced' :
-                         'Not Invoiced'}
+                        {demoMode ? '—' : (
+                          invoiceStatus === 'paid' ? 'Paid' :
+                          invoiceStatus === 'pending' ? 'Invoiced' :
+                          'Not Invoiced'
+                        )}
                       </p>
                     </div>
                   </div>

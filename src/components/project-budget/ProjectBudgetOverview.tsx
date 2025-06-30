@@ -3,6 +3,7 @@ import React from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Project } from '@/hooks/useProjects';
 import { formatCurrency } from '@/lib/currency';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface BudgetMetrics {
   totalBudget: number;
@@ -20,10 +21,15 @@ interface ProjectBudgetOverviewProps {
 }
 
 const ProjectBudgetOverview = ({ project, budgetMetrics, displayCurrency }: ProjectBudgetOverviewProps) => {
+  const { demoMode } = useCurrency();
   const isFixedPrice = project.pricingType === 'fixed';
 
   // Format numbers: remove decimals and convert 1000+ to K format
   const formatMetric = (value: number, isCurrency = false) => {
+    if (demoMode && isCurrency) {
+      return '—';
+    }
+
     const rounded = Math.round(value);
     
     if (rounded >= 1000) {
@@ -55,12 +61,12 @@ const ProjectBudgetOverview = ({ project, budgetMetrics, displayCurrency }: Proj
           </span>
           {isFixedPrice && (
             <span className="text-sm text-slate-600">
-              Budget: {formatCurrency(budgetMetrics.totalBudget, displayCurrency)}
+              Budget: {demoMode ? '—' : formatCurrency(budgetMetrics.totalBudget, displayCurrency)}
             </span>
           )}
           {!isFixedPrice && (
             <span className="text-sm text-slate-600">
-              Rate: {formatCurrency(project.hourlyRate || 0, displayCurrency)}/hr
+              Rate: {demoMode ? '—' : formatCurrency(project.hourlyRate || 0, displayCurrency)}/hr
             </span>
           )}
         </div>
@@ -75,7 +81,7 @@ const ProjectBudgetOverview = ({ project, budgetMetrics, displayCurrency }: Proj
                 </p>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{formatCurrency(budgetMetrics.totalBudget, displayCurrency)}</p>
+                <p>{demoMode ? '—' : formatCurrency(budgetMetrics.totalBudget, displayCurrency)}</p>
               </TooltipContent>
             </Tooltip>
             <p className="text-slate-600 py-[24px] text-base">Total Budget</p>
@@ -85,12 +91,12 @@ const ProjectBudgetOverview = ({ project, budgetMetrics, displayCurrency }: Proj
             <Tooltip>
               <TooltipTrigger asChild>
                 <p className={`text-4xl font-normal cursor-help ${budgetMetrics.budgetProgress > 100 ? 'text-red-600' : 'text-zinc-950'}`}>
-                  {budgetMetrics.budgetProgress.toFixed(1)}%
+                  {demoMode ? '—' : `${budgetMetrics.budgetProgress.toFixed(1)}%`}
                 </p>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{budgetMetrics.budgetProgress.toFixed(1)}% of budget used</p>
-                {budgetMetrics.budgetProgress > 100 && (
+                <p>{demoMode ? '—' : `${budgetMetrics.budgetProgress.toFixed(1)}% of budget used`}</p>
+                {budgetMetrics.budgetProgress > 100 && !demoMode && (
                   <p className="text-red-600">Over budget by {(budgetMetrics.budgetProgress - 100).toFixed(1)}%</p>
                 )}
               </TooltipContent>

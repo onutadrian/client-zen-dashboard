@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Project } from '@/hooks/useProjects';
 import { Task } from '@/hooks/useTasks';
 import { formatCurrency } from '@/lib/currency';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface BudgetMetrics {
   totalBudget: number;
@@ -35,6 +36,7 @@ const ProjectTimeInvestmentAnalysis = ({
   convert,
   client 
 }: ProjectTimeInvestmentAnalysisProps) => {
+  const { demoMode } = useCurrency();
   const isFixedPrice = project.pricingType === 'fixed';
   const totalEstimatedHours = tasks.reduce((sum, task) => sum + (task.estimatedHours || 0), 0);
   const hourlyRate = isFixedPrice ? (client?.price || 0) : (project.hourlyRate || 0);
@@ -48,25 +50,25 @@ const ProjectTimeInvestmentAnalysis = ({
         <div className="space-y-4">
           <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
             <span className="font-medium">Total Hours Worked</span>
-            <span className="font-bold">{totalActualHours}h</span>
+            <span className="font-bold">{demoMode ? '—' : `${totalActualHours}h`}</span>
           </div>
           <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
             <span className="font-medium">Effective Hourly Rate</span>
             <span className="font-bold">
-              {formatCurrency(totalActualHours > 0 ? (budgetMetrics.revenueEarned / totalActualHours) : 0, displayCurrency)}/hr
+              {demoMode ? '—' : `${formatCurrency(totalActualHours > 0 ? (budgetMetrics.revenueEarned / totalActualHours) : 0, displayCurrency)}/hr`}
             </span>
           </div>
           <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
             <span className="font-medium">Revenue per Hour</span>
             <span className="font-bold">
-              {formatCurrency(totalActualHours > 0 ? (totalInvoiceAmount / totalActualHours) : 0, displayCurrency)}/hr
+              {demoMode ? '—' : `${formatCurrency(totalActualHours > 0 ? (totalInvoiceAmount / totalActualHours) : 0, displayCurrency)}/hr`}
             </span>
           </div>
           {isFixedPrice && (
             <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
               <span className="font-medium">Target Hourly Rate</span>
               <span className="font-bold">
-                {formatCurrency(totalEstimatedHours > 0 ? (budgetMetrics.totalBudget / totalEstimatedHours) : 0, displayCurrency)}/hr
+                {demoMode ? '—' : `${formatCurrency(totalEstimatedHours > 0 ? (budgetMetrics.totalBudget / totalEstimatedHours) : 0, displayCurrency)}/hr`}
               </span>
             </div>
           )}

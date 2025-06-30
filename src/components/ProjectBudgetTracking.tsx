@@ -23,11 +23,6 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
   const { hourEntries } = useHourEntries();
   const { displayCurrency, convert, demoMode } = useCurrency();
   
-  // Don't render the component at all in demo mode
-  if (demoMode) {
-    return null;
-  }
-  
   const isFixedPrice = project.pricingType === 'fixed';
   
   // Filter project-specific data
@@ -39,19 +34,19 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
   const totalHoursWorked = projectHours.reduce((sum, entry) => sum + entry.hours, 0);
   
   // Calculate milestone-based financials with currency conversion
-  const totalMilestoneAmount = projectMilestones.reduce((sum, milestone) => {
+  const totalMilestoneAmount = demoMode ? 0 : projectMilestones.reduce((sum, milestone) => {
     const amount = milestone.amount || 0;
     const convertedAmount = convert(amount, project.currency, displayCurrency);
     return sum + convertedAmount;
   }, 0);
   
-  const totalInvoiceAmount = projectInvoices.reduce((sum, invoice) => {
+  const totalInvoiceAmount = demoMode ? 0 : projectInvoices.reduce((sum, invoice) => {
     const convertedAmount = convert(invoice.amount, invoice.currency, displayCurrency);
     return sum + convertedAmount;
   }, 0);
   
   const paidInvoices = projectInvoices.filter(i => i.status === 'paid');
-  const totalPaidAmount = paidInvoices.reduce((sum, invoice) => {
+  const totalPaidAmount = demoMode ? 0 : paidInvoices.reduce((sum, invoice) => {
     const convertedAmount = convert(invoice.amount, invoice.currency, displayCurrency);
     return sum + convertedAmount;
   }, 0);
@@ -59,9 +54,9 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
   // Calculate progress metrics
   const completedMilestones = projectMilestones.filter(m => m.status === 'completed').length;
   const milestoneProgress = projectMilestones.length > 0 ? (completedMilestones / projectMilestones.length) * 100 : 0;
-  const averageCompletion = projectMilestones.length > 0 
+  const averageCompletion = demoMode ? 0 : (projectMilestones.length > 0 
     ? projectMilestones.reduce((sum, m) => sum + m.completionPercentage, 0) / projectMilestones.length 
-    : 0;
+    : 0);
   
   // Task-based metrics for context
   const totalEstimatedHours = tasks.reduce((sum, task) => sum + (task.estimatedHours || 0), 0);
@@ -71,12 +66,12 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
   // Budget calculations based on project type with currency conversion
   let budgetMetrics;
   if (isFixedPrice) {
-    const fixedBudget = convert(project.fixedPrice || totalMilestoneAmount, project.currency, displayCurrency);
-    const costSoFar = totalActualHours * convert(hourlyRate, project.currency, displayCurrency);
+    const fixedBudget = demoMode ? 0 : convert(project.fixedPrice || totalMilestoneAmount, project.currency, displayCurrency);
+    const costSoFar = demoMode ? 0 : totalActualHours * convert(hourlyRate, project.currency, displayCurrency);
     
     // Calculate budget progress - ensure we have a valid percentage
     let budgetProgress = 0;
-    if (fixedBudget > 0) {
+    if (fixedBudget > 0 && !demoMode) {
       budgetProgress = (costSoFar / fixedBudget) * 100;
     }
     
@@ -86,15 +81,15 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
       remainingBudget: fixedBudget - costSoFar,
       budgetProgress: budgetProgress,
       revenueEarned: totalPaidAmount,
-      revenueProgress: fixedBudget > 0 ? (totalPaidAmount / fixedBudget) * 100 : 0
+      revenueProgress: fixedBudget > 0 && !demoMode ? (totalPaidAmount / fixedBudget) * 100 : 0
     };
   } else {
-    const estimatedBudget = (project.estimatedHours || totalEstimatedHours) * convert(hourlyRate, project.currency, displayCurrency);
-    const actualCost = totalActualHours * convert(hourlyRate, project.currency, displayCurrency);
+    const estimatedBudget = demoMode ? 0 : (project.estimatedHours || totalEstimatedHours) * convert(hourlyRate, project.currency, displayCurrency);
+    const actualCost = demoMode ? 0 : totalActualHours * convert(hourlyRate, project.currency, displayCurrency);
     
     // Calculate budget progress - ensure we have a valid percentage
     let budgetProgress = 0;
-    if (estimatedBudget > 0) {
+    if (estimatedBudget > 0 && !demoMode) {
       budgetProgress = (actualCost / estimatedBudget) * 100;
     }
     
@@ -104,7 +99,7 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
       remainingBudget: estimatedBudget - actualCost,
       budgetProgress: budgetProgress,
       revenueEarned: totalPaidAmount,
-      revenueProgress: estimatedBudget > 0 ? (totalPaidAmount / estimatedBudget) * 100 : 0
+      revenueProgress: estimatedBudget > 0 && !demoMode ? (totalPaidAmount / estimatedBudget) * 100 : 0
     };
   }
 
