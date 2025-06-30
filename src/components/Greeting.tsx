@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const Greeting = () => {
   const { profile, user, loading } = useAuth();
+  const { demoMode } = useCurrency();
 
   if (loading) {
     return (
@@ -17,8 +19,11 @@ const Greeting = () => {
     if (profile?.full_name) {
       return profile.full_name;
     }
-    if (user?.email) {
+    if (user?.email && !demoMode) {
       return user.email;
+    }
+    if (demoMode) {
+      return 'Demo User';
     }
     return 'User';
   };

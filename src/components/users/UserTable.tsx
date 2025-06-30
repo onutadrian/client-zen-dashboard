@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Edit, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { UserProfile } from '@/types/auth';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface UserTableProps {
   users: UserProfile[];
@@ -14,6 +15,8 @@ interface UserTableProps {
 }
 
 const UserTable = ({ users, loading, onEditUser }: UserTableProps) => {
+  const { demoMode } = useCurrency();
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -48,7 +51,7 @@ const UserTable = ({ users, loading, onEditUser }: UserTableProps) => {
               <TableCell className="font-medium">
                 {user.full_name || 'N/A'}
               </TableCell>
-              <TableCell>{user.email}</TableCell>
+              <TableCell>{demoMode ? '—' : user.email}</TableCell>
               <TableCell>
                 <Badge className={user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}>
                   {user.role}

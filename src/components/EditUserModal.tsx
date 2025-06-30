@@ -10,6 +10,7 @@ import { UserProfile } from '@/types/auth';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/types/client';
 import { useUserProjectAssignments } from '@/hooks/useUserProjectAssignments';
+import { useCurrency } from '@/hooks/useCurrency';
 import { Loader2, User, Briefcase, Users } from 'lucide-react';
 
 interface EditUserModalProps {
@@ -22,6 +23,7 @@ interface EditUserModalProps {
 
 const EditUserModal = ({ isOpen, onClose, user, projects, clients = [] }: EditUserModalProps) => {
   const { assignments, loading, assignUserToProject, removeUserFromProject, getUserAssignments } = useUserProjectAssignments();
+  const { demoMode } = useCurrency();
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [selectedClients, setSelectedClients] = useState<number[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -81,7 +83,7 @@ const EditUserModal = ({ isOpen, onClose, user, projects, clients = [] }: EditUs
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <User className="w-5 h-5 mr-2" />
-            Edit User: {user.full_name || user.email}
+            Edit User: {user.full_name || (demoMode ? 'Demo User' : user.email)}
           </DialogTitle>
         </DialogHeader>
 
@@ -90,7 +92,7 @@ const EditUserModal = ({ isOpen, onClose, user, projects, clients = [] }: EditUs
           <div className="flex items-center space-x-4 p-4 bg-slate-50 rounded-lg">
             <div>
               <h3 className="font-medium">{user.full_name || 'No name'}</h3>
-              <p className="text-sm text-slate-600">{user.email}</p>
+              <p className="text-sm text-slate-600">{demoMode ? '—' : user.email}</p>
               <Badge className={user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}>
                 {user.role}
               </Badge>

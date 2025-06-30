@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, X } from 'lucide-react';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface ClientPeopleSectionProps {
   formData: any;
@@ -15,6 +16,8 @@ interface ClientPeopleSectionProps {
 }
 
 const ClientPeopleSection = ({ formData, setFormData, newPerson, setNewPerson, errors, setErrors }: ClientPeopleSectionProps) => {
+  const { demoMode } = useCurrency();
+
   const addPerson = () => {
     if (newPerson.name.trim() && newPerson.email.trim()) {
       if (!/\S+@\S+\.\S+/.test(newPerson.email)) {
@@ -70,7 +73,7 @@ const ClientPeopleSection = ({ formData, setFormData, newPerson, setNewPerson, e
             <div>
               <div className="font-medium">{person.name}</div>
               <div className="text-sm text-slate-600">{person.title}</div>
-              <div className="text-xs text-slate-500">{person.email}</div>
+              <div className="text-xs text-slate-500">{demoMode ? '—' : person.email}</div>
             </div>
             <Button
               type="button"

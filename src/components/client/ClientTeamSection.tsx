@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Users, Mail } from 'lucide-react';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface ClientTeamSectionProps {
   people: Array<{
@@ -11,6 +12,8 @@ interface ClientTeamSectionProps {
 }
 
 const ClientTeamSection = ({ people }: ClientTeamSectionProps) => {
+  const { demoMode } = useCurrency();
+
   if (!people || people.length === 0) return null;
 
   return (
@@ -28,7 +31,7 @@ const ClientTeamSection = ({ people }: ClientTeamSectionProps) => {
             </div>
             <div className="flex items-center text-slate-500">
               <Mail className="w-4 h-4 mr-1" />
-              <span className="text-sm">{person.email}</span>
+              <span className="text-sm">{demoMode ? '—' : person.email}</span>
             </div>
           </div>
         ))}

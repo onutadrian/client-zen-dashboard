@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Trash2, CheckCircle, XCircle, Mail, Clock } from 'lucide-react';
 import { format } from 'date-fns';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface InviteTableProps {
   invites: any[];
@@ -13,6 +14,8 @@ interface InviteTableProps {
 }
 
 const InviteTable = ({ invites, onDeleteInvite, showActions = true }: InviteTableProps) => {
+  const { demoMode } = useCurrency();
+
   const getInviteStatusIcon = (invite: any) => {
     if (invite.used) {
       return <CheckCircle className="h-4 w-4 text-green-600" />;
@@ -56,7 +59,7 @@ const InviteTable = ({ invites, onDeleteInvite, showActions = true }: InviteTabl
         <TableBody>
           {invites.map((invite) => (
             <TableRow key={invite.id} className={!showActions ? 'opacity-60' : ''}>
-              <TableCell className="font-medium">{invite.email}</TableCell>
+              <TableCell className="font-medium">{demoMode ? '—' : invite.email}</TableCell>
               <TableCell>
                 <Badge className={invite.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}>
                   {invite.role}
