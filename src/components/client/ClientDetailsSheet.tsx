@@ -1,74 +1,92 @@
 
 import React from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { DollarSign, Clock, Users, FileText } from 'lucide-react';
+import { Client } from '@/types/client';
+import { useCurrency } from '@/hooks/useCurrency';
+import { formatCurrency } from '@/lib/currency';
 import ClientHourEntriesSection from './ClientHourEntriesSection';
-import ClientNotesSection from './ClientNotesSection';
-import ClientTeamSection from './ClientTeamSection';
-import ClientDocumentsSection from './ClientDocumentsSection';
-import ClientLinksSection from './ClientLinksSection';
 import ClientInvoicesSection from './ClientInvoicesSection';
-
-interface HourEntry {
-  id: number;
-  hours: number;
-  description: string;
-  date: string;
-  billed?: boolean;
-}
+import ClientTeamSection from './ClientTeamSection';
+import ClientLinksSection from './ClientLinksSection';
+import ClientNotesSection from './ClientNotesSection';
+import ClientDocumentsSection from './ClientDocumentsSection';
 
 interface ClientDetailsSheetProps {
+  client: Client;
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  client: any;
-  hourEntries: HourEntry[];
-  billedHours: number;
-  unbilledHours: number;
-  onToggleBilledStatus: (entryId: number) => void;
-  displayCurrency: string;
-  formatCurrency: (amount: number, currency: string) => string;
+  onClose: () => void;
 }
 
-const ClientDetailsSheet = ({
-  isOpen,
-  onOpenChange,
-  client,
-  hourEntries,
-  billedHours,
-  unbilledHours,
-  onToggleBilledStatus,
-  displayCurrency,
-  formatCurrency
-}: ClientDetailsSheetProps) => {
+const ClientDetailsSheet = ({ client, isOpen, onClose }: ClientDetailsSheetProps) => {
+  const { demoMode } = useCurrency();
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800 hover:bg-green-100';
+      case 'inactive':
+        return 'bg-red-100 text-red-800 hover:bg-red-100';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
+      default:
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+    }
+  };
+
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[600px] sm:w-[800px] overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>{client.name} - Details</SheetTitle>
-          <SheetDescription>
-            View and manage client information, logged hours, and project details.
-          </SheetDescription>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetHeader className="mb-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <SheetTitle className="text-2xl font-bold">{client.name}</SheetTitle>
+              <div className="flex items-center space-x-3 mt-2">
+                <Badge className={getStatusBadge(client.status)}>
+                  {client.status.charAt(0).toUpperCase() + client.status.slice(1)}
+                </Badge>
+                {!demoMode && (
+                  <span className="text-sm text-slate-600">
+                    {client.priceType === 'hourly' ? 'Hourly Rate' : 
+                     client.priceType === 'daily' ? 'Daily Rate' : 'Fixed Price'}
+                  </span>
+                )}
+              </div>
+            </div>
+            {!demoMode && (
+              <div className="text-right">
+                <div className="flex items-center text-xl font-bold text-slate-800">
+                  <DollarSign className="w-5 h-5 mr-1" />
+                  {formatCurrency(client.price, client.currency)}
+                </div>
+                <div className="text-sm text-slate-500">
+                  {client.priceType === 'hourly' ? 'per hour' : 
+                   client.priceType === 'daily' ? 'per day' : 'total'}
+                </div>
+              </div>
+            )}
+          </div>
         </SheetHeader>
-        <div className="mt-6 space-y-6">
-          <ClientHourEntriesSection
-            hourEntries={hourEntries}
-            billedHours={billedHours}
-            unbilledHours={unbilledHours}
-            onToggleBilledStatus={onToggleBilledStatus}
-          />
-          
-          <ClientNotesSection notes={client.notes} />
-          
-          <ClientTeamSection people={client.people} />
-          
-          <ClientDocumentsSection documents={client.documents} />
-          
+
+        <div className="space-y-6">
+          {!demoMode && client.hourEntries && client.hourEntries.length > 0 && (
+            <ClientHourEntriesSection hourEntries={client.hourEntries} />
+          )}
+
+          {!demoMode && client.invoices && client.invoices.length > 0 && (
+            <ClientInvoicesSection invoices={client.invoices} />
+          )}
+
+          {client.people && client.people.length > 0 && (
+            <ClientTeamSection people={client.people} />
+          )}
+
           <ClientLinksSection links={client.links} />
-          
-          <ClientInvoicesSection
-            client={client}
-            displayCurrency={displayCurrency}
-            formatCurrency={formatCurrency}
-          />
+
+          <ClientDocumentsSection documents={client.documents} />
+
+          <ClientNotesSection notes={client.notes} />
         </div>
       </SheetContent>
     </Sheet>

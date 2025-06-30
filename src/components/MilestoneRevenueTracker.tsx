@@ -15,7 +15,12 @@ interface MilestoneRevenueTrackerProps {
 
 const MilestoneRevenueTracker = ({ milestones, projectId, projectCurrency }: MilestoneRevenueTrackerProps) => {
   const { invoices } = useInvoices();
-  const { displayCurrency, convert } = useCurrency();
+  const { displayCurrency, convert, demoMode } = useCurrency();
+  
+  // Don't render the component at all in demo mode
+  if (demoMode) {
+    return null;
+  }
   
   const projectInvoices = invoices.filter(i => i.projectId === projectId);
   

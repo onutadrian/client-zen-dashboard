@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Task } from '@/types/task';
 import { useAuth } from '@/hooks/useAuth';
 import { useHourEntries } from '@/hooks/useHourEntries';
+import { useCurrency } from '@/hooks/useCurrency';
 import TaskStatusSelect from './TaskStatusSelect';
 import TaskActionButtons from './TaskActionButtons';
 
@@ -49,6 +49,7 @@ const TaskTableRow = ({
 }: TaskTableRowProps) => {
   const { isAdmin } = useAuth();
   const { hourEntries } = useHourEntries();
+  const { demoMode } = useCurrency();
 
   const getProjectName = (projectId?: string) => {
     if (!projectId) return 'No Project';
@@ -109,7 +110,7 @@ const TaskTableRow = ({
           )}
         </div>
       </TableCell>
-      {isAdmin && (
+      {isAdmin && !demoMode && (
         <TableCell>
           <Badge 
             variant={isBilled(task) ? "default" : "secondary"}

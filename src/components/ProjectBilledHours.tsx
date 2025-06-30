@@ -19,7 +19,12 @@ interface ProjectBilledHoursProps {
 const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursProps) => {
   const { hourEntries } = useHourEntries();
   const { invoices } = useInvoices();
-  const { displayCurrency, convert } = useCurrency();
+  const { displayCurrency, convert, demoMode } = useCurrency();
+  
+  // Don't render the component at all in demo mode
+  if (demoMode) {
+    return null;
+  }
   
   const projectHours = hourEntries.filter(entry => entry.projectId === project.id);
   const projectInvoices = invoices.filter(invoice => invoice.projectId === project.id);

@@ -13,7 +13,13 @@ interface SubscriptionMetricsProps {
 }
 
 const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMetricsProps) => {
-  const { convert } = useCurrency();
+  const { convert, demoMode } = useCurrency();
+  
+  // Don't render the component at all in demo mode
+  if (demoMode) {
+    return null;
+  }
+  
   const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
   
   const monthlyTotal = activeSubscriptions.reduce((total, subscription) => {

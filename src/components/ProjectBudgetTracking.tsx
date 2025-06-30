@@ -20,7 +20,13 @@ interface ProjectBudgetTrackingProps {
 const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBudgetTrackingProps) => {
   const { invoices } = useInvoices();
   const { hourEntries } = useHourEntries();
-  const { displayCurrency, convert } = useCurrency();
+  const { displayCurrency, convert, demoMode } = useCurrency();
+  
+  // Don't render the component at all in demo mode
+  if (demoMode) {
+    return null;
+  }
+  
   const isFixedPrice = project.pricingType === 'fixed';
   
   // Filter project-specific data
