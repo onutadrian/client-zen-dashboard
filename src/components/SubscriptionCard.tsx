@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -130,11 +131,13 @@ const SubscriptionCard = ({
 
           {/* Login Credentials */}
           <div className="space-y-2">
-            <div className="flex items-center text-sm text-slate-600">
-              <Mail className="w-4 h-4 mr-2" />
-              <span className="font-mono text-xs">{loginEmail}</span>
-            </div>
-            {secureNotes && (
+            {loginEmail && (
+              <div className="flex items-center text-sm text-slate-600">
+                <Mail className="w-4 h-4 mr-2" />
+                <span className="font-mono text-xs">{demoMode ? '—' : loginEmail}</span>
+              </div>
+            )}
+            {secureNotes && !demoMode && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center text-sm text-slate-600">
                   <CreditCard className="w-4 h-4 mr-2" />
