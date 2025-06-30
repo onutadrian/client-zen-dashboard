@@ -42,10 +42,15 @@ const AnalyticsSection = ({
   customDateRange,
   onCustomDateChange
 }: AnalyticsSectionProps) => {
-  const { convert } = useCurrency();
+  const { convert, demoMode } = useCurrency();
   
   // Format numbers: remove decimals and convert 1000+ to K format
   const formatMetric = (value, isCurrency = false, currency = '') => {
+    // Return dash if demo mode is enabled and this is a currency value
+    if (demoMode && isCurrency) {
+      return '—';
+    }
+    
     const numValue = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : value;
     
     if (isNaN(numValue)) return value;
@@ -75,6 +80,11 @@ const AnalyticsSection = ({
   };
 
   const getOriginalValue = (value, isCurrency = false) => {
+    // Return dash if demo mode is enabled and this is a currency value
+    if (demoMode && isCurrency) {
+      return '—';
+    }
+    
     if (isCurrency) {
       return value;
     }
@@ -175,8 +185,8 @@ const AnalyticsSection = ({
     },
     {
       title: "Total Revenue",
-      value: formatCurrency(totalRevenue, displayCurrency),
-      originalValue: formatCurrency(totalRevenue, displayCurrency),
+      value: demoMode ? '—' : formatCurrency(totalRevenue, displayCurrency),
+      originalValue: demoMode ? '—' : formatCurrency(totalRevenue, displayCurrency),
       isCurrency: true,
       isTime: false,
       subtitle: "from paid invoices",
@@ -185,8 +195,8 @@ const AnalyticsSection = ({
     },
     {
       title: "Monthly Costs",
-      value: formatCurrency(monthlySubscriptionCost, displayCurrency),
-      originalValue: formatCurrency(monthlySubscriptionCost, displayCurrency),
+      value: demoMode ? '—' : formatCurrency(monthlySubscriptionCost, displayCurrency),
+      originalValue: demoMode ? '—' : formatCurrency(monthlySubscriptionCost, displayCurrency),
       isCurrency: true,
       isTime: false,
       subtitle: "subscription expenses",
@@ -195,8 +205,8 @@ const AnalyticsSection = ({
     },
     {
       title: "Total Paid to Date",
-      value: formatCurrency(totalPaidToDate, displayCurrency),
-      originalValue: formatCurrency(totalPaidToDate, displayCurrency),
+      value: demoMode ? '—' : formatCurrency(totalPaidToDate, displayCurrency),
+      originalValue: demoMode ? '—' : formatCurrency(totalPaidToDate, displayCurrency),
       isCurrency: true,
       isTime: false,
       subtitle: "all subscriptions",
@@ -205,8 +215,8 @@ const AnalyticsSection = ({
     },
     {
       title: "Net Profit",
-      value: formatCurrency(netProfit, displayCurrency),
-      originalValue: formatCurrency(netProfit, displayCurrency),
+      value: demoMode ? '—' : formatCurrency(netProfit, displayCurrency),
+      originalValue: demoMode ? '—' : formatCurrency(netProfit, displayCurrency),
       isCurrency: true,
       isTime: false,
       subtitle: netProfitSubtitle,
@@ -240,8 +250,8 @@ const AnalyticsSection = ({
               ? formatHours(stat.value)
               : formatMetric(stat.value, stat.isCurrency, displayCurrency);
             
-            const needsTooltip = typeof stat.value === 'number' ? stat.value >= 1000 : 
-              (typeof stat.value === 'string' && parseFloat(stat.value.replace(/[^0-9.-]/g, '')) >= 1000);
+            const needsTooltip = !demoMode && !stat.isTime && typeof stat.value === 'number' ? stat.value >= 1000 : 
+              (!demoMode && typeof stat.value === 'string' && parseFloat(stat.value.replace(/[^0-9.-]/g, '')) >= 1000);
             
             return (
               <Card key={index} className="hover:shadow-none transition-all duration-200 shadow-none w-full min-w-0">

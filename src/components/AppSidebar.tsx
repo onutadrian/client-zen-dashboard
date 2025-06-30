@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Home, Briefcase, UserCheck, Users, CreditCard, FileText } from "lucide-react";
+import { Home, Briefcase, UserCheck, Users, CreditCard, FileText, Eye, EyeOff } from "lucide-react";
 import { Link, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -13,6 +14,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
 import LogoutButton from '@/components/LogoutButton';
@@ -58,7 +60,7 @@ const items = [
 
 export default function AppSidebar() {
   const { profile } = useAuth();
-  const { displayCurrency, updateCurrency } = useCurrency();
+  const { displayCurrency, updateCurrency, demoMode, toggleDemoMode } = useCurrency();
   const location = useLocation();
   const userRole = profile?.role || 'standard';
 
@@ -87,6 +89,26 @@ export default function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <div className="p-4 space-y-3">
+          <div className="space-y-2">
+            <label className="text-xs text-sidebar-foreground/70">Demo Mode</label>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="demo-mode"
+                checked={demoMode}
+                onCheckedChange={toggleDemoMode}
+              />
+              <div className="flex items-center space-x-1">
+                {demoMode ? (
+                  <EyeOff className="h-3 w-3 text-sidebar-foreground/70" />
+                ) : (
+                  <Eye className="h-3 w-3 text-sidebar-foreground/70" />
+                )}
+                <span className="text-xs text-sidebar-foreground/70">
+                  {demoMode ? 'Hide Financials' : 'Show Financials'}
+                </span>
+              </div>
+            </div>
+          </div>
           <div className="space-y-2">
             <label className="text-xs text-sidebar-foreground/70">Currency</label>
             <Select value={displayCurrency} onValueChange={updateCurrency}>

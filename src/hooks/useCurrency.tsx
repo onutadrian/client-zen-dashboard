@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { fallbackExchangeRates, convertCurrency as convertCurrencyUtil } from '@/lib/currency';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +12,8 @@ interface CurrencyContextType {
   loadingRates: boolean;
   lastFetched: Date | null;
   refreshRates: () => Promise<void>;
+  demoMode: boolean;
+  toggleDemoMode: () => void;
 }
 
 interface ExchangeRates {
@@ -28,6 +29,11 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [displayCurrency, setDisplayCurrency] = useState(() => {
     // Load currency from localStorage or default to USD
     return localStorage.getItem('displayCurrency') || 'USD';
+  });
+  
+  const [demoMode, setDemoMode] = useState(() => {
+    // Load demo mode from localStorage or default to false
+    return localStorage.getItem('demoMode') === 'true';
   });
   
   const [liveExchangeRates, setLiveExchangeRates] = useState<ExchangeRates | null>(null);
@@ -135,6 +141,21 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }));
   }, []);
 
+  const toggleDemoMode = useCallback(() => {
+    setDemoMode(prev => {
+      const newDemoMode = !prev;
+      localStorage.setItem('demoMode', newDemoMode.toString());
+      console.log('Demo mode toggled to:', newDemoMode);
+      
+      // Dispatch a custom event to notify other components
+      window.dispatchEvent(new CustomEvent('demoModeChanged', { 
+        detail: { demoMode: newDemoMode } 
+      }));
+      
+      return newDemoMode;
+    });
+  }, []);
+
   // Provide a convert function that uses the live rates
   const convert = useCallback((amount: number, fromCurrency: string, toCurrency: string): number => {
     return convertCurrencyUtil(amount, fromCurrency, toCurrency, liveExchangeRates || fallbackExchangeRates);
@@ -159,6 +180,8 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       loadingRates,
       lastFetched,
       refreshRates: fetchExchangeRates,
+      demoMode,
+      toggleDemoMode,
     }}>
       {children}
     </CurrencyContext.Provider>
