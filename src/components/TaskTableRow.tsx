@@ -4,6 +4,7 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Task } from '@/types/task';
 import { useAuth } from '@/hooks/useAuth';
+import { useHourEntries } from '@/hooks/useHourEntries';
 import TaskStatusSelect from './TaskStatusSelect';
 import TaskActionButtons from './TaskActionButtons';
 
@@ -47,6 +48,7 @@ const TaskTableRow = ({
   onStatusChange
 }: TaskTableRowProps) => {
   const { isAdmin } = useAuth();
+  const { hourEntries } = useHourEntries();
 
   const getProjectName = (projectId?: string) => {
     if (!projectId) return 'No Project';
@@ -55,15 +57,20 @@ const TaskTableRow = ({
   };
 
   const isBilled = (task: Task) => {
-    const client = clients.find(c => c.id === task.clientId);
-    if (!client || !client.hourEntries) return false;
+    // Look for hour entries related to this task
+    const taskHourEntries = hourEntries.filter(entry => {
+      // Check if the hour entry is related to this task
+      // This could be by description containing the task title, or by project/client matching
+      const isRelatedByDescription = entry.description?.includes(task.title) || 
+                                   entry.description?.includes(`Completed task: ${task.title}`);
+      const isRelatedByProject = entry.projectId === task.projectId && 
+                               entry.clientId === task.clientId;
+      
+      return isRelatedByDescription || isRelatedByProject;
+    });
 
-    const taskDescription = `Completed task: ${task.title}`;
-    const taskHourEntry = client.hourEntries.find(entry => 
-      entry.description === taskDescription && entry.billed === true
-    );
-
-    return !!taskHourEntry;
+    // Check if any of the related hour entries are billed
+    return taskHourEntries.some(entry => entry.billed === true);
   };
 
   return (
