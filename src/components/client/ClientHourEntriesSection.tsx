@@ -2,14 +2,7 @@
 import React from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Clock } from 'lucide-react';
-
-interface HourEntry {
-  id: number;
-  hours: number;
-  description: string;
-  date: string;
-  billed?: boolean;
-}
+import { HourEntry } from '@/types/hourEntry';
 
 interface ClientHourEntriesSectionProps {
   hourEntries: HourEntry[];
