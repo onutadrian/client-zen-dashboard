@@ -29,9 +29,6 @@ const ClientSelectDropdown = ({
     onClientChange(Number(value));
   };
 
-  console.log('ClientSelectDropdown - Available clients:', clients);
-  console.log('ClientSelectDropdown - Selected client ID:', selectedClientId);
-
   return (
     <div>
       <Label htmlFor="client">

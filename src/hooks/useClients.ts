@@ -13,7 +13,6 @@ export const useClients = () => {
       const clientsData = await loadClientsFromSupabase();
       setClients(clientsData);
     } catch (error) {
-      console.error('useClients - Error loading clients:', error);
       toast({
         title: "Error",
         description: "Failed to load clients",
@@ -36,7 +35,6 @@ export const useClients = () => {
         description: "Client added successfully"
       });
     } catch (error) {
-      console.error('Error adding client:', error);
       toast({
         title: "Error",
         description: "Failed to add client",
@@ -58,7 +56,6 @@ export const useClients = () => {
         description: "Client updated successfully"
       });
     } catch (error) {
-      console.error('Error updating client:', error);
       toast({
         title: "Error",
         description: "Failed to update client",

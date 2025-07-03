@@ -1,3 +1,4 @@
+
 // Exchange rates will be dynamically fetched from the API
 // These are fallback rates in case the API fails
 export const fallbackExchangeRates = {
@@ -14,7 +15,6 @@ export const convertCurrency = (
 ): number => {
   // Handle invalid inputs
   if (isNaN(amount) || amount === null || amount === undefined) {
-    console.log('convertCurrency: Invalid amount received:', amount);
     return 0;
   }
   
@@ -25,13 +25,11 @@ export const convertCurrency = (
   
   const fromRates = rates[fromCurrency as keyof typeof rates];
   if (!fromRates) {
-    console.log('convertCurrency: Invalid fromCurrency:', fromCurrency);
     return amount;
   }
   
   const rate = fromRates[toCurrency as keyof typeof fromRates];
   if (!rate) {
-    console.log('convertCurrency: Invalid toCurrency:', toCurrency, 'for fromCurrency:', fromCurrency);
     return amount;
   }
   
@@ -42,7 +40,6 @@ export const convertCurrency = (
 export const formatCurrency = (amount: number, currency: string): string => {
   // Handle invalid inputs
   if (isNaN(amount) || amount === null || amount === undefined) {
-    console.log('formatCurrency: Invalid amount received:', amount);
     amount = 0;
   }
   

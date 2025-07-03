@@ -33,9 +33,6 @@ const ProjectSelectDropdown = ({
     onProjectChange(value);
   };
 
-  console.log('ProjectSelectDropdown - Available projects:', projects);
-  console.log('ProjectSelectDropdown - Selected project ID:', selectedProjectId);
-
   return (
     <div>
       <Label htmlFor="project">
