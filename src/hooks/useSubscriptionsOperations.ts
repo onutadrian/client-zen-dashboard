@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Subscription } from '@/hooks/useSubscriptions';
 import { 
@@ -26,7 +25,7 @@ export const useSubscriptionsOperations = (
         login_email: newSubscription.login_email || '',
         secure_notes: newSubscription.secure_notes || '',
         category: newSubscription.category || 'Software',
-        total_paid: newSubscription.total_paid || 0,
+        total_paid: newSubscription.total_paid || newSubscription.price, // Use provided total_paid or default to price
         status: newSubscription.status || 'active',
         currency: newSubscription.currency || 'USD'
       };

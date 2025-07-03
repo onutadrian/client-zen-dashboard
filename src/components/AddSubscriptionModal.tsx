@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -23,9 +22,10 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const price = parseFloat(formData.price) || 0;
     const subscriptionData = {
       name: formData.name,
-      price: parseFloat(formData.price) || 0,
+      price: price,
       billing_date: formData.billing_date,
       billing_cycle: formData.billing_cycle,
       login_email: formData.login_email,
@@ -34,7 +34,7 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
       status: formData.status,
       currency: formData.currency,
       seats: parseInt(formData.seats) || 1,
-      total_paid: 0
+      total_paid: price // Set total_paid to the subscription price
     };
     
     onAdd(subscriptionData);
