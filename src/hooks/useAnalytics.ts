@@ -32,12 +32,10 @@ export const useAnalytics = (params?: AnalyticsParams) => {
 
   const calculateAnalytics = async () => {
     if (!user) {
-      console.log('No user, skipping analytics calculation');
       setLoading(false);
       return;
     }
 
-    console.log('Calculating analytics for user:', user.email, 'with date range:', params?.dateRange);
     setLoading(true);
 
     try {
@@ -49,10 +47,6 @@ export const useAnalytics = (params?: AnalyticsParams) => {
         fetchInvoicesData(params),
         fetchSubscriptionsData() // Get all subscriptions, not filtered by date
       ]);
-
-      // Debug hour entries
-      console.log('Raw hour entries:', hourEntries);
-      console.log('Number of hour entries:', hourEntries?.length || 0);
       
       // Calculate basic metrics
       const totalClients = clients?.length || 0;
@@ -60,29 +54,14 @@ export const useAnalytics = (params?: AnalyticsParams) => {
       
       const totalHours = hourEntries?.reduce((sum, entry) => {
         const hours = parseFloat(entry.hours?.toString() || '0');
-        console.log(`Entry ${entry.id}: ${hours} hours on ${entry.date} for client ${entry.client_id}`);
         return sum + hours;
       }, 0) || 0;
 
-      console.log('Total hours calculated:', totalHours);
-      
-      // Show breakdown by client
-      const hoursByClient = hourEntries?.reduce((acc, entry) => {
-        const clientId = entry.client_id;
-        const hours = parseFloat(entry.hours?.toString() || '0');
-        acc[clientId] = (acc[clientId] || 0) + hours;
-        return acc;
-      }, {} as Record<number, number>) || {};
-      
-      console.log('Hours by client:', hoursByClient);
-
       // Calculate revenue ONLY from paid invoices - this is the source of truth
       const invoiceRevenue = calculateInvoiceRevenue(invoices, convert, displayCurrency);
-      console.log('Invoice revenue calculated:', invoiceRevenue);
 
       // Total revenue is ONLY from paid invoices (no double counting)
       const totalRevenue = invoiceRevenue;
-      console.log('Total revenue calculated:', totalRevenue);
 
       // Calculate subscription costs - only active subscriptions
       const activeSubscriptions = allSubscriptions?.filter(sub => sub.status === 'active') || [];
@@ -117,19 +96,16 @@ export const useAnalytics = (params?: AnalyticsParams) => {
         revenueBreakdown
       };
 
-      console.log('Analytics calculated:', newAnalytics);
       setAnalytics(newAnalytics);
     } catch (error) {
       console.error('Error calculating analytics:', error);
     } finally {
-      console.log('Analytics calculation complete, setting loading to false');
       setLoading(false);
     }
   };
 
   useEffect(() => {
     if (user) {
-      console.log('User or date range changed, recalculating analytics');
       calculateAnalytics();
     }
   }, [user, displayCurrency, params?.dateRange?.from, params?.dateRange?.to]);

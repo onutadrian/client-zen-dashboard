@@ -46,7 +46,6 @@ export const useSubscriptions = () => {
         return;
       }
 
-      console.log('Fetched subscriptions:', data);
       if (data) {
         setSubscriptions(data);
       }
@@ -64,8 +63,6 @@ export const useSubscriptions = () => {
     }
 
     try {
-      console.log('Adding subscription:', newSubscription);
-      
       const subscriptionData = {
         name: newSubscription.name,
         price: newSubscription.price,
@@ -91,7 +88,6 @@ export const useSubscriptions = () => {
         throw error;
       }
 
-      console.log('Added subscription:', data);
       if (data) {
         setSubscriptions(prev => [data, ...prev]);
       }
@@ -108,8 +104,6 @@ export const useSubscriptions = () => {
     }
 
     try {
-      console.log('Updating subscription:', subscriptionId, updatedSubscription);
-      
       const updateData = {
         name: updatedSubscription.name,
         price: updatedSubscription.price,
@@ -144,7 +138,6 @@ export const useSubscriptions = () => {
         throw error;
       }
 
-      console.log('Updated subscription:', data);
       if (data) {
         setSubscriptions(prev => 
           prev.map(sub => 
@@ -165,8 +158,6 @@ export const useSubscriptions = () => {
     }
 
     try {
-      console.log('Deleting subscription:', subscriptionId);
-      
       const { error } = await supabase
         .from('subscriptions')
         .delete()
@@ -178,7 +169,6 @@ export const useSubscriptions = () => {
         throw error;
       }
 
-      console.log('Deleted subscription:', subscriptionId);
       setSubscriptions(prev => prev.filter(sub => sub.id !== subscriptionId));
     } catch (error) {
       console.error('Error deleting subscription:', error);
