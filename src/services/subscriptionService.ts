@@ -50,6 +50,7 @@ export const updateSubscriptionInSupabase = async (
     price: updatedSubscription.price,
     seats: updatedSubscription.seats,
     billing_date: updatedSubscription.billing_date,
+    billing_cycle: updatedSubscription.billing_cycle,
     login_email: updatedSubscription.login_email,
     secure_notes: updatedSubscription.secure_notes,
     category: updatedSubscription.category,

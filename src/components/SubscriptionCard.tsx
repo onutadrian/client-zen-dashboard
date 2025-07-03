@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Eye, EyeOff, Mail, CreditCard, Edit, Users } from 'lucide-react';
+import { Calendar, Eye, EyeOff, Mail, CreditCard, Edit, Users, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { useCurrency } from '@/hooks/useCurrency';
 
@@ -14,27 +14,76 @@ const SubscriptionCard = ({
   const [showSecureNotes, setShowSecureNotes] = useState(false);
   const { demoMode } = useCurrency();
   
-  const getDaysUntilBilling = () => {
-    const billingDate = new Date(subscription.billing_date);
+  const getNextBillingDate = () => {
+    const currentBillingDate = new Date(subscription.billing_date);
     const today = new Date();
-    const diffTime = billingDate.getTime() - today.getTime();
+    
+    // If subscription is canceled, don't calculate next billing
+    if (subscription.status === 'canceled') {
+      return currentBillingDate;
+    }
+    
+    // If billing date is in the future, return it
+    if (currentBillingDate > today) {
+      return currentBillingDate;
+    }
+    
+    // Calculate next billing date based on cycle
+    const nextBillingDate = new Date(currentBillingDate);
+    const billingCycle = subscription.billing_cycle || 'monthly';
+    
+    if (billingCycle === 'yearly') {
+      // Add years until we get a future date
+      while (nextBillingDate <= today) {
+        nextBillingDate.setFullYear(nextBillingDate.getFullYear() + 1);
+      }
+    } else {
+      // Add months until we get a future date
+      while (nextBillingDate <= today) {
+        nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+      }
+    }
+    
+    return nextBillingDate;
+  };
+  
+  const getDaysUntilBilling = () => {
+    if (subscription.status === 'canceled') {
+      return null;
+    }
+    
+    const nextBillingDate = getNextBillingDate();
+    const today = new Date();
+    const diffTime = nextBillingDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
   
   const daysUntilBilling = getDaysUntilBilling();
-  const isUpcoming = daysUntilBilling <= 7 && daysUntilBilling >= 0;
-  const isOverdue = daysUntilBilling < 0;
+  const isUpcoming = daysUntilBilling !== null && daysUntilBilling <= 7 && daysUntilBilling >= 0;
   
   const getBillingStatus = () => {
-    if (isOverdue) return {
-      text: 'Overdue',
-      color: 'bg-red-100 text-red-800 hover:bg-red-100'
-    };
-    if (isUpcoming) return {
-      text: `${daysUntilBilling} days`,
-      color: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
-    };
+    if (subscription.status === 'canceled') {
+      return {
+        text: 'Canceled',
+        color: 'bg-red-100 text-red-800 hover:bg-red-100'
+      };
+    }
+    
+    if (daysUntilBilling === null) {
+      return {
+        text: 'Unknown',
+        color: 'bg-gray-100 text-gray-800 hover:bg-gray-100'
+      };
+    }
+    
+    if (isUpcoming) {
+      return {
+        text: `${daysUntilBilling} days`,
+        color: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+      };
+    }
+    
     return {
       text: `${daysUntilBilling} days`,
       color: 'bg-green-100 text-green-800 hover:bg-green-100'
@@ -61,8 +110,9 @@ const SubscriptionCard = ({
   const totalPrice = subscription.price * seats;
   const currency = subscription.currency || 'USD';
   const loginEmail = subscription.login_email || '';
-  const billingDate = subscription.billing_date;
+  const nextBillingDate = getNextBillingDate();
   const secureNotes = subscription.secure_notes || '';
+  const billingCycle = subscription.billing_cycle || 'monthly';
   
   const formatCurrency = (amount) => {
     const symbols = { USD: '$', EUR: '€', RON: 'RON ' };
@@ -71,7 +121,7 @@ const SubscriptionCard = ({
   };
 
   return (
-    <Card className={`transition-all duration-200 ${isOverdue ? 'border-red-200 bg-red-50' : ''}`}>
+    <Card className="transition-all duration-200">
       <CardContent className="p-4">
         <div className="space-y-3">
           {/* Header */}
@@ -93,7 +143,10 @@ const SubscriptionCard = ({
             {!demoMode && (
               <div className="text-right ml-4">
                 <div className="text-lg font-bold text-slate-800">{formatCurrency(totalPrice)}</div>
-                <div className="text-xs text-slate-500">per month</div>
+                <div className="text-xs text-slate-500 flex items-center justify-end">
+                  <Clock className="w-3 h-3 mr-1" />
+                  per {billingCycle === 'yearly' ? 'year' : 'month'}
+                </div>
                 {seats > 1 && (
                   <div className="text-xs text-slate-600 flex items-center justify-end mt-1">
                     <Users className="w-3 h-3 mr-1" />
@@ -120,7 +173,12 @@ const SubscriptionCard = ({
           <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
             <div className="flex items-center text-sm text-slate-600">
               <Calendar className="w-4 h-4 mr-2" />
-              <span>{new Date(billingDate).toLocaleDateString()}</span>
+              <span>
+                {subscription.status === 'canceled' 
+                  ? `Last billed: ${new Date(subscription.billing_date).toLocaleDateString()}`
+                  : `Next billing: ${nextBillingDate.toLocaleDateString()}`
+                }
+              </span>
             </div>
             {!demoMode && (
               <Badge className={billingStatus.color}>

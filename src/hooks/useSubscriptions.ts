@@ -10,6 +10,7 @@ export interface Subscription {
   price: number;
   seats: number;
   billing_date: string;
+  billing_cycle: 'monthly' | 'yearly';
   login_email: string;
   secure_notes: string;
   category: string;

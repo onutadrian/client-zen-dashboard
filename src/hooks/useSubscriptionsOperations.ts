@@ -22,6 +22,7 @@ export const useSubscriptionsOperations = (
         price: newSubscription.price,
         seats: newSubscription.seats || 1,
         billing_date: newSubscription.billing_date,
+        billing_cycle: newSubscription.billing_cycle || 'monthly',
         login_email: newSubscription.login_email || '',
         secure_notes: newSubscription.secure_notes || '',
         category: newSubscription.category || 'Software',

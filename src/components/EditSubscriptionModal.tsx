@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -15,6 +16,7 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
     price: 0,
     seats: 1,
     billing_date: '',
+    billing_cycle: 'monthly',
     login_email: '',
     secure_notes: '',
     category: '',
@@ -32,6 +34,7 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
         price: subscription.price || 0,
         seats: subscription.seats || 1,
         billing_date: subscription.billing_date || '',
+        billing_cycle: subscription.billing_cycle || 'monthly',
         login_email: subscription.login_email || '',
         secure_notes: subscription.secure_notes || '',
         category: subscription.category || '',
@@ -57,6 +60,7 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
         price: formData.price,
         seats: formData.seats,
         billing_date: formData.billing_date,
+        billing_cycle: formData.billing_cycle,
         login_email: formData.login_email,
         secure_notes: formData.secure_notes,
         category: formData.category,
@@ -172,6 +176,20 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
                 onChange={(e) => handleChange('seats', parseInt(e.target.value) || 1)}
                 required
               />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-sm font-medium">Billing Cycle</Label>
+            <div className="flex items-center space-x-2 mt-2">
+              <span className="text-sm">Monthly</span>
+              <Switch
+                checked={formData.billing_cycle === 'yearly'}
+                onCheckedChange={(checked) => 
+                  handleChange('billing_cycle', checked ? 'yearly' : 'monthly')
+                }
+              />
+              <span className="text-sm">Yearly</span>
             </div>
           </div>
 

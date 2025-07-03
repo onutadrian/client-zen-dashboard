@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 
 const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
     billing_date: '',
+    billing_cycle: 'monthly',
     login_email: '',
     password: '',
     category: 'Software',
@@ -25,6 +27,7 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
       name: formData.name,
       price: parseFloat(formData.price) || 0,
       billing_date: formData.billing_date,
+      billing_cycle: formData.billing_cycle,
       login_email: formData.login_email,
       password: formData.password,
       category: formData.category,
@@ -44,6 +47,7 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
       name: '',
       price: '',
       billing_date: '',
+      billing_cycle: 'monthly',
       login_email: '',
       password: '',
       category: 'Software',
@@ -85,7 +89,7 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="sub-price">Monthly Price *</Label>
+              <Label htmlFor="sub-price">Price *</Label>
               <Input
                 id="sub-price"
                 type="number"
@@ -106,6 +110,20 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
                 onChange={(e) => setFormData({ ...formData, seats: e.target.value })}
                 placeholder="1"
               />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-sm font-medium">Billing Cycle</Label>
+            <div className="flex items-center space-x-2 mt-2">
+              <span className="text-sm">Monthly</span>
+              <Switch
+                checked={formData.billing_cycle === 'yearly'}
+                onCheckedChange={(checked) => 
+                  setFormData({ ...formData, billing_cycle: checked ? 'yearly' : 'monthly' })
+                }
+              />
+              <span className="text-sm">Yearly</span>
             </div>
           </div>
 
