@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,51 +8,53 @@ import { useHourEntries } from '@/hooks/useHourEntries';
 import { formatCurrency } from '@/lib/currency';
 import ClientCardHeader from '@/components/client/ClientCardHeader';
 import ClientDetailsSheet from '@/components/client/ClientDetailsSheet';
-
 interface ClientCardProps {
   client: Client;
   onEdit: (client: Client) => void;
   onDelete: (clientId: number) => void;
 }
-
-const ClientCard = ({ client, onEdit, onDelete }: ClientCardProps) => {
+const ClientCard = ({
+  client,
+  onEdit,
+  onDelete
+}: ClientCardProps) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const { demoMode, displayCurrency, convert } = useCurrency();
-  const { hourEntries } = useHourEntries();
+  const {
+    demoMode,
+    displayCurrency,
+    convert
+  } = useCurrency();
+  const {
+    hourEntries
+  } = useHourEntries();
 
   // Calculate client stats from hour entries
   const clientHourEntries = hourEntries.filter(entry => entry.clientId === client.id);
   const totalHours = clientHourEntries.reduce((sum, entry) => sum + (entry.hours || 0), 0);
   const unbilledHours = clientHourEntries.filter(entry => !entry.billed).reduce((sum, entry) => sum + (entry.hours || 0), 0);
-  
   const paidInvoices = client.invoices?.filter(invoice => invoice.status === 'paid').length || 0;
   const totalInvoices = client.invoices?.length || 0;
   const totalInvoiceAmount = client.invoices?.reduce((sum, invoice) => {
     const convertedAmount = convert(invoice.amount, invoice.currency || client.currency, displayCurrency);
     return sum + convertedAmount;
   }, 0) || 0;
-
   const formatDisplayAmount = (amount: number) => formatCurrency(amount, displayCurrency);
-
   const handleLogTimeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     // TODO: Implement log time functionality
   };
-
-  return (
-    <>
+  return <>
       <Card className="hover:shadow-lg transition-shadow duration-200">
         <CardContent className="p-6">
           <div className="space-y-4">
             <ClientCardHeader client={client} demoMode={demoMode} />
             
-            {!demoMode && (
-              <div className="flex items-center justify-between pt-2">
+            {!demoMode && <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center space-x-6">
                   <div className="flex items-center text-slate-600">
                     <Clock className="w-4 h-4 mr-1" />
                     <span className="text-sm">{totalHours} hours</span>
-                    {unbilledHours > 0 && <span className="text-xs text-orange-600 ml-1">({unbilledHours} unbilled)</span>}
+                    {unbilledHours > 0}
                   </div>
                   <div className="flex items-center text-slate-600">
                     <FileCheck className="w-4 h-4 mr-1" />
@@ -67,34 +68,19 @@ const ClientCard = ({ client, onEdit, onDelete }: ClientCardProps) => {
                   <Plus className="w-3 h-3 mr-1" />
                   Log Time
                 </Button>
-              </div>
-            )}
+              </div>}
             
             <div className="flex justify-between items-center pt-4 border-t">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsDetailsOpen(true)}
-                className="flex items-center space-x-2"
-              >
+              <Button variant="outline" size="sm" onClick={() => setIsDetailsOpen(true)} className="flex items-center space-x-2">
                 <Eye className="w-4 h-4" />
                 <span>View Details</span>
               </Button>
               
               <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEdit(client)}
-                >
+                <Button variant="outline" size="sm" onClick={() => onEdit(client)}>
                   <Edit className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onDelete(client.id)}
-                  className="text-red-600 hover:text-red-700"
-                >
+                <Button variant="outline" size="sm" onClick={() => onDelete(client.id)} className="text-red-600 hover:text-red-700">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -103,13 +89,7 @@ const ClientCard = ({ client, onEdit, onDelete }: ClientCardProps) => {
         </CardContent>
       </Card>
 
-      <ClientDetailsSheet
-        client={client}
-        isOpen={isDetailsOpen}
-        onClose={() => setIsDetailsOpen(false)}
-      />
-    </>
-  );
+      <ClientDetailsSheet client={client} isOpen={isDetailsOpen} onClose={() => setIsDetailsOpen(false)} />
+    </>;
 };
-
 export default ClientCard;
