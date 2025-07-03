@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +20,14 @@ const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMet
   const monthlyTotal = activeSubscriptions.reduce((total, subscription) => {
     const convertedCost = convert(subscription.price, subscription.currency, displayCurrency);
     const totalSeats = subscription.seats || 1;
-    return total + (convertedCost * totalSeats);
+    const subscriptionCost = convertedCost * totalSeats;
+    
+    // Convert to monthly equivalent based on billing cycle
+    const monthlyCost = subscription.billing_cycle === 'yearly' 
+      ? subscriptionCost / 12 
+      : subscriptionCost;
+    
+    return total + monthlyCost;
   }, 0);
 
   const totalPaidToDate = subscriptions.reduce((total, subscription) => {
