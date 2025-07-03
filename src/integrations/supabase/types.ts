@@ -444,6 +444,7 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          billing_cycle: string
           billing_date: string
           category: string
           created_at: string
@@ -460,6 +461,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          billing_cycle?: string
           billing_date: string
           category?: string
           created_at?: string
@@ -476,6 +478,7 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          billing_cycle?: string
           billing_date?: string
           category?: string
           created_at?: string

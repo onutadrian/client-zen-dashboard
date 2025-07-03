@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Subscription } from '@/hooks/useSubscriptions';
 
-export const fetchSubscriptionsFromSupabase = async (userId: string) => {
+export const fetchSubscriptionsFromSupabase = async (userId: string): Promise<Subscription[]> => {
   const { data, error } = await supabase
     .from('subscriptions')
     .select('*')
@@ -14,13 +14,17 @@ export const fetchSubscriptionsFromSupabase = async (userId: string) => {
     throw error;
   }
 
-  return data || [];
+  // Map the data to ensure billing_cycle is included with proper type
+  return (data || []).map(item => ({
+    ...item,
+    billing_cycle: item.billing_cycle as 'monthly' | 'yearly' || 'monthly'
+  }));
 };
 
 export const addSubscriptionToSupabase = async (
   subscriptionData: Omit<Subscription, 'id' | 'created_at' | 'updated_at'>,
   userId: string
-) => {
+): Promise<Subscription> => {
   const dataToInsert = {
     ...subscriptionData,
     user_id: userId
@@ -37,14 +41,17 @@ export const addSubscriptionToSupabase = async (
     throw error;
   }
 
-  return data;
+  return {
+    ...data,
+    billing_cycle: data.billing_cycle as 'monthly' | 'yearly' || 'monthly'
+  };
 };
 
 export const updateSubscriptionInSupabase = async (
   subscriptionId: number,
   updatedSubscription: Partial<Subscription>,
   userId: string
-) => {
+): Promise<Subscription> => {
   const updateData = {
     name: updatedSubscription.name,
     price: updatedSubscription.price,
@@ -80,7 +87,10 @@ export const updateSubscriptionInSupabase = async (
     throw error;
   }
 
-  return data;
+  return {
+    ...data,
+    billing_cycle: data.billing_cycle as 'monthly' | 'yearly' || 'monthly'
+  };
 };
 
 export const deleteSubscriptionFromSupabase = async (
