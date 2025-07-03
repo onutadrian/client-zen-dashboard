@@ -2,12 +2,10 @@
 import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, Clock, Users, FileText } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 import { Client } from '@/types/client';
 import { useCurrency } from '@/hooks/useCurrency';
-import { useHourEntries } from '@/hooks/useHourEntries';
 import { formatCurrency } from '@/lib/currency';
-import ClientHourEntriesSection from './ClientHourEntriesSection';
 import ClientInvoicesSection from './ClientInvoicesSection';
 import ClientTeamSection from './ClientTeamSection';
 import ClientLinksSection from './ClientLinksSection';
@@ -21,8 +19,7 @@ interface ClientDetailsSheetProps {
 }
 
 const ClientDetailsSheet = ({ client, isOpen, onClose }: ClientDetailsSheetProps) => {
-  const { demoMode, displayCurrency, convert } = useCurrency();
-  const { hourEntries, updateHourEntry } = useHourEntries();
+  const { demoMode, displayCurrency } = useCurrency();
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -34,18 +31,6 @@ const ClientDetailsSheet = ({ client, isOpen, onClose }: ClientDetailsSheetProps
         return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
       default:
         return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
-    }
-  };
-
-  // Get hour entries for this client
-  const clientHourEntries = hourEntries.filter(entry => entry.clientId === client.id);
-  const billedHours = clientHourEntries.filter(entry => entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
-  const unbilledHours = clientHourEntries.filter(entry => !entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
-
-  const handleToggleBilledStatus = async (entryId: number) => {
-    const entry = clientHourEntries.find(e => e.id === entryId);
-    if (entry) {
-      await updateHourEntry(entryId, { billed: !entry.billed });
     }
   };
 
@@ -84,15 +69,6 @@ const ClientDetailsSheet = ({ client, isOpen, onClose }: ClientDetailsSheetProps
         </SheetHeader>
 
         <div className="space-y-6">
-          {!demoMode && clientHourEntries.length > 0 && (
-            <ClientHourEntriesSection 
-              hourEntries={clientHourEntries}
-              billedHours={billedHours}
-              unbilledHours={unbilledHours}
-              onToggleBilledStatus={handleToggleBilledStatus}
-            />
-          )}
-
           {!demoMode && client.invoices && client.invoices.length > 0 && (
             <ClientInvoicesSection 
               client={client}
