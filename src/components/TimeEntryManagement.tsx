@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Plus, Clock } from 'lucide-react';
+import { Edit, Trash2, Plus, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import EditTimeEntryModal from './EditTimeEntryModal';
 import DeleteTimeEntryDialog from './DeleteTimeEntryDialog';
 import { HourEntry, useHourEntries } from '@/hooks/useHourEntries';
@@ -16,9 +17,14 @@ const TimeEntryManagement = ({ projectId, onAddTimeEntry }: TimeEntryManagementP
   const { hourEntries, refreshHourEntries } = useHourEntries();
   const [editingEntry, setEditingEntry] = useState<HourEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<HourEntry | null>(null);
+  const [showAllEntries, setShowAllEntries] = useState(false);
 
   // Filter entries for this project
   const projectEntries = hourEntries.filter(entry => entry.projectId === projectId);
+  const sortedEntries = projectEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  
+  const displayedEntries = showAllEntries ? sortedEntries : sortedEntries.slice(0, 10);
+  const hasMoreEntries = sortedEntries.length > 10;
 
   const handleEditComplete = () => {
     setEditingEntry(null);
@@ -73,50 +79,64 @@ const TimeEntryManagement = ({ projectId, onAddTimeEntry }: TimeEntryManagementP
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {projectEntries
-              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-              .slice(0, 10)
-              .map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-medium">{formatDate(entry.date)}</span>
-                      <span className="text-sm text-slate-500">
-                        {entry.hours} {entry.hours === 1 ? 'hour' : 'hours'}
+            {displayedEntries.map((entry) => (
+              <div key={entry.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="font-medium">{formatDate(entry.date)}</span>
+                    <span className="text-sm text-slate-500">
+                      {entry.hours} {entry.hours === 1 ? 'hour' : 'hours'}
+                    </span>
+                    {entry.billed && (
+                      <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
+                        Billed
                       </span>
-                      {entry.billed && (
-                        <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
-                          Billed
-                        </span>
-                      )}
-                    </div>
-                    {entry.description && (
-                      <p className="text-sm text-slate-600 line-clamp-2">{entry.description}</p>
                     )}
                   </div>
-                  <div className="flex items-center space-x-2 ml-4 flex-shrink-0">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setEditingEntry(entry)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setDeletingEntry(entry)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  {entry.description && (
+                    <p className="text-sm text-slate-600 line-clamp-2">{entry.description}</p>
+                  )}
                 </div>
-              ))}
-            {projectEntries.length > 10 && (
-              <p className="text-sm text-slate-500 text-center mt-2">
-                +{projectEntries.length - 10} more entries
-              </p>
+                <div className="flex items-center space-x-2 ml-4 flex-shrink-0">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEditingEntry(entry)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setDeletingEntry(entry)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {hasMoreEntries && (
+              <div className="text-center mt-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAllEntries(!showAllEntries)}
+                  className="text-slate-500 hover:text-slate-700"
+                >
+                  {showAllEntries ? (
+                    <>
+                      <ChevronUp className="w-4 h-4 mr-1" />
+                      Show Less
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-4 h-4 mr-1" />
+                      +{sortedEntries.length - 10} more entries
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
           </div>
         </CardContent>
