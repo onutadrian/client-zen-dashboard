@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FileCheck, ExternalLink, Plus, X } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
+import InvoiceStatusButton from '@/components/InvoiceStatusButton';
 
 interface ClientInvoicesSectionProps {
   // For display mode (ClientDetailsSheet)
@@ -54,9 +55,14 @@ const ClientInvoicesSection = ({
                   <div className="text-sm text-slate-600">{new Date(invoice.date).toLocaleDateString()}</div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Badge className={invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                    {invoice.status}
-                  </Badge>
+                  <InvoiceStatusButton
+                    invoiceId={invoice.id.toString()}
+                    currentStatus={invoice.status}
+                    onStatusChange={() => {
+                      // Refresh client data after status change
+                      window.location.reload();
+                    }}
+                  />
                   {invoice.url && (
                     <a href={invoice.url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
                       <ExternalLink className="w-3 h-3" />
@@ -98,6 +104,15 @@ const ClientInvoicesSection = ({
     });
   };
 
+  const updateInvoiceStatus = (index: number, newStatus: string) => {
+    const updatedInvoices = [...formData.invoices];
+    updatedInvoices[index] = { ...updatedInvoices[index], status: newStatus };
+    setFormData({
+      ...formData,
+      invoices: updatedInvoices
+    });
+  };
+
   return (
     <div>
       <Label>Invoices</Label>
@@ -123,6 +138,7 @@ const ClientInvoicesSection = ({
           >
             <option value="pending">Pending</option>
             <option value="paid">Paid</option>
+            <option value="overdue">Overdue</option>
           </select>
           <Input
             placeholder="Invoice URL (optional)"
@@ -141,9 +157,15 @@ const ClientInvoicesSection = ({
               <div className="text-sm text-slate-600">{new Date(invoice.date).toLocaleDateString()}</div>
             </div>
             <div className="flex items-center space-x-2">
-              <Badge className={invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                {invoice.status}
-              </Badge>
+              <select
+                className="text-xs px-2 py-1 rounded border"
+                value={invoice.status}
+                onChange={(e) => updateInvoiceStatus(index, e.target.value)}
+              >
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+                <option value="overdue">Overdue</option>
+              </select>
               <Button
                 type="button"
                 variant="ghost"
