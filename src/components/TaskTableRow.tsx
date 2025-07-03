@@ -67,8 +67,8 @@ const TaskTableRow = ({
     // Look for hour entries that match this task's project and client
     const taskRelatedHourEntries = hourEntries.filter(entry => {
       // Check if the hour entry belongs to the same project and client
-      const matchesProject = entry.project_id === task.projectId;
-      const matchesClient = entry.client_id === task.clientId;
+      const matchesProject = entry.projectId === task.projectId;
+      const matchesClient = entry.clientId === task.clientId;
       
       // Also check if the description contains the task title or indicates it's related to this task
       const descriptionMatches = entry.description?.includes(task.title) || 
