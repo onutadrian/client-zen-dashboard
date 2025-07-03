@@ -59,22 +59,40 @@ const TaskTableRow = ({
   };
 
   const isBilled = (task: Task) => {
-    // Only show as billed if the task is completed and has worked hours
+    // Only completed tasks with worked hours can be billed
     if (task.status !== 'completed' || !task.workedHours || task.workedHours === 0) {
       return false;
     }
 
-    // Look for hour entries related to this completed task
-    const taskHourEntries = hourEntries.filter(entry => {
-      // Check if the hour entry is related to this specific completed task
-      const isRelatedByDescription = entry.description?.includes(`Completed task: ${task.title}`);
+    // Look for hour entries that match this task's project and client
+    const taskRelatedHourEntries = hourEntries.filter(entry => {
+      // Check if the hour entry belongs to the same project and client
+      const matchesProject = entry.project_id === task.projectId;
+      const matchesClient = entry.client_id === task.clientId;
       
-      return isRelatedByDescription;
+      // Also check if the description contains the task title or indicates it's related to this task
+      const descriptionMatches = entry.description?.includes(task.title) || 
+                                 entry.description?.includes(`Completed task: ${task.title}`) ||
+                                 entry.description?.toLowerCase().includes(task.title.toLowerCase());
+      
+      return matchesProject && matchesClient && descriptionMatches;
     });
 
-    // If we found related hour entries, check if they are billed
-    // Only show as "Billed" if we have hour entries and they are actually billed
-    return taskHourEntries.length > 0 && taskHourEntries.some(entry => entry.billed === true);
+    // If we found related hour entries, check if any are marked as billed
+    if (taskRelatedHourEntries.length > 0) {
+      return taskRelatedHourEntries.some(entry => entry.billed === true);
+    }
+
+    // If no specific hour entries found, consider recent completed tasks as potentially unbilled
+    // This handles cases where hour entries might not have been created yet or don't match exactly
+    const completedDate = task.completedDate ? new Date(task.completedDate) : null;
+    if (completedDate) {
+      const daysSinceCompletion = (Date.now() - completedDate.getTime()) / (1000 * 60 * 60 * 24);
+      // Consider tasks completed more than 7 days ago as likely billed unless we have specific unbilled entries
+      return daysSinceCompletion > 7;
+    }
+
+    return false;
   };
 
   return (
