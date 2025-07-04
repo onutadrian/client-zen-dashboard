@@ -63,14 +63,21 @@ export const useAnalytics = (params?: AnalyticsParams) => {
       // Total revenue is ONLY from paid invoices (no double counting)
       const totalRevenue = invoiceRevenue;
 
-      // Calculate subscription costs - only active subscriptions
+      // Calculate subscription costs - only active subscriptions with proper yearly-to-monthly conversion
       const activeSubscriptions = allSubscriptions?.filter(sub => sub.status === 'active') || [];
       const monthlySubscriptionCost = activeSubscriptions.reduce((sum, sub) => {
         const price = parseFloat(sub.price?.toString() || '0');
         const seats = parseInt(sub.seats?.toString() || '1');
         const subCurrency = sub.currency || 'USD';
         const convertedPrice = convert(price, subCurrency, displayCurrency);
-        return sum + (convertedPrice * seats);
+        const subscriptionCost = convertedPrice * seats;
+        
+        // Convert to monthly equivalent based on billing cycle
+        const monthlyCost = sub.billing_cycle === 'yearly' 
+          ? subscriptionCost / 12 
+          : subscriptionCost;
+        
+        return sum + monthlyCost;
       }, 0);
 
       const totalPaidToDate = allSubscriptions?.reduce((sum, sub) => {
