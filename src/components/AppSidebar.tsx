@@ -89,26 +89,28 @@ export default function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <div className="p-4 space-y-3">
-          <div className="space-y-2">
-            <label className="text-xs text-sidebar-foreground/70">Demo Mode</label>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="demo-mode"
-                checked={demoMode}
-                onCheckedChange={toggleDemoMode}
-              />
-              <div className="flex items-center space-x-1">
-                {demoMode ? (
-                  <EyeOff className="h-3 w-3 text-sidebar-foreground/70" />
-                ) : (
-                  <Eye className="h-3 w-3 text-sidebar-foreground/70" />
-                )}
-                <span className="text-xs text-sidebar-foreground/70">
-                  {demoMode ? 'Hide Financials' : 'Show Financials'}
-                </span>
+          {userRole === 'admin' && (
+            <div className="space-y-2">
+              <label className="text-xs text-sidebar-foreground/70">Demo Mode</label>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="demo-mode"
+                  checked={demoMode}
+                  onCheckedChange={toggleDemoMode}
+                />
+                <div className="flex items-center space-x-1">
+                  {demoMode ? (
+                    <EyeOff className="h-3 w-3 text-sidebar-foreground/70" />
+                  ) : (
+                    <Eye className="h-3 w-3 text-sidebar-foreground/70" />
+                  )}
+                  <span className="text-xs text-sidebar-foreground/70">
+                    {demoMode ? 'Hide Financials' : 'Show Financials'}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
           <div className="space-y-2">
             <label className="text-xs text-sidebar-foreground/70">Currency</label>
             <Select value={displayCurrency} onValueChange={updateCurrency}>
