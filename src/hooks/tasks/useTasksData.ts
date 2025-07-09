@@ -53,8 +53,24 @@ export const useTasksData = () => {
   };
 
   useEffect(() => {
+    console.log('useTasksData: Initial load triggered');
     loadTasks();
   }, []);
+
+  // Listen for auth state changes but don't reload if we already have tasks
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('useTasksData: Auth state changed:', event, 'Tasks count:', tasks.length);
+      
+      // Only reload if we don't have tasks and user is authenticated
+      if (event === 'SIGNED_IN' && tasks.length === 0) {
+        console.log('useTasksData: Reloading tasks after sign in');
+        setTimeout(() => loadTasks(), 100);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [tasks.length]);
 
   return {
     tasks,
