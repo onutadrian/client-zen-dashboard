@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import ClientSelectDropdown from '@/components/forms/ClientSelectDropdown';
 import ProjectSelectDropdown from '@/components/forms/ProjectSelectDropdown';
 import TaskFormFields from './task/TaskFormFields';
+import { useMilestones } from '@/hooks/useMilestones';
 
 interface Client {
   id: number;
@@ -29,6 +30,7 @@ interface Task {
   clientId: number;
   clientName: string;
   projectId?: string;
+  milestoneId?: string;
   estimatedHours?: number;
   actualHours?: number;
   status: 'pending' | 'in-progress' | 'completed';
@@ -50,11 +52,13 @@ interface AddTaskModalProps {
 }
 
 const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTaskModalProps) => {
+  const { milestones } = useMilestones();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     clientId: null as number | null,
     projectId: null as string | null,
+    milestoneId: null as string | null,
     estimatedHours: undefined as number | undefined,
     notes: '',
     assetsInput: '',
@@ -70,6 +74,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
         description: task.description,
         clientId: task.clientId,
         projectId: task.projectId || null,
+        milestoneId: task.milestoneId || null,
         estimatedHours: task.estimatedHours,
         notes: task.notes,
         assetsInput: task.assets.join('\n'),
@@ -83,6 +88,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
         description: '',
         clientId: null,
         projectId: null,
+        milestoneId: null,
         estimatedHours: undefined,
         notes: '',
         assetsInput: '',
@@ -99,7 +105,8 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
     setFormData(prev => ({
       ...prev,
       clientId: newClientId,
-      projectId: null
+      projectId: null,
+      milestoneId: null
     }));
   };
 
@@ -132,6 +139,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
       clientId: formData.clientId,
       clientName: selectedClient?.name || '',
       projectId: formData.projectId,
+      milestoneId: formData.milestoneId,
       estimatedHours: formData.estimatedHours,
       notes: formData.notes.trim(),
       assets,
@@ -149,6 +157,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
       description: '',
       clientId: null,
       projectId: null,
+      milestoneId: null,
       estimatedHours: undefined,
       notes: '',
       assetsInput: '',
@@ -171,6 +180,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
             setFormData={setFormData}
             clients={clients}
             availableProjects={availableProjects}
+            milestones={milestones}
             selectedClient={selectedClient}
             onClientChange={handleClientChange}
           />

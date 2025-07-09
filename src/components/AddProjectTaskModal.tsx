@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useMilestones } from '@/hooks/useMilestones';
 
 interface AddProjectTaskModalProps {
   isOpen: boolean;
@@ -16,14 +18,20 @@ interface AddProjectTaskModalProps {
 }
 
 const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clientName }: AddProjectTaskModalProps) => {
+  const { milestones } = useMilestones();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     estimatedHours: '',
+    milestoneId: '',
     notes: '',
     startDate: '',
     endDate: ''
   });
+
+  const availableMilestones = milestones.filter(m => 
+    m.projectId === projectId && m.status === 'in-progress'
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +42,7 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
       clientId,
       clientName,
       projectId,
+      milestoneId: formData.milestoneId || undefined,
       estimatedHours: formData.estimatedHours ? parseInt(formData.estimatedHours) : undefined,
       notes: formData.notes,
       assets: [],
@@ -46,6 +55,7 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
       title: '',
       description: '',
       estimatedHours: '',
+      milestoneId: '',
       notes: '',
       startDate: '',
       endDate: ''
@@ -100,6 +110,35 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
               placeholder="Enter estimated hours"
               min="1"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="milestone">Milestone</Label>
+            <Select
+              value={formData.milestoneId}
+              onValueChange={(value) => handleChange('milestoneId', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={
+                  availableMilestones.length === 0 
+                    ? "No in-progress milestones available"
+                    : "Select a milestone (optional)"
+                } />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">No milestone</SelectItem>
+                {availableMilestones.map((milestone) => (
+                  <SelectItem key={milestone.id} value={milestone.id}>
+                    {milestone.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {availableMilestones.length === 0 && (
+              <p className="text-sm text-amber-600 mt-1">
+                No in-progress milestones found. Consider creating or activating a milestone for better time tracking.
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

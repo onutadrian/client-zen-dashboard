@@ -22,6 +22,7 @@ export const createHourEntryForCompletedTask = async (
   const supabaseEntry = {
     project_id: task.projectId,
     client_id: task.clientId,
+    milestone_id: task.milestoneId,
     hours: workedHours,
     description: `Completed task: ${task.title}`,
     date: new Date().toISOString().split('T')[0],

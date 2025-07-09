@@ -3,6 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ClientSelectDropdown from '@/components/forms/ClientSelectDropdown';
 import ProjectSelectDropdown from '@/components/forms/ProjectSelectDropdown';
 
@@ -18,11 +19,19 @@ interface Project {
   clientId: number;
 }
 
+interface Milestone {
+  id: string;
+  projectId: string;
+  title: string;
+  status: 'pending' | 'in-progress' | 'completed';
+}
+
 interface TaskFormData {
   title: string;
   description: string;
   clientId: number | null;
   projectId: string | null;
+  milestoneId: string | null;
   estimatedHours?: number;
   notes: string;
   assetsInput: string;
@@ -35,6 +44,7 @@ interface TaskFormFieldsProps {
   setFormData: React.Dispatch<React.SetStateAction<TaskFormData>>;
   clients: Client[];
   availableProjects: Project[];
+  milestones: Milestone[];
   selectedClient?: Client;
   onClientChange: (clientId: number | null) => void;
 }
@@ -44,9 +54,13 @@ const TaskFormFields = ({
   setFormData,
   clients,
   availableProjects,
+  milestones,
   selectedClient,
   onClientChange
 }: TaskFormFieldsProps) => {
+  const availableMilestones = milestones.filter(m => 
+    m.projectId === formData.projectId && m.status === 'in-progress'
+  );
   return (
     <>
       <div>
@@ -82,12 +96,43 @@ const TaskFormFields = ({
         <ProjectSelectDropdown
           projects={availableProjects}
           selectedProjectId={formData.projectId}
-          onProjectChange={(projectId) => setFormData(prev => ({ ...prev, projectId }))}
+          onProjectChange={(projectId) => setFormData(prev => ({ ...prev, projectId, milestoneId: null }))}
           disabled={!formData.clientId}
           clientSelected={!!formData.clientId}
           required={true}
         />
       </div>
+
+      {formData.projectId && (
+        <div>
+          <Label htmlFor="milestone">Milestone</Label>
+          <Select
+            value={formData.milestoneId || ""}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, milestoneId: value || null }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={
+                availableMilestones.length === 0 
+                  ? "No in-progress milestones available"
+                  : "Select a milestone (optional)"
+              } />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">No milestone</SelectItem>
+              {availableMilestones.map((milestone) => (
+                <SelectItem key={milestone.id} value={milestone.id}>
+                  {milestone.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {availableMilestones.length === 0 && formData.projectId && (
+            <p className="text-sm text-amber-600 mt-1">
+              No in-progress milestones found. Consider creating or activating a milestone for better time tracking.
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div>

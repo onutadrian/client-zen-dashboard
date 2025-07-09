@@ -513,6 +513,7 @@ export type Database = {
           end_date: string | null
           estimated_hours: number | null
           id: number
+          milestone_id: string | null
           notes: string | null
           project_id: string
           start_date: string | null
@@ -532,6 +533,7 @@ export type Database = {
           end_date?: string | null
           estimated_hours?: number | null
           id?: number
+          milestone_id?: string | null
           notes?: string | null
           project_id: string
           start_date?: string | null
@@ -551,6 +553,7 @@ export type Database = {
           end_date?: string | null
           estimated_hours?: number | null
           id?: number
+          milestone_id?: string | null
           notes?: string | null
           project_id?: string
           start_date?: string | null
@@ -565,6 +568,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
             referencedColumns: ["id"]
           },
           {

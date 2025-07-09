@@ -22,6 +22,7 @@ export const loadTasksFromDatabase = async (): Promise<Task[]> => {
     clientId: task.client_id,
     clientName: task.client_name,
     projectId: task.project_id,
+    milestoneId: task.milestone_id,
     estimatedHours: task.estimated_hours,
     actualHours: task.actual_hours,
     workedHours: task.worked_hours,
@@ -52,6 +53,7 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
     client_id: newTask.clientId,
     client_name: newTask.clientName,
     project_id: projectId,
+    milestone_id: newTask.milestoneId,
     estimated_hours: newTask.estimatedHours,
     status: 'pending',
     notes: newTask.notes,
@@ -79,6 +81,7 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
     clientId: result.client_id,
     clientName: result.client_name,
     projectId: result.project_id,
+    milestoneId: result.milestone_id,
     estimatedHours: result.estimated_hours,
     actualHours: result.actual_hours,
     workedHours: result.worked_hours,
@@ -148,6 +151,7 @@ export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTask
   if (updatedTask.clientId) supabaseUpdate.client_id = updatedTask.clientId;
   if (updatedTask.clientName) supabaseUpdate.client_name = updatedTask.clientName;
   if (updatedTask.projectId) supabaseUpdate.project_id = updatedTask.projectId;
+  if (updatedTask.milestoneId !== undefined) supabaseUpdate.milestone_id = updatedTask.milestoneId;
   if (updatedTask.estimatedHours !== undefined) supabaseUpdate.estimated_hours = updatedTask.estimatedHours;
   if (updatedTask.notes !== undefined) supabaseUpdate.notes = updatedTask.notes;
   if (updatedTask.assets) supabaseUpdate.assets = updatedTask.assets;

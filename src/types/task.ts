@@ -6,6 +6,7 @@ export interface Task {
   clientId: number;
   clientName: string;
   projectId?: string;
+  milestoneId?: string;
   estimatedHours?: number;
   actualHours?: number;
   workedHours?: number;
