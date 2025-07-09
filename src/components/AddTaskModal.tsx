@@ -10,6 +10,7 @@ import ClientSelectDropdown from '@/components/forms/ClientSelectDropdown';
 import ProjectSelectDropdown from '@/components/forms/ProjectSelectDropdown';
 import TaskFormFields from './task/TaskFormFields';
 import { useMilestones } from '@/hooks/useMilestones';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Client {
   id: number;
@@ -53,6 +54,7 @@ interface AddTaskModalProps {
 
 const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTaskModalProps) => {
   const { milestones } = useMilestones();
+  const { isAdmin } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -126,6 +128,18 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
     if (!formData.projectId) {
       toast.error('Please select a project');
       return;
+    }
+
+    // Check if milestone is required for standard users
+    if (!isAdmin && formData.projectId) {
+      const availableMilestones = milestones.filter(m => 
+        m.projectId === formData.projectId && m.status === 'in-progress'
+      );
+      
+      if (availableMilestones.length > 0 && (!formData.milestoneId || formData.milestoneId === 'none')) {
+        toast.error('Please select a milestone - it is required for this project');
+        return;
+      }
     }
 
     const assets = formData.assetsInput

@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMilestones } from '@/hooks/useMilestones';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface AddProjectTaskModalProps {
   isOpen: boolean;
@@ -19,6 +21,7 @@ interface AddProjectTaskModalProps {
 
 const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clientName }: AddProjectTaskModalProps) => {
   const { milestones } = useMilestones();
+  const { isAdmin } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -32,9 +35,18 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
   const availableMilestones = milestones.filter(m => 
     m.projectId === projectId && m.status === 'in-progress'
   );
+  
+  // For standard users, milestone is required if there are available milestones
+  const isMilestoneRequired = !isAdmin && availableMilestones.length > 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if milestone is required for standard users
+    if (isMilestoneRequired && (!formData.milestoneId || formData.milestoneId === 'none')) {
+      toast.error('Please select a milestone - it is required for this project');
+      return;
+    }
     
     const taskData = {
       title: formData.title,
@@ -113,7 +125,9 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
           </div>
 
           <div>
-            <Label htmlFor="milestone">Milestone</Label>
+            <Label htmlFor="milestone">
+              Milestone {isMilestoneRequired ? '*' : ''}
+            </Label>
             <Select
               value={formData.milestoneId}
               onValueChange={(value) => handleChange('milestoneId', value)}
@@ -122,11 +136,13 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
                 <SelectValue placeholder={
                   availableMilestones.length === 0 
                     ? "No in-progress milestones available"
-                    : "Select a milestone (optional)"
+                    : isMilestoneRequired 
+                      ? "Select a milestone (required)" 
+                      : "Select a milestone (optional)"
                 } />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No milestone</SelectItem>
+                {!isMilestoneRequired && <SelectItem value="none">No milestone</SelectItem>}
                 {availableMilestones.map((milestone) => (
                   <SelectItem key={milestone.id} value={milestone.id}>
                     {milestone.title}
@@ -134,6 +150,11 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
                 ))}
               </SelectContent>
             </Select>
+            {isMilestoneRequired && (
+              <p className="text-sm text-blue-600 mt-1">
+                Milestone selection is required for standard users.
+              </p>
+            )}
             {availableMilestones.length === 0 && (
               <p className="text-sm text-amber-600 mt-1">
                 No in-progress milestones found. Consider creating or activating a milestone for better time tracking.

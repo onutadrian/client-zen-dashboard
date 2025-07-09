@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ClientSelectDropdown from '@/components/forms/ClientSelectDropdown';
 import ProjectSelectDropdown from '@/components/forms/ProjectSelectDropdown';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Client {
   id: number;
@@ -58,9 +59,13 @@ const TaskFormFields = ({
   selectedClient,
   onClientChange
 }: TaskFormFieldsProps) => {
+  const { isAdmin } = useAuth();
   const availableMilestones = milestones.filter(m => 
     m.projectId === formData.projectId && m.status === 'in-progress'
   );
+  
+  // For standard users, milestone is required if there are available milestones
+  const isMilestoneRequired = !isAdmin && availableMilestones.length > 0;
   return (
     <>
       <div>
@@ -105,7 +110,9 @@ const TaskFormFields = ({
 
       {formData.projectId && (
         <div>
-          <Label htmlFor="milestone">Milestone</Label>
+          <Label htmlFor="milestone">
+            Milestone {isMilestoneRequired ? '*' : ''}
+          </Label>
           <Select
             value={formData.milestoneId || ""}
             onValueChange={(value) => setFormData(prev => ({ ...prev, milestoneId: value || null }))}
@@ -114,11 +121,13 @@ const TaskFormFields = ({
               <SelectValue placeholder={
                 availableMilestones.length === 0 
                   ? "No in-progress milestones available"
-                  : "Select a milestone (optional)"
+                  : isMilestoneRequired 
+                    ? "Select a milestone (required)" 
+                    : "Select a milestone (optional)"
               } />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">No milestone</SelectItem>
+              {!isMilestoneRequired && <SelectItem value="none">No milestone</SelectItem>}
               {availableMilestones.map((milestone) => (
                 <SelectItem key={milestone.id} value={milestone.id}>
                   {milestone.title}
