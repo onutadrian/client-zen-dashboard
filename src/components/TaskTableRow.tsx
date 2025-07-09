@@ -83,15 +83,7 @@ const TaskTableRow = ({
       return taskRelatedHourEntries.some(entry => entry.billed === true);
     }
 
-    // If no specific hour entries found, consider recent completed tasks as potentially unbilled
-    // This handles cases where hour entries might not have been created yet or don't match exactly
-    const completedDate = task.completedDate ? new Date(task.completedDate) : null;
-    if (completedDate) {
-      const daysSinceCompletion = (Date.now() - completedDate.getTime()) / (1000 * 60 * 60 * 24);
-      // Consider tasks completed more than 7 days ago as likely billed unless we have specific unbilled entries
-      return daysSinceCompletion > 7;
-    }
-
+    // If no specific hour entries found, the task is not billed
     return false;
   };
 

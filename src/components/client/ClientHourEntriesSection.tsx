@@ -3,6 +3,7 @@ import React from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Clock } from 'lucide-react';
 import { HourEntry } from '@/types/hourEntry';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ClientHourEntriesSectionProps {
   hourEntries: HourEntry[];
@@ -17,6 +18,8 @@ const ClientHourEntriesSection = ({
   unbilledHours,
   onToggleBilledStatus
 }: ClientHourEntriesSectionProps) => {
+  const { isAdmin } = useAuth();
+  
   if (hourEntries.length === 0) return null;
 
   return (
@@ -38,10 +41,12 @@ const ClientHourEntriesSection = ({
                 <span className="text-sm text-slate-600">
                   {entry.billed ? 'Billed' : 'Unbilled'}
                 </span>
-                <Switch 
-                  checked={entry.billed || false} 
-                  onCheckedChange={() => onToggleBilledStatus(entry.id)} 
-                />
+                {isAdmin && (
+                  <Switch 
+                    checked={entry.billed || false} 
+                    onCheckedChange={() => onToggleBilledStatus(entry.id)} 
+                  />
+                )}
               </div>
             </div>
           </div>
