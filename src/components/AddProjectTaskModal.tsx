@@ -42,7 +42,7 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
       clientId,
       clientName,
       projectId,
-      milestoneId: formData.milestoneId || undefined,
+      milestoneId: formData.milestoneId === 'none' ? undefined : formData.milestoneId || undefined,
       estimatedHours: formData.estimatedHours ? parseInt(formData.estimatedHours) : undefined,
       notes: formData.notes,
       assets: [],
@@ -126,7 +126,7 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
                 } />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No milestone</SelectItem>
+                <SelectItem value="none">No milestone</SelectItem>
                 {availableMilestones.map((milestone) => (
                   <SelectItem key={milestone.id} value={milestone.id}>
                     {milestone.title}

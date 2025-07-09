@@ -139,7 +139,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
       clientId: formData.clientId,
       clientName: selectedClient?.name || '',
       projectId: formData.projectId,
-      milestoneId: formData.milestoneId,
+      milestoneId: formData.milestoneId === 'none' ? null : formData.milestoneId,
       estimatedHours: formData.estimatedHours,
       notes: formData.notes.trim(),
       assets,

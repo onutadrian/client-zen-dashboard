@@ -118,7 +118,7 @@ const TaskFormFields = ({
               } />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No milestone</SelectItem>
+              <SelectItem value="none">No milestone</SelectItem>
               {availableMilestones.map((milestone) => (
                 <SelectItem key={milestone.id} value={milestone.id}>
                   {milestone.title}
