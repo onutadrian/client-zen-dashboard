@@ -5,7 +5,7 @@ import ProjectBilledHours from './ProjectBilledHours';
 import LogProjectHoursModal from './LogProjectHoursModal';
 import MilestoneHoursTracker from './MilestoneHoursTracker';
 import AddMilestoneModal from './AddMilestoneModal';
-import TimeEntryManagement from './TimeEntryManagement';
+
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/types/client';
 import { Milestone } from '@/hooks/useMilestones';
@@ -108,14 +108,10 @@ const ProjectTimeTrackingSection = ({
           <MilestoneHoursTracker 
             milestones={milestones}
             hourEntries={projectHours}
+            onAddTimeEntry={client ? () => setShowLogHoursModal(true) : undefined}
           />
         )}
 
-        {/* Time Entry Management - now uses hooks directly */}
-        <TimeEntryManagement 
-          projectId={project.id}
-          onAddTimeEntry={client ? () => setShowLogHoursModal(true) : undefined}
-        />
       </div>
 
       {client && (

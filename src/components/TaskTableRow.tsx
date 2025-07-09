@@ -64,27 +64,16 @@ const TaskTableRow = ({
       return false;
     }
 
-    // Look for hour entries that match this task's project and client
+    // Look for hour entries that match this task and are marked as billed
     const taskRelatedHourEntries = hourEntries.filter(entry => {
-      // Check if the hour entry belongs to the same project and client
       const matchesProject = entry.projectId === task.projectId;
       const matchesClient = entry.clientId === task.clientId;
+      const descriptionMatches = entry.description?.includes(`Completed task: ${task.title}`);
       
-      // Also check if the description contains the task title or indicates it's related to this task
-      const descriptionMatches = entry.description?.includes(task.title) || 
-                                 entry.description?.includes(`Completed task: ${task.title}`) ||
-                                 entry.description?.toLowerCase().includes(task.title.toLowerCase());
-      
-      return matchesProject && matchesClient && descriptionMatches;
+      return matchesProject && matchesClient && descriptionMatches && entry.billed === true;
     });
 
-    // If we found related hour entries, check if any are marked as billed
-    if (taskRelatedHourEntries.length > 0) {
-      return taskRelatedHourEntries.some(entry => entry.billed === true);
-    }
-
-    // If no specific hour entries found, the task is not billed
-    return false;
+    return taskRelatedHourEntries.length > 0;
   };
 
   return (
