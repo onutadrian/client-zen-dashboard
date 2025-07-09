@@ -75,6 +75,9 @@ const TaskManagementSection = ({
   console.log('TaskManagementSection - Passing clients to modal:', clients);
   console.log('TaskManagementSection - Passing projects to modal:', projects);
 
+  console.log('TaskManagementSection - Current tasks count:', tasks.length);
+  console.log('TaskManagementSection - Tasks data:', tasks);
+
   return (
     <>
       <TaskTable

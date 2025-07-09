@@ -9,6 +9,8 @@ export const useTasksData = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const { toast } = useToast();
 
+  console.log('useTasksData: Current tasks count:', tasks.length);
+
   const loadTasks = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -56,7 +58,10 @@ export const useTasksData = () => {
 
   return {
     tasks,
-    setTasks,
+    setTasks: (newTasks: React.SetStateAction<Task[]>) => {
+      console.log('useTasksData: setTasks called');
+      setTasks(newTasks);
+    },
     loadTasks
   };
 };
