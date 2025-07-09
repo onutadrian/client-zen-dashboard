@@ -23,16 +23,20 @@ export const useTasksOperations = (
       const transformedTask = await createTaskInDatabase(newTask);
       console.log('useTasksOperations: Task created in database:', transformedTask);
       
+      // Use functional update to ensure we get the latest state
       setTasks(prev => {
         const newTasks = [...prev, transformedTask];
         console.log('useTasksOperations: Updating local state from', prev.length, 'to', newTasks.length, 'tasks');
         return newTasks;
       });
       
-      toast({
-        title: "Success",
-        description: "Task added successfully"
-      });
+      // Use setTimeout to ensure the toast doesn't interfere with the state update
+      setTimeout(() => {
+        toast({
+          title: "Success",
+          description: "Task added successfully"
+        });
+      }, 0);
     } catch (error) {
       console.error('Error adding task:', error);
       toast({

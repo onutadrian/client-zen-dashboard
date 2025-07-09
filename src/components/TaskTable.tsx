@@ -96,19 +96,27 @@ const TaskTable = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tasks.map((task) => (
-                <TaskTableRow
-                  key={task.id}
-                  task={task}
-                  clients={clients}
-                  projects={projects}
-                  onTaskClick={onTaskClick}
-                  onUpdateTask={onUpdateTask}
-                  onDeleteTask={onDeleteTask}
-                  onEditTask={onEditTask}
-                  onStatusChange={handleStatusChange}
-                />
-              ))}
+              {tasks.length === 0 ? (
+                <TableRow>
+                  <td colSpan={8} className="text-center py-4 text-muted-foreground">
+                    No tasks found
+                  </td>
+                </TableRow>
+              ) : (
+                tasks.map((task) => (
+                  <TaskTableRow
+                    key={`task-${task.id}`}
+                    task={task}
+                    clients={clients}
+                    projects={projects}
+                    onTaskClick={onTaskClick}
+                    onUpdateTask={onUpdateTask}
+                    onDeleteTask={onDeleteTask}
+                    onEditTask={onEditTask}
+                    onStatusChange={handleStatusChange}
+                  />
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
