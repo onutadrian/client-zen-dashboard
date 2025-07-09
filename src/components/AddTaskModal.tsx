@@ -162,7 +162,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
     });
 
     handleClose();
-    toast.success(task ? 'Task updated successfully' : 'Task added successfully');
+    // Remove the duplicate toast here since the hook already shows one
   };
 
   const handleClose = () => {

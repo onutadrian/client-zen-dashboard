@@ -19,8 +19,15 @@ export const useTasksOperations = (
 
   const addTask = async (newTask: CreateTaskData) => {
     try {
+      console.log('useTasksOperations: Starting task creation with:', newTask);
       const transformedTask = await createTaskInDatabase(newTask);
-      setTasks(prev => [...prev, transformedTask]);
+      console.log('useTasksOperations: Task created in database:', transformedTask);
+      
+      setTasks(prev => {
+        const newTasks = [...prev, transformedTask];
+        console.log('useTasksOperations: Updating local state from', prev.length, 'to', newTasks.length, 'tasks');
+        return newTasks;
+      });
       
       toast({
         title: "Success",
