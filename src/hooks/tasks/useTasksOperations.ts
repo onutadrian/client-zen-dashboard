@@ -25,7 +25,7 @@ export const useTasksOperations = (
       
       // Use functional update to ensure we get the latest state
       setTasks(prev => {
-        const newTasks = [...prev, transformedTask];
+        const newTasks = [transformedTask, ...prev];
         console.log('useTasksOperations: Updating local state from', prev.length, 'to', newTasks.length, 'tasks');
         return newTasks;
       });
