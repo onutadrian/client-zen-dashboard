@@ -4,7 +4,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { UserProfile, AuthContextType } from '@/types/auth';
-import { fetchUserProfile } from './authUtils';
+import { fetchUserProfile, cleanupAuthState, performSignOut } from './authUtils';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -33,14 +33,35 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         
+        // Handle token refresh failures and session errors
+        if (event === 'TOKEN_REFRESHED' && !session) {
+          console.log('Token refresh failed - cleaning up auth state');
+          cleanupAuthState();
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+          return;
+        }
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         // Defer profile fetching to avoid recursion
         if (session?.user) {
           setTimeout(async () => {
-            const userProfile = await fetchUserProfile(session.user.id);
-            setProfile(userProfile);
+            try {
+              const userProfile = await fetchUserProfile(session.user.id);
+              setProfile(userProfile);
+            } catch (error) {
+              console.error('Error fetching user profile:', error);
+              // If profile fetch fails due to auth issues, sign out
+              if (error?.message?.includes('auth') || error?.message?.includes('JWT')) {
+                console.log('Auth error detected - performing cleanup sign out');
+                await performSignOut();
+                return;
+              }
+            }
             setLoading(false);
           }, 0);
         } else {
@@ -54,6 +75,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         } else if (event === 'SIGNED_OUT') {
           console.log('User signed out');
           setProfile(null);
+          // Clean up any remaining auth state
+          cleanupAuthState();
         } else if (event === 'TOKEN_REFRESHED') {
           console.log('Token refreshed successfully');
         } else if (event === 'PASSWORD_RECOVERY') {
@@ -65,16 +88,42 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // THEN check for existing session with error handling
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
       console.log('Initial session check:', session?.user?.id);
+      
+      if (error) {
+        console.error('Session check error:', error);
+        cleanupAuthState();
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        const userProfile = await fetchUserProfile(session.user.id);
-        setProfile(userProfile);
+        try {
+          const userProfile = await fetchUserProfile(session.user.id);
+          setProfile(userProfile);
+        } catch (error) {
+          console.error('Error fetching initial profile:', error);
+          // If profile fetch fails due to auth issues, clean up
+          if (error?.message?.includes('auth') || error?.message?.includes('JWT')) {
+            cleanupAuthState();
+            setSession(null);
+            setUser(null);
+            setProfile(null);
+          }
+        }
       }
+      setLoading(false);
+    }).catch((error) => {
+      console.error('Session initialization error:', error);
+      cleanupAuthState();
       setLoading(false);
     });
 
@@ -84,27 +133,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signOut = async () => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signOut();
       
-      if (error) {
-        console.error('Sign out error:', error);
-        toast({
-          title: "Error",
-          description: "Failed to sign out. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Clear state
-      setUser(null);
-      setSession(null);
-      setProfile(null);
+      // Use the enhanced sign out function that handles cleanup
+      await performSignOut();
       
-      toast({
-        title: "Signed Out",
-        description: "You have been successfully signed out.",
-      });
     } catch (error) {
       console.error('Unexpected sign out error:', error);
       toast({
@@ -112,6 +144,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         description: "An unexpected error occurred during sign out.",
         variant: "destructive",
       });
+      // Force cleanup anyway
+      cleanupAuthState();
+      window.location.href = '/';
     } finally {
       setLoading(false);
     }
