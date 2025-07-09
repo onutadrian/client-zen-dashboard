@@ -33,8 +33,16 @@ const MilestoneHoursTracker = ({ milestones, hourEntries, onAddTimeEntry }: Mile
     setDeletingEntry(null);
     refreshHourEntries();
   };
-  // Group hours by milestone
-  const hoursByMilestone = hourEntries.reduce((acc, entry) => {
+  // Group hours by milestone - filter out entries with malformed milestone data
+  const validHourEntries = hourEntries.filter(entry => {
+    // Filter out entries with malformed milestone IDs (objects instead of strings/null)
+    if (entry.milestoneId && typeof entry.milestoneId === 'object') {
+      return false;
+    }
+    return true;
+  });
+
+  const hoursByMilestone = validHourEntries.reduce((acc, entry) => {
     const milestoneId = entry.milestoneId || 'unassigned';
     if (!acc[milestoneId]) {
       acc[milestoneId] = [];
@@ -53,7 +61,7 @@ const MilestoneHoursTracker = ({ milestones, hourEntries, onAddTimeEntry }: Mile
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center">
               <Target className="w-5 h-5 mr-2" />
-              Hours by Milestone ({hourEntries.length} entries)
+              Hours by Milestone ({validHourEntries.length} entries)
             </CardTitle>
             {onAddTimeEntry && (
               <Button onClick={onAddTimeEntry} size="sm" variant="outline">

@@ -22,7 +22,12 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
   const { invoices } = useInvoices();
   const { displayCurrency, convert, demoMode } = useCurrency();
   
-  const projectHours = hourEntries.filter(entry => entry.projectId === project.id);
+  const projectHours = hourEntries.filter(entry => {
+    // Filter by project ID and exclude entries with malformed milestone data
+    if (entry.projectId !== project.id) return false;
+    if (entry.milestoneId && typeof entry.milestoneId === 'object') return false;
+    return true;
+  });
   const projectInvoices = invoices.filter(invoice => invoice.projectId === project.id);
   
   // Calculate time metrics
