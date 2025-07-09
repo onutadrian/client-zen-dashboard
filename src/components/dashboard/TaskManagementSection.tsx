@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import TaskTable from '@/components/TaskTable';
 import AddTaskModal from '@/components/AddTaskModal';
 import { Task } from '@/types/task';
@@ -78,21 +78,33 @@ const TaskManagementSection = ({
   console.log('TaskManagementSection - Current tasks count:', tasks.length);
   console.log('TaskManagementSection - Tasks data:', tasks);
 
+  const transformedTasks = useMemo(() => {
+    return tasks.map(transformTaskForTaskTable);
+  }, [tasks]);
+
+  const transformedClients = useMemo(() => {
+    return clients.map(client => ({
+      id: client.id,
+      name: client.name,
+      priceType: client.priceType || 'hour',
+      hourEntries: []
+    }));
+  }, [clients]);
+
+  const transformedProjects = useMemo(() => {
+    return projects.map(project => ({
+      id: project.id,
+      name: project.name,
+      clientId: project.clientId
+    }));
+  }, [projects]);
+
   return (
     <>
       <TaskTable
-        tasks={tasks.map(transformTaskForTaskTable)}
-        clients={clients.map(client => ({
-          id: client.id,
-          name: client.name,
-          priceType: client.priceType || 'hour',
-          hourEntries: []
-        }))}
-        projects={projects.map(project => ({
-          id: project.id,
-          name: project.name,
-          clientId: project.clientId
-        }))}
+        tasks={transformedTasks}
+        clients={transformedClients}
+        projects={transformedProjects}
         onTaskClick={onTaskClick}
         onUpdateTask={onUpdateTask}
         onDeleteTask={onDeleteTask}
