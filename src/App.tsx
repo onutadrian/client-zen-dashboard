@@ -17,7 +17,7 @@ import UsersPage from '@/pages/UsersPage';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ContractTemplatesPage from '@/pages/ContractTemplatesPage';
-import AuthDebugButton from '@/components/AuthDebugButton';
+
 
 function App() {
   const queryClient = new QueryClient();
@@ -74,7 +74,7 @@ function App() {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Router>
-              <AuthDebugButton />
+              
             </div>
             <Toaster />
           </ThemeProvider>
