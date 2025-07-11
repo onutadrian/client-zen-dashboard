@@ -38,10 +38,10 @@ const SubscriptionsSection = ({
         </div>
       </div>
       
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {subscriptions.map(subscription => <SubscriptionCard key={subscription.id} subscription={subscription} onEdit={onEditSubscription} />)}
         
-        {subscriptions.length === 0 && <Card className="border-dashed border-2 border-slate-300">
+        {subscriptions.length === 0 && <Card className="border-dashed border-2 border-slate-300 col-span-full">
             <CardContent className="flex flex-col items-center justify-center py-8">
               <CreditCard className="w-8 h-8 text-slate-400 mb-3" />
               <p className="text-slate-500 text-center text-sm mb-3">No subscriptions tracked</p>
