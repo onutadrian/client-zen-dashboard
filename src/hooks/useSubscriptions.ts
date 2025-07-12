@@ -17,6 +17,7 @@ export interface Subscription {
   total_paid: number;
   status: string;
   currency: string;
+  invoice_link?: string;
   user_id?: string;
   created_at?: string;
   updated_at?: string;

@@ -17,7 +17,8 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
     category: 'Software',
     status: 'active',
     currency: 'USD',
-    seats: '1'
+    seats: '1',
+    invoice_link: ''
   });
 
   const handleSubmit = (e) => {
@@ -34,7 +35,8 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
       status: formData.status,
       currency: formData.currency,
       seats: parseInt(formData.seats) || 1,
-      total_paid: price // Set total_paid to the subscription price
+      total_paid: price, // Set total_paid to the subscription price
+      invoice_link: formData.invoice_link
     };
     
     onAdd(subscriptionData);
@@ -53,7 +55,8 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
       category: 'Software',
       status: 'active',
       currency: 'USD',
-      seats: '1'
+      seats: '1',
+      invoice_link: ''
     });
   };
 
@@ -202,6 +205,17 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               placeholder="Password (stored securely)"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="sub-invoice-link">Invoice Link</Label>
+            <Input
+              id="sub-invoice-link"
+              type="url"
+              value={formData.invoice_link}
+              onChange={(e) => setFormData({ ...formData, invoice_link: e.target.value })}
+              placeholder="https://billing.example.com/invoices"
             />
           </div>
 

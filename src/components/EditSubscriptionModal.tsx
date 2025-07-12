@@ -22,7 +22,8 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
     category: '',
     total_paid: 0,
     status: 'active',
-    currency: 'USD'
+    currency: 'USD',
+    invoice_link: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -40,7 +41,8 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
         category: subscription.category || '',
         total_paid: subscription.total_paid || 0,
         status: subscription.status || 'active',
-        currency: subscription.currency || 'USD'
+        currency: subscription.currency || 'USD',
+        invoice_link: subscription.invoice_link || ''
       });
     }
   }, [subscription]);
@@ -66,7 +68,8 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
         category: formData.category,
         total_paid: formData.total_paid,
         status: formData.status,
-        currency: formData.currency
+        currency: formData.currency,
+        invoice_link: formData.invoice_link
       });
       
       toast({
@@ -227,6 +230,17 @@ const EditSubscriptionModal = ({ subscription, isOpen, onClose, onUpdate }) => {
               value={formData.login_email}
               onChange={(e) => handleChange('login_email', e.target.value)}
               required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="invoice_link">Invoice Link</Label>
+            <Input
+              id="invoice_link"
+              type="url"
+              value={formData.invoice_link}
+              onChange={(e) => handleChange('invoice_link', e.target.value)}
+              placeholder="https://billing.example.com/invoices"
             />
           </div>
 

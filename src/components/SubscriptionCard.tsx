@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Eye, EyeOff, Mail, CreditCard, Edit, Users, Clock } from 'lucide-react';
+import { Calendar, Eye, EyeOff, Mail, CreditCard, Edit, Users, Clock, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { useCurrency } from '@/hooks/useCurrency';
 
@@ -113,6 +113,7 @@ const SubscriptionCard = ({
   const nextBillingDate = getNextBillingDate();
   const secureNotes = subscription.secure_notes || '';
   const billingCycle = subscription.billing_cycle || 'monthly';
+  const invoiceLink = subscription.invoice_link || '';
   
   const formatCurrency = (amount) => {
     const symbols = { USD: '$', EUR: '€', RON: 'RON ' };
@@ -186,6 +187,24 @@ const SubscriptionCard = ({
               </Badge>
             )}
           </div>
+
+          {/* Invoices Link */}
+          {invoiceLink && !demoMode && (
+            <div className="flex items-center justify-between py-2 px-3 bg-purple-50 rounded-lg">
+              <div className="flex items-center text-sm text-slate-600">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                <span>Billing portal</span>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => window.open(invoiceLink, '_blank')}
+                className="h-6 px-2 text-purple-600 hover:text-purple-800"
+              >
+                Open
+              </Button>
+            </div>
+          )}
 
           {/* Login Credentials */}
           <div className="space-y-2">
