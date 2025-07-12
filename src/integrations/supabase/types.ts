@@ -455,6 +455,7 @@ export type Database = {
           created_at: string
           currency: string
           id: number
+          invoice_link: string | null
           login_email: string | null
           name: string
           price: number
@@ -472,6 +473,7 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: number
+          invoice_link?: string | null
           login_email?: string | null
           name: string
           price?: number
@@ -489,6 +491,7 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: number
+          invoice_link?: string | null
           login_email?: string | null
           name?: string
           price?: number
