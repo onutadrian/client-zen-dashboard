@@ -64,6 +64,7 @@ export const updateSubscriptionInSupabase = async (
     total_paid: updatedSubscription.total_paid,
     status: updatedSubscription.status,
     currency: updatedSubscription.currency,
+    invoice_link: updatedSubscription.invoice_link,
     updated_at: new Date().toISOString()
   };
 

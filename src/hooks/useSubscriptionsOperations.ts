@@ -27,7 +27,8 @@ export const useSubscriptionsOperations = (
         category: newSubscription.category || 'Software',
         total_paid: newSubscription.total_paid || newSubscription.price, // Use provided total_paid or default to price
         status: newSubscription.status || 'active',
-        currency: newSubscription.currency || 'USD'
+        currency: newSubscription.currency || 'USD',
+        invoice_link: newSubscription.invoice_link || ''
       };
 
       const data = await addSubscriptionToSupabase(subscriptionData, user.id);
