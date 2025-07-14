@@ -38,28 +38,56 @@ export const SecurityProvider = ({ children }: SecurityProviderProps) => {
   };
 
   const validateInput = (input: string, context: string): boolean => {
+    // Enhanced XSS validation patterns
     const xssPatterns = [
       /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
       /javascript:/gi,
       /on\w+\s*=/gi,
-      /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi
+      /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
+      /<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi,
+      /<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi,
+      /vbscript:/gi,
+      /data:text\/html/gi
     ];
 
     for (const pattern of xssPatterns) {
       if (pattern.test(input)) {
-        logSecurityAction('xss_attempt', context, undefined, { input });
+        logSecurityAction('xss_attempt', context, undefined, { 
+          input: input.substring(0, 100) // Only log first 100 chars for security
+        });
         return false;
       }
     }
 
+    // Enhanced SQL injection patterns
     const sqlPatterns = [
       /('|(\\')|(;|\/\*|\*\/|--|\+))/gi,
-      /(union|select|insert|update|delete|drop|create|alter|exec|execute)/gi
+      /(union|select|insert|update|delete|drop|create|alter|exec|execute)/gi,
+      /(or|and)\s+\d+\s*=\s*\d+/gi,
+      /'\s*(or|and)\s*'[^']*'/gi
     ];
 
     for (const pattern of sqlPatterns) {
       if (pattern.test(input)) {
-        logSecurityAction('sql_injection_attempt', context, undefined, { input });
+        logSecurityAction('sql_injection_attempt', context, undefined, { 
+          input: input.substring(0, 100)
+        });
+        return false;
+      }
+    }
+
+    // Check for path traversal attempts
+    const pathTraversalPatterns = [
+      /\.\.[\/\\]/gi,
+      /[\/\\]etc[\/\\]/gi,
+      /[\/\\]proc[\/\\]/gi
+    ];
+
+    for (const pattern of pathTraversalPatterns) {
+      if (pattern.test(input)) {
+        logSecurityAction('path_traversal_attempt', context, undefined, { 
+          input: input.substring(0, 100)
+        });
         return false;
       }
     }

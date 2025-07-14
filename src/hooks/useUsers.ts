@@ -48,12 +48,19 @@ export const useUsers = () => {
 
   const updateUserRole = async (userId: string, role: 'admin' | 'standard') => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role })
-        .eq('id', userId);
+      // Use the secure admin-only function to update roles
+      const { error } = await supabase.rpc('update_user_role', {
+        target_user_id: userId,
+        new_role: role
+      });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error cases
+        if (error.message?.includes('Only administrators')) {
+          throw new Error('You do not have permission to update user roles');
+        }
+        throw error;
+      }
 
       toast({
         title: "Success",
@@ -62,9 +69,10 @@ export const useUsers = () => {
 
       await fetchUsers();
     } catch (error) {
+      console.error('Role update error:', error);
       toast({
         title: "Error",
-        description: "Failed to update user role",
+        description: error.message || "Failed to update user role",
         variant: "destructive",
       });
     }

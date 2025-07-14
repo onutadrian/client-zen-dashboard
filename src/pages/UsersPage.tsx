@@ -14,6 +14,7 @@ import EditUserModal from '@/components/EditUserModal';
 import UserTable from '@/components/users/UserTable';
 import InviteTable from '@/components/users/InviteTable';
 import DashboardContainer from '@/components/dashboard/DashboardContainer';
+import { SecurityAuditDashboard } from '@/components/security/SecurityAuditDashboard';
 import { UserProfile } from '@/types/auth';
 
 const UsersPage = () => {
@@ -93,9 +94,10 @@ const UsersPage = () => {
           </div>
 
           <Tabs defaultValue="users" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="users">Users ({users.length})</TabsTrigger>
               <TabsTrigger value="invites">Invites ({activeInvites.length})</TabsTrigger>
+              <TabsTrigger value="security">Security Audit</TabsTrigger>
             </TabsList>
 
             <TabsContent value="users" className="mt-6">
@@ -134,6 +136,10 @@ const UsersPage = () => {
                   </Card>
                 )}
               </div>
+            </TabsContent>
+            
+            <TabsContent value="security">
+              <SecurityAuditDashboard />
             </TabsContent>
           </Tabs>
 

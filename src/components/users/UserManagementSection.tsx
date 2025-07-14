@@ -22,15 +22,37 @@ export const UserManagementSection = ({
     const targetUser = users.find(u => u.id === userId);
     const oldRole = targetUser?.role;
 
-    // Log the security-sensitive action
-    await logSecurityAction('user_role_changed', 'user_management', userId, {
-      oldRole,
-      newRole,
-      changedBy: currentUser?.id,
-      targetUserEmail: targetUser?.email
-    });
+    try {
+      // Log the security-sensitive action before attempting the change
+      await logSecurityAction('user_role_change_attempt', 'user_management', userId, {
+        oldRole,
+        newRole,
+        changedBy: currentUser?.id,
+        targetUserEmail: targetUser?.email
+      });
 
-    await onUpdateUserRole(userId, newRole);
+      await onUpdateUserRole(userId, newRole);
+
+      // Log successful change
+      await logSecurityAction('user_role_changed', 'user_management', userId, {
+        oldRole,
+        newRole,
+        changedBy: currentUser?.id,
+        targetUserEmail: targetUser?.email,
+        success: true
+      });
+    } catch (error) {
+      // Log failed attempt
+      await logSecurityAction('user_role_change_failed', 'user_management', userId, {
+        oldRole,
+        newRole,
+        changedBy: currentUser?.id,
+        targetUserEmail: targetUser?.email,
+        error: error.message,
+        success: false
+      });
+      throw error;
+    }
   };
 
   const handleUserDelete = async (userId: string) => {

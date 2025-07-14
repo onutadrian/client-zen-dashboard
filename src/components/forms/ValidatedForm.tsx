@@ -2,7 +2,7 @@
 import React, { ReactNode } from 'react';
 import { z } from 'zod';
 import { validateData } from '@/lib/validation';
-import { useSecurityAudit } from '@/hooks/useSecurityAudit';
+import { useSecurity } from '@/components/security/SecurityProvider';
 import { useToast } from '@/hooks/use-toast';
 
 interface ValidatedFormProps<T> {
@@ -22,7 +22,7 @@ export function ValidatedForm<T>({
   className,
   formName
 }: ValidatedFormProps<T>) {
-  const { trackValidationError, validateInput } = useSecurityAudit();
+  const { trackValidationError, validateInput } = useSecurity();
   const { toast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent) => {
