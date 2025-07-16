@@ -25,6 +25,7 @@ interface UseAnalyticsStatsProps {
     monthlySubscriptionCost: number;
     totalPaidToDate: number;
   };
+  comparisonText?: string;
 }
 
 export const useAnalyticsStats = ({
@@ -41,7 +42,8 @@ export const useAnalyticsStats = ({
   revenueBreakdown = [],
   selectedPeriod,
   customDateRange,
-  previousPeriodData
+  previousPeriodData,
+  comparisonText
 }: UseAnalyticsStatsProps) => {
   const { demoMode } = useCurrency();
 
@@ -114,7 +116,8 @@ export const useAnalyticsStats = ({
       statusRows: getClientStatusRows(),
       details: clients.slice(0, 3).map(client => client.name),
       currentValue: totalClients,
-      previousValue: previousPeriodData?.totalClients
+      previousValue: previousPeriodData?.totalClients,
+      comparisonText
     },
     {
       title: "Total Time",
@@ -126,7 +129,8 @@ export const useAnalyticsStats = ({
       statusRows: [],
       details: timeBreakdown.slice(0, 3),
       currentValue: totalHours,
-      previousValue: previousPeriodData?.totalHours
+      previousValue: previousPeriodData?.totalHours,
+      comparisonText
     },
     {
       title: "Total Revenue",
@@ -138,7 +142,8 @@ export const useAnalyticsStats = ({
       statusRows: [],
       details: revenueBreakdown.slice(0, 3),
       currentValue: totalRevenue,
-      previousValue: previousPeriodData?.totalRevenue
+      previousValue: previousPeriodData?.totalRevenue,
+      comparisonText
     },
     {
       title: "Monthly Costs",
@@ -150,7 +155,8 @@ export const useAnalyticsStats = ({
       statusRows: [],
       details: null,
       currentValue: monthlySubscriptionCost,
-      previousValue: previousPeriodData?.monthlySubscriptionCost
+      previousValue: previousPeriodData?.monthlySubscriptionCost,
+      comparisonText
     },
     {
       title: "Total Paid to Date",
@@ -162,7 +168,8 @@ export const useAnalyticsStats = ({
       statusRows: [],
       details: null,
       currentValue: totalPaidToDate,
-      previousValue: previousPeriodData?.totalPaidToDate
+      previousValue: previousPeriodData?.totalPaidToDate,
+      comparisonText
     },
     {
       title: "Net Profit",
@@ -174,12 +181,13 @@ export const useAnalyticsStats = ({
       statusRows: [],
       details: revenueBreakdown.slice(0, 3),
       currentValue: netProfit,
-      previousValue: previousPeriodData ? (previousPeriodData.totalRevenue - previousPeriodData.monthlySubscriptionCost) : undefined
+      previousValue: previousPeriodData ? (previousPeriodData.totalRevenue - previousPeriodData.monthlySubscriptionCost) : undefined,
+      comparisonText
     }
   ], [
     totalClients, activeClients, totalHours, totalRevenue, monthlySubscriptionCost,
     totalPaidToDate, clients, displayCurrency, formatCurrency, timeBreakdown,
-    revenueBreakdown, selectedPeriod, customDateRange, demoMode, netProfit, netProfitSubtitle, previousPeriodData
+    revenueBreakdown, selectedPeriod, customDateRange, demoMode, netProfit, netProfitSubtitle, previousPeriodData, comparisonText
   ]);
 
   return { stats };

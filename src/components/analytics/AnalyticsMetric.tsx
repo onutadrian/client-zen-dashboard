@@ -19,6 +19,7 @@ interface AnalyticsMetricProps {
     details: any[] | null;
     currentValue?: number;
     previousValue?: number;
+    comparisonText?: string;
   };
   displayCurrency: string;
 }
@@ -62,7 +63,7 @@ const AnalyticsMetric = ({ stat, displayCurrency }: AnalyticsMetricProps) => {
                 <TrendIcon className="w-2.5 h-2.5 lg:w-3 lg:h-3" />
                 <span className="text-xs">{trend.change}%</span>
               </Badge>
-              <span className="text-xs text-slate-500 hidden sm:inline">vs prev 30d</span>
+              <span className="text-xs text-slate-500 hidden sm:inline">{stat.comparisonText || "vs prev 30d"}</span>
             </div>
           </div>
 

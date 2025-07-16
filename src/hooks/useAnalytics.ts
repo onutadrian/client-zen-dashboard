@@ -39,19 +39,82 @@ export const useAnalytics = (params?: AnalyticsParams) => {
     setLoading(true);
 
     try {
-      // Calculate previous 30-day period for comparison
-      const currentEndDate = params?.dateRange?.to || new Date();
-      const currentStartDate = params?.dateRange?.from || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      
-      // Calculate previous period (30 days before the current period)
-      const periodDuration = currentEndDate.getTime() - currentStartDate.getTime();
-      const previousEndDate = new Date(currentStartDate.getTime() - 1000); // 1 second before current period
-      const previousStartDate = new Date(previousEndDate.getTime() - periodDuration);
-      
+      // Calculate the appropriate previous period based on the current period selection
+      const getPreviousPeriod = () => {
+        if (!params?.dateRange?.from || !params?.dateRange?.to) {
+          // For all-time, compare with previous 30 days
+          const now = new Date();
+          const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+          return {
+            from: sixtyDaysAgo,
+            to: thirtyDaysAgo,
+            comparisonText: "vs prev 30d"
+          };
+        }
+
+        const currentFrom = params.dateRange.from;
+        const currentTo = params.dateRange.to;
+        const periodDuration = currentTo.getTime() - currentFrom.getTime();
+
+        // Calculate previous period of the same duration
+        const previousTo = new Date(currentFrom.getTime() - 1); // Just before current period starts
+        const previousFrom = new Date(previousTo.getTime() - periodDuration);
+
+        // Determine comparison text based on period type
+        let comparisonText = "vs prev period";
+        
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth();
+
+        // Check if this is "this month"
+        if (currentFrom.getMonth() === currentMonth && 
+            currentFrom.getFullYear() === currentYear &&
+            currentTo.getMonth() === currentMonth &&
+            currentTo.getFullYear() === currentYear) {
+          comparisonText = "vs last month";
+        }
+        // Check if this is "this year"  
+        else if (currentFrom.getFullYear() === currentYear &&
+                 currentTo.getFullYear() === currentYear &&
+                 currentFrom.getMonth() === 0 && // January
+                 currentTo.getMonth() === 11) { // December
+          comparisonText = "vs last year";
+        }
+        // Check if this is "last month"
+        else if (currentFrom.getMonth() === currentMonth - 1 && 
+                 currentFrom.getFullYear() === currentYear) {
+          comparisonText = "vs prev month";
+        }
+        // Check if this is "last year"
+        else if (currentFrom.getFullYear() === currentYear - 1) {
+          comparisonText = "vs prev year";
+        }
+        // For custom periods, show duration-based text
+        else {
+          const days = Math.ceil(periodDuration / (1000 * 60 * 60 * 24));
+          if (days <= 31) {
+            comparisonText = "vs prev month";
+          } else if (days <= 92) {
+            comparisonText = "vs prev quarter";
+          } else {
+            comparisonText = "vs prev period";
+          }
+        }
+
+        return {
+          from: previousFrom,
+          to: previousTo,
+          comparisonText
+        };
+      };
+
+      const previousPeriod = getPreviousPeriod();
       const previousPeriodParams = {
         dateRange: {
-          from: previousStartDate,
-          to: previousEndDate
+          from: previousPeriod.from,
+          to: previousPeriod.to
         }
       };
 
@@ -136,7 +199,8 @@ export const useAnalytics = (params?: AnalyticsParams) => {
           totalRevenue: prevTotalRevenue,
           monthlySubscriptionCost: monthlySubscriptionCost, // Subscription costs are relatively stable
           totalPaidToDate: totalPaidToDate // This is cumulative, so we use current value
-        }
+        },
+        comparisonText: previousPeriod.comparisonText
       };
 
       setAnalytics(newAnalytics);

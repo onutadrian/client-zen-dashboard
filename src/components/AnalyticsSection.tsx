@@ -30,6 +30,7 @@ interface AnalyticsSectionProps {
     monthlySubscriptionCost: number;
     totalPaidToDate: number;
   };
+  comparisonText?: string;
 }
 
 const AnalyticsSection = (props: AnalyticsSectionProps) => {

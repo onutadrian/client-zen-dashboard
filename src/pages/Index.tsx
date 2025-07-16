@@ -124,6 +124,7 @@ const Index = () => {
               customDateRange={customDateRange}
               onCustomDateChange={setCustomDateRange}
               previousPeriodData={analytics.previousPeriodData}
+              comparisonText={analytics.comparisonText}
             />
           ) : (
             <UserAnalyticsSection

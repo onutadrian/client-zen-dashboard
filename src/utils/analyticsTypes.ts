@@ -24,6 +24,7 @@ export interface AnalyticsData {
     monthlySubscriptionCost: number;
     totalPaidToDate: number;
   };
+  comparisonText?: string;
 }
 
 export interface AnalyticsParams {
