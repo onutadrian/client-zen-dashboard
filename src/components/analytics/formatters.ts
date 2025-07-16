@@ -47,7 +47,17 @@ export const getOriginalValue = (value: any, isCurrency = false, demoMode = fals
   return Math.round(numValue).toString();
 };
 
-export const getTrendData = (metric: string) => {
+export const getTrendData = (metric: string, currentValue?: number, previousValue?: number) => {
+  // If previous period data is provided, calculate actual trend
+  if (currentValue !== undefined && previousValue !== undefined && previousValue > 0) {
+    const change = Math.round(((currentValue - previousValue) / previousValue) * 100);
+    return {
+      change: Math.abs(change),
+      isIncrease: change >= 0
+    };
+  }
+  
+  // Fallback to static data when no comparison data is available
   const trends = {
     'Total Clients': { change: 15, isIncrease: true },
     'Total Time': { change: 23, isIncrease: true },

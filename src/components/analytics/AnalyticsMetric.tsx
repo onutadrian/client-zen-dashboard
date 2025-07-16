@@ -17,13 +17,15 @@ interface AnalyticsMetricProps {
     subtitle: string;
     statusRows: string[];
     details: any[] | null;
+    currentValue?: number;
+    previousValue?: number;
   };
   displayCurrency: string;
 }
 
 const AnalyticsMetric = ({ stat, displayCurrency }: AnalyticsMetricProps) => {
   const { demoMode } = useCurrency();
-  const trend = getTrendData(stat.title);
+  const trend = getTrendData(stat.title, stat.currentValue, stat.previousValue);
   const TrendIcon = trend.isIncrease ? TrendingUp : TrendingDown;
   
   // Use special formatting for time, regular formatting for others

@@ -22,6 +22,14 @@ interface AnalyticsSectionProps {
   onPeriodChange: (period: PeriodOption) => void;
   customDateRange: { from: Date | undefined; to: Date | undefined };
   onCustomDateChange: (range: { from: Date | undefined; to: Date | undefined }) => void;
+  // Previous period data for comparison
+  previousPeriodData?: {
+    totalClients: number;
+    totalHours: number;
+    totalRevenue: number;
+    monthlySubscriptionCost: number;
+    totalPaidToDate: number;
+  };
 }
 
 const AnalyticsSection = (props: AnalyticsSectionProps) => {
