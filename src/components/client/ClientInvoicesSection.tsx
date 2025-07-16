@@ -58,7 +58,13 @@ const ClientInvoicesSection = ({
                 </div>
                 <div className="flex items-center space-x-2">
                   <select
-                    className="text-xs px-2 py-1 rounded border bg-background"
+                    className={`text-xs px-2 py-1 rounded border ${
+                      invoice.status === 'paid' 
+                        ? 'bg-green-50 text-green-700 border-green-200' 
+                        : invoice.status === 'overdue' 
+                        ? 'bg-red-50 text-red-700 border-red-200'
+                        : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                    }`}
                     value={invoice.status}
                     onChange={(e) => {
                       if (onInvoiceStatusUpdate) {
