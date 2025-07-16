@@ -123,6 +123,7 @@ const Index = () => {
               onPeriodChange={setSelectedPeriod}
               customDateRange={customDateRange}
               onCustomDateChange={setCustomDateRange}
+              previousPeriodData={analytics.previousPeriodData}
             />
           ) : (
             <UserAnalyticsSection

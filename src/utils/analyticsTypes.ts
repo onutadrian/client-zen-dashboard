@@ -17,6 +17,13 @@ export interface AnalyticsData {
   clients: any[];
   timeBreakdown: any[];
   revenueBreakdown: any[];
+  previousPeriodData?: {
+    totalClients: number;
+    totalHours: number;
+    totalRevenue: number;
+    monthlySubscriptionCost: number;
+    totalPaidToDate: number;
+  };
 }
 
 export interface AnalyticsParams {

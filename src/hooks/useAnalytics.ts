@@ -39,7 +39,23 @@ export const useAnalytics = (params?: AnalyticsParams) => {
     setLoading(true);
 
     try {
-      // Fetch all data - but don't filter subscriptions by date for cost calculation
+      // Calculate previous 30-day period for comparison
+      const currentEndDate = params?.dateRange?.to || new Date();
+      const currentStartDate = params?.dateRange?.from || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      
+      // Calculate previous period (30 days before the current period)
+      const periodDuration = currentEndDate.getTime() - currentStartDate.getTime();
+      const previousEndDate = new Date(currentStartDate.getTime() - 1000); // 1 second before current period
+      const previousStartDate = new Date(previousEndDate.getTime() - periodDuration);
+      
+      const previousPeriodParams = {
+        dateRange: {
+          from: previousStartDate,
+          to: previousEndDate
+        }
+      };
+
+      // Fetch current period data
       const [clients, projects, hourEntries, invoices, allSubscriptions] = await Promise.all([
         fetchClientsData(),
         fetchProjectsData(),
@@ -47,8 +63,14 @@ export const useAnalytics = (params?: AnalyticsParams) => {
         fetchInvoicesData(params),
         fetchSubscriptionsData() // Get all subscriptions, not filtered by date
       ]);
+
+      // Fetch previous period data for comparison
+      const [prevHourEntries, prevInvoices] = await Promise.all([
+        fetchHourEntriesData(previousPeriodParams),
+        fetchInvoicesData(previousPeriodParams)
+      ]);
       
-      // Calculate basic metrics
+      // Calculate current period metrics
       const totalClients = clients?.length || 0;
       const activeClients = clients?.filter(client => client.status === 'active').length || 0;
       
@@ -59,8 +81,6 @@ export const useAnalytics = (params?: AnalyticsParams) => {
 
       // Calculate revenue ONLY from paid invoices - this is the source of truth
       const invoiceRevenue = calculateInvoiceRevenue(invoices, convert, displayCurrency);
-
-      // Total revenue is ONLY from paid invoices (no double counting)
       const totalRevenue = invoiceRevenue;
 
       // Calculate subscription costs - only active subscriptions with proper yearly-to-monthly conversion
@@ -87,6 +107,15 @@ export const useAnalytics = (params?: AnalyticsParams) => {
         return sum + convertedPaid;
       }, 0) || 0;
 
+      // Calculate previous period metrics for comparison
+      const prevTotalHours = prevHourEntries?.reduce((sum, entry) => {
+        const hours = parseFloat(entry.hours?.toString() || '0');
+        return sum + hours;
+      }, 0) || 0;
+
+      const prevInvoiceRevenue = calculateInvoiceRevenue(prevInvoices, convert, displayCurrency);
+      const prevTotalRevenue = prevInvoiceRevenue;
+
       // Calculate breakdowns
       const timeBreakdown = calculateTimeBreakdown(clients, hourEntries);
       const revenueBreakdown = calculateRevenueBreakdown(clients, hourEntries, projects, params, convert, displayCurrency);
@@ -100,7 +129,14 @@ export const useAnalytics = (params?: AnalyticsParams) => {
         totalPaidToDate,
         clients: clients || [],
         timeBreakdown,
-        revenueBreakdown
+        revenueBreakdown,
+        previousPeriodData: {
+          totalClients: totalClients, // Client count doesn't change much day-to-day
+          totalHours: prevTotalHours,
+          totalRevenue: prevTotalRevenue,
+          monthlySubscriptionCost: monthlySubscriptionCost, // Subscription costs are relatively stable
+          totalPaidToDate: totalPaidToDate // This is cumulative, so we use current value
+        }
       };
 
       setAnalytics(newAnalytics);
