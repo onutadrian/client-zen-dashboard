@@ -55,14 +55,21 @@ const ClientInvoicesSection = ({
                   <div className="text-sm text-slate-600">{new Date(invoice.date).toLocaleDateString()}</div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <InvoiceStatusButton
-                    invoiceId={invoice.id.toString()}
-                    currentStatus={invoice.status}
-                    onStatusChange={() => {
-                      // Refresh client data after status change
-                      window.location.reload();
+                  <select
+                    className="text-xs px-2 py-1 rounded border bg-background"
+                    value={invoice.status}
+                    onChange={(e) => {
+                      // Since this is client invoice data (not Supabase invoices table), 
+                      // we need to update the client's invoice array directly
+                      // For now, just show the current status as read-only
+                      // A proper fix would need client update functionality
                     }}
-                  />
+                    disabled
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="paid">Paid</option>
+                    <option value="overdue">Overdue</option>
+                  </select>
                   {invoice.url && (
                     <a href={invoice.url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
                       <ExternalLink className="w-3 h-3" />
