@@ -13,6 +13,7 @@ interface ClientInvoicesSectionProps {
   client?: any;
   displayCurrency?: string;
   formatCurrency?: (amount: number, currency: string) => string;
+  onInvoiceStatusUpdate?: (invoiceId: number, newStatus: string) => void;
   // For edit mode (EditClientModal)
   formData?: any;
   setFormData?: (data: any) => void;
@@ -26,6 +27,7 @@ const ClientInvoicesSection = ({
   client, 
   displayCurrency, 
   formatCurrency,
+  onInvoiceStatusUpdate,
   formData,
   setFormData,
   newInvoice,
@@ -59,12 +61,10 @@ const ClientInvoicesSection = ({
                     className="text-xs px-2 py-1 rounded border bg-background"
                     value={invoice.status}
                     onChange={(e) => {
-                      // Since this is client invoice data (not Supabase invoices table), 
-                      // we need to update the client's invoice array directly
-                      // For now, just show the current status as read-only
-                      // A proper fix would need client update functionality
+                      if (onInvoiceStatusUpdate) {
+                        onInvoiceStatusUpdate(invoice.id, e.target.value);
+                      }
                     }}
-                    disabled
                   >
                     <option value="pending">Pending</option>
                     <option value="paid">Paid</option>

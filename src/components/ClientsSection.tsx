@@ -16,6 +16,7 @@ interface ClientsSectionProps {
   formatCurrency: (amount: number, currency: string) => string;
   activeClients: number;
   onAddClient: () => void;
+  onInvoiceStatusUpdate?: (clientId: number, invoiceId: number, newStatus: string) => void;
 }
 
 const ClientsSection = ({
@@ -25,7 +26,8 @@ const ClientsSection = ({
   convertCurrency,
   formatCurrency,
   activeClients,
-  onAddClient
+  onAddClient,
+  onInvoiceStatusUpdate
 }: ClientsSectionProps) => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -65,6 +67,8 @@ const ClientsSection = ({
               client={client} 
               onEdit={handleEditClient}
               onDelete={handleDeleteClient}
+              onInvoiceStatusUpdate={onInvoiceStatusUpdate ? (invoiceId, newStatus) => 
+                onInvoiceStatusUpdate(client.id, invoiceId, newStatus) : undefined}
             />
           ))}
           

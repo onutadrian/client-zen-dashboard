@@ -16,9 +16,10 @@ interface ClientDetailsSheetProps {
   client: Client;
   isOpen: boolean;
   onClose: () => void;
+  onInvoiceStatusUpdate?: (invoiceId: number, newStatus: string) => void;
 }
 
-const ClientDetailsSheet = ({ client, isOpen, onClose }: ClientDetailsSheetProps) => {
+const ClientDetailsSheet = ({ client, isOpen, onClose, onInvoiceStatusUpdate }: ClientDetailsSheetProps) => {
   const { demoMode, displayCurrency } = useCurrency();
 
   const getStatusBadge = (status: string) => {
@@ -74,6 +75,7 @@ const ClientDetailsSheet = ({ client, isOpen, onClose }: ClientDetailsSheetProps
               client={client}
               displayCurrency={displayCurrency}
               formatCurrency={formatCurrency}
+              onInvoiceStatusUpdate={onInvoiceStatusUpdate}
             />
           )}
 

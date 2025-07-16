@@ -17,7 +17,8 @@ const ClientsPage = () => {
   const {
     clients,
     addClient,
-    updateClient
+    updateClient,
+    updateClientInvoiceStatus
   } = useClients();
   const {
     subscriptions
@@ -46,6 +47,7 @@ const ClientsPage = () => {
             formatCurrency={formatCurrency} 
             activeClients={analytics.activeClients} 
             onAddClient={() => setShowClientModal(true)} 
+            onInvoiceStatusUpdate={updateClientInvoiceStatus}
           />
 
           <ModalsContainer 

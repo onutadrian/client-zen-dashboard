@@ -12,11 +12,13 @@ interface ClientCardProps {
   client: Client;
   onEdit: (client: Client) => void;
   onDelete: (clientId: number) => void;
+  onInvoiceStatusUpdate?: (invoiceId: number, newStatus: string) => void;
 }
 const ClientCard = ({
   client,
   onEdit,
-  onDelete
+  onDelete,
+  onInvoiceStatusUpdate
 }: ClientCardProps) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const {
@@ -89,7 +91,12 @@ const ClientCard = ({
         </CardContent>
       </Card>
 
-      <ClientDetailsSheet client={client} isOpen={isDetailsOpen} onClose={() => setIsDetailsOpen(false)} />
+      <ClientDetailsSheet 
+        client={client} 
+        isOpen={isDetailsOpen} 
+        onClose={() => setIsDetailsOpen(false)} 
+        onInvoiceStatusUpdate={onInvoiceStatusUpdate}
+      />
     </>;
 };
 export default ClientCard;

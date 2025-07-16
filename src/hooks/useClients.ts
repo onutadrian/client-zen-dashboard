@@ -64,9 +64,39 @@ export const useClients = () => {
     }
   };
 
+  const updateClientInvoiceStatus = async (clientId: number, invoiceId: number, newStatus: string) => {
+    try {
+      const client = clients.find(c => c.id === clientId);
+      if (!client || !client.invoices) return;
+
+      const updatedInvoices = client.invoices.map((invoice: any) => 
+        invoice.id === invoiceId ? { ...invoice, status: newStatus } : invoice
+      );
+
+      const updatedClient = { ...client, invoices: updatedInvoices };
+      
+      await updateClientInSupabase(clientId, updatedClient);
+      setClients(prev => prev.map(c => 
+        c.id === clientId ? updatedClient : c
+      ));
+
+      toast({
+        title: "Success",
+        description: "Invoice status updated successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update invoice status",
+        variant: "destructive"
+      });
+    }
+  };
+
   return {
     clients,
     addClient,
-    updateClient
+    updateClient,
+    updateClientInvoiceStatus
   };
 };
