@@ -23,6 +23,8 @@ const MilestoneHoursTracker = ({ milestones, hourEntries, onAddTimeEntry }: Mile
   const { refreshHourEntries } = useHourEntries();
   const [editingEntry, setEditingEntry] = useState<HourEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<HourEntry | null>(null);
+  const [expandedMilestones, setExpandedMilestones] = useState<Set<string>>(new Set());
+  const [showAllUnassigned, setShowAllUnassigned] = useState(false);
 
   const handleEditComplete = () => {
     setEditingEntry(null);
@@ -123,7 +125,7 @@ const MilestoneHoursTracker = ({ milestones, hourEntries, onAddTimeEntry }: Mile
                 {milestoneHours.length > 0 && (
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-slate-700">Time Entries:</p>
-                    {milestoneHours.slice(0, 5).map((entry) => (
+                    {(expandedMilestones.has(milestone.id) ? milestoneHours : milestoneHours.slice(0, 5)).map((entry) => (
                       <div key={entry.id} className="flex justify-between items-center text-sm bg-slate-50 p-2 rounded">
                         <div className="flex-1">
                           <p className="font-medium line-clamp-1">{entry.description || 'Time entry'}</p>
@@ -159,10 +161,29 @@ const MilestoneHoursTracker = ({ milestones, hourEntries, onAddTimeEntry }: Mile
                         </div>
                       </div>
                     ))}
-                    {milestoneHours.length > 5 && (
-                      <p className="text-xs text-slate-500 text-center">
-                        +{milestoneHours.length - 5} more entries
-                      </p>
+                    {milestoneHours.length > 5 && !expandedMilestones.has(milestone.id) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setExpandedMilestones(prev => new Set([...prev, milestone.id]))}
+                        className="w-full text-xs text-slate-500 hover:text-slate-700"
+                      >
+                        Load {milestoneHours.length - 5} more entries
+                      </Button>
+                    )}
+                    {expandedMilestones.has(milestone.id) && milestoneHours.length > 5 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setExpandedMilestones(prev => {
+                          const newSet = new Set(prev);
+                          newSet.delete(milestone.id);
+                          return newSet;
+                        })}
+                        className="w-full text-xs text-slate-500 hover:text-slate-700"
+                      >
+                        Show less
+                      </Button>
                     )}
                   </div>
                 )}
@@ -184,7 +205,7 @@ const MilestoneHoursTracker = ({ milestones, hourEntries, onAddTimeEntry }: Mile
               </p>
               
               <div className="space-y-1">
-                {unassignedHours.slice(0, 5).map((entry) => (
+                {(showAllUnassigned ? unassignedHours : unassignedHours.slice(0, 5)).map((entry) => (
                   <div key={entry.id} className="flex justify-between items-center text-sm bg-white p-2 rounded border">
                     <div className="flex-1">
                       <p className="font-medium line-clamp-1">{entry.description || 'Time entry'}</p>
@@ -220,10 +241,25 @@ const MilestoneHoursTracker = ({ milestones, hourEntries, onAddTimeEntry }: Mile
                     </div>
                   </div>
                 ))}
-                {unassignedHours.length > 5 && (
-                  <p className="text-xs text-orange-600 text-center mt-1">
-                    +{unassignedHours.length - 5} more entries
-                  </p>
+                {unassignedHours.length > 5 && !showAllUnassigned && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAllUnassigned(true)}
+                    className="w-full text-xs text-orange-600 hover:text-orange-700 mt-1"
+                  >
+                    Load {unassignedHours.length - 5} more entries
+                  </Button>
+                )}
+                {showAllUnassigned && unassignedHours.length > 5 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAllUnassigned(false)}
+                    className="w-full text-xs text-orange-600 hover:text-orange-700 mt-1"
+                  >
+                    Show less
+                  </Button>
                 )}
               </div>
             </div>
