@@ -85,18 +85,10 @@ const SubscriptionsPage = () => {
     <DashboardContainer>
       <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
         <div className="max-w-7xl mx-auto space-y-6">
-          <div className="flex items-center justify-between w-full">
-            <h1 className="text-3xl font-bold text-slate-800">Subscriptions</h1>
-            <Tabs value={billingFilter} onValueChange={(value) => setBillingFilter(value as 'all' | 'monthly' | 'yearly')}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                <TabsTrigger value="yearly">Yearly</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-          
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-3xl font-bold text-slate-800">Subscriptions</h1>
+            </div>
             <Button onClick={() => setShowSubscriptionModal(true)} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
               <Plus className="w-4 h-4 mr-2" />
               Add Subscription
@@ -117,7 +109,9 @@ const SubscriptionsPage = () => {
             monthlySubscriptionCost={analytics.monthlySubscriptionCost} 
             totalPaidToDate={totalPaidToDate} 
             displayCurrency={displayCurrency} 
-            formatCurrency={formatCurrency} 
+            formatCurrency={formatCurrency}
+            billingFilter={billingFilter}
+            onBillingFilterChange={setBillingFilter}
           />
 
           <ModalsContainer 

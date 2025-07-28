@@ -3,6 +3,7 @@ import { CreditCard, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SubscriptionCard from '@/components/SubscriptionCard';
 interface Subscription {
   id: number;
@@ -17,6 +18,8 @@ interface SubscriptionsSectionProps {
   totalPaidToDate: number;
   displayCurrency: string;
   formatCurrency: (amount: number, currency: string) => string;
+  billingFilter: 'all' | 'monthly' | 'yearly';
+  onBillingFilterChange: (filter: 'all' | 'monthly' | 'yearly') => void;
 }
 const SubscriptionsSection = ({
   subscriptions,
@@ -25,17 +28,22 @@ const SubscriptionsSection = ({
   monthlySubscriptionCost,
   totalPaidToDate,
   displayCurrency,
-  formatCurrency
+  formatCurrency,
+  billingFilter,
+  onBillingFilterChange
 }: SubscriptionsSectionProps) => {
   return <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-slate-800 flex items-center">
           Subscriptions
         </h2>
-        <div className="flex items-center space-x-2">
-          
-          
-        </div>
+        <Tabs value={billingFilter} onValueChange={onBillingFilterChange}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="monthly">Monthly</TabsTrigger>
+            <TabsTrigger value="yearly">Yearly</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

@@ -50,6 +50,8 @@ const MainContentGrid = ({
         totalPaidToDate={totalPaidToDate}
         displayCurrency={displayCurrency}
         formatCurrency={formatCurrency}
+        billingFilter="all"
+        onBillingFilterChange={() => {}}
       />
     </div>
   );
