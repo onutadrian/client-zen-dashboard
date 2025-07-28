@@ -35,6 +35,19 @@ const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMet
     return total + convertedCost;
   }, 0);
 
+  const yearlyTotal = activeSubscriptions.reduce((total, subscription) => {
+    const convertedCost = convert(subscription.price, subscription.currency, displayCurrency);
+    const totalSeats = subscription.seats || 1;
+    const subscriptionCost = convertedCost * totalSeats;
+    
+    // Convert to yearly equivalent based on billing cycle
+    const yearlyCost = subscription.billing_cycle === 'yearly' 
+      ? subscriptionCost 
+      : subscriptionCost * 12;
+    
+    return total + yearlyCost;
+  }, 0);
+
   // Format numbers: remove decimals and convert 1000+ to K format
   const formatMetric = (value: number, isCurrency = false) => {
     const rounded = Math.round(value);
@@ -54,15 +67,6 @@ const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMet
     return rounded.toString();
   };
 
-  // Mock trend data for 30-day comparison
-  const getTrendData = (metric: string) => {
-    const trends = {
-      'Monthly Subscription Cost': { change: 12, isIncrease: false }, // decrease is good for costs
-      'Total Paid to Date': { change: 8, isIncrease: true },
-      'Active Subscriptions': { change: 15, isIncrease: true }
-    };
-    return trends[metric] || { change: 0, isIncrease: true };
-  };
 
   const stats = [
     {
@@ -71,6 +75,14 @@ const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMet
       originalValue: formatCurrency(monthlyTotal, displayCurrency),
       isCurrency: true,
       subtitle: "total monthly recurring costs",
+      statusRows: [`${activeSubscriptions.length} active subscription${activeSubscriptions.length !== 1 ? 's' : ''}`]
+    },
+    {
+      title: "Yearly Subscription Cost",
+      value: yearlyTotal,
+      originalValue: formatCurrency(yearlyTotal, displayCurrency),
+      isCurrency: true,
+      subtitle: "total yearly recurring costs",
       statusRows: [`${activeSubscriptions.length} active subscription${activeSubscriptions.length !== 1 ? 's' : ''}`]
     },
     {
@@ -93,10 +105,8 @@ const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMet
 
   return (
     <TooltipProvider>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {stats.map((stat, index) => {
-          const trend = getTrendData(stat.title);
-          const TrendIcon = trend.isIncrease ? TrendingUp : TrendingDown;
           const formattedValue = demoMode && stat.isCurrency ? '—' : formatMetric(stat.value, stat.isCurrency);
           const needsTooltip = !demoMode && typeof stat.value === 'number' ? stat.value >= 1000 : false;
           
@@ -114,22 +124,6 @@ const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMet
                     >
                       {stat.title}
                     </h3>
-                    
-                    {!demoMode && (
-                      <div className="flex items-center space-x-1 lg:space-x-2">
-                        <Badge 
-                          className={`text-xs px-1.5 lg:px-2 py-0.5 lg:py-1 flex items-center space-x-1 ${
-                            trend.isIncrease 
-                              ? 'bg-green-100 text-green-800 hover:bg-green-100' 
-                              : 'bg-red-100 text-red-800 hover:bg-red-100'
-                          }`}
-                        >
-                          <TrendIcon className="w-2.5 h-2.5 lg:w-3 lg:h-3" />
-                          <span className="text-xs">{trend.change}%</span>
-                        </Badge>
-                        <span className="text-xs text-slate-500 hidden sm:inline">vs prev 30d</span>
-                      </div>
-                    )}
                   </div>
 
                   <div className="space-y-1">
