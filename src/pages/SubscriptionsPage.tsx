@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus } from 'lucide-react';
 import SubscriptionsSection from '@/components/SubscriptionsSection';
 import SubscriptionMetrics from '@/components/SubscriptionMetrics';
@@ -18,6 +19,7 @@ const SubscriptionsPage = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = React.useState(false);
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = React.useState(false);
   const [selectedSubscription, setSelectedSubscription] = React.useState(null);
+  const [billingFilter, setBillingFilter] = React.useState<'all' | 'monthly' | 'yearly'>('all');
   const {
     subscriptions,
     loading,
@@ -42,8 +44,14 @@ const SubscriptionsPage = () => {
     };
   }, []);
 
-  // Calculate total paid to date for all subscriptions
-  const totalPaidToDate = subscriptions.reduce((sum, sub) => {
+  // Filter subscriptions based on billing cycle
+  const filteredSubscriptions = subscriptions.filter(sub => {
+    if (billingFilter === 'all') return true;
+    return sub.billing_cycle === billingFilter;
+  });
+
+  // Calculate total paid to date for filtered subscriptions
+  const totalPaidToDate = filteredSubscriptions.reduce((sum, sub) => {
     const totalPaid = sub.total_paid || 0;
     const convertedTotal = convert(totalPaid, sub.currency || 'USD', displayCurrency);
     return sum + convertedTotal;
@@ -80,6 +88,13 @@ const SubscriptionsPage = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <h1 className="text-3xl font-bold text-slate-800">Subscriptions</h1>
+              <Tabs value={billingFilter} onValueChange={(value) => setBillingFilter(value as 'all' | 'monthly' | 'yearly')}>
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                  <TabsTrigger value="yearly">Yearly</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
             <Button onClick={() => setShowSubscriptionModal(true)} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
               <Plus className="w-4 h-4 mr-2" />
@@ -89,13 +104,13 @@ const SubscriptionsPage = () => {
           
           {/* Metrics Cards */}
           <SubscriptionMetrics 
-            key={`metrics-${displayCurrency}-${forceRefresh}`}
-            subscriptions={subscriptions} 
+            key={`metrics-${displayCurrency}-${forceRefresh}-${billingFilter}`}
+            subscriptions={filteredSubscriptions} 
             displayCurrency={displayCurrency} 
           />
           
           <SubscriptionsSection 
-            subscriptions={subscriptions} 
+            subscriptions={filteredSubscriptions} 
             onEditSubscription={handleEditSubscription} 
             onAddSubscription={() => setShowSubscriptionModal(true)} 
             monthlySubscriptionCost={analytics.monthlySubscriptionCost} 
