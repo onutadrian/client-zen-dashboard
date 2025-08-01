@@ -103,7 +103,7 @@ const ClientInvoicesSection = ({
         ...formData,
         invoices: [...formData.invoices, { ...newInvoice, id: Date.now(), amount: parseFloat(newInvoice.amount) }]
       });
-      setNewInvoice({ amount: '', date: '', status: 'pending', url: '', currency: 'USD' });
+      setNewInvoice({ amount: '', date: '', status: 'pending', url: '', currency: formData?.currency || 'USD' });
       const newErrors = {...errors};
       delete newErrors.invoiceAmount;
       setErrors(newErrors);
@@ -130,7 +130,7 @@ const ClientInvoicesSection = ({
     <div>
       <Label>Invoices</Label>
       <div className="space-y-3">
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-6 gap-2">
           <Input
             type="number"
             step="0.01"
@@ -139,6 +139,15 @@ const ClientInvoicesSection = ({
             onChange={(e) => setNewInvoice({ ...newInvoice, amount: e.target.value })}
             className={errors?.invoiceAmount ? 'border-red-500' : ''}
           />
+          <select
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={newInvoice.currency}
+            onChange={(e) => setNewInvoice({ ...newInvoice, currency: e.target.value })}
+          >
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="RON">RON</option>
+          </select>
           <Input
             type="date"
             value={newInvoice.date}
