@@ -144,16 +144,34 @@ export const useUserInvites = () => {
 
   const validateInviteToken = async (token: string) => {
     try {
-      const { data, error } = await supabase
-        .from('user_invites')
-        .select('*')
-        .eq('token', token)
-        .eq('used', false)
-        .gt('expires_at', new Date().toISOString())
-        .single();
+      const { data, error } = await supabase.functions.invoke('validate-invite-token', {
+        body: { token }
+      });
 
-      if (error) return null;
-      return data ? { ...data, role: data.role as UserRole } : null;
+      if (error) {
+        console.error('Error validating invite token:', error);
+        return null;
+      }
+
+      if (data?.valid) {
+        return {
+          token,
+          role: data.role as UserRole,
+          expires_at: data.expires_at,
+          // Only include necessary fields for validation
+          id: '', // Not needed for validation
+          email: '', // Not exposed for security
+          used: false,
+          created_at: '',
+          invited_by: '',
+          used_at: null,
+          used_by: null,
+          email_sent: false,
+          email_sent_at: null
+        };
+      }
+
+      return null;
     } catch (error) {
       console.error('Error validating invite token:', error);
       return null;
