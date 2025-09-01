@@ -60,11 +60,25 @@ const TaskTableRow = ({
 
   const isBilled = (task: Task): boolean => {
     if (task.status !== 'completed' || !task.workedHours || task.workedHours <= 0) {
+      console.log(`Task ${task.id} (${task.title}) - Not eligible for billing:`, {
+        status: task.status,
+        workedHours: task.workedHours
+      });
       return false;
     }
 
     // Simple and reliable: check if there are any billed hour entries linked to this task ID
-    return hourEntries.some(entry => entry.taskId === task.id && entry.billed === true);
+    const billedEntries = hourEntries.filter(entry => entry.taskId === task.id && entry.billed === true);
+    const result = billedEntries.length > 0;
+    
+    console.log(`Task ${task.id} (${task.title}) - Billing check:`, {
+      taskId: task.id,
+      billedEntriesFound: billedEntries.length,
+      result,
+      matchingEntries: billedEntries.map(e => ({ id: e.id, taskId: e.taskId, billed: e.billed }))
+    });
+    
+    return result;
   };
 
   return (
