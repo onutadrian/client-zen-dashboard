@@ -62,7 +62,8 @@ export const hourEntryService = {
         createdAt: entry.created_at,
         updatedAt: entry.updated_at,
         userId: entry.user_id || undefined,
-        milestoneId: milestoneId
+        milestoneId: milestoneId,
+        taskId: entry.task_id || undefined
       };
     });
 
@@ -90,7 +91,8 @@ export const hourEntryService = {
       date: newEntry.date,
       billed: newEntry.billed,
       user_id: user.id, // Set the authenticated user's ID
-      milestone_id: newEntry.milestoneId || null
+      milestone_id: newEntry.milestoneId || null,
+      task_id: newEntry.taskId || null
     };
 
     console.log('hourEntryService: Inserting entry:', supabaseEntry);
@@ -115,7 +117,8 @@ export const hourEntryService = {
       createdAt: data.created_at,
       updatedAt: data.updated_at,
       userId: data.user_id || undefined,
-      milestoneId: data.milestone_id || undefined
+      milestoneId: data.milestone_id || undefined,
+      taskId: data.task_id || undefined
     };
 
     return transformedEntry;
@@ -132,6 +135,7 @@ export const hourEntryService = {
     if (updatedEntry.billed !== undefined) supabaseUpdate.billed = updatedEntry.billed;
     if (updatedEntry.userId !== undefined) supabaseUpdate.user_id = updatedEntry.userId || null;
     if (updatedEntry.milestoneId !== undefined) supabaseUpdate.milestone_id = updatedEntry.milestoneId || null;
+    if (updatedEntry.taskId !== undefined) supabaseUpdate.task_id = updatedEntry.taskId || null;
 
     const { error } = await supabase
       .from('hour_entries')

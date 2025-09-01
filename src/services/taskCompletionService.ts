@@ -23,6 +23,7 @@ export const createHourEntryForCompletedTask = async (
     project_id: task.projectId,
     client_id: task.clientId,
     milestone_id: task.milestoneId,
+    task_id: task.id,
     hours: workedHours,
     description: `Completed task: ${task.title}`,
     date: new Date().toISOString().split('T')[0],

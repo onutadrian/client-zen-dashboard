@@ -11,4 +11,5 @@ export interface HourEntry {
   updatedAt: string;
   userId?: string;
   milestoneId?: string;
+  taskId?: number;
 }
