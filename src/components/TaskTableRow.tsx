@@ -68,7 +68,14 @@ const TaskTableRow = ({
     const taskRelatedHourEntries = hourEntries.filter(entry => {
       const matchesProject = entry.projectId === task.projectId;
       const matchesClient = entry.clientId === task.clientId;
-      const descriptionMatches = entry.description?.includes(`Completed task: ${task.title}`);
+      
+      // Improved matching: check if description contains task title or normalize both for comparison
+      const normalizeText = (text: string) => text.toLowerCase().replace(/\s+/g, ' ').trim();
+      const taskTitleNormalized = normalizeText(task.title);
+      const descriptionNormalized = entry.description ? normalizeText(entry.description) : '';
+      
+      const descriptionMatches = entry.description?.includes(`Completed task: ${task.title}`) ||
+                                 descriptionNormalized.includes(taskTitleNormalized);
       
       return matchesProject && matchesClient && descriptionMatches && entry.billed === true;
     });
