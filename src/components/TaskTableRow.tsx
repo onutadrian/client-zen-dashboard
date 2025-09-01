@@ -69,15 +69,48 @@ const TaskTableRow = ({
       const matchesProject = entry.projectId === task.projectId;
       const matchesClient = entry.clientId === task.clientId;
       
-      // Improved matching: check if description contains task title or normalize both for comparison
-      const normalizeText = (text: string) => text.toLowerCase().replace(/\s+/g, ' ').trim();
-      const taskTitleNormalized = normalizeText(task.title);
-      const descriptionNormalized = entry.description ? normalizeText(entry.description) : '';
+      if (!entry.description || !matchesProject || !matchesClient) {
+        return false;
+      }
+
+      // Enhanced matching logic for task descriptions
+      const taskTitle = task.title.toLowerCase();
+      const entryDescription = entry.description.toLowerCase();
       
-      const descriptionMatches = entry.description?.includes(`Completed task: ${task.title}`) ||
-                                 descriptionNormalized.includes(taskTitleNormalized);
+      // Direct match first
+      if (entryDescription.includes(`completed task: ${taskTitle}`)) {
+        return entry.billed === true;
+      }
       
-      return matchesProject && matchesClient && descriptionMatches && entry.billed === true;
+      // Extract the task name from the hour entry description
+      const taskNameMatch = entryDescription.match(/completed task:\s*(.+)/);
+      if (taskNameMatch) {
+        const extractedTaskName = taskNameMatch[1].trim();
+        
+        // Create normalized versions by removing common variations
+        const normalizeForComparison = (text: string) => {
+          return text
+            .toLowerCase()
+            .replace(/\bstage\s*/g, '') // remove "stage" word
+            .replace(/\bv(\d+)/g, '$1') // convert "v8" to "8"
+            .replace(/\s+/g, ' ')
+            .trim();
+        };
+        
+        const normalizedTask = normalizeForComparison(taskTitle);
+        const normalizedEntry = normalizeForComparison(extractedTaskName);
+        
+        // Check if they match after normalization or if one contains the other
+        const isMatch = normalizedTask === normalizedEntry || 
+                       normalizedTask.includes(normalizedEntry) || 
+                       normalizedEntry.includes(normalizedTask);
+        
+        if (isMatch) {
+          return entry.billed === true;
+        }
+      }
+      
+      return false;
     });
 
     return taskRelatedHourEntries.length > 0;
