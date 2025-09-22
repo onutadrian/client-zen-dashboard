@@ -117,8 +117,8 @@ const TaskFormFields = ({
             Milestone {isMilestoneRequired ? '*' : ''}
           </Label>
           <Select
-            value={formData.milestoneId || ""}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, milestoneId: value || null }))}
+            value={formData.milestoneId || "none"}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, milestoneId: value === "none" ? null : value }))}
           >
             <SelectTrigger>
               <SelectValue placeholder={
@@ -151,14 +151,14 @@ const TaskFormFields = ({
         <div>
           <Label htmlFor="assignedTo">Assign To</Label>
           <Select 
-            value={formData.assignedTo || ''} 
-            onValueChange={(value) => setFormData(prev => ({ ...prev, assignedTo: value || undefined }))}
+            value={formData.assignedTo || 'unassigned'} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, assignedTo: value === 'unassigned' ? undefined : value }))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select user (optional)" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Unassigned</SelectItem>
+              <SelectItem value="unassigned">Unassigned</SelectItem>
               {users.map((user) => (
                 <SelectItem key={user.id} value={user.id}>
                   {user.full_name || user.email}
