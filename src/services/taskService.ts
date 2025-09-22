@@ -67,9 +67,9 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
     status: 'pending',
     notes: newTask.notes,
     assets: newTask.assets,
-    start_date: newTask.startDate,
-    end_date: newTask.endDate,
-    assigned_to: newTask.assignedTo,
+    start_date: newTask.startDate || null,
+    end_date: newTask.endDate || null,
+    assigned_to: newTask.assignedTo || null,
     user_id: user.id // Add the user_id to satisfy RLS policy
   };
 
@@ -176,10 +176,10 @@ export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTask
   if (updatedTask.estimatedHours !== undefined) supabaseUpdate.estimated_hours = updatedTask.estimatedHours;
   if (updatedTask.notes !== undefined) supabaseUpdate.notes = updatedTask.notes;
   if (updatedTask.assets) supabaseUpdate.assets = updatedTask.assets;
-  if (updatedTask.startDate !== undefined) supabaseUpdate.start_date = updatedTask.startDate;
-  if (updatedTask.endDate !== undefined) supabaseUpdate.end_date = updatedTask.endDate;
+  if (updatedTask.startDate !== undefined) supabaseUpdate.start_date = updatedTask.startDate || null;
+  if (updatedTask.endDate !== undefined) supabaseUpdate.end_date = updatedTask.endDate || null;
   if (updatedTask.workedHours !== undefined) supabaseUpdate.worked_hours = updatedTask.workedHours;
-  if (updatedTask.assignedTo !== undefined) supabaseUpdate.assigned_to = updatedTask.assignedTo;
+  if (updatedTask.assignedTo !== undefined) supabaseUpdate.assigned_to = updatedTask.assignedTo || null;
 
   console.log('supabaseUpdate object:', supabaseUpdate);
 
