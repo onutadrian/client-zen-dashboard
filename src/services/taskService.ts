@@ -163,6 +163,8 @@ export const deleteTaskFromDatabase = async (taskId: number) => {
 };
 
 export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTaskData) => {
+  console.log('editTaskInDatabase called with:', { taskId, updatedTask });
+  
   const supabaseUpdate: any = {};
   
   if (updatedTask.title) supabaseUpdate.title = updatedTask.title;
@@ -179,10 +181,49 @@ export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTask
   if (updatedTask.workedHours !== undefined) supabaseUpdate.worked_hours = updatedTask.workedHours;
   if (updatedTask.assignedTo !== undefined) supabaseUpdate.assigned_to = updatedTask.assignedTo;
 
-  const { error } = await supabase
+  console.log('supabaseUpdate object:', supabaseUpdate);
+
+  const { data, error } = await supabase
     .from('tasks')
     .update(supabaseUpdate)
-    .eq('id', taskId);
+    .eq('id', taskId)
+    .select(`
+      *,
+      assigned_to_profile:profiles!assigned_to(
+        id,
+        full_name,
+        email
+      )
+    `)
+    .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error updating task in database:', error);
+    throw error;
+  }
+  
+  console.log('Task updated successfully in database:', data);
+  
+  // Return the updated task with the joined profile data
+  return {
+    id: data.id,
+    title: data.title,
+    description: data.description || '',
+    clientId: data.client_id,
+    clientName: data.client_name,
+    projectId: data.project_id,
+    milestoneId: data.milestone_id,
+    estimatedHours: data.estimated_hours,
+    actualHours: data.actual_hours,
+    workedHours: data.worked_hours,
+    status: data.status as 'pending' | 'in-progress' | 'completed',
+    notes: data.notes || '',
+    assets: data.assets || [],
+    createdDate: data.created_date,
+    completedDate: data.completed_date || undefined,
+    startDate: data.start_date || undefined,
+    endDate: data.end_date || undefined,
+    assignedTo: data.assigned_to,
+    assignedToName: data.assigned_to_profile?.full_name || null,
+  };
 };

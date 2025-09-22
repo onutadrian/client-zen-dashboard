@@ -147,11 +147,17 @@ export const useTasksOperations = (
 
   const editTask = async (taskId: number, updatedTask: UpdateTaskData) => {
     try {
-      await editTaskInDatabase(taskId, updatedTask);
+      console.log('editTask called with:', { taskId, updatedTask });
+      
+      const updatedTaskFromDb = await editTaskInDatabase(taskId, updatedTask);
 
-      setTasks(prev => prev.map(task => 
-        task.id === taskId ? { ...task, ...updatedTask } : task
-      ));
+      setTasks(prev => {
+        const updated = prev.map(task => 
+          task.id === taskId ? updatedTaskFromDb : task
+        );
+        console.log('Local task state updated:', updated.find(t => t.id === taskId));
+        return updated;
+      });
 
       toast({
         title: "Success",
