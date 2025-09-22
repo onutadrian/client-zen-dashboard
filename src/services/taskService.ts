@@ -7,7 +7,14 @@ export const loadTasksFromDatabase = async (): Promise<Task[]> => {
   const result = await retryOperation(async () => {
     const { data, error } = await supabase
       .from('tasks')
-      .select('*')
+      .select(`
+        *,
+        assigned_to_profile:profiles!assigned_to(
+          id,
+          full_name,
+          email
+        )
+      `)
       .order('created_date', { ascending: false });
 
     if (error) throw error;
@@ -32,7 +39,9 @@ export const loadTasksFromDatabase = async (): Promise<Task[]> => {
     createdDate: task.created_date,
     completedDate: task.completed_date || undefined,
     startDate: task.start_date || undefined,
-    endDate: task.end_date || undefined
+    endDate: task.end_date || undefined,
+    assignedTo: task.assigned_to,
+    assignedToName: task.assigned_to_profile?.full_name || null,
   }));
 };
 
@@ -60,15 +69,23 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
     assets: newTask.assets,
     start_date: newTask.startDate,
     end_date: newTask.endDate,
+    assigned_to: newTask.assignedTo,
     user_id: user.id // Add the user_id to satisfy RLS policy
   };
 
   const result = await retryOperation(async () => {
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert([supabaseTask])
-      .select()
-      .single();
+  const { data, error } = await supabase
+    .from('tasks')
+    .insert([supabaseTask])
+    .select(`
+      *,
+      assigned_to_profile:profiles!assigned_to(
+        id,
+        full_name,
+        email
+      )
+    `)
+    .single();
 
     if (error) throw error;
     return data;
@@ -91,7 +108,9 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
     createdDate: result.created_date,
     completedDate: result.completed_date || undefined,
     startDate: result.start_date || undefined,
-    endDate: result.end_date || undefined
+    endDate: result.end_date || undefined,
+    assignedTo: result.assigned_to,
+    assignedToName: result.assigned_to_profile?.full_name || null,
   };
 };
 
@@ -158,6 +177,7 @@ export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTask
   if (updatedTask.startDate !== undefined) supabaseUpdate.start_date = updatedTask.startDate;
   if (updatedTask.endDate !== undefined) supabaseUpdate.end_date = updatedTask.endDate;
   if (updatedTask.workedHours !== undefined) supabaseUpdate.worked_hours = updatedTask.workedHours;
+  if (updatedTask.assignedTo !== undefined) supabaseUpdate.assigned_to = updatedTask.assignedTo;
 
   const { error } = await supabase
     .from('tasks')

@@ -101,6 +101,18 @@ const TaskTableRow = ({
         </span>
       </TableCell>
       <TableCell>
+        <div className="text-sm">
+          {task.assignedToName ? (
+            <div>
+              <p className="font-medium text-slate-700">{task.assignedToName}</p>
+              <p className="text-slate-500 text-xs">Assigned</p>
+            </div>
+          ) : (
+            <p className="text-slate-500">Unassigned</p>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
         <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
           <TaskStatusSelect
             status={task.status}

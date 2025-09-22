@@ -41,6 +41,8 @@ interface Task {
   completedDate?: string;
   startDate?: string;
   endDate?: string;
+  assignedTo?: string;
+  assignedToName?: string;
 }
 
 interface AddTaskModalProps {
@@ -52,9 +54,12 @@ interface AddTaskModalProps {
   task?: Task | null;
 }
 
+import { useUsers } from '@/hooks/useUsers';
+
 const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTaskModalProps) => {
   const { milestones } = useMilestones();
   const { isAdmin } = useAuth();
+  const { users, loading: usersLoading } = useUsers();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -65,7 +70,8 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
     notes: '',
     assetsInput: '',
     startDate: '',
-    endDate: ''
+    endDate: '',
+    assignedTo: undefined as string | undefined,
   });
 
   // Populate form when editing
@@ -81,7 +87,8 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
         notes: task.notes,
         assetsInput: task.assets.join('\n'),
         startDate: task.startDate || '',
-        endDate: task.endDate || ''
+        endDate: task.endDate || '',
+        assignedTo: task.assignedTo || undefined,
       });
     } else {
       // Reset form for new task
@@ -95,7 +102,8 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
         notes: '',
         assetsInput: '',
         startDate: '',
-        endDate: ''
+        endDate: '',
+        assignedTo: undefined,
       });
     }
   }, [task]);
@@ -159,6 +167,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
       assets,
       startDate: formData.startDate || undefined,
       endDate: formData.endDate || undefined,
+      assignedTo: formData.assignedTo,
     });
 
     handleClose();
@@ -176,7 +185,8 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
       notes: '',
       assetsInput: '',
       startDate: '',
-      endDate: ''
+      endDate: '',
+      assignedTo: undefined,
     });
     onClose();
   };
@@ -197,6 +207,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
             milestones={milestones}
             selectedClient={selectedClient}
             onClientChange={handleClientChange}
+            users={users}
           />
 
           <div className="flex justify-end space-x-3 pt-4">

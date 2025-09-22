@@ -38,6 +38,7 @@ interface TaskFormData {
   assetsInput: string;
   startDate: string;
   endDate: string;
+  assignedTo?: string;
 }
 
 interface TaskFormFieldsProps {
@@ -48,6 +49,7 @@ interface TaskFormFieldsProps {
   milestones: Milestone[];
   selectedClient?: Client;
   onClientChange: (clientId: number | null) => void;
+  users?: Array<{ id: string; full_name?: string; email?: string }>;
 }
 
 const TaskFormFields = ({
@@ -57,7 +59,8 @@ const TaskFormFields = ({
   availableProjects,
   milestones,
   selectedClient,
-  onClientChange
+  onClientChange,
+  users = []
 }: TaskFormFieldsProps) => {
   const { isAdmin } = useAuth();
   const availableMilestones = milestones.filter(m => 
@@ -140,6 +143,29 @@ const TaskFormFields = ({
               No in-progress milestones found. Consider creating or activating a milestone for better time tracking.
             </p>
           )}
+        </div>
+      )}
+
+      {/* Assignment Field - Only show for admins */}
+      {isAdmin && (
+        <div>
+          <Label htmlFor="assignedTo">Assign To</Label>
+          <Select 
+            value={formData.assignedTo || ''} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, assignedTo: value || undefined }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select user (optional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Unassigned</SelectItem>
+              {users.map((user) => (
+                <SelectItem key={user.id} value={user.id}>
+                  {user.full_name || user.email}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
 

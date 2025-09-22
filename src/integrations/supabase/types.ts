@@ -562,6 +562,7 @@ export type Database = {
         Row: {
           actual_hours: number | null
           assets: string[] | null
+          assigned_to: string | null
           client_id: number
           client_name: string
           completed_date: string | null
@@ -582,6 +583,7 @@ export type Database = {
         Insert: {
           actual_hours?: number | null
           assets?: string[] | null
+          assigned_to?: string | null
           client_id: number
           client_name: string
           completed_date?: string | null
@@ -602,6 +604,7 @@ export type Database = {
         Update: {
           actual_hours?: number | null
           assets?: string[] | null
+          assigned_to?: string | null
           client_id?: number
           client_name?: string
           completed_date?: string | null
@@ -620,6 +623,13 @@ export type Database = {
           worked_hours?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_client_id_fkey"
             columns: ["client_id"]

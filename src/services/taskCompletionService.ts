@@ -18,6 +18,11 @@ export const createHourEntryForCompletedTask = async (
     throw new Error('User not authenticated');
   }
 
+  // Determine who should get credit for the hours:
+  // If task is assigned to someone, they get the hours
+  // Otherwise, the current user (who completed the task) gets the hours
+  const hoursUserId = task.assignedTo || user.id;
+  
   // Create hour entry directly in Supabase
   const supabaseEntry = {
     project_id: task.projectId,
@@ -28,7 +33,7 @@ export const createHourEntryForCompletedTask = async (
     description: `Completed task: ${task.title}`,
     date: new Date().toISOString().split('T')[0],
     billed: false,
-    user_id: user.id
+    user_id: hoursUserId
   };
 
   const { data, error } = await supabase

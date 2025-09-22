@@ -88,6 +88,7 @@ const TaskTable = ({
                 <TableHead className="w-[300px]">Task</TableHead>
                 <TableHead>Client</TableHead>
                 <TableHead>Project</TableHead>
+                <TableHead>Assigned To</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Hours</TableHead>
                 {isAdmin && <TableHead>Billing</TableHead>}
@@ -98,7 +99,7 @@ const TaskTable = ({
             <TableBody>
               {tasks.length === 0 ? (
                 <TableRow>
-                  <td colSpan={8} className="text-center py-4 text-muted-foreground">
+                  <td colSpan={9} className="text-center py-4 text-muted-foreground">
                     No tasks found
                   </td>
                 </TableRow>

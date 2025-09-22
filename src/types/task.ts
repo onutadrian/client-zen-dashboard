@@ -17,6 +17,8 @@ export interface Task {
   completedDate?: string;
   startDate?: string;
   endDate?: string;
+  assignedTo?: string;
+  assignedToName?: string;
 }
 
 export type TaskStatus = Task['status'];
