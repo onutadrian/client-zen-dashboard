@@ -7,22 +7,25 @@ export const loadTasksFromDatabase = async (): Promise<Task[]> => {
   const result = await retryOperation(async () => {
     const { data, error } = await supabase
       .from('tasks')
-      .select(`
-        *,
-        assigned_to_profile:profiles(
-          id,
-          full_name,
-          email
-        )
-      `)
+      .select('*')
       .order('created_date', { ascending: false });
 
     if (error) throw error;
     return data;
   });
 
-  // Transform Supabase data to match our Task interface
-  return result.map(task => ({
+  // Resolve assignee names separately to avoid join issues
+  const assignedIds = Array.from(new Set((result as any[]).map(t => t.assigned_to).filter(Boolean)));
+  const userMap = new Map<string, { full_name: string | null; email: string | null }>();
+  if (assignedIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', assignedIds as string[]);
+    profiles?.forEach((p: any) => userMap.set(p.id, { full_name: p.full_name, email: p.email }));
+  }
+
+  return (result as any[]).map(task => ({
     id: task.id,
     title: task.title,
     description: task.description || '',
@@ -40,8 +43,8 @@ export const loadTasksFromDatabase = async (): Promise<Task[]> => {
     completedDate: task.completed_date || undefined,
     startDate: task.start_date || undefined,
     endDate: task.end_date || undefined,
-    assignedTo: task.assigned_to,
-    assignedToName: task.assigned_to_profile?.full_name || null,
+    assignedTo: task.assigned_to || undefined,
+    assignedToName: (() => { const p = userMap.get(task.assigned_to); return p?.full_name || p?.email || undefined; })(),
   }));
 };
 
@@ -77,19 +80,23 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
   const { data, error } = await supabase
     .from('tasks')
     .insert([supabaseTask])
-    .select(`
-      *,
-      assigned_to_profile:profiles(
-        id,
-        full_name,
-        email
-      )
-    `)
+    .select('*')
     .single();
 
     if (error) throw error;
     return data;
   });
+
+  // Lookup assignee profile for name (respecting RLS)
+  let assignedToName: string | undefined = undefined;
+  if (result.assigned_to) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', result.assigned_to)
+      .maybeSingle();
+    if (profile) assignedToName = profile.full_name || profile.email || undefined;
+  }
 
   return {
     id: result.id,
@@ -109,8 +116,8 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
     completedDate: result.completed_date || undefined,
     startDate: result.start_date || undefined,
     endDate: result.end_date || undefined,
-    assignedTo: result.assigned_to,
-    assignedToName: result.assigned_to_profile?.full_name || null,
+    assignedTo: result.assigned_to || undefined,
+    assignedToName,
   };
 };
 
@@ -187,14 +194,7 @@ export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTask
     .from('tasks')
     .update(supabaseUpdate)
     .eq('id', taskId)
-    .select(`
-      *,
-      assigned_to_profile:profiles(
-        id,
-        full_name,
-        email
-      )
-    `)
+    .select('*')
     .single();
 
   if (error) {
@@ -204,7 +204,17 @@ export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTask
   
   console.log('Task updated successfully in database:', data);
   
-  // Return the updated task with the joined profile data
+  // Resolve assignee name after update
+  let assignedToName: string | undefined = undefined;
+  if (data.assigned_to) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', data.assigned_to)
+      .maybeSingle();
+    if (profile) assignedToName = profile.full_name || profile.email || undefined;
+  }
+
   return {
     id: data.id,
     title: data.title,
@@ -223,7 +233,7 @@ export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTask
     completedDate: data.completed_date || undefined,
     startDate: data.start_date || undefined,
     endDate: data.end_date || undefined,
-    assignedTo: data.assigned_to,
-    assignedToName: data.assigned_to_profile?.full_name || null,
+    assignedTo: data.assigned_to || undefined,
+    assignedToName,
   };
 };

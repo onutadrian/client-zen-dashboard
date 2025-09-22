@@ -56,10 +56,16 @@ interface AddTaskModalProps {
 
 import { useUsers } from '@/hooks/useUsers';
 
+// Admin-only wrapper to fetch users, avoiding profile fetch for non-admins
+const AdminUsersWrapper = (props: Omit<React.ComponentProps<typeof TaskFormFields>, 'users'>) => {
+  const { users } = useUsers();
+  return <TaskFormFields {...props} users={users} />;
+};
+
 const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTaskModalProps) => {
   const { milestones } = useMilestones();
   const { isAdmin } = useAuth();
-  const { users, loading: usersLoading } = useUsers();
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -199,16 +205,28 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <TaskFormFields
-            formData={formData}
-            setFormData={setFormData}
-            clients={clients}
-            availableProjects={availableProjects}
-            milestones={milestones}
-            selectedClient={selectedClient}
-            onClientChange={handleClientChange}
-            users={users}
-          />
+          {isAdmin ? (
+            <AdminUsersWrapper
+              formData={formData}
+              setFormData={setFormData}
+              clients={clients}
+              availableProjects={availableProjects}
+              milestones={milestones}
+              selectedClient={selectedClient}
+              onClientChange={handleClientChange}
+            />
+          ) : (
+            <TaskFormFields
+              formData={formData}
+              setFormData={setFormData}
+              clients={clients}
+              availableProjects={availableProjects}
+              milestones={milestones}
+              selectedClient={selectedClient}
+              onClientChange={handleClientChange}
+              users={[]}
+            />
+          )}
 
           <div className="flex justify-end space-x-3 pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>
