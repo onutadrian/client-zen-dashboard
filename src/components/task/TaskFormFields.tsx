@@ -150,20 +150,20 @@ const TaskFormFields = ({
       {isAdmin && (
         <div>
           <Label htmlFor="assignedTo">Assign To</Label>
-          <Select 
-            value={formData.assignedTo || ''} 
-            onValueChange={(value) => 
-            setFormData(prev => ({ 
-              ...prev, 
-              assignedTo: value === "" ? undefined : value 
-            }))
-          }
+          <Select
+            value={formData.assignedTo ?? 'none'}
+            onValueChange={(value) =>
+              setFormData(prev => ({
+                ...prev,
+                assignedTo: value === 'none' ? undefined : value
+              }))
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Select user (optional)" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Unassigned</SelectItem>
+              <SelectItem value="none">Unassigned</SelectItem>
               {users.map((user) => (
                 <SelectItem key={user.id} value={user.id}>
                   {user.full_name || user.email}
