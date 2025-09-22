@@ -48,7 +48,10 @@ const TaskManagementSection = ({
     createdDate: task.createdDate,
     completedDate: task.completedDate || '',
     startDate: task.startDate || '',
-    endDate: task.endDate || ''
+    endDate: task.endDate || '',
+    // Include assignment fields so the table and edit modal have them
+    assignedTo: task.assignedTo,
+    assignedToName: task.assignedToName,
   });
 
   const handleEditTask = (task: Task) => {

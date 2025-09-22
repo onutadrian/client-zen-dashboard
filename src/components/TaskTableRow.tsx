@@ -107,6 +107,8 @@ const TaskTableRow = ({
               <p className="font-medium text-slate-700">{task.assignedToName}</p>
               <p className="text-slate-500 text-xs">Assigned</p>
             </div>
+          ) : task.assignedTo ? (
+            <p className="text-slate-500">Assigned</p>
           ) : (
             <p className="text-slate-500">Unassigned</p>
           )}
