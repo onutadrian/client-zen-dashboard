@@ -151,14 +151,19 @@ const TaskFormFields = ({
         <div>
           <Label htmlFor="assignedTo">Assign To</Label>
           <Select 
-            value={formData.assignedTo || 'unassigned'} 
-            onValueChange={(value) => setFormData(prev => ({ ...prev, assignedTo: value === 'unassigned' ? undefined : value }))}
+            value={formData.assignedTo || ''} 
+            onValueChange={(value) => 
+            setFormData(prev => ({ 
+              ...prev, 
+              assignedTo: value === "" ? undefined : value 
+            }))
+          }
           >
             <SelectTrigger>
               <SelectValue placeholder="Select user (optional)" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="unassigned">Unassigned</SelectItem>
+              <SelectItem value="">Unassigned</SelectItem>
               {users.map((user) => (
                 <SelectItem key={user.id} value={user.id}>
                   {user.full_name || user.email}

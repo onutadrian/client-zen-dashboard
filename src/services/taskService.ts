@@ -9,7 +9,7 @@ export const loadTasksFromDatabase = async (): Promise<Task[]> => {
       .from('tasks')
       .select(`
         *,
-        assigned_to_profile:profiles!assigned_to(
+        assigned_to_profile:profiles(
           id,
           full_name,
           email
@@ -79,7 +79,7 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
     .insert([supabaseTask])
     .select(`
       *,
-      assigned_to_profile:profiles!assigned_to(
+      assigned_to_profile:profiles(
         id,
         full_name,
         email
@@ -189,7 +189,7 @@ export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTask
     .eq('id', taskId)
     .select(`
       *,
-      assigned_to_profile:profiles!assigned_to(
+      assigned_to_profile:profiles(
         id,
         full_name,
         email
