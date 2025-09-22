@@ -42,7 +42,8 @@ const Index = () => {
       startDate: task.startDate || '',
       endDate: task.endDate || '',
       notes: task.notes || '',
-      assets: task.assets || []
+      assets: task.assets || [],
+      assignedTo: task.assignedTo,
     };
     addTask(taskData);
   };
@@ -66,11 +67,13 @@ const Index = () => {
       clientId: task.clientId,
       clientName: task.clientName,
       projectId: task.projectId,
+      milestoneId: task.milestoneId,
       estimatedHours: task.estimatedHours || 0,
       startDate: task.startDate || '',
       endDate: task.endDate || '',
       notes: task.notes || '',
-      assets: task.assets || []
+      assets: task.assets || [],
+      assignedTo: task.assignedTo,
     };
     editTask(task.id, taskData);
   };
