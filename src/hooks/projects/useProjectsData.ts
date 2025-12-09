@@ -62,6 +62,7 @@ export const useProjectsData = () => {
         pricingType: project.pricing_type as 'fixed' | 'hourly' | 'daily',
         fixedPrice: project.fixed_price || undefined,
         hourlyRate: project.hourly_rate || undefined,
+        urgentHourlyRate: project.urgent_hourly_rate || undefined,
         dailyRate: project.daily_rate || undefined,
         estimatedHours: project.estimated_hours || undefined,
         currency: project.currency || 'USD',

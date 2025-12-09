@@ -19,6 +19,7 @@ export interface Task {
   endDate?: string;
   assignedTo?: string;
   assignedToName?: string;
+  urgent?: boolean;
 }
 
 export type TaskStatus = Task['status'];

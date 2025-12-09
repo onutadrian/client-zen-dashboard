@@ -14,6 +14,7 @@ export interface Project {
   pricingType: 'fixed' | 'hourly' | 'daily';
   fixedPrice?: number;
   hourlyRate?: number;
+  urgentHourlyRate?: number;
   dailyRate?: number;
   estimatedHours?: number;
   currency: string;

@@ -45,6 +45,7 @@ export const loadTasksFromDatabase = async (): Promise<Task[]> => {
     endDate: task.end_date || undefined,
     assignedTo: task.assigned_to || undefined,
     assignedToName: (() => { const p = userMap.get(task.assigned_to); return p?.full_name || p?.email || undefined; })(),
+    urgent: task.urgent || false,
   }));
 };
 
@@ -73,6 +74,7 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
     start_date: newTask.startDate || null,
     end_date: newTask.endDate || null,
     assigned_to: newTask.assignedTo || null,
+    urgent: newTask.urgent || false,
     user_id: user.id // Add the user_id to satisfy RLS policy
   };
 
@@ -118,6 +120,7 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
     endDate: result.end_date || undefined,
     assignedTo: result.assigned_to || undefined,
     assignedToName,
+    urgent: result.urgent || false,
   };
 };
 
@@ -187,6 +190,7 @@ export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTask
   if (updatedTask.endDate !== undefined) supabaseUpdate.end_date = updatedTask.endDate || null;
   if (updatedTask.workedHours !== undefined) supabaseUpdate.worked_hours = updatedTask.workedHours;
   if (updatedTask.assignedTo !== undefined) supabaseUpdate.assigned_to = updatedTask.assignedTo || null;
+  if (updatedTask.urgent !== undefined) supabaseUpdate.urgent = updatedTask.urgent;
 
   console.log('supabaseUpdate object:', supabaseUpdate);
 
@@ -235,5 +239,6 @@ export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTask
     endDate: data.end_date || undefined,
     assignedTo: data.assigned_to || undefined,
     assignedToName,
+    urgent: data.urgent || false,
   };
 };

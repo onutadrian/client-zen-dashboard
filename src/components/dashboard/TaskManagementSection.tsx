@@ -52,6 +52,7 @@ const TaskManagementSection = ({
     // Include assignment fields so the table and edit modal have them
     assignedTo: task.assignedTo,
     assignedToName: task.assignedToName,
+    urgent: task.urgent,
   });
 
   const handleEditTask = (task: Task) => {

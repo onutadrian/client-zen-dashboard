@@ -399,6 +399,7 @@ export type Database = {
           status: string
           team: string[] | null
           updated_at: string
+          urgent_hourly_rate: number | null
           user_id: string
         }
         Insert: {
@@ -422,6 +423,7 @@ export type Database = {
           status?: string
           team?: string[] | null
           updated_at?: string
+          urgent_hourly_rate?: number | null
           user_id?: string
         }
         Update: {
@@ -445,6 +447,7 @@ export type Database = {
           status?: string
           team?: string[] | null
           updated_at?: string
+          urgent_hourly_rate?: number | null
           user_id?: string
         }
         Relationships: [
@@ -577,6 +580,7 @@ export type Database = {
           start_date: string | null
           status: string
           title: string
+          urgent: boolean | null
           user_id: string
           worked_hours: number | null
         }
@@ -598,6 +602,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           title: string
+          urgent?: boolean | null
           user_id?: string
           worked_hours?: number | null
         }
@@ -619,6 +624,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           title?: string
+          urgent?: boolean | null
           user_id?: string
           worked_hours?: number | null
         }

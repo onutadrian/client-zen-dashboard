@@ -37,6 +37,7 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
     pricingType: 'fixed' as 'fixed' | 'hourly',
     fixedPrice: '',
     hourlyRate: '',
+    urgentHourlyRate: '',
     estimatedHours: '',
     currency: 'EUR'
   });
@@ -98,6 +99,7 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
       pricingType: formData.pricingType,
       fixedPrice: formData.pricingType === 'fixed' && formData.fixedPrice ? parseFloat(formData.fixedPrice) : undefined,
       hourlyRate: formData.pricingType === 'hourly' && formData.hourlyRate ? parseFloat(formData.hourlyRate) : undefined,
+      urgentHourlyRate: formData.pricingType === 'hourly' && formData.urgentHourlyRate ? parseFloat(formData.urgentHourlyRate) : undefined,
       estimatedHours: formData.pricingType === 'hourly' && formData.estimatedHours ? parseInt(formData.estimatedHours) : undefined,
       currency: formData.currency,
       invoices: []
@@ -117,6 +119,7 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
       pricingType: 'fixed',
       fixedPrice: '',
       hourlyRate: '',
+      urgentHourlyRate: '',
       estimatedHours: '',
       currency: 'EUR'
     });
@@ -227,18 +230,31 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
               />
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="hourlyRate">Hourly Rate ({formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : 'RON'})</Label>
-                <Input
-                  id="hourlyRate"
-                  type="number"
-                  step="0.01"
-                  value={formData.hourlyRate}
-                  onChange={(e) => handleChange('hourlyRate', e.target.value)}
-                  placeholder="Rate per hour"
-                  required
-                />
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="hourlyRate">Hourly Rate ({formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : 'RON'})</Label>
+                  <Input
+                    id="hourlyRate"
+                    type="number"
+                    step="0.01"
+                    value={formData.hourlyRate}
+                    onChange={(e) => handleChange('hourlyRate', e.target.value)}
+                    placeholder="Rate per hour"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="urgentHourlyRate">Urgent Rate ({formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : 'RON'})</Label>
+                  <Input
+                    id="urgentHourlyRate"
+                    type="number"
+                    step="0.01"
+                    value={formData.urgentHourlyRate}
+                    onChange={(e) => handleChange('urgentHourlyRate', e.target.value)}
+                    placeholder="Urgent rate per hour"
+                  />
+                </div>
               </div>
               <div>
                 <Label htmlFor="estimatedHours">Estimated Hours</Label>
