@@ -146,17 +146,30 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
               />
             </div>
           ) : formData.pricingType === 'hourly' ? (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="hourlyRate">Hourly Rate ({getCurrencySymbol(formData.currency || 'USD')})</Label>
-                <Input
-                  id="hourlyRate"
-                  type="number"
-                  step="0.01"
-                  value={formData.hourlyRate || ''}
-                  onChange={(e) => handleInputChange('hourlyRate', e.target.value ? parseFloat(e.target.value) : undefined)}
-                  placeholder="Rate per hour"
-                />
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="hourlyRate">Hourly Rate ({getCurrencySymbol(formData.currency || 'USD')})</Label>
+                  <Input
+                    id="hourlyRate"
+                    type="number"
+                    step="0.01"
+                    value={formData.hourlyRate || ''}
+                    onChange={(e) => handleInputChange('hourlyRate', e.target.value ? parseFloat(e.target.value) : undefined)}
+                    placeholder="Rate per hour"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="urgentHourlyRate">Urgent Rate ({getCurrencySymbol(formData.currency || 'USD')})</Label>
+                  <Input
+                    id="urgentHourlyRate"
+                    type="number"
+                    step="0.01"
+                    value={formData.urgentHourlyRate || ''}
+                    onChange={(e) => handleInputChange('urgentHourlyRate', e.target.value ? parseFloat(e.target.value) : undefined)}
+                    placeholder="Urgent rate per hour"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="estimatedHours">Estimated Hours</Label>

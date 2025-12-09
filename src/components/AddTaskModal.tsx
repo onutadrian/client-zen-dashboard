@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import ClientSelectDropdown from '@/components/forms/ClientSelectDropdown';
 import ProjectSelectDropdown from '@/components/forms/ProjectSelectDropdown';
@@ -43,6 +44,7 @@ interface Task {
   endDate?: string;
   assignedTo?: string;
   assignedToName?: string;
+  urgent?: boolean;
 }
 
 interface AddTaskModalProps {
@@ -78,6 +80,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
     startDate: '',
     endDate: '',
     assignedTo: undefined as string | undefined,
+    urgent: false,
   });
 
   // Populate form when editing
@@ -95,6 +98,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
         startDate: task.startDate || '',
         endDate: task.endDate || '',
         assignedTo: task.assignedTo || undefined,
+        urgent: task.urgent || false,
       });
     } else {
       // Reset form for new task
@@ -110,6 +114,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
         startDate: '',
         endDate: '',
         assignedTo: undefined,
+        urgent: false,
       });
     }
   }, [task]);
@@ -174,6 +179,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
       startDate: formData.startDate || undefined,
       endDate: formData.endDate || undefined,
       assignedTo: formData.assignedTo,
+      urgent: formData.urgent,
     });
 
     handleClose();
@@ -193,6 +199,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
       startDate: '',
       endDate: '',
       assignedTo: undefined,
+      urgent: false,
     });
     onClose();
   };
@@ -227,6 +234,18 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
               users={[]}
             />
           )}
+
+          {/* Urgent checkbox */}
+          <div className="flex items-center space-x-2 pt-2">
+            <Checkbox
+              id="urgent"
+              checked={formData.urgent}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, urgent: checked as boolean }))}
+            />
+            <Label htmlFor="urgent" className="text-sm font-medium text-red-600">
+              Mark as Urgent (uses urgent hourly rate)
+            </Label>
+          </div>
 
           <div className="flex justify-end space-x-3 pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>

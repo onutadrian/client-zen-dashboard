@@ -87,11 +87,18 @@ const TaskTableRow = ({
       onClick={() => onTaskClick(task)}
     >
       <TableCell className="font-medium">
-        <div>
-          <p className="font-semibold">{task.title}</p>
-          {task.description && (
-            <p className="text-sm text-slate-600 line-clamp-1">{task.description}</p>
+        <div className="flex items-center gap-2">
+          {task.urgent && (
+            <Badge variant="destructive" className="text-xs">
+              Urgent
+            </Badge>
           )}
+          <div>
+            <p className="font-semibold">{task.title}</p>
+            {task.description && (
+              <p className="text-sm text-slate-600 line-clamp-1">{task.description}</p>
+            )}
+          </div>
         </div>
       </TableCell>
       <TableCell>{task.clientName}</TableCell>
