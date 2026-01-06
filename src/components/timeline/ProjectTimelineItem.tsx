@@ -30,8 +30,10 @@ const ProjectTimelineItem = ({ project, tasks, milestones, clients }: ProjectTim
         return 'bg-green-500';
       case 'active':
         return 'bg-blue-500';
-      case 'on-hold':
+      case 'paused':
         return 'bg-yellow-500';
+      case 'canceled':
+        return 'bg-red-500';
       case 'in-progress':
         return 'bg-blue-500';
       case 'pending':
