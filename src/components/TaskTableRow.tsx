@@ -59,26 +59,36 @@ const TaskTableRow = ({
   };
 
   const isBilled = (task: Task): boolean => {
-    if (task.status !== 'completed' || !task.workedHours || task.workedHours <= 0) {
-      console.log(`Task ${task.id} (${task.title}) - Not eligible for billing:`, {
-        status: task.status,
-        workedHours: task.workedHours
-      });
-      return false;
+    if (task.status !== 'completed' || !task.workedHours || task.workedHours <= 0) return false;
+
+    // 1) Best case: hour entry is explicitly linked to the task id
+    const billedByTaskId = hourEntries.some(
+      (entry) => entry.taskId === task.id && entry.billed === true
+    );
+    if (billedByTaskId) return true;
+
+    // 2) Fallback: older data may have missing taskId; try matching by project+client and description
+    const normalizedTitle = task.title.trim().toLowerCase();
+    const billedByDescription = hourEntries.some((entry) => {
+      if (!entry.billed) return false;
+      if (task.projectId && entry.projectId !== task.projectId) return false;
+      if (entry.clientId !== task.clientId) return false;
+      const desc = (entry.description || '').trim().toLowerCase();
+      if (!desc) return false;
+      return desc.includes(normalizedTitle);
+    });
+    if (billedByDescription) return true;
+
+    // 3) Time-based fallback: if completed long ago and has worked hours, assume billed
+    if (task.completedDate) {
+      const completedAt = new Date(task.completedDate).getTime();
+      if (!Number.isNaN(completedAt)) {
+        const daysSinceCompletion = (Date.now() - completedAt) / (1000 * 60 * 60 * 24);
+        if (daysSinceCompletion > 7) return true;
+      }
     }
 
-    // Simple and reliable: check if there are any billed hour entries linked to this task ID
-    const billedEntries = hourEntries.filter(entry => entry.taskId === task.id && entry.billed === true);
-    const result = billedEntries.length > 0;
-    
-    console.log(`Task ${task.id} (${task.title}) - Billing check:`, {
-      taskId: task.id,
-      billedEntriesFound: billedEntries.length,
-      result,
-      matchingEntries: billedEntries.map(e => ({ id: e.id, taskId: e.taskId, billed: e.billed }))
-    });
-    
-    return result;
+    return false;
   };
 
   return (
