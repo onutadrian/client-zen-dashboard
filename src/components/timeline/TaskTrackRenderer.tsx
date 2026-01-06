@@ -20,8 +20,10 @@ const TaskTrackRenderer = ({ tasks, totalHeight }: TaskTrackRendererProps) => {
         return 'bg-green-500';
       case 'active':
         return 'bg-blue-600';
-      case 'on-hold':
+      case 'paused':
         return 'bg-yellow-500';
+      case 'canceled':
+        return 'bg-red-500';
       case 'in-progress':
         return 'bg-blue-600';
       case 'pending':

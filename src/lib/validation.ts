@@ -42,7 +42,7 @@ export const projectValidationSchema = z.object({
   startDate: z.string().min(1, 'Start date is required'),
   estimatedEndDate: z.string().min(1, 'Estimated end date is required'),
   endDate: z.string().optional(),
-  status: z.enum(['active', 'completed', 'on-hold', 'cancelled']).default('active'),
+  status: z.enum(['active', 'completed', 'paused', 'canceled']).default('active'),
   pricingType: z.enum(['fixed', 'hourly', 'daily']).default('fixed'),
   fixedPrice: z.number().min(0).optional(),
   hourlyRate: z.number().min(0).optional(),
