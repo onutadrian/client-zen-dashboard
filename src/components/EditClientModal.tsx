@@ -5,9 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Client } from '@/types/client';
-import { mapPriceType } from '@/utils/clientUtils';
 import ClientBasicInfoForm from '@/components/client/ClientBasicInfoForm';
-import ClientRateForm from '@/components/client/ClientRateForm';
 import ClientDocumentsSection from '@/components/client/ClientDocumentsSection';
 import ClientLinksSection from '@/components/client/ClientLinksSection';
 import ClientPeopleSection from '@/components/client/ClientPeopleSection';
@@ -23,7 +21,6 @@ interface EditClientModalProps {
 const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalProps) => {
   const [formData, setFormData] = useState({
     ...client,
-    priceType: mapPriceType(client.priceType),
     documents: client.documents || [],
     links: client.links || [],
     people: client.people || [],
@@ -41,14 +38,6 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
     
     if (!formData.name?.trim()) {
       newErrors.name = 'Client name is required';
-    }
-    
-    if (!formData.price || formData.price <= 0) {
-      newErrors.price = 'Price must be greater than 0';
-    }
-    
-    if (!formData.priceType) {
-      newErrors.priceType = 'Price type is required';
     }
     
     if (!formData.status) {
@@ -80,11 +69,6 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
             errors={errors}
           />
 
-          <ClientRateForm 
-            formData={formData}
-            setFormData={setFormData}
-            errors={errors}
-          />
 
           <div>
             <Label htmlFor="notes">Notes</Label>

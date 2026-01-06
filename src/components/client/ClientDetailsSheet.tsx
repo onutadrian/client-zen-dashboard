@@ -2,7 +2,6 @@
 import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign } from 'lucide-react';
 import { Client } from '@/types/client';
 import { useCurrency } from '@/hooks/useCurrency';
 import { formatCurrency } from '@/lib/currency';
@@ -46,26 +45,8 @@ const ClientDetailsSheet = ({ client, isOpen, onClose, onInvoiceStatusUpdate }: 
                 <Badge className={getStatusBadge(client.status)}>
                   {client.status.charAt(0).toUpperCase() + client.status.slice(1)}
                 </Badge>
-                {!demoMode && (
-                  <span className="text-sm text-slate-600">
-                    {client.priceType === 'hourly' ? 'Hourly Rate' : 
-                     client.priceType === 'daily' ? 'Daily Rate' : 'Fixed Price'}
-                  </span>
-                )}
               </div>
             </div>
-            {!demoMode && (
-              <div className="text-right">
-                <div className="flex items-center text-xl font-bold text-slate-800">
-                  <DollarSign className="w-5 h-5 mr-1" />
-                  {formatCurrency(client.price, client.currency)}
-                </div>
-                <div className="text-sm text-slate-500">
-                  {client.priceType === 'hourly' ? 'per hour' : 
-                   client.priceType === 'daily' ? 'per day' : 'total'}
-                </div>
-              </div>
-            )}
           </div>
         </SheetHeader>
 

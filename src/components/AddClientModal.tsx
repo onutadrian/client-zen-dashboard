@@ -10,15 +10,12 @@ import { Plus, X } from 'lucide-react';
 const AddClientModal = ({ isOpen, onClose, onAdd }) => {
   const [formData, setFormData] = useState({
     name: '',
-    price: '',
-    priceType: 'hourly',
     status: 'active',
     notes: '',
     documents: [],
     links: [],
     people: [],
-    invoices: [],
-    currency: 'USD'
+    invoices: []
   });
 
   const [newDocument, setNewDocument] = useState('');
@@ -29,7 +26,9 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
     e.preventDefault();
     const clientData = {
       ...formData,
-      price: parseFloat(formData.price) || 0,
+      price: 0,
+      priceType: 'hour',
+      currency: 'USD',
       totalHours: 0
     };
     onAdd(clientData);
@@ -40,15 +39,12 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
   const resetForm = () => {
     setFormData({
       name: '',
-      price: '',
-      priceType: 'hourly',
       status: 'active',
       notes: '',
       documents: [],
       links: [],
       people: [],
-      invoices: [],
-      currency: 'USD'
+      invoices: []
     });
     setNewDocument('');
     setNewLink('');
@@ -141,49 +137,6 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
             </div>
           </div>
 
-          {/* Pricing */}
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="client-price">Price *</Label>
-              <Input
-                id="client-price"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                placeholder="0.00"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="price-type">Price Type</Label>
-              <Select value={formData.priceType} onValueChange={(value) => setFormData({ ...formData, priceType: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="hourly">Per Hour</SelectItem>
-                  <SelectItem value="daily">Per Day</SelectItem>
-                  <SelectItem value="weekly">Per Week</SelectItem>
-                  <SelectItem value="monthly">Per Month</SelectItem>
-                  <SelectItem value="project">Per Project</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="client-currency">Currency</Label>
-              <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="USD">US Dollar ($)</SelectItem>
-                  <SelectItem value="EUR">Euro (€)</SelectItem>
-                  <SelectItem value="RON">Romanian Lei (RON)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
           {/* Documents */}
           <div>
