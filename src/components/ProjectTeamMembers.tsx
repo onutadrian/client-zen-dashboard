@@ -14,43 +14,66 @@ interface ProjectTeamMembersProps {
   onUpdateProject: (projectId: string, updates: any) => void;
 }
 
+interface TeamMember {
+  name: string;
+  title: string;
+  notes: string;
+}
+
 const ProjectTeamMembers = ({
   project,
   client,
   onUpdateProject
 }: ProjectTeamMembersProps) => {
-  const [newMember, setNewMember] = useState('');
+  const [newMember, setNewMember] = useState({ name: '', title: '', notes: '' });
   const [isAdding, setIsAdding] = useState(false);
 
+  // Parse team members - support both old string[] format and new object format
+  const parseTeamMembers = (): TeamMember[] => {
+    if (!project.team || project.team.length === 0) return [];
+    
+    return project.team.map(member => {
+      if (typeof member === 'string') {
+        // Legacy format - just a name string
+        return { name: member, title: '', notes: '' };
+      }
+      // New format - already an object
+      return member as unknown as TeamMember;
+    });
+  };
+
+  const teamMembers = parseTeamMembers();
+
   const handleAddMember = () => {
-    if (newMember.trim()) {
-      const updatedTeam = [...(project.team || []), newMember.trim()];
+    if (newMember.name.trim()) {
+      const updatedTeam = [...(project.team || []), JSON.stringify(newMember)];
       onUpdateProject(project.id, {
         ...project,
         team: updatedTeam
       });
-      setNewMember('');
+      setNewMember({ name: '', title: '', notes: '' });
       setIsAdding(false);
     }
   };
 
-  const handleRemoveMember = (memberToRemove: string) => {
-    const updatedTeam = (project.team || []).filter(member => member !== memberToRemove);
+  const handleRemoveMember = (index: number) => {
+    const updatedTeam = (project.team || []).filter((_, i) => i !== index);
     onUpdateProject(project.id, {
       ...project,
       team: updatedTeam
     });
   };
 
-  const getMemberTitle = (memberName: string) => {
-    if (!client?.people) return 'Team Member';
-    
-    // Try to find the member by name or email in the client's people data
-    const person = client.people.find(p => 
-      p.name === memberName || p.email === memberName
-    );
-    
-    return person?.title || 'Team Member';
+  const getMemberData = (member: string | any): TeamMember => {
+    if (typeof member === 'string') {
+      try {
+        const parsed = JSON.parse(member);
+        return { name: parsed.name || member, title: parsed.title || '', notes: parsed.notes || '' };
+      } catch {
+        return { name: member, title: '', notes: '' };
+      }
+    }
+    return member as TeamMember;
   };
 
   return (
@@ -74,55 +97,83 @@ const ProjectTeamMembers = ({
         </CardHeader>
         <CardContent>
           {isAdding && (
-            <div className="flex space-x-2 mb-4">
-              <Input
-                placeholder="Enter team member name or email"
-                value={newMember}
-                onChange={(e) => setNewMember(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddMember()}
-              />
-              <Button onClick={handleAddMember} size="sm">
-                Add
-              </Button>
-              <Button 
-                onClick={() => setIsAdding(false)} 
-                variant="outline" 
-                size="sm"
-              >
-                Cancel
-              </Button>
+            <div className="space-y-3 mb-4 p-4 border rounded-lg bg-muted/50">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Name *</label>
+                  <Input
+                    placeholder="Team member name"
+                    value={newMember.name}
+                    onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Title</label>
+                  <Input
+                    placeholder="Job title (e.g., Developer)"
+                    value={newMember.title}
+                    onChange={(e) => setNewMember({ ...newMember, title: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Notes</label>
+                <Input
+                  placeholder="Additional notes"
+                  value={newMember.notes}
+                  onChange={(e) => setNewMember({ ...newMember, notes: e.target.value })}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddMember()}
+                />
+              </div>
+              <div className="flex space-x-2">
+                <Button onClick={handleAddMember} size="sm">
+                  Add Member
+                </Button>
+                <Button 
+                  onClick={() => setIsAdding(false)} 
+                  variant="outline" 
+                  size="sm"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           )}
 
           {project.team && project.team.length > 0 ? (
             <div className="space-y-3">
-              {project.team.map((member, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <UserCheck className="w-5 h-5 text-blue-600" />
+              {project.team.map((member, index) => {
+                const memberData = getMemberData(member);
+                return (
+                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <UserCheck className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{memberData.name}</p>
+                        {memberData.title && (
+                          <p className="text-sm text-slate-600">{memberData.title}</p>
+                        )}
+                        {memberData.notes && (
+                          <p className="text-xs text-slate-500 mt-1">{memberData.notes}</p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{member}</p>
-                      <p className="text-sm text-slate-600 flex items-center">
-                        <UserCheck className="w-4 h-4 mr-1" />
-                        {getMemberTitle(member)}
-                      </p>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="secondary">Active</Badge>
+                      <Button
+                        onClick={() => handleRemoveMember(index)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="secondary">Active</Badge>
-                    <Button
-                      onClick={() => handleRemoveMember(member)}
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-8">
