@@ -4,6 +4,7 @@ import AddTaskModal from '@/components/AddTaskModal';
 import { Task } from '@/types/task';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/types/client';
+import ProjectStatusFilter, { ProjectStatus } from './ProjectStatusFilter';
 
 interface TaskManagementSectionProps {
   tasks: Task[];
@@ -14,6 +15,8 @@ interface TaskManagementSectionProps {
   onDeleteTask: (taskId: number) => void;
   onEditTask: (task: any) => void;
   onAddTask: (task: Omit<Task, 'id' | 'createdDate'>) => void;
+  selectedStatuses: ProjectStatus[];
+  onStatusChange: (statuses: ProjectStatus[]) => void;
 }
 
 const TaskManagementSection = ({
@@ -24,13 +27,12 @@ const TaskManagementSection = ({
   onUpdateTask,
   onDeleteTask,
   onEditTask,
-  onAddTask
+  onAddTask,
+  selectedStatuses,
+  onStatusChange
 }: TaskManagementSectionProps) => {
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-
-  console.log('TaskManagementSection - Raw clients received:', clients);
-  console.log('TaskManagementSection - Raw projects received:', projects);
 
   const transformTaskForTaskTable = (task: Task) => ({
     id: task.id,
@@ -49,7 +51,6 @@ const TaskManagementSection = ({
     completedDate: task.completedDate || '',
     startDate: task.startDate || '',
     endDate: task.endDate || '',
-    // Include assignment fields so the table and edit modal have them
     assignedTo: task.assignedTo,
     assignedToName: task.assignedToName,
     urgent: task.urgent,
@@ -74,17 +75,24 @@ const TaskManagementSection = ({
     handleModalClose();
   };
 
-  // The clients and projects are already filtered by the parent component based on user permissions
-  // So we can pass them directly to the AddTaskModal
-  console.log('TaskManagementSection - Passing clients to modal:', clients);
-  console.log('TaskManagementSection - Passing projects to modal:', projects);
+  // Filter projects by selected statuses
+  const filteredProjects = useMemo(() => {
+    return projects.filter(project => selectedStatuses.includes(project.status as ProjectStatus));
+  }, [projects, selectedStatuses]);
 
-  console.log('TaskManagementSection - Current tasks count:', tasks.length);
-  console.log('TaskManagementSection - Tasks data:', tasks);
+  // Get project IDs for filtering tasks
+  const filteredProjectIds = useMemo(() => {
+    return new Set(filteredProjects.map(p => p.id));
+  }, [filteredProjects]);
+
+  // Filter tasks to only include those linked to filtered projects
+  const filteredTasks = useMemo(() => {
+    return tasks.filter(task => task.projectId && filteredProjectIds.has(task.projectId));
+  }, [tasks, filteredProjectIds]);
 
   const transformedTasks = useMemo(() => {
-    return tasks.map(transformTaskForTaskTable);
-  }, [tasks]);
+    return filteredTasks.map(transformTaskForTaskTable);
+  }, [filteredTasks]);
 
   const transformedClients = useMemo(() => {
     return clients.map(client => ({
@@ -96,15 +104,22 @@ const TaskManagementSection = ({
   }, [clients]);
 
   const transformedProjects = useMemo(() => {
-    return projects.map(project => ({
+    return filteredProjects.map(project => ({
       id: project.id,
       name: project.name,
       clientId: project.clientId
     }));
-  }, [projects]);
+  }, [filteredProjects]);
 
   return (
     <>
+      <div className="mb-4">
+        <ProjectStatusFilter
+          selectedStatuses={selectedStatuses}
+          onStatusChange={onStatusChange}
+        />
+      </div>
+
       <TaskTable
         tasks={transformedTasks}
         clients={transformedClients}

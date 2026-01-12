@@ -8,6 +8,7 @@ import TaskManagementSection from '@/components/dashboard/TaskManagementSection'
 import TimelineSection from '@/components/dashboard/TimelineSection';
 import { useDashboardData } from '@/hooks/dashboard/useDashboardData';
 import type { Task as HookTask } from '@/types/task';
+import type { ProjectStatus } from '@/components/dashboard/ProjectStatusFilter';
 
 const Index = () => {
   const {
@@ -29,6 +30,7 @@ const Index = () => {
   } = useDashboardData();
 
   const [selectedTask, setSelectedTask] = useState<HookTask | null>(null);
+  const [selectedStatuses, setSelectedStatuses] = useState<ProjectStatus[]>(['active']);
 
   const handleAddTask = (task: Omit<HookTask, 'id' | 'createdDate'>) => {
     const taskData = {
@@ -99,6 +101,18 @@ const Index = () => {
     });
   };
 
+  // Filter projects and tasks by selected statuses
+  const filteredProjects = projects.filter(project => 
+    selectedStatuses.includes(project.status as ProjectStatus)
+  );
+  const filteredProjectIds = new Set(filteredProjects.map(p => p.id));
+  const filteredTasks = tasks.filter(task => 
+    task.projectId && filteredProjectIds.has(task.projectId)
+  );
+  const filteredMilestones = milestones.filter(milestone =>
+    filteredProjectIds.has(milestone.projectId)
+  );
+
   if (authLoading) {
     return <DashboardContainer><div /></DashboardContainer>;
   }
@@ -149,12 +163,14 @@ const Index = () => {
             onDeleteTask={handleDeleteTask}
             onEditTask={handleEditTask}
             onAddTask={handleAddTask}
+            selectedStatuses={selectedStatuses}
+            onStatusChange={setSelectedStatuses}
           />
 
           <TimelineSection
-            projects={projects}
-            tasks={tasks}
-            milestones={milestones}
+            projects={filteredProjects}
+            tasks={filteredTasks}
+            milestones={filteredMilestones}
             clients={clients}
           />
         </div>
