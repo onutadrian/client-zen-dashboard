@@ -102,14 +102,14 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-slate-500">No client associated with this project</p>
+          <p className="text-muted-foreground">No client associated with this project</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center">
           <DollarSign className="w-5 h-5 mr-2" />
@@ -117,7 +117,7 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
           <ProjectMetricsCards
             isFixedPrice={isFixedPrice}
             hasMilestones={hasMilestones}
@@ -138,8 +138,8 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
         </div>
         
         {unbilledHours > 0 && !isFixedPrice && !demoMode && (
-          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-            <p className="text-sm text-amber-800">
+          <div className="mt-4 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+            <p className="text-sm text-warning-foreground">
               You have <strong>{unbilledHours.toFixed(2)} hours</strong> of unbilled work worth{' '}
               <strong>{formatCurrency(unbilledRevenue, displayCurrency)}</strong>. Consider creating an invoice.
             </p>
