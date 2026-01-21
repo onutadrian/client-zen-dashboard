@@ -18,6 +18,7 @@ export interface Project {
   dailyRate?: number;
   estimatedHours?: number;
   currency: string;
+  useMilestones?: boolean;
   invoices: Array<{
     id: string;
     amount: number;

@@ -48,6 +48,11 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
         <SheetHeader>
+          {task.urgent && (
+            <div className="mb-2">
+              <Badge variant="destructive" className="text-xs">Urgent</Badge>
+            </div>
+          )}
           <SheetTitle>{task.title}</SheetTitle>
           <SheetDescription>Task details and information</SheetDescription>
         </SheetHeader>

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface Client {
@@ -39,7 +40,8 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
     hourlyRate: '',
     urgentHourlyRate: '',
     estimatedHours: '',
-    currency: 'EUR'
+    currency: 'EUR',
+    useMilestones: true,
   });
   
   const [inheritOptions, setInheritOptions] = useState({
@@ -102,7 +104,8 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
       urgentHourlyRate: formData.pricingType === 'hourly' && formData.urgentHourlyRate ? parseFloat(formData.urgentHourlyRate) : undefined,
       estimatedHours: formData.pricingType === 'hourly' && formData.estimatedHours ? parseInt(formData.estimatedHours) : undefined,
       currency: formData.currency,
-      invoices: []
+      invoices: [],
+      useMilestones: formData.useMilestones,
     };
 
     onAdd(projectData);
@@ -121,7 +124,8 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
       hourlyRate: '',
       urgentHourlyRate: '',
       estimatedHours: '',
-      currency: 'EUR'
+      currency: 'EUR',
+      useMilestones: true,
     });
     setInheritOptions({
       documents: false,
@@ -213,6 +217,16 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
                 <Label htmlFor="hourly">Hourly Rate</Label>
               </div>
             </RadioGroup>
+          </div>
+
+          {/* Use Milestones */}
+          <div className="flex items-center justify-between">
+            <Label htmlFor="useMilestones">Use milestones</Label>
+            <Switch
+              id="useMilestones"
+              checked={formData.useMilestones}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, useMilestones: checked }))}
+            />
           </div>
 
           {/* Conditional Pricing Fields */}

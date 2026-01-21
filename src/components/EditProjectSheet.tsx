@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Switch } from '@/components/ui/switch';
 import { Project } from '@/hooks/useProjects';
 
 interface Client {
@@ -130,6 +131,16 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
                 <Label htmlFor="edit-daily">Daily Rate</Label>
               </div>
             </RadioGroup>
+          </div>
+
+          {/* Use Milestones */}
+          <div className="flex items-center justify-between">
+            <Label htmlFor="useMilestones">Use milestones</Label>
+            <Switch
+              id="useMilestones"
+              checked={formData.useMilestones !== false}
+              onCheckedChange={(checked) => handleInputChange('useMilestones', checked)}
+            />
           </div>
 
           {/* Conditional Pricing Fields */}

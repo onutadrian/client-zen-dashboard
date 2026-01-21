@@ -400,6 +400,7 @@ export type Database = {
           team: string[] | null
           updated_at: string
           urgent_hourly_rate: number | null
+          use_milestones: boolean
           user_id: string
         }
         Insert: {
@@ -424,6 +425,7 @@ export type Database = {
           team?: string[] | null
           updated_at?: string
           urgent_hourly_rate?: number | null
+          use_milestones?: boolean
           user_id?: string
         }
         Update: {
@@ -448,6 +450,7 @@ export type Database = {
           team?: string[] | null
           updated_at?: string
           urgent_hourly_rate?: number | null
+          use_milestones?: boolean
           user_id?: string
         }
         Relationships: [

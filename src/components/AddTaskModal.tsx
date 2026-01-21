@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import ClientSelectDropdown from '@/components/forms/ClientSelectDropdown';
 import ProjectSelectDropdown from '@/components/forms/ProjectSelectDropdown';
@@ -23,6 +23,7 @@ interface Project {
   id: string;
   name: string;
   clientId: number;
+  useMilestones?: boolean;
 }
 
 interface Task {
@@ -121,6 +122,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
 
   const selectedClient = clients.find(c => c.id === formData.clientId);
   const availableProjects = projects.filter(p => !formData.clientId || p.clientId === formData.clientId);
+  const selectedProject = availableProjects.find(p => p.id === formData.projectId) || null;
 
   const handleClientChange = (newClientId: number | null) => {
     setFormData(prev => ({
@@ -235,16 +237,14 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
             />
           )}
 
-          {/* Urgent checkbox */}
-          <div className="flex items-center space-x-2 pt-2">
-            <Checkbox
+          {/* Urgent toggle */}
+          <div className="flex items-center justify-between pt-2">
+            <Label htmlFor="urgent" className="text-sm font-medium">Mark as Urgent</Label>
+            <Switch
               id="urgent"
               checked={formData.urgent}
-              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, urgent: checked as boolean }))}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, urgent: checked }))}
             />
-            <Label htmlFor="urgent" className="text-sm font-medium text-red-600">
-              Mark as Urgent (uses urgent hourly rate)
-            </Label>
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">

@@ -40,18 +40,21 @@ const ProjectOverview = ({
         project={project}
         client={client}
         milestones={milestones}
+        tasks={tasks}
         onAddMilestone={onAddMilestone}
       />
 
-      {/* Milestones Section */}
-      <ProjectMilestoneSection
-        project={project}
-        client={client}
-        milestones={milestones}
-        onAddMilestone={onAddMilestone}
-        onUpdateMilestone={onUpdateMilestone}
-        onDeleteMilestone={onDeleteMilestone}
-      />
+      {/* Milestones Section - only when project uses milestones */}
+      {project.useMilestones !== false && (
+        <ProjectMilestoneSection
+          project={project}
+          client={client}
+          milestones={milestones}
+          onAddMilestone={onAddMilestone}
+          onUpdateMilestone={onUpdateMilestone}
+          onDeleteMilestone={onDeleteMilestone}
+        />
+      )}
 
       {/* Tasks Section */}
       <ProjectTaskSection

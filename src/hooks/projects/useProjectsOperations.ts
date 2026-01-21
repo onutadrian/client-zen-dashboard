@@ -30,7 +30,8 @@ export const useProjectsOperations = (setProjects: React.Dispatch<React.SetState
         estimated_hours: newProject.estimatedHours || null,
         currency: newProject.currency || 'USD',
         invoices: newProject.invoices || [],
-        user_id: user.id
+        user_id: user.id,
+        use_milestones: newProject.useMilestones !== false
       };
 
       const { data, error } = await supabase
@@ -60,6 +61,7 @@ export const useProjectsOperations = (setProjects: React.Dispatch<React.SetState
         dailyRate: data.daily_rate || undefined,
         estimatedHours: data.estimated_hours || undefined,
         currency: data.currency || 'USD',
+        useMilestones: data.use_milestones !== false,
         invoices: Array.isArray(data.invoices) ? data.invoices as Array<{
           id: string;
           amount: number;
@@ -105,7 +107,8 @@ export const useProjectsOperations = (setProjects: React.Dispatch<React.SetState
         daily_rate: updatedProject.dailyRate || null,
         estimated_hours: updatedProject.estimatedHours || null,
         currency: updatedProject.currency || 'USD',
-        invoices: updatedProject.invoices || []
+        invoices: updatedProject.invoices || [],
+        use_milestones: updatedProject.useMilestones !== false
       };
 
       const { error } = await supabase

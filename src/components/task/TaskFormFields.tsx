@@ -18,6 +18,7 @@ interface Project {
   id: string;
   name: string;
   clientId: number;
+  useMilestones?: boolean;
 }
 
 interface Milestone {
@@ -66,9 +67,10 @@ const TaskFormFields = ({
   const availableMilestones = milestones.filter(m => 
     m.projectId === formData.projectId && m.status === 'in-progress'
   );
-  
-  // For standard users, milestone is required if there are available milestones
-  const isMilestoneRequired = !isAdmin && availableMilestones.length > 0;
+  const selectedProject = availableProjects.find(p => p.id === formData.projectId) || null;
+  const projectUsesMilestones = selectedProject?.useMilestones !== false;
+  // For standard users, milestone is required only if project uses milestones and there are any
+  const isMilestoneRequired = !isAdmin && projectUsesMilestones && availableMilestones.length > 0;
   return (
     <>
       <div>

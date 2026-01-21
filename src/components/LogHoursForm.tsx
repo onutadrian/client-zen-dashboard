@@ -10,6 +10,7 @@ import { Save, Plus } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/types/client';
 import { Milestone } from '@/hooks/useMilestones';
+import type { Task } from '@/types/task';
 import { useHourEntries } from '@/hooks/useHourEntries';
 import { getTimeLabel, getStepValue, getPlaceholder, getButtonText, convertToHours } from '@/utils/pricingUtils';
 
@@ -17,6 +18,7 @@ interface LogHoursFormProps {
   project: Project;
   client: Client;
   milestones: Milestone[];
+  tasks: Task[];
   onClose: () => void;
   onCreateMilestone?: () => void;
 }
@@ -24,7 +26,8 @@ interface LogHoursFormProps {
 const LogHoursForm = ({ 
   project, 
   client, 
-  milestones, 
+  milestones,
+  tasks,
   onClose, 
   onCreateMilestone 
 }: LogHoursFormProps) => {
@@ -33,12 +36,16 @@ const LogHoursForm = ({
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [billed, setBilled] = useState(false);
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string>('unassigned');
+  const [selectedTaskId, setSelectedTaskId] = useState<string>('unassigned');
   const { addHourEntry } = useHourEntries();
 
   // Filter milestones that are not completed
   const availableMilestones = milestones.filter(m => 
     m.status === 'pending' || m.status === 'in-progress'
   );
+  const usesMilestones = project.useMilestones !== false;
+  // Filter tasks in this project only
+  const availableTasks = tasks.filter(t => t.projectId === project.id);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +62,8 @@ const LogHoursForm = ({
       description,
       date,
       billed,
-      milestoneId: selectedMilestoneId === 'unassigned' ? undefined : selectedMilestoneId
+      milestoneId: selectedMilestoneId === 'unassigned' ? undefined : selectedMilestoneId,
+      taskId: selectedTaskId === 'unassigned' ? undefined : Number(selectedTaskId)
     });
 
     // Reset form
@@ -64,6 +72,7 @@ const LogHoursForm = ({
     setDate(new Date().toISOString().split('T')[0]);
     setBilled(false);
     setSelectedMilestoneId('unassigned');
+    setSelectedTaskId('unassigned');
     onClose();
   };
 
@@ -95,36 +104,55 @@ const LogHoursForm = ({
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="milestone">Milestone (Optional)</Label>
-        <div className="flex gap-2">
-          <Select value={selectedMilestoneId} onValueChange={setSelectedMilestoneId}>
-            <SelectTrigger className="flex-1">
-              <SelectValue placeholder="Select milestone or leave unassigned" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="unassigned">No milestone (unassigned)</SelectItem>
-              {availableMilestones.map((milestone) => (
-                <SelectItem key={milestone.id} value={milestone.id}>
-                  {milestone.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {onCreateMilestone && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onCreateMilestone}
-              className="px-3"
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
-          )}
+      {usesMilestones && (
+        <div>
+          <Label htmlFor="milestone">Milestone (Optional)</Label>
+          <div className="flex gap-2">
+            <Select value={selectedMilestoneId} onValueChange={setSelectedMilestoneId}>
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Select milestone or leave unassigned" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unassigned">No milestone (unassigned)</SelectItem>
+                {availableMilestones.map((milestone) => (
+                  <SelectItem key={milestone.id} value={milestone.id}>
+                    {milestone.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {onCreateMilestone && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onCreateMilestone}
+                className="px-3"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
+      )}
+
+      <div>
+        <Label htmlFor="task">Task (Optional)</Label>
+        <Select value={selectedTaskId} onValueChange={setSelectedTaskId}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select task or leave unassigned" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="unassigned">No task (unassigned)</SelectItem>
+            {availableTasks.map((task) => (
+              <SelectItem key={task.id} value={String(task.id)}>
+                {task.title}{task.urgent ? ' (urgent)' : ''}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-      
+
       <div>
         <Label htmlFor="description">Description (Optional)</Label>
         <Textarea

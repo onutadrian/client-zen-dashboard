@@ -47,7 +47,7 @@ export const useProjectsData = () => {
       const { data, error } = await projectsQuery;
       if (error) throw error;
 
-      const transformedProjects: Project[] = data.map(project => ({
+      const transformedProjects: Project[] = data.map((project: any) => ({
         id: project.id,
         name: project.name,
         clientId: project.client_id,
@@ -66,6 +66,7 @@ export const useProjectsData = () => {
         dailyRate: project.daily_rate || undefined,
         estimatedHours: project.estimated_hours || undefined,
         currency: project.currency || 'USD',
+        useMilestones: project.use_milestones !== false, // default to true if not present
         invoices: Array.isArray(project.invoices) ? project.invoices as Array<{
           id: string;
           amount: number;

@@ -8,6 +8,7 @@ import AddMilestoneModal from './AddMilestoneModal';
 
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/types/client';
+import type { Task } from '@/types/task';
 import { Milestone } from '@/hooks/useMilestones';
 import { useHourEntries } from '@/hooks/useHourEntries';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -16,6 +17,8 @@ interface ProjectTimeTrackingSectionProps {
   project: Project;
   client?: Client;
   milestones: Milestone[];
+  // All tasks for this project (used for pricing logic e.g., urgent)
+  tasks?: Task[];
   onAddMilestone?: (milestone: Omit<Milestone, 'id' | 'createdAt' | 'updatedAt' | 'completionPercentage' | 'paymentStatus'>) => void;
 }
 
@@ -23,6 +26,7 @@ const ProjectTimeTrackingSection = ({
   project,
   client,
   milestones,
+  tasks,
   onAddMilestone
 }: ProjectTimeTrackingSectionProps) => {
   const [showLogHoursModal, setShowLogHoursModal] = useState(false);
@@ -30,6 +34,7 @@ const ProjectTimeTrackingSection = ({
   const { hourEntries } = useHourEntries();
   const { displayCurrency } = useCurrency();
   const [forceRefresh, setForceRefresh] = useState(0);
+  const usesMilestones = project.useMilestones !== false;
   
   const isFixedPrice = project.pricingType === 'fixed';
   const projectHours = hourEntries.filter(entry => entry.projectId === project.id);
@@ -100,11 +105,12 @@ const ProjectTimeTrackingSection = ({
           key={`billed-hours-${displayCurrency}-${forceRefresh}`}
           project={project} 
           client={client} 
-          milestones={milestones} 
+          milestones={milestones}
+          tasks={tasks || []}
         />
 
-        {/* Show milestone hours tracker if there are any hours logged */}
-        {projectHours.length > 0 && (
+        {/* Show milestone hours tracker only when project uses milestones */}
+        {usesMilestones && projectHours.length > 0 && (
           <MilestoneHoursTracker 
             milestones={milestones}
             hourEntries={projectHours}
@@ -122,6 +128,7 @@ const ProjectTimeTrackingSection = ({
             project={project}
             client={client}
             milestones={milestones}
+            tasks={tasks || []}
             onCreateMilestone={handleCreateMilestone}
           />
 

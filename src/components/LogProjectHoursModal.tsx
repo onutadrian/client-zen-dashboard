@@ -4,6 +4,7 @@ import { Clock } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/types/client';
 import { Milestone } from '@/hooks/useMilestones';
+import type { Task } from '@/types/task';
 import LogHoursForm from './LogHoursForm';
 import { getButtonText } from '@/utils/pricingUtils';
 
@@ -13,6 +14,7 @@ interface LogProjectHoursModalProps {
   project: Project;
   client: Client;
   milestones: Milestone[];
+  tasks?: Task[];
   onCreateMilestone?: () => void;
 }
 
@@ -22,6 +24,7 @@ const LogProjectHoursModal = ({
   project, 
   client, 
   milestones,
+  tasks,
   onCreateMilestone 
 }: LogProjectHoursModalProps) => {
   return (
@@ -40,6 +43,7 @@ const LogProjectHoursModal = ({
           project={project}
           client={client}
           milestones={milestones}
+          tasks={tasks || []}
           onClose={onClose}
           onCreateMilestone={onCreateMilestone}
         />

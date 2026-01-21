@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { useMilestones } from '@/hooks/useMilestones';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -17,9 +18,10 @@ interface AddProjectTaskModalProps {
   projectId: string;
   clientId: number;
   clientName: string;
+  useMilestonesEnabled?: boolean;
 }
 
-const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clientName }: AddProjectTaskModalProps) => {
+const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clientName, useMilestonesEnabled = true }: AddProjectTaskModalProps) => {
   const { milestones } = useMilestones();
   const { isAdmin } = useAuth();
   const [formData, setFormData] = useState({
@@ -29,7 +31,8 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
     milestoneId: '',
     notes: '',
     startDate: '',
-    endDate: ''
+    endDate: '',
+    urgent: false,
   });
 
   const availableMilestones = milestones.filter(m => 
@@ -37,7 +40,7 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
   );
   
   // For standard users, milestone is required if there are available milestones
-  const isMilestoneRequired = !isAdmin && availableMilestones.length > 0;
+  const isMilestoneRequired = !isAdmin && useMilestonesEnabled && availableMilestones.length > 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +62,8 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
       notes: formData.notes,
       assets: [],
       startDate: formData.startDate || undefined,
-      endDate: formData.endDate || undefined
+      endDate: formData.endDate || undefined,
+      urgent: formData.urgent,
     };
 
     onAdd(taskData);
@@ -70,7 +74,8 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
       milestoneId: '',
       notes: '',
       startDate: '',
-      endDate: ''
+      endDate: '',
+      urgent: false,
     });
     onClose();
   };
@@ -160,6 +165,16 @@ const AddProjectTaskModal = ({ isOpen, onClose, onAdd, projectId, clientId, clie
                 No in-progress milestones found. Consider creating or activating a milestone for better time tracking.
               </p>
             )}
+          </div>
+
+          {/* Urgent flag */}
+          <div className="flex items-center justify-between">
+            <Label htmlFor="urgent" className="text-sm font-medium">Mark as Urgent</Label>
+            <Switch
+              id="urgent"
+              checked={formData.urgent}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, urgent: checked }))}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

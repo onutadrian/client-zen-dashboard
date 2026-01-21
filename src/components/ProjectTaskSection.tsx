@@ -53,17 +53,24 @@ const ProjectTaskSection = ({
             <div className="space-y-4">
               {tasks.map((task) => (
                 <div key={task.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      {task.urgent && (
+                        <div className="mb-1">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-red-100 text-red-800">Urgent</span>
+                        </div>
+                      )}
                       <h4 className="font-medium">{task.title}</h4>
-                      <p className="text-sm text-slate-600">{task.description}</p>
+                      {task.description && (
+                        <p className="text-sm text-slate-600 mt-1">{task.description}</p>
+                      )}
                       {task.workedHours && task.workedHours > 0 && (
                         <p className="text-sm text-green-600 mt-1">
                           {task.workedHours}h worked
                         </p>
                       )}
                     </div>
-                    <div className="text-right">
+                    <div className="text-right ml-4">
                       <span className={`px-2 py-1 rounded text-xs ${
                         task.status === 'completed' ? 'bg-green-100 text-green-800' :
                         task.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
@@ -87,6 +94,7 @@ const ProjectTaskSection = ({
         projectId={project.id}
         clientId={client?.id || 0}
         clientName={client?.name || ''}
+        useMilestonesEnabled={project.useMilestones as any}
       />
     </>
   );

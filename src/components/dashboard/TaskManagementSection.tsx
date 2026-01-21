@@ -107,7 +107,8 @@ const TaskManagementSection = ({
     return filteredProjects.map(project => ({
       id: project.id,
       name: project.name,
-      clientId: project.clientId
+      clientId: project.clientId,
+      useMilestones: project.useMilestones
     }));
   }, [filteredProjects]);
 

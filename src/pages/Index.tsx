@@ -46,6 +46,8 @@ const Index = () => {
       notes: task.notes || '',
       assets: task.assets || [],
       assignedTo: task.assignedTo,
+      // Preserve urgent flag from the form
+      urgent: task.urgent,
     };
     addTask(taskData);
   };
@@ -76,6 +78,8 @@ const Index = () => {
       notes: task.notes || '',
       assets: task.assets || [],
       assignedTo: task.assignedTo,
+      // Preserve urgent flag during edit
+      urgent: task.urgent,
     };
     editTask(task.id, taskData);
   };
@@ -97,7 +101,8 @@ const Index = () => {
       completedDate: task.completedDate,
       createdDate: task.createdDate,
       notes: task.notes,
-      assets: task.assets
+      assets: task.assets,
+      urgent: task.urgent,
     });
   };
 

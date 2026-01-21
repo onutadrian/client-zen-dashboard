@@ -6,6 +6,7 @@ import ProjectMetricsCards from './ProjectMetricsCards';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/types/client';
 import { Milestone } from '@/hooks/useMilestones';
+import type { Task } from '@/types/task';
 import { useHourEntries } from '@/hooks/useHourEntries';
 import { useInvoices } from '@/hooks/useInvoices';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -15,9 +16,11 @@ interface ProjectBilledHoursProps {
   project: Project;
   client?: Client;
   milestones: Milestone[];
+  // Tasks for the current project (used to determine urgent pricing)
+  tasks: Task[];
 }
 
-const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursProps) => {
+const ProjectBilledHours = ({ project, client, milestones, tasks }: ProjectBilledHoursProps) => {
   const { hourEntries } = useHourEntries();
   const { invoices } = useInvoices();
   const { displayCurrency, convert, demoMode } = useCurrency();
@@ -46,9 +49,17 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
   // Calculate value of billed hours (this is the actual "Billed Revenue" for hourly/daily projects)
   let valueFromBilledHours = 0;
   if (!demoMode) {
-    if (project.pricingType === 'hourly' && project.hourlyRate) {
-      const convertedRate = convert(project.hourlyRate, project.currency, displayCurrency);
-      valueFromBilledHours = billedHours * convertedRate;
+    if (project.pricingType === 'hourly' && (project.hourlyRate || project.urgentHourlyRate)) {
+      // Per-entry calculation to honor urgent task rate when applicable
+      valueFromBilledHours = projectHours
+        .filter(entry => entry.billed)
+        .reduce((sum, entry) => {
+          const linkedTask = tasks.find(t => t.id === entry.taskId);
+          const isUrgent = !!linkedTask?.urgent;
+          const rate = isUrgent && project.urgentHourlyRate ? project.urgentHourlyRate : (project.hourlyRate || 0);
+          const entryValue = entry.hours * convert(rate, project.currency, displayCurrency);
+          return sum + entryValue;
+        }, 0);
     } else if (project.pricingType === 'daily' && project.dailyRate) {
       const convertedRate = convert(project.dailyRate, project.currency, displayCurrency);
       // Convert hours to days (assuming 8-hour workday)
@@ -59,9 +70,17 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
   // Calculate unbilled revenue based on project pricing and unbilled hours with currency conversion
   let unbilledRevenue = 0;
   if (!demoMode) {
-    if (project.pricingType === 'hourly' && project.hourlyRate) {
-      const convertedRate = convert(project.hourlyRate, project.currency, displayCurrency);
-      unbilledRevenue = unbilledHours * convertedRate;
+    if (project.pricingType === 'hourly' && (project.hourlyRate || project.urgentHourlyRate)) {
+      // Per-entry calculation to honor urgent task rate when applicable
+      unbilledRevenue = projectHours
+        .filter(entry => !entry.billed)
+        .reduce((sum, entry) => {
+          const linkedTask = tasks.find(t => t.id === entry.taskId);
+          const isUrgent = !!linkedTask?.urgent;
+          const rate = isUrgent && project.urgentHourlyRate ? project.urgentHourlyRate : (project.hourlyRate || 0);
+          const entryValue = entry.hours * convert(rate, project.currency, displayCurrency);
+          return sum + entryValue;
+        }, 0);
     } else if (project.pricingType === 'daily' && project.dailyRate) {
       const convertedRate = convert(project.dailyRate, project.currency, displayCurrency);
       // Convert hours to days (assuming 8-hour workday)
