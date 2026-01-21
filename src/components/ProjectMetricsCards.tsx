@@ -70,7 +70,7 @@ const ProjectMetricsCards = ({
     return (
       <TooltipProvider>
         <>
-          <div className="text-center p-4 rounded-lg bg-muted">
+          <div className="flex-1 text-center p-4 rounded-lg bg-muted">
             <Tooltip>
               <TooltipTrigger asChild>
                 <p className="text-foreground text-4xl font-normal cursor-help">
@@ -84,7 +84,7 @@ const ProjectMetricsCards = ({
             <p className="text-muted-foreground py-[24px] text-base">Project Value</p>
           </div>
 
-          <div className="text-center p-4 rounded-lg bg-muted">
+          <div className="flex-1 text-center p-4 rounded-lg bg-muted">
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="cursor-help">
@@ -103,7 +103,7 @@ const ProjectMetricsCards = ({
             <p className="text-muted-foreground py-[16px] text-base">Billed Revenue</p>
           </div>
 
-          <div className="text-center p-4 rounded-lg bg-muted">
+          <div className="flex-1 text-center p-4 rounded-lg bg-muted">
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="cursor-help">
@@ -123,7 +123,7 @@ const ProjectMetricsCards = ({
           </div>
 
           {totalHours > 0 && (
-            <div className="text-center p-4 rounded-lg bg-muted">
+            <div className="flex-1 text-center p-4 rounded-lg bg-muted">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <p className="text-foreground text-4xl font-normal cursor-help">
@@ -147,7 +147,7 @@ const ProjectMetricsCards = ({
     return (
       <TooltipProvider>
         <>
-          <div className="text-center p-4 rounded-lg bg-muted">
+          <div className="flex-1 text-center p-4 rounded-lg bg-muted">
             <Tooltip>
               <TooltipTrigger asChild>
                 <p className="text-foreground text-4xl font-normal cursor-help">
@@ -161,7 +161,7 @@ const ProjectMetricsCards = ({
             <p className="text-muted-foreground py-[24px] text-base">Unbilled Revenue</p>
           </div>
 
-          <div className="text-center p-4 rounded-lg bg-muted">
+          <div className="flex-1 text-center p-4 rounded-lg bg-muted">
             <Tooltip>
               <TooltipTrigger asChild>
                 <p className="text-foreground text-4xl font-normal cursor-help">
@@ -175,7 +175,7 @@ const ProjectMetricsCards = ({
             <p className="text-muted-foreground py-[24px] text-base">Total Value</p>
           </div>
 
-          <div className="text-center p-4 rounded-lg bg-muted">
+          <div className="flex-1 text-center p-4 rounded-lg bg-muted">
             <Tooltip>
               <TooltipTrigger asChild>
                 <p className="text-foreground text-4xl font-normal cursor-help">
@@ -189,7 +189,7 @@ const ProjectMetricsCards = ({
             <p className="text-muted-foreground py-[24px] text-base">Earned Value</p>
           </div>
 
-          <div className="text-center p-4 rounded-lg bg-muted">
+          <div className="flex-1 text-center p-4 rounded-lg bg-muted">
             <Tooltip>
               <TooltipTrigger asChild>
                 <p className="text-foreground text-4xl font-normal cursor-help">
@@ -211,7 +211,7 @@ const ProjectMetricsCards = ({
   return (
     <TooltipProvider>
       <>
-        <div className="text-center p-4 rounded-lg bg-muted">
+        <div className="flex-1 text-center p-4 rounded-lg bg-muted">
           <Tooltip>
             <TooltipTrigger asChild>
               <p className="text-foreground text-4xl font-normal cursor-help">
@@ -225,7 +225,7 @@ const ProjectMetricsCards = ({
           <p className="text-muted-foreground py-[24px] text-base">Total Hours</p>
         </div>
 
-        <div className="text-center p-4 rounded-lg bg-muted">
+        <div className="flex-1 text-center p-4 rounded-lg bg-muted">
           <Tooltip>
             <TooltipTrigger asChild>
               <p className="text-foreground font-normal text-4xl cursor-help">
@@ -239,7 +239,7 @@ const ProjectMetricsCards = ({
           <p className="text-muted-foreground py-[24px] text-base">Billed Revenue</p>
         </div>
 
-        <div className="text-center p-4 rounded-lg bg-muted">
+        <div className="flex-1 text-center p-4 rounded-lg bg-muted">
           <Tooltip>
             <TooltipTrigger asChild>
               <p className="text-foreground font-normal text-4xl cursor-help">
@@ -253,7 +253,7 @@ const ProjectMetricsCards = ({
           <p className="text-muted-foreground py-[24px] text-base">Unbilled Revenue</p>
         </div>
 
-        <div className="text-center p-4 rounded-lg bg-muted">
+        <div className="flex-1 text-center p-4 rounded-lg bg-muted">
           <Tooltip>
             <TooltipTrigger asChild>
               <p className="text-foreground font-normal text-4xl cursor-help">
