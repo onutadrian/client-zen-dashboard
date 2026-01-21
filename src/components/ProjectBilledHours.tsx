@@ -117,7 +117,7 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
+        <div className="flex flex-col md:flex-row gap-4 w-full">
           <ProjectMetricsCards
             isFixedPrice={isFixedPrice}
             hasMilestones={hasMilestones}
