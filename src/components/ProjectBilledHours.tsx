@@ -85,6 +85,12 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
     }, 0);
 
   const isFixedPrice = project.pricingType === 'fixed';
+  const hasMilestones = milestones.length > 0;
+  
+  // For fixed price projects: calculate billed/unbilled based on invoices vs fixed price
+  const fixedProjectValue = demoMode ? 0 : convert(project.fixedPrice || 0, project.currency, displayCurrency);
+  const fixedBilledRevenue = paidInvoicedRevenue; // What's been paid
+  const fixedUnbilledRevenue = Math.max(0, fixedProjectValue - paidInvoicedRevenue);
 
   if (!client) {
     return (
@@ -111,9 +117,10 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <ProjectMetricsCards
             isFixedPrice={isFixedPrice}
+            hasMilestones={hasMilestones}
             totalHours={totalHours}
             billedHours={billedHours}
             unbilledHours={unbilledHours}
@@ -122,6 +129,9 @@ const ProjectBilledHours = ({ project, client, milestones }: ProjectBilledHoursP
             unbilledRevenue={unbilledRevenue}
             totalMilestoneValue={totalMilestoneValue}
             completedMilestoneValue={completedMilestoneValue}
+            fixedProjectValue={fixedProjectValue}
+            fixedBilledRevenue={fixedBilledRevenue}
+            fixedUnbilledRevenue={fixedUnbilledRevenue}
             displayCurrency={displayCurrency}
             demoMode={demoMode}
           />
