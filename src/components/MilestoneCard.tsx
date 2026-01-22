@@ -8,15 +8,17 @@ interface MilestoneCardProps {
   milestone: Milestone;
   onEdit: (milestone: Milestone) => void;
   onDelete: (milestoneId: string) => void;
+  onView?: (milestone: Milestone) => void;
 }
 
 const MilestoneCard = ({
   milestone,
   onEdit,
-  onDelete
+  onDelete,
+  onView
 }: MilestoneCardProps) => {
   return (
-    <div className="border rounded-lg p-4">
+    <div className="border rounded-lg p-4 cursor-pointer hover:bg-slate-50" onClick={() => onView && onView(milestone)}>
       <div className="flex items-start justify-between">
         <div className="flex-1 mr-4">
           <div className="flex items-center space-x-2 mb-2">
@@ -40,7 +42,7 @@ const MilestoneCard = ({
         </div>
         
         {/* Action buttons */}
-        <div className="flex items-center space-x-2 flex-shrink-0">
+        <div className="flex items-center space-x-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
           <Button
             size="sm"
             variant="outline"

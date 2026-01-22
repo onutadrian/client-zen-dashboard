@@ -22,18 +22,26 @@ const ProjectTaskSection = ({
   onAddTask
 }: ProjectTaskSectionProps) => {
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const isActive = project.status === 'active';
+  const [viewTask, setViewTask] = useState<Task | null>(null);
 
   return (
     <>
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Tasks</h3>
-        <Button
-          onClick={() => setShowAddTaskModal(true)}
-          className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Task
-        </Button>
+        <div className="flex items-center gap-3">
+          {!isActive && (
+            <span className="text-sm text-slate-500">Project is inactive</span>
+          )}
+          <Button
+            onClick={() => setShowAddTaskModal(true)}
+            className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+            disabled={!isActive}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Task
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -44,6 +52,7 @@ const ProjectTaskSection = ({
               <Button
                 onClick={() => setShowAddTaskModal(true)}
                 className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+                disabled={!isActive}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add First Task
@@ -52,7 +61,7 @@ const ProjectTaskSection = ({
           ) : (
             <div className="space-y-4">
               {tasks.map((task) => (
-                <div key={task.id} className="border rounded-lg p-4">
+                <div key={task.id} className="border rounded-lg p-4 cursor-pointer hover:bg-slate-50" onClick={() => setViewTask(task)}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       {task.urgent && (
@@ -96,8 +105,16 @@ const ProjectTaskSection = ({
         clientName={client?.name || ''}
         useMilestonesEnabled={project.useMilestones as any}
       />
+
+      <TaskDetailsSheet
+        task={viewTask}
+        isOpen={!!viewTask}
+        onClose={() => setViewTask(null)}
+        projects={[{ id: project.id, name: project.name }] as any}
+      />
     </>
   );
 };
 
 export default ProjectTaskSection;
+import TaskDetailsSheet from './TaskDetailsSheet';

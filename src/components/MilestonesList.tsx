@@ -10,13 +10,17 @@ interface MilestonesListProps {
   onAddMilestone: () => void;
   onEditMilestone: (milestone: Milestone) => void;
   onDeleteMilestone: (milestoneId: string) => void;
+  onViewMilestone?: (milestone: Milestone) => void;
+  canAdd?: boolean;
 }
 
 const MilestonesList = ({
   milestones,
   onAddMilestone,
   onEditMilestone,
-  onDeleteMilestone
+  onDeleteMilestone,
+  onViewMilestone,
+  canAdd = true
 }: MilestonesListProps) => {
   if (milestones.length === 0) {
     return (
@@ -25,6 +29,7 @@ const MilestonesList = ({
         <Button
           onClick={onAddMilestone}
           className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+          disabled={!canAdd}
         >
           <Plus className="w-4 h-4 mr-2" />
           Add First Milestone
@@ -41,6 +46,7 @@ const MilestonesList = ({
           milestone={milestone}
           onEdit={onEditMilestone}
           onDelete={onDeleteMilestone}
+          onView={onViewMilestone}
         />
       ))}
     </div>

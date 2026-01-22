@@ -35,6 +35,7 @@ const ProjectTimeTrackingSection = ({
   const { displayCurrency } = useCurrency();
   const [forceRefresh, setForceRefresh] = useState(0);
   const usesMilestones = project.useMilestones !== false;
+  const isActive = project.status === 'active';
   
   const isFixedPrice = project.pricingType === 'fixed';
   const projectHours = hourEntries.filter(entry => entry.projectId === project.id);
@@ -85,8 +86,9 @@ const ProjectTimeTrackingSection = ({
             <div className="flex items-center gap-2">
               {!isFixedPrice && (
                 <Button
-                  onClick={() => setShowLogHoursModal(true)}
+                  onClick={() => isActive && setShowLogHoursModal(true)}
                   className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+                  disabled={!isActive}
                 >
                   <Clock className="w-4 h-4 mr-2" />
                   {getLogButtonText()}
@@ -114,7 +116,7 @@ const ProjectTimeTrackingSection = ({
           <MilestoneHoursTracker 
             milestones={milestones}
             hourEntries={projectHours}
-            onAddTimeEntry={client ? () => setShowLogHoursModal(true) : undefined}
+            onAddTimeEntry={client && isActive ? () => setShowLogHoursModal(true) : undefined}
           />
         )}
 

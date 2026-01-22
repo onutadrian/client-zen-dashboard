@@ -5,6 +5,7 @@ import Greeting from '@/components/Greeting';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import UserAnalyticsSection from '@/components/UserAnalyticsSection';
 import TaskManagementSection from '@/components/dashboard/TaskManagementSection';
+import TaskDetailsSheet from '@/components/TaskDetailsSheet';
 import TimelineSection from '@/components/dashboard/TimelineSection';
 import { useDashboardData } from '@/hooks/dashboard/useDashboardData';
 import type { Task as HookTask } from '@/types/task';
@@ -177,6 +178,13 @@ const Index = () => {
             tasks={filteredTasks}
             milestones={filteredMilestones}
             clients={clients}
+          />
+
+          <TaskDetailsSheet
+            task={selectedTask as any}
+            isOpen={!!selectedTask}
+            onClose={() => setSelectedTask(null)}
+            projects={projects as any}
           />
         </div>
       </div>

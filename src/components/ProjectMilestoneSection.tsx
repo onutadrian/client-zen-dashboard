@@ -6,6 +6,7 @@ import { Plus } from 'lucide-react';
 import AddMilestoneModal from './AddMilestoneModal';
 import EditMilestoneModal from './EditMilestoneModal';
 import MilestonesList from './MilestonesList';
+import MilestoneDetailsSheet from './MilestoneDetailsSheet';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/types/client';
 import { Milestone } from '@/hooks/useMilestones';
@@ -29,6 +30,8 @@ const ProjectMilestoneSection = ({
 }: ProjectMilestoneSectionProps) => {
   const [showAddMilestoneModal, setShowAddMilestoneModal] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
+  const [viewMilestone, setViewMilestone] = useState<Milestone | null>(null);
+  const isActive = project.status === 'active';
 
   const isFixedPrice = project.pricingType === 'fixed';
 
@@ -38,13 +41,19 @@ const ProjectMilestoneSection = ({
         <h3 className="text-lg font-semibold">
           {isFixedPrice ? 'Project Milestones' : 'Milestones'}
         </h3>
-        <Button
-          onClick={() => setShowAddMilestoneModal(true)}
-          className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Milestone
-        </Button>
+        <div className="flex items-center gap-3">
+          {!isActive && (
+            <span className="text-sm text-slate-500">Project is inactive</span>
+          )}
+          <Button
+            onClick={() => setShowAddMilestoneModal(true)}
+            className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+            disabled={!isActive}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Milestone
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -54,6 +63,8 @@ const ProjectMilestoneSection = ({
             onAddMilestone={() => setShowAddMilestoneModal(true)}
             onEditMilestone={setEditingMilestone}
             onDeleteMilestone={onDeleteMilestone}
+            onViewMilestone={setViewMilestone}
+            canAdd={isActive}
           />
         </CardContent>
       </Card>
@@ -73,6 +84,12 @@ const ProjectMilestoneSection = ({
           milestone={editingMilestone}
         />
       )}
+
+      <MilestoneDetailsSheet
+        milestone={viewMilestone}
+        isOpen={!!viewMilestone}
+        onClose={() => setViewMilestone(null)}
+      />
     </>
   );
 };

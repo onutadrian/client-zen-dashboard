@@ -1,5 +1,8 @@
 
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
 import { Task } from '@/hooks/useTasks';
 import { Milestone } from '@/hooks/useMilestones';
@@ -32,6 +35,23 @@ const ProjectBudgetTracking = ({ project, client, tasks, milestones }: ProjectBu
   
   // Calculate total hours worked on this project
   const totalHoursWorked = projectHours.reduce((sum, entry) => sum + entry.hours, 0);
+
+  // If milestones are enabled for this project but none exist yet, show a friendly placeholder
+  if (project.useMilestones !== false && projectMilestones.length === 0) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6 text-center text-slate-600">
+            <div className="max-w-xl mx-auto">
+              <p className="text-base">
+                No milestones found for this project. Add milestones to enable budget tracking and revenue insights.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   // Calculate milestone-based financials with currency conversion
   const totalMilestoneAmount = demoMode ? 0 : projectMilestones.reduce((sum, milestone) => {

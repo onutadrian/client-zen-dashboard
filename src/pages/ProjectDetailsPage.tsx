@@ -66,8 +66,8 @@ const ProjectDetailsPage = () => {
     fetchSupabaseProject();
   }, [id]);
 
-  // Hide budget tracking for fixed price projects
-  const showBudgetTracking = project?.pricingType !== 'fixed';
+  // Hide budget tracking for fixed price projects and for projects not using milestones
+  const showBudgetTracking = project?.pricingType !== 'fixed' && project?.useMilestones !== false;
 
   // Listen for currency changes to force refresh
   useEffect(() => {

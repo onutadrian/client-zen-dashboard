@@ -141,11 +141,15 @@ const TaskManagementSection = ({
           name: client.name,
           priceType: client.priceType || 'hour'
         }))}
-        projects={projects.map(project => ({
-          id: project.id,
-          name: project.name,
-          clientId: project.clientId
-        }))}
+        projects={projects
+          .filter(project => project.status === 'active')
+          .map(project => ({
+            id: project.id,
+            name: project.name,
+            clientId: project.clientId,
+            useMilestones: project.useMilestones,
+            status: project.status
+          }))}
         task={editingTask}
       />
     </>
