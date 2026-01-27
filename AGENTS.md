@@ -35,3 +35,22 @@ Testing & Validation
 Agent Notes
 - Document behavioral changes in PR/message summaries.
 - Do not alter unrelated files or project configuration unless requested.
+
+Memory Log (Token‑Conscious)
+- Purpose: Persist a tiny, high-signal memory so resets/new sessions retain key context without bloating prompts.
+- Location: `AGENT_MEMORY.md` (append‑only, concise). Keep AGENTS.md policy; keep the log itself out of this file to avoid auto-inclusion overhead.
+- When to add entries (only if meaningful):
+  - Architectural decisions or cross-cutting conventions not obvious from code.
+  - External integration endpoints/flows (e.g., edge functions) or schema changes.
+  - Role/permission rules that affect UX or data visibility.
+  - Non-trivial runbook updates or project operating assumptions.
+- Do not add:
+  - Secrets/tokens, stack traces, full diffs, or chat transcripts.
+  - Ephemeral todos or one-off debug notes.
+- Entry format (one-liners + 2–5 bullets max):
+  - `YYYY-MM-DD – <Category>: <very short title>`
+  - Bullets: 1 line each, prefer nouns/imperatives, avoid prose.
+- Size discipline:
+  - Target ≤ 30–40 lines total. When approaching that, compress older entries into a short “History Rollup”.
+  - Prefer links/paths over pasted code. Reference files like `src/...` instead of quoting.
+- Retrieval: On reset, scan `AGENT_MEMORY.md` first to rehydrate working context.
