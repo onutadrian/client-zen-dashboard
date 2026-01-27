@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import ClientsSection from '@/components/ClientsSection';
+import CardListSkeleton from '@/components/skeletons/CardListSkeleton';
 import ModalsContainer from '@/components/ModalsContainer';
 import DashboardContainer from '@/components/dashboard/DashboardContainer';
 import { useClients } from '@/hooks/useClients';
@@ -18,7 +19,8 @@ const ClientsPage = () => {
     clients,
     addClient,
     updateClient,
-    updateClientInvoiceStatus
+    updateClientInvoiceStatus,
+    loading: clientsLoading
   } = useClients();
   const {
     subscriptions
@@ -39,16 +41,20 @@ const ClientsPage = () => {
             </Button>
           </div>
           
-          <ClientsSection 
-            clients={clients} 
-            onUpdateClient={updateClient} 
-            displayCurrency={displayCurrency} 
-            convertCurrency={convert} 
-            formatCurrency={formatCurrency} 
-            activeClients={analytics.activeClients} 
-            onAddClient={() => setShowClientModal(true)} 
-            onInvoiceStatusUpdate={updateClientInvoiceStatus}
-          />
+          {clientsLoading ? (
+            <CardListSkeleton count={3} lines={4} />
+          ) : (
+            <ClientsSection 
+              clients={clients} 
+              onUpdateClient={updateClient} 
+              displayCurrency={displayCurrency} 
+              convertCurrency={convert} 
+              formatCurrency={formatCurrency} 
+              activeClients={analytics.activeClients} 
+              onAddClient={() => setShowClientModal(true)} 
+              onInvoiceStatusUpdate={updateClientInvoiceStatus}
+            />
+          )}
 
           <ModalsContainer 
             showClientModal={showClientModal} 

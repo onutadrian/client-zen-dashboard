@@ -6,10 +6,12 @@ import { loadClientsFromSupabase, addClientToSupabase, updateClientInSupabase } 
 
 export const useClients = () => {
   const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
   const loadClients = async () => {
     try {
+      setLoading(true);
       const clientsData = await loadClientsFromSupabase();
       setClients(clientsData);
     } catch (error) {
@@ -18,6 +20,8 @@ export const useClients = () => {
         description: "Failed to load clients",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -97,6 +101,7 @@ export const useClients = () => {
     clients,
     addClient,
     updateClient,
-    updateClientInvoiceStatus
+    updateClientInvoiceStatus,
+    loading
   };
 };

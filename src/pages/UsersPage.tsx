@@ -121,7 +121,19 @@ const UsersPage = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <InviteTable invites={activeInvites} onDeleteInvite={deleteInvite} showActions={true} />
+                    {invitesLoading ? (
+                      // Simple skeleton table for invites
+                      <div className="rounded-md border">
+                        <div className="p-4 space-y-3">
+                          <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="h-4 w-full bg-muted animate-pulse rounded" />
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <InviteTable invites={activeInvites} onDeleteInvite={deleteInvite} showActions={true} />
+                    )}
                   </CardContent>
                 </Card>
 
@@ -131,7 +143,18 @@ const UsersPage = () => {
                       <CardTitle>Expired/Used Invites</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <InviteTable invites={expiredOrUsedInvites} onDeleteInvite={deleteInvite} showActions={false} />
+                      {invitesLoading ? (
+                        <div className="rounded-md border">
+                          <div className="p-4 space-y-3">
+                            <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+                            {Array.from({ length: 3 }).map((_, i) => (
+                              <div key={i} className="h-4 w-full bg-muted animate-pulse rounded" />
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <InviteTable invites={expiredOrUsedInvites} onDeleteInvite={deleteInvite} showActions={false} />
+                      )}
                     </CardContent>
                   </Card>
                 )}

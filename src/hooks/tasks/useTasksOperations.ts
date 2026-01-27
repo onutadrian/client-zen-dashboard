@@ -1,5 +1,6 @@
 
 import { useToast } from '@/hooks/use-toast';
+import { useUsers } from '@/hooks/useUsers';
 import { Task, CreateTaskData, UpdateTaskData } from '@/types/task';
 import { 
   createTaskInDatabase, 
@@ -12,10 +13,12 @@ import { createHourEntryForCompletedTask } from '@/services/taskCompletionServic
 export const useTasksOperations = (
   tasks: Task[],
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>,
+  loadTasks: () => Promise<void> | void,
   onHourEntryCreated?: () => void,
   onTaskDeleted?: () => void
 ) => {
   const { toast } = useToast();
+  const { users } = useUsers();
 
   const addTask = async (newTask: CreateTaskData) => {
     try {
@@ -153,7 +156,17 @@ export const useTasksOperations = (
 
       setTasks(prev => {
         const updated = prev.map(task => 
-          task.id === taskId ? updatedTaskFromDb : task
+          task.id === taskId 
+            ? {
+                ...updatedTaskFromDb,
+                // Fallback: ensure assignedToName is set immediately if lookup failed
+                assignedToName: updatedTaskFromDb.assignedToName || (() => {
+                  if (!updatedTask.assignedTo) return updatedTaskFromDb.assignedToName;
+                  const u = users.find(u => u.id === updatedTask.assignedTo);
+                  return u ? (u.full_name || u.email || updatedTaskFromDb.assignedToName) : updatedTaskFromDb.assignedToName;
+                })()
+              }
+            : task
         );
         console.log('Local task state updated:', updated.find(t => t.id === taskId));
         return updated;
@@ -163,6 +176,13 @@ export const useTasksOperations = (
         title: "Success",
         description: "Task updated successfully"
       });
+
+      // Fallback: refresh from DB to ensure full consistency across derived fields
+      try {
+        await Promise.resolve(loadTasks());
+      } catch (e) {
+        console.warn('Background refresh after edit failed:', e);
+      }
     } catch (error) {
       console.error('Error editing task:', error);
       toast({

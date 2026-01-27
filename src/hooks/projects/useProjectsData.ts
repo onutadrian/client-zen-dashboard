@@ -6,10 +6,12 @@ import { Project } from './types';
 
 export const useProjectsData = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
   const loadProjects = async () => {
     try {
+      setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
@@ -84,6 +86,8 @@ export const useProjectsData = () => {
         description: "Failed to load projects",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -94,6 +98,7 @@ export const useProjectsData = () => {
   return {
     projects,
     setProjects,
-    loadProjects
+    loadProjects,
+    loading
   };
 };

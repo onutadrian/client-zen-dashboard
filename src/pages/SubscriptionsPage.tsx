@@ -7,6 +7,7 @@ import SubscriptionsSection from '@/components/SubscriptionsSection';
 import SubscriptionMetrics from '@/components/SubscriptionMetrics';
 import ModalsContainer from '@/components/ModalsContainer';
 import DashboardContainer from '@/components/dashboard/DashboardContainer';
+import SubscriptionsSkeleton from '@/components/subscriptions/SubscriptionsSkeleton';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useClients } from '@/hooks/useClients';
@@ -66,15 +67,8 @@ const SubscriptionsPage = () => {
     return (
       <DashboardContainer>
         <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <h1 className="text-3xl font-bold text-slate-800">Subscriptions</h1>
-              </div>
-            </div>
-            <div className="text-center py-8">
-              <p className="text-slate-600">Loading subscriptions...</p>
-            </div>
+          <div className="max-w-7xl mx-auto">
+            <SubscriptionsSkeleton />
           </div>
         </div>
       </DashboardContainer>

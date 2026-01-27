@@ -20,6 +20,7 @@ export interface Milestone {
 
 export const useMilestones = () => {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export const useMilestones = () => {
 
   const loadMilestones = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('milestones')
         .select('*')
@@ -58,6 +60,8 @@ export const useMilestones = () => {
         description: "Failed to load milestones",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -182,6 +186,7 @@ export const useMilestones = () => {
 
   return {
     milestones,
+    loading,
     addMilestone,
     updateMilestone,
     deleteMilestone,

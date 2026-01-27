@@ -3,10 +3,11 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Loader2 } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { UserProfile } from '@/types/auth';
 import { useCurrency } from '@/hooks/useCurrency';
+import TableSkeleton from '@/components/skeletons/TableSkeleton';
 
 interface UserTableProps {
   users: UserProfile[];
@@ -19,9 +20,11 @@ const UserTable = ({ users, loading, onEditUser }: UserTableProps) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
-      </div>
+      <TableSkeleton
+        rows={5}
+        cols={5}
+        headers={["Name", "Email", "Role", "Joined", "Actions"]}
+      />
     );
   }
 

@@ -6,7 +6,7 @@ import { useProjectsOperations } from './projects/useProjectsOperations';
 export type { Project } from './projects/types';
 
 export const useProjects = () => {
-  const { projects, setProjects } = useProjectsData();
+  const { projects, setProjects, loading } = useProjectsData();
   const [showArchived, setShowArchived] = useState(false);
   
   const { addProject, updateProject, archiveProject, deleteProject } = useProjectsOperations(setProjects);
@@ -22,6 +22,7 @@ export const useProjects = () => {
     addProject,
     updateProject,
     archiveProject,
-    deleteProject
+    deleteProject,
+    loading
   };
 };

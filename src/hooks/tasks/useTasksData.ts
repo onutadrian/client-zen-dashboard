@@ -7,12 +7,14 @@ import { loadTasksFromDatabase } from '@/services/taskService';
 
 export const useTasksData = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
   console.log('useTasksData: Current tasks count:', tasks.length);
 
   const loadTasks = async () => {
     try {
+      setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
@@ -49,6 +51,8 @@ export const useTasksData = () => {
         description: "Failed to load tasks. Please check your connection and try again.",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -78,6 +82,7 @@ export const useTasksData = () => {
       console.log('useTasksData: setTasks called');
       setTasks(newTasks);
     },
-    loadTasks
+    loadTasks,
+    loading
   };
 };

@@ -41,6 +41,7 @@ const TaskManagementSection = ({
     clientId: task.clientId,
     clientName: task.clientName,
     projectId: task.projectId || '',
+    milestoneId: task.milestoneId,
     estimatedHours: task.estimatedHours || 0,
     actualHours: task.actualHours || 0,
     workedHours: task.workedHours || 0,

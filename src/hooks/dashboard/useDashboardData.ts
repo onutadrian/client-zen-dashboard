@@ -19,10 +19,10 @@ export const useDashboardData = () => {
   } = usePeriodFilter();
   
   const analytics = useAnalytics({ dateRange });
-  const { projects } = useProjects();
-  const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks();
-  const { milestones } = useMilestones();
-  const { clients } = useClients();
+  const { projects, loading: projectsLoading } = useProjects();
+  const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, editTask } = useTasks();
+  const { milestones, loading: milestonesLoading } = useMilestones();
+  const { clients, loading: clientsLoading } = useClients();
 
   return {
     authLoading,
@@ -40,6 +40,11 @@ export const useDashboardData = () => {
     deleteTask,
     editTask,
     milestones,
-    clients
+    clients,
+    // loading flags for skeletons
+    projectsLoading,
+    tasksLoading,
+    milestonesLoading,
+    clientsLoading
   };
 };

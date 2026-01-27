@@ -31,6 +31,7 @@ interface AnalyticsSectionProps {
     totalPaidToDate: number;
   };
   comparisonText?: string;
+  loading?: boolean;
 }
 
 const AnalyticsSection = (props: AnalyticsSectionProps) => {
@@ -48,15 +49,29 @@ const AnalyticsSection = (props: AnalyticsSectionProps) => {
 
       {/* Metrics Grid */}
       <TooltipProvider>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-          {stats.map((stat, index) => (
-            <AnalyticsMetric
-              key={index}
-              stat={stat}
-              displayCurrency={props.displayCurrency}
-            />
-          ))}
-        </div>
+        {props.loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-lg border p-4">
+                <div className="space-y-3">
+                  <div className="h-4 w-28 bg-muted animate-pulse rounded" />
+                  <div className="h-7 w-24 bg-muted animate-pulse rounded" />
+                  <div className="h-3 w-32 bg-muted animate-pulse rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+            {stats.map((stat, index) => (
+              <AnalyticsMetric
+                key={index}
+                stat={stat}
+                displayCurrency={props.displayCurrency}
+              />
+            ))}
+          </div>
+        )}
       </TooltipProvider>
     </div>
   );

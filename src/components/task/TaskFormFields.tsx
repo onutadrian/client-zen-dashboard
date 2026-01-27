@@ -67,6 +67,13 @@ const TaskFormFields = ({
   const availableMilestones = milestones.filter(m => 
     m.projectId === formData.projectId && m.status === 'in-progress'
   );
+  // Ensure the currently selected milestone remains visible even if not in-progress
+  const currentSelected = formData.milestoneId
+    ? milestones.find(m => m.id === formData.milestoneId)
+    : undefined;
+  const displayedMilestones = currentSelected && !availableMilestones.some(m => m.id === currentSelected.id)
+    ? [currentSelected, ...availableMilestones]
+    : availableMilestones;
   const selectedProject = availableProjects.find(p => p.id === formData.projectId) || null;
   const projectUsesMilestones = selectedProject?.useMilestones !== false;
   // For standard users, milestone is required only if project uses milestones and there are any
@@ -133,7 +140,7 @@ const TaskFormFields = ({
             </SelectTrigger>
             <SelectContent>
               {!isMilestoneRequired && <SelectItem value="none">No milestone</SelectItem>}
-              {availableMilestones.map((milestone) => (
+              {displayedMilestones.map((milestone) => (
                 <SelectItem key={milestone.id} value={milestone.id}>
                   {milestone.title}
                 </SelectItem>

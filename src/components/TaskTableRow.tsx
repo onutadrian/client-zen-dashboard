@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Task } from '@/types/task';
 import { useAuth } from '@/hooks/useAuth';
 import { useHourEntries } from '@/hooks/useHourEntries';
+import { useUsers } from '@/hooks/useUsers';
 import { useCurrency } from '@/hooks/useCurrency';
 import TaskStatusSelect from './TaskStatusSelect';
 import TaskActionButtons from './TaskActionButtons';
@@ -51,6 +52,15 @@ const TaskTableRow = ({
   const { isAdmin } = useAuth();
   const { hourEntries } = useHourEntries();
   const { demoMode } = useCurrency();
+  const { users } = useUsers();
+
+  // Fallback resolve for assigned user name if not present on the task object
+  const resolvedAssigneeName = React.useMemo(() => {
+    if (task.assignedToName) return task.assignedToName;
+    if (!task.assignedTo) return undefined;
+    const u = users.find(u => u.id === task.assignedTo);
+    return u ? (u.full_name || u.email || undefined) : undefined;
+  }, [task.assignedToName, task.assignedTo, users]);
 
   const getProjectName = (projectId?: string) => {
     if (!projectId) return 'No Project';
@@ -117,9 +127,9 @@ const TaskTableRow = ({
       </TableCell>
       <TableCell>
         <div className="text-sm">
-          {task.assignedToName ? (
+          {resolvedAssigneeName ? (
             <div>
-              <p className="font-medium text-slate-700">{task.assignedToName}</p>
+              <p className="font-medium text-slate-700">{resolvedAssigneeName}</p>
               <p className="text-slate-500 text-xs">Assigned</p>
             </div>
           ) : task.assignedTo ? (

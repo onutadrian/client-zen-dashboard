@@ -13,16 +13,17 @@ import { useClients } from '@/hooks/useClients';
 import { useProjects } from '@/hooks/useProjects';
 import { useTasks } from '@/hooks/useTasks';
 import { useMilestones } from '@/hooks/useMilestones';
+import CardListSkeleton from '@/components/skeletons/CardListSkeleton';
 import { useCurrency } from '@/hooks/useCurrency';
 
 const ProjectsPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeTab, setActiveTab] = useState('projects');
   const { displayCurrency } = useCurrency();
-  const { clients } = useClients();
-  const { projects, showArchived, setShowArchived, addProject, updateProject, archiveProject, deleteProject } = useProjects();
-  const { tasks } = useTasks();
-  const { milestones } = useMilestones();
+  const { clients, loading: clientsLoading } = useClients();
+  const { projects, showArchived, setShowArchived, addProject, updateProject, archiveProject, deleteProject, loading: projectsLoading } = useProjects();
+  const { tasks, loading: tasksLoading } = useTasks();
+  const { milestones, loading: milestonesLoading } = useMilestones();
 
   return (
     <DashboardContainer>
@@ -47,17 +48,24 @@ const ProjectsPage = () => {
             </TabsList>
 
             <TabsContent value="projects" className="mt-6">
-              <ProjectsSection 
-                projects={projects} 
-                clients={clients} 
-                onAddProject={addProject} 
-                onUpdateProject={updateProject} 
-                onArchiveProject={archiveProject} 
-                onDeleteProject={deleteProject} 
-              />
+              {projectsLoading || clientsLoading ? (
+                <CardListSkeleton count={3} lines={5} />
+              ) : (
+                <ProjectsSection 
+                  projects={projects} 
+                  clients={clients} 
+                  onAddProject={addProject} 
+                  onUpdateProject={updateProject} 
+                  onArchiveProject={archiveProject} 
+                  onDeleteProject={deleteProject} 
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="timeline" className="mt-6">
+              {projectsLoading || tasksLoading || milestonesLoading ? (
+                <CardListSkeleton count={2} lines={6} />
+              ) : (
               <ProjectTimeline
                 projects={projects.map(project => ({
                   id: project.id,
@@ -115,7 +123,7 @@ const ProjectsPage = () => {
                   id: client.id,
                   name: client.name
                 }))}
-              />
+              />)}
             </TabsContent>
           </Tabs>
 

@@ -7,6 +7,8 @@ import UserAnalyticsSection from '@/components/UserAnalyticsSection';
 import TaskManagementSection from '@/components/dashboard/TaskManagementSection';
 import TaskDetailsSheet from '@/components/TaskDetailsSheet';
 import TimelineSection from '@/components/dashboard/TimelineSection';
+import CardListSkeleton from '@/components/skeletons/CardListSkeleton';
+import AnalyticsSkeleton from '@/components/analytics/AnalyticsSkeleton';
 import { useDashboardData } from '@/hooks/dashboard/useDashboardData';
 import type { Task as HookTask } from '@/types/task';
 import type { ProjectStatus } from '@/components/dashboard/ProjectStatusFilter';
@@ -27,7 +29,11 @@ const Index = () => {
     deleteTask,
     editTask,
     milestones,
-    clients
+    clients,
+    projectsLoading,
+    tasksLoading,
+    milestonesLoading,
+    clientsLoading
   } = useDashboardData();
 
   const [selectedTask, setSelectedTask] = useState<HookTask | null>(null);
@@ -107,6 +113,33 @@ const Index = () => {
     });
   };
 
+  // Keep the selected task in sync when the tasks array updates
+  React.useEffect(() => {
+    if (!selectedTask) return;
+    const latest = tasks.find(t => t.id === selectedTask.id);
+    if (latest) {
+      setSelectedTask({
+        id: latest.id,
+        title: latest.title,
+        description: latest.description,
+        status: latest.status,
+        clientId: latest.clientId,
+        clientName: latest.clientName,
+        projectId: latest.projectId || '',
+        estimatedHours: latest.estimatedHours,
+        workedHours: latest.workedHours,
+        actualHours: latest.actualHours,
+        startDate: latest.startDate,
+        endDate: latest.endDate,
+        completedDate: latest.completedDate,
+        createdDate: latest.createdDate,
+        notes: latest.notes,
+        assets: latest.assets,
+        urgent: latest.urgent,
+      } as any);
+    }
+  }, [tasks, selectedTask?.id]);
+
   // Filter projects and tasks by selected statuses
   const filteredProjects = projects.filter(project => 
     selectedStatuses.includes(project.status as ProjectStatus)
@@ -148,37 +181,50 @@ const Index = () => {
               onCustomDateChange={setCustomDateRange}
               previousPeriodData={analytics.previousPeriodData}
               comparisonText={analytics.comparisonText}
+              loading={analytics.loading}
             />
           ) : (
-            <UserAnalyticsSection
+            (projectsLoading || tasksLoading ? (
+              <AnalyticsSkeleton />
+            ) : (
+              <UserAnalyticsSection
+                tasks={tasks}
+                projects={projects}
+                selectedPeriod={selectedPeriod}
+                onPeriodChange={setSelectedPeriod}
+                customDateRange={customDateRange}
+                onCustomDateChange={setCustomDateRange}
+              />
+            ))
+          )}
+
+          {(tasksLoading || clientsLoading || projectsLoading) ? (
+            <CardListSkeleton count={3} lines={5} />
+          ) : (
+            <TaskManagementSection
               tasks={tasks}
+              clients={clients}
               projects={projects}
-              selectedPeriod={selectedPeriod}
-              onPeriodChange={setSelectedPeriod}
-              customDateRange={customDateRange}
-              onCustomDateChange={setCustomDateRange}
+              onTaskClick={handleTaskClick}
+              onUpdateTask={handleUpdateTask}
+              onDeleteTask={handleDeleteTask}
+              onEditTask={handleEditTask}
+              onAddTask={handleAddTask}
+              selectedStatuses={selectedStatuses}
+              onStatusChange={setSelectedStatuses}
             />
           )}
 
-          <TaskManagementSection
-            tasks={tasks}
-            clients={clients}
-            projects={projects}
-            onTaskClick={handleTaskClick}
-            onUpdateTask={handleUpdateTask}
-            onDeleteTask={handleDeleteTask}
-            onEditTask={handleEditTask}
-            onAddTask={handleAddTask}
-            selectedStatuses={selectedStatuses}
-            onStatusChange={setSelectedStatuses}
-          />
-
-          <TimelineSection
-            projects={filteredProjects}
-            tasks={filteredTasks}
-            milestones={filteredMilestones}
-            clients={clients}
-          />
+          {(projectsLoading || tasksLoading || milestonesLoading || clientsLoading) ? (
+            <CardListSkeleton count={2} lines={6} />
+          ) : (
+            <TimelineSection
+              projects={filteredProjects}
+              tasks={filteredTasks}
+              milestones={filteredMilestones}
+              clients={clients}
+            />
+          )}
 
           <TaskDetailsSheet
             task={selectedTask as any}
