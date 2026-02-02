@@ -29,6 +29,21 @@ export const useHourEntries = () => {
     }
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const handleHourEntriesChanged = () => {
+      loadHourEntries();
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('hourEntriesChanged', handleHourEntriesChanged);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('hourEntriesChanged', handleHourEntriesChanged);
+      }
+    };
+  }, [isAuthenticated, loadHourEntries]);
+
   return {
     hourEntries,
     loading,

@@ -9,6 +9,7 @@ import AddTaskModal from './AddTaskModal';
 import TaskFilters from './task/TaskFilters';
 import TaskStats from './task/TaskStats';
 import { Task } from '@/types/task';
+import TaskMobileCards from '@/components/task/TaskMobileCards';
 
 interface Client {
   id: number;
@@ -20,6 +21,7 @@ interface Project {
   id: string;
   name: string;
   clientId: number;
+  pricingType?: 'fixed' | 'hourly' | 'daily';
 }
 
 interface TasksSectionProps {
@@ -143,15 +145,29 @@ const TasksSection = ({
               </Button>
             </div>
           ) : (
-            <TaskTable
-              tasks={filteredTasks}
-              clients={availableClients}
-              projects={projects}
-              onTaskClick={handleTaskClick}
-              onUpdateTask={onUpdateTask}
-              onDeleteTask={handleDeleteTask}
-              onEditTask={handleEditTask}
-            />
+            <>
+              <div className="hidden sm:block">
+                <TaskTable
+                  tasks={filteredTasks}
+                  clients={availableClients}
+                  projects={projects}
+                  onTaskClick={handleTaskClick}
+                  onUpdateTask={onUpdateTask}
+                  onDeleteTask={handleDeleteTask}
+                  onEditTask={handleEditTask}
+                />
+              </div>
+              <div className="sm:hidden">
+                <TaskMobileCards
+                  tasks={filteredTasks}
+                  projects={projects}
+                  onTaskClick={handleTaskClick}
+                  onStatusChange={(task, status) => onUpdateTask(task.id, status)}
+                  onEditTask={handleEditTask}
+                  onDeleteTask={handleDeleteTask}
+                />
+              </div>
+            </>
           )}
         </CardContent>
 

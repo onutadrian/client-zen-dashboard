@@ -27,8 +27,8 @@ const ProjectsPage = () => {
 
   return (
     <DashboardContainer>
-      <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="w-full">
+        <div className="w-full space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <h1 className="text-3xl font-bold text-slate-800">Projects</h1>
@@ -42,9 +42,9 @@ const ProjectsPage = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2">
               <TabsTrigger value="projects">Projects List</TabsTrigger>
-              <TabsTrigger value="timeline">Timeline View</TabsTrigger>
+              <TabsTrigger value="timeline" className="hidden sm:inline-flex">Timeline View</TabsTrigger>
             </TabsList>
 
             <TabsContent value="projects" className="mt-6">
@@ -62,7 +62,7 @@ const ProjectsPage = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="timeline" className="mt-6">
+            <TabsContent value="timeline" className="mt-6 hidden sm:block">
               {projectsLoading || tasksLoading || milestonesLoading ? (
                 <CardListSkeleton count={2} lines={6} />
               ) : (

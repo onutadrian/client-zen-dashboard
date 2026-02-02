@@ -45,9 +45,7 @@ const UsersPage = () => {
   if (!isAdmin) {
     return (
       <DashboardContainer>
-        <div className="min-h-screen p-6 flex items-center justify-center" style={{
-          backgroundColor: '#F3F3F2'
-        }}>
+        <div className="w-full flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-slate-800 mb-4">Access Denied</h1>
             <p className="text-slate-600">You don't have permission to access this page.</p>
@@ -76,10 +74,8 @@ const UsersPage = () => {
 
   return (
     <DashboardContainer>
-      <div className="min-h-screen p-6" style={{
-        backgroundColor: '#F3F3F2'
-      }}>
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="w-full">
+        <div className="w-full space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <h1 className="text-3xl font-bold text-slate-800 flex items-center">

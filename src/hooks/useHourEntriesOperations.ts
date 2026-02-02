@@ -42,6 +42,9 @@ export const useHourEntriesOperations = () => {
     try {
       const transformedEntry = await hourEntryService.create(newEntry);
       setHourEntries(prev => [transformedEntry, ...prev]);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('hourEntriesChanged'));
+      }
       
       toast({
         title: "Success",
@@ -66,6 +69,9 @@ export const useHourEntriesOperations = () => {
       setHourEntries(prev => prev.map(entry => 
         entry.id === entryId ? { ...entry, ...updatedEntry } : entry
       ));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('hourEntriesChanged'));
+      }
 
       toast({
         title: "Success",
@@ -97,6 +103,9 @@ export const useHourEntriesOperations = () => {
       // Force a refresh from the database to ensure consistency
       console.log('Refreshing data from database to ensure consistency');
       await loadHourEntries();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('hourEntriesChanged'));
+      }
       
       toast({
         title: "Success",

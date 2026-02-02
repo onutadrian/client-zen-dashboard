@@ -110,7 +110,7 @@ const ProjectTaskSection = ({
         task={viewTask}
         isOpen={!!viewTask}
         onClose={() => setViewTask(null)}
-        projects={[{ id: project.id, name: project.name }] as any}
+        projects={[{ id: project.id, name: project.name, pricingType: project.pricingType }]}
       />
     </>
   );

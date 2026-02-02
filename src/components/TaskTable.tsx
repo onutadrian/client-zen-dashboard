@@ -4,7 +4,6 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components
 import CaptureWorkedHoursModal from './CaptureWorkedHoursModal';
 import TaskTableRow from './TaskTableRow';
 import { Task } from '@/types/task';
-import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
@@ -25,6 +24,7 @@ interface Project {
   id: string;
   name: string;
   clientId: number;
+  pricingType?: 'fixed' | 'hourly' | 'daily';
 }
 
 interface TaskTableProps {
@@ -50,7 +50,6 @@ const TaskTable = ({
 }: TaskTableProps) => {
   const [showHoursModal, setShowHoursModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const { isAdmin } = useAuth();
 
   const handleStatusChange = (task: Task, newStatus: Task['status']) => {
     if (newStatus === 'completed' && task.status !== 'completed') {
@@ -87,19 +86,18 @@ const TaskTable = ({
               <TableRow>
                 <TableHead className="w-[300px]">Task</TableHead>
                 <TableHead>Client</TableHead>
-                <TableHead>Project</TableHead>
-                <TableHead>Assigned To</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Hours</TableHead>
-                {isAdmin && <TableHead>Billing</TableHead>}
-                <TableHead>Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="whitespace-nowrap">Project</TableHead>
+                <TableHead className="whitespace-nowrap">Assigned To</TableHead>
+                <TableHead className="whitespace-nowrap">Status</TableHead>
+                <TableHead className="whitespace-nowrap">Hours</TableHead>
+                <TableHead className="whitespace-nowrap">Created</TableHead>
+                <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {tasks.length === 0 ? (
                 <TableRow>
-                  <td colSpan={9} className="text-center py-4 text-muted-foreground">
+                  <td colSpan={8} className="text-center py-4 text-muted-foreground">
                     No tasks found
                   </td>
                 </TableRow>

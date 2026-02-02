@@ -92,7 +92,7 @@ const ProjectDetailsPage = () => {
   if (!project) {
     return (
       <DashboardContainer>
-        <div className="min-h-screen p-6 flex items-center justify-center" style={{ backgroundColor: '#F3F3F2' }}>
+        <div className="w-full flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-slate-800 mb-4">Project not found</h1>
             <Button onClick={() => navigate('/projects')} variant="outline">
@@ -107,8 +107,8 @@ const ProjectDetailsPage = () => {
 
   return (
     <DashboardContainer>
-      <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
-        <div className="max-w-7xl mx-auto">
+      <div className="w-full">
+        <div className="w-full">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">

@@ -16,7 +16,7 @@ const AnalyticsSkeleton = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 min-[600px]:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         {Array.from({ length: 6 }).map((_, i) => (
           <Card key={i}>
             <CardHeader className="pb-2">
@@ -36,4 +36,3 @@ const AnalyticsSkeleton = () => {
 };
 
 export default AnalyticsSkeleton;
-

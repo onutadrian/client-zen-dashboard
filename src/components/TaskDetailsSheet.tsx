@@ -7,12 +7,17 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Clock, User, FileText, Link as LinkIcon, Calendar, FolderOpen } from 'lucide-react';
 import { Task } from '@/types/task';
+import { useAuth } from '@/hooks/useAuth';
+import { useCurrency } from '@/hooks/useCurrency';
+import { useHourEntries } from '@/hooks/useHourEntries';
 
 interface Project {
   id: string;
   name: string;
+  pricingType?: 'fixed' | 'hourly' | 'daily';
 }
 
 interface TaskDetailsSheetProps {
@@ -24,6 +29,9 @@ interface TaskDetailsSheetProps {
 
 const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsSheetProps) => {
   if (!task) return null;
+  const { isAdmin } = useAuth();
+  const { demoMode } = useCurrency();
+  const { hourEntries, updateHourEntry } = useHourEntries();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -42,6 +50,32 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
     if (!projectId) return 'No Project';
     const project = projects.find(p => p.id === projectId);
     return project ? project.name : 'Unknown Project';
+  };
+
+  const projectPricingType = React.useMemo(() => {
+    if (!task.projectId) return undefined;
+    const project = projects.find(p => p.id === task.projectId);
+    return project?.pricingType;
+  }, [projects, task.projectId]);
+
+  const isFixedPriceProject = projectPricingType === 'fixed';
+
+  const taskHourEntries = React.useMemo(
+    () => hourEntries.filter((entry) => entry.taskId === task.id),
+    [hourEntries, task.id]
+  );
+
+  const isBilled = React.useMemo(
+    () => taskHourEntries.some((entry) => entry.billed === true),
+    [taskHourEntries]
+  );
+
+  const handleToggleBilled = async () => {
+    if (demoMode || isFixedPriceProject || taskHourEntries.length === 0) return;
+    const nextBilledState = !isBilled;
+    await Promise.all(
+      taskHourEntries.map((entry) => updateHourEntry(entry.id, { billed: nextBilledState }))
+    );
   };
 
   return (
@@ -88,6 +122,43 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
               </h3>
               <div className="space-y-1 text-sm text-slate-600 ml-6">
                 <div className="text-green-600 font-medium">{task.workedHours}h worked</div>
+              </div>
+            </div>
+          )}
+
+          {/* Billing */}
+          {isAdmin && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-slate-700">Billing</h3>
+              <div className="flex items-center justify-between text-sm text-slate-600">
+                {demoMode ? (
+                  <Badge variant="secondary">
+                    —
+                  </Badge>
+                ) : isFixedPriceProject ? (
+                  <Badge variant="secondary">
+                    Fixed price
+                  </Badge>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={isBilled ? "default" : "secondary"}
+                        className={isBilled ? "bg-green-100 text-green-800" : ""}
+                      >
+                        {isBilled ? "Billed" : "Not Billed"}
+                      </Badge>
+                      {taskHourEntries.length === 0 && (
+                        <span className="text-xs text-slate-500">No linked hours</span>
+                      )}
+                    </div>
+                    <Switch
+                      checked={isBilled}
+                      onCheckedChange={handleToggleBilled}
+                      disabled={taskHourEntries.length === 0}
+                    />
+                  </>
+                )}
               </div>
             </div>
           )}

@@ -67,7 +67,11 @@ export default function AppSidebar() {
   const filteredItems = items.filter(item => item.roles.includes(userRole));
 
   return (
-    <Sidebar>
+    <Sidebar
+      variant="floating"
+      collapsible="none"
+      className="rounded-lg border border-sidebar-border shadow-sm"
+    >
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Project Manager</SidebarGroupLabel>

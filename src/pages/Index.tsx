@@ -158,8 +158,8 @@ const Index = () => {
 
   return (
     <DashboardContainer>
-      <div className="min-h-screen p-6" style={{ backgroundColor: '#F3F3F2' }}>
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="w-full">
+        <div className="w-full space-y-6">
           <Greeting />
           
           {isAdmin ? (

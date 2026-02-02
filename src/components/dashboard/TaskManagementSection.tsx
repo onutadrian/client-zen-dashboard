@@ -1,10 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import TaskTable from '@/components/TaskTable';
 import AddTaskModal from '@/components/AddTaskModal';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import { Task } from '@/types/task';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/types/client';
 import ProjectStatusFilter, { ProjectStatus } from './ProjectStatusFilter';
+import TaskMobileCards from '@/components/task/TaskMobileCards';
 
 interface TaskManagementSectionProps {
   tasks: Task[];
@@ -109,7 +112,8 @@ const TaskManagementSection = ({
       id: project.id,
       name: project.name,
       clientId: project.clientId,
-      useMilestones: project.useMilestones
+      useMilestones: project.useMilestones,
+      pricingType: project.pricingType
     }));
   }, [filteredProjects]);
 
@@ -122,16 +126,36 @@ const TaskManagementSection = ({
         />
       </div>
 
-      <TaskTable
-        tasks={transformedTasks}
-        clients={transformedClients}
-        projects={transformedProjects}
-        onTaskClick={onTaskClick}
-        onUpdateTask={onUpdateTask}
-        onDeleteTask={onDeleteTask}
-        onEditTask={handleEditTask}
-        onAddTaskClick={() => setShowAddTaskModal(true)}
-      />
+      <div className="hidden sm:block">
+        <TaskTable
+          tasks={transformedTasks}
+          clients={transformedClients}
+          projects={transformedProjects}
+          onTaskClick={onTaskClick}
+          onUpdateTask={onUpdateTask}
+          onDeleteTask={onDeleteTask}
+          onEditTask={handleEditTask}
+          onAddTaskClick={() => setShowAddTaskModal(true)}
+        />
+      </div>
+
+      <div className="sm:hidden mt-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Tasks ({transformedTasks.length})</h3>
+          <Button onClick={() => setShowAddTaskModal(true)} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Task
+          </Button>
+        </div>
+        <TaskMobileCards
+          tasks={transformedTasks}
+          projects={transformedProjects}
+          onTaskClick={onTaskClick}
+          onStatusChange={(task, status) => onUpdateTask(task.id, status)}
+          onEditTask={handleEditTask}
+          onDeleteTask={onDeleteTask}
+        />
+      </div>
 
       <AddTaskModal
         isOpen={showAddTaskModal}
@@ -150,7 +174,7 @@ const TaskManagementSection = ({
             clientId: project.clientId,
             useMilestones: project.useMilestones,
             status: project.status
-          }))}
+        }))}
         task={editingTask}
       />
     </>

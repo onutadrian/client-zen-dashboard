@@ -27,6 +27,7 @@ interface Project {
   id: string;
   name: string;
   clientId: number;
+  pricingType?: 'fixed' | 'hourly' | 'daily';
 }
 
 interface TaskTableRowProps {
@@ -68,38 +69,23 @@ const TaskTableRow = ({
     return project ? project.name : 'Unknown Project';
   };
 
-  const isBilled = (task: Task): boolean => {
-    if (task.status !== 'completed' || !task.workedHours || task.workedHours <= 0) return false;
+  const projectPricingType = React.useMemo(() => {
+    if (!task.projectId) return undefined;
+    const project = projects.find(p => p.id === task.projectId);
+    return project?.pricingType;
+  }, [projects, task.projectId]);
 
-    // 1) Best case: hour entry is explicitly linked to the task id
-    const billedByTaskId = hourEntries.some(
-      (entry) => entry.taskId === task.id && entry.billed === true
-    );
-    if (billedByTaskId) return true;
+  const isFixedPriceProject = projectPricingType === 'fixed';
 
-    // 2) Fallback: older data may have missing taskId; try matching by project+client and description
-    const normalizedTitle = task.title.trim().toLowerCase();
-    const billedByDescription = hourEntries.some((entry) => {
-      if (!entry.billed) return false;
-      if (task.projectId && entry.projectId !== task.projectId) return false;
-      if (entry.clientId !== task.clientId) return false;
-      const desc = (entry.description || '').trim().toLowerCase();
-      if (!desc) return false;
-      return desc.includes(normalizedTitle);
-    });
-    if (billedByDescription) return true;
+  const taskHourEntries = React.useMemo(
+    () => hourEntries.filter((entry) => entry.taskId === task.id),
+    [hourEntries, task.id]
+  );
 
-    // 3) Time-based fallback: if completed long ago and has worked hours, assume billed
-    if (task.completedDate) {
-      const completedAt = new Date(task.completedDate).getTime();
-      if (!Number.isNaN(completedAt)) {
-        const daysSinceCompletion = (Date.now() - completedAt) / (1000 * 60 * 60 * 24);
-        if (daysSinceCompletion > 7) return true;
-      }
-    }
-
-    return false;
-  };
+  const isBilled = React.useMemo(
+    () => taskHourEntries.some((entry) => entry.billed === true),
+    [taskHourEntries]
+  );
 
   return (
     <TableRow 
@@ -108,9 +94,27 @@ const TaskTableRow = ({
     >
       <TableCell className="font-medium">
         <div>
-          {task.urgent && (
-            <div className="mb-1">
-              <Badge variant="destructive" className="text-xs">Urgent</Badge>
+          {(task.urgent || (isAdmin && task.status === 'completed')) && (
+            <div className="mb-1 flex flex-wrap items-center gap-2">
+              {task.urgent && (
+                <Badge variant="destructive" className="text-xs">Urgent</Badge>
+              )}
+              {isAdmin && task.status === 'completed' && (
+                <>
+                  {demoMode ? (
+                    <Badge variant="secondary" className="text-xs">—</Badge>
+                  ) : isFixedPriceProject ? (
+                    <Badge variant="secondary" className="text-xs">Fixed price</Badge>
+                  ) : (
+                    <Badge
+                      variant={isBilled ? "default" : "secondary"}
+                      className={isBilled ? "bg-green-100 text-green-800 text-xs" : "text-xs"}
+                    >
+                      {isBilled ? "Billed" : "Not Billed"}
+                    </Badge>
+                  )}
+                </>
+              )}
             </div>
           )}
           <p className="font-semibold">{task.title}</p>
@@ -156,22 +160,6 @@ const TaskTableRow = ({
           )}
         </div>
       </TableCell>
-      {isAdmin && (
-        <TableCell>
-          {demoMode ? (
-            <Badge variant="secondary">
-              —
-            </Badge>
-          ) : (
-            <Badge 
-              variant={isBilled(task) ? "default" : "secondary"}
-              className={isBilled(task) ? "bg-green-100 text-green-800" : ""}
-            >
-              {isBilled(task) ? "Billed" : "Not Billed"}
-            </Badge>
-          )}
-        </TableCell>
-      )}
       <TableCell className="text-sm text-slate-600">
         {new Date(task.createdDate).toLocaleDateString()}
       </TableCell>
