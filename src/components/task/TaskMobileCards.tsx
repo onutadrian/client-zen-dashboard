@@ -18,9 +18,10 @@ interface TaskMobileCardsProps {
   tasks: Task[];
   projects: Project[];
   onTaskClick: (task: Task) => void;
-  onStatusChange: (task: Task, newStatus: Task['status']) => void;
-  onEditTask: (task: Task) => void;
-  onDeleteTask: (taskId: number) => void;
+  onStatusChange?: (task: Task, newStatus: Task['status']) => void;
+  onEditTask?: (task: Task) => void;
+  onDeleteTask?: (taskId: number) => void;
+  readOnly?: boolean;
 }
 
 const TaskMobileCards = ({
@@ -29,7 +30,8 @@ const TaskMobileCards = ({
   onTaskClick,
   onStatusChange,
   onEditTask,
-  onDeleteTask
+  onDeleteTask,
+  readOnly = false
 }: TaskMobileCardsProps) => {
   const { isAdmin } = useAuth();
   const { demoMode } = useCurrency();
@@ -47,6 +49,19 @@ const TaskMobileCards = ({
     return project?.pricingType;
   };
 
+  const getStatusBadgeClass = (status: Task['status']) => {
+    switch (status) {
+      case 'completed':
+        return 'ui-pill ui-pill--success';
+      case 'in-progress':
+        return 'ui-pill ui-pill--info';
+      case 'pending':
+        return 'ui-pill ui-pill--neutral';
+      default:
+        return 'ui-pill ui-pill--neutral';
+    }
+  };
+
   return (
     <div className="space-y-3">
       {tasks.map((task) => {
@@ -56,24 +71,24 @@ const TaskMobileCards = ({
 
         return (
           <Card key={`task-card-${task.id}`} className="cursor-pointer hover:shadow-sm transition-shadow" onClick={() => onTaskClick(task)}>
-            <CardContent className="p-4 space-y-3">
+            <CardContent className="ui-card-content space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   {(task.urgent || (isAdmin && task.status === 'completed')) && (
                     <div className="mb-1 flex flex-wrap items-center gap-2">
                       {task.urgent && (
-                        <Badge variant="destructive" className="text-xs">Urgent</Badge>
+                        <Badge className="ui-pill ui-pill--danger">Urgent</Badge>
                       )}
                       {isAdmin && task.status === 'completed' && (
                         <>
                           {demoMode ? (
-                            <Badge variant="secondary" className="text-xs">—</Badge>
+                            <Badge className="ui-pill ui-pill--neutral">—</Badge>
                           ) : isFixedPriceProject ? (
-                            <Badge variant="secondary" className="text-xs">Fixed price</Badge>
+                            <Badge className="ui-pill ui-pill--info">Fixed price</Badge>
                           ) : (
                             <Badge
                               variant={isBilled ? "default" : "secondary"}
-                              className={isBilled ? "bg-green-100 text-green-800 text-xs" : "text-xs"}
+                              className={isBilled ? "ui-pill ui-pill--success" : "ui-pill ui-pill--neutral"}
                             >
                               {isBilled ? "Billed" : "Not Billed"}
                             </Badge>
@@ -87,13 +102,15 @@ const TaskMobileCards = ({
                     <p className="text-sm text-slate-600 mt-1">{task.description}</p>
                   )}
                 </div>
-                <div onClick={(e) => e.stopPropagation()}>
-                  <TaskActionButtons
-                    task={task}
-                    onEditTask={onEditTask}
-                    onDeleteTask={onDeleteTask}
-                  />
-                </div>
+                {!readOnly && (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <TaskActionButtons
+                      task={task}
+                      onEditTask={onEditTask}
+                      onDeleteTask={onDeleteTask}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
@@ -115,10 +132,16 @@ const TaskMobileCards = ({
                   {task.assignedToName ? `Assigned to ${task.assignedToName}` : 'Unassigned'}
                 </div>
                 <div onClick={(e) => e.stopPropagation()}>
-                  <TaskStatusSelect
-                    status={task.status}
-                    onStatusChange={(newStatus) => onStatusChange(task, newStatus)}
-                  />
+                  {readOnly ? (
+                    <Badge className={getStatusBadgeClass(task.status)}>
+                      {task.status.replace('-', ' ')}
+                    </Badge>
+                  ) : (
+                    <TaskStatusSelect
+                      status={task.status}
+                      onStatusChange={(newStatus) => onStatusChange?.(task, newStatus)}
+                    />
+                  )}
                 </div>
               </div>
             </CardContent>

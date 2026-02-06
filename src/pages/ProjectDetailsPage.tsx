@@ -18,6 +18,7 @@ import { useHourEntries } from '@/hooks/useHourEntries';
 import { useCurrency } from '@/hooks/useCurrency';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
+import { useAuth } from '@/hooks/useAuth';
 
 type SupabaseProject = Tables<'projects'>;
 
@@ -28,6 +29,10 @@ const ProjectDetailsPage = () => {
   const [forceRefresh, setForceRefresh] = useState(0);
   const [supabaseProject, setSupabaseProject] = useState<SupabaseProject | null>(null);
   const { displayCurrency } = useCurrency();
+  const { profile, user } = useAuth();
+  const role =
+    profile?.role ??
+    (user?.user_metadata?.role as string | undefined);
 
   const { projects, updateProject, archiveProject, deleteProject } = useProjects();
   const { clients } = useClients();
@@ -46,6 +51,19 @@ const ProjectDetailsPage = () => {
   const client = clients.find(c => c.id === project?.clientId);
   const projectTasks = tasks.filter(task => task.projectId === id);
   const projectMilestones = milestones.filter(milestone => milestone.projectId === id);
+
+  if (role === 'client') {
+    return (
+      <DashboardContainer>
+        <div className="min-h-screen p-6 flex items-center justify-center" style={{ backgroundColor: '#F3F3F2' }}>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-slate-800 mb-4">Access Denied</h1>
+            <p className="text-slate-600">Clients cannot access this page.</p>
+          </div>
+        </div>
+      </DashboardContainer>
+    );
+  }
 
   // Fetch Supabase project for future use
   useEffect(() => {

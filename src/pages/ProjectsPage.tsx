@@ -15,15 +15,33 @@ import { useTasks } from '@/hooks/useTasks';
 import { useMilestones } from '@/hooks/useMilestones';
 import CardListSkeleton from '@/components/skeletons/CardListSkeleton';
 import { useCurrency } from '@/hooks/useCurrency';
+import { useAuth } from '@/hooks/useAuth';
 
 const ProjectsPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeTab, setActiveTab] = useState('projects');
   const { displayCurrency } = useCurrency();
+  const { profile, user } = useAuth();
+  const role =
+    profile?.role ??
+    (user?.user_metadata?.role as string | undefined);
   const { clients, loading: clientsLoading } = useClients();
   const { projects, showArchived, setShowArchived, addProject, updateProject, archiveProject, deleteProject, loading: projectsLoading } = useProjects();
   const { tasks, loading: tasksLoading } = useTasks();
   const { milestones, loading: milestonesLoading } = useMilestones();
+
+  if (role === 'client') {
+    return (
+      <DashboardContainer>
+        <div className="min-h-screen p-6 flex items-center justify-center" style={{ backgroundColor: '#F3F3F2' }}>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-slate-800 mb-4">Access Denied</h1>
+            <p className="text-slate-600">Clients cannot access this page.</p>
+          </div>
+        </div>
+      </DashboardContainer>
+    );
+  }
 
   return (
     <DashboardContainer>

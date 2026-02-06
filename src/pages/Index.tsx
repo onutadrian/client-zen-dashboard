@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardContainer from '@/components/dashboard/DashboardContainer';
 import Greeting from '@/components/Greeting';
 import AnalyticsSection from '@/components/AnalyticsSection';
@@ -12,8 +12,10 @@ import AnalyticsSkeleton from '@/components/analytics/AnalyticsSkeleton';
 import { useDashboardData } from '@/hooks/dashboard/useDashboardData';
 import type { Task as HookTask } from '@/types/task';
 import type { ProjectStatus } from '@/components/dashboard/ProjectStatusFilter';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
+  const navigate = useNavigate();
   const {
     authLoading,
     isAdmin,
@@ -30,6 +32,9 @@ const Index = () => {
     editTask,
     milestones,
     clients,
+    profile,
+    user,
+    session,
     projectsLoading,
     tasksLoading,
     milestonesLoading,
@@ -151,6 +156,17 @@ const Index = () => {
   const filteredMilestones = milestones.filter(milestone =>
     filteredProjectIds.has(milestone.projectId)
   );
+
+  useEffect(() => {
+    const role =
+      profile?.role ??
+      (session?.user?.user_metadata?.role as string | undefined) ??
+      (user?.user_metadata?.role as string | undefined);
+
+    if (role === 'client') {
+      navigate('/client', { replace: true });
+    }
+  }, [profile?.role, session?.user?.user_metadata?.role, user?.user_metadata?.role, navigate]);
 
   if (authLoading) {
     return <DashboardContainer><div /></DashboardContainer>;

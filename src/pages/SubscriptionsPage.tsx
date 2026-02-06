@@ -13,9 +13,14 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 import { useClients } from '@/hooks/useClients';
 import { useCurrency } from '@/hooks/useCurrency';
 import { formatCurrency } from '@/lib/currency';
+import { useAuth } from '@/hooks/useAuth';
 
 const SubscriptionsPage = () => {
   const { displayCurrency, convert } = useCurrency();
+  const { profile, user } = useAuth();
+  const role =
+    profile?.role ??
+    (user?.user_metadata?.role as string | undefined);
   const [forceRefresh, setForceRefresh] = useState(0);
   const [showSubscriptionModal, setShowSubscriptionModal] = React.useState(false);
   const [showEditSubscriptionModal, setShowEditSubscriptionModal] = React.useState(false);
@@ -31,6 +36,19 @@ const SubscriptionsPage = () => {
     clients
   } = useClients();
   const analytics = useAnalytics();
+
+  if (role === 'client') {
+    return (
+      <DashboardContainer>
+        <div className="min-h-screen p-6 flex items-center justify-center" style={{ backgroundColor: '#F3F3F2' }}>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-slate-800 mb-4">Access Denied</h1>
+            <p className="text-slate-600">Clients cannot access this page.</p>
+          </div>
+        </div>
+      </DashboardContainer>
+    );
+  }
 
   // Listen for currency changes to force refresh
   useEffect(() => {
@@ -83,7 +101,7 @@ const SubscriptionsPage = () => {
             <div className="flex items-center space-x-4">
               <h1 className="text-3xl font-bold text-slate-800">Subscriptions</h1>
             </div>
-            <Button onClick={() => setShowSubscriptionModal(true)} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
+            <Button variant="primary" onClick={() => setShowSubscriptionModal(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Subscription
             </Button>

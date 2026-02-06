@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Client Zen UI Kit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Satoshi:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Use app styles (Tailwind + shared component classes). View via Vite dev server. -->
+  <link rel="stylesheet" href="/src/index.css" />
+  <style>
+    :root {
+      --page-max: 1200px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Satoshi", system-ui, sans-serif;
+      background: #ffffff;
+      color: #0b1220;
+    }
+    .page {
+      padding: 32px 24px 96px;
+      max-width: var(--page-max);
+      margin: 0 auto;
+    }
+    h1 { font-size: 32px; font-weight: 700; margin: 0 0 4px; }
+    h2 { font-size: 22px; font-weight: 600; margin: 32px 0 12px; }
+    h3 { font-size: 16px; font-weight: 600; margin: 20px 0 8px; }
+    p { color: #64748b; margin: 0 0 12px; }
+    .section { margin-top: 24px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .swatch {
+      height: 48px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .swatch-label { font-size: 12px; color: #64748b; margin-top: 6px; }
+    .small { font-size: 12px; }
+    .spec {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      color: #0f172a;
+      background: #f8fafc;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    .divider { height: 1px; background: #e2e8f0; margin: 20px 0; }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .table th, .table td {
+      text-align: left;
+      padding: 12px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+    }
+    .table th { color: #475569; font-weight: 600; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Client Zen UI Kit</h1>
+    <p>Static UI reference for typography, colors, components, spacing, and proposed fixes. View via Vite dev server to use app CSS.</p>
+
+    <div class="section">
+      <h2>Typography</h2>
+      <div class="ui-card">
+        <div class="ui-card-content">
+          <div style="font-size:32px;font-weight:700;">H1 / Dashboard Title</div>
+          <div style="font-size:22px;font-weight:600; margin-top:8px;">H2 / Section Title</div>
+          <div style="font-size:16px;font-weight:600; margin-top:8px;">H3 / Subsection</div>
+          <div style="font-size:14px;font-weight:500; margin-top:8px;">Body / Base text</div>
+          <div style="font-size:13px; margin-top:8px; color:#64748b;">Muted / Secondary text</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Colors</h2>
+      <div class="grid">
+        <div class="ui-card">
+          <div class="ui-card-content">
+            <div class="swatch" style="background:#ffffff;"></div>
+            <div class="swatch-label">Background</div>
+          </div>
+        </div>
+        <div class="ui-card">
+          <div class="ui-card-content">
+            <div class="swatch" style="background:#0f172a;"></div>
+            <div class="swatch-label">Primary</div>
+          </div>
+        </div>
+        <div class="ui-card">
+          <div class="ui-card-content">
+            <div class="swatch" style="background:#f1f5f9;"></div>
+            <div class="swatch-label">Muted / Accent</div>
+          </div>
+        </div>
+        <div class="ui-card">
+          <div class="ui-card-content">
+            <div class="swatch" style="background:#ef4444;"></div>
+            <div class="swatch-label">Destructive</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Pills / Badges</h2>
+      <p class="small">Proposed: no hover effect, always single line.</p>
+      <div class="row">
+        <div class="ui-pill ui-pill--neutral">Pending</div>
+        <div class="ui-pill ui-pill--info">In Progress</div>
+        <div class="ui-pill ui-pill--success">Completed</div>
+        <div class="ui-pill ui-pill--danger">Urgent</div>
+      </div>
+      <div class="divider"></div>
+      <div class="spec">Proposed: remove hover styles in badge variants, add whitespace-nowrap for status pills.</div>
+    </div>
+
+    <div class="section">
+      <h2>Client Summary Cards</h2>
+      <p class="small">Client dashboard metrics (time + task breakdown).</p>
+      <div class="grid">
+        <div class="ui-card">
+          <div class="ui-analytics-content">
+            <div class="ui-analytics-title">Work Logged</div>
+            <div class="ui-analytics-value" style="margin-top:8px;">13.0h</div>
+            <div class="ui-analytics-meta" style="margin-top:6px;">Hours from completed tasks</div>
+          </div>
+        </div>
+        <div class="ui-card">
+          <div class="ui-analytics-content">
+            <div class="ui-analytics-title">Completed</div>
+            <div class="ui-analytics-value" style="margin-top:8px;">8</div>
+            <div class="ui-pill ui-pill--neutral" style="margin-top:8px;">Urgent hours: 9h</div>
+          </div>
+        </div>
+        <div class="ui-card">
+          <div class="ui-analytics-content">
+            <div class="ui-analytics-title">Next Up</div>
+            <div class="ui-analytics-value" style="margin-top:8px;">0</div>
+            <div class="ui-analytics-meta" style="margin-top:6px;">No pending tasks</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Analytics Cards (Dashboard)</h2>
+      <p class="small">Admin analytics cards (financial + time breakdown).</p>
+      <div class="grid">
+        <div class="ui-card">
+          <div class="ui-analytics-content">
+            <div class="ui-analytics-title">Total Revenue</div>
+            <div class="ui-analytics-value" style="margin-top:8px;">€77.64K</div>
+            <div class="ui-analytics-meta" style="margin-top:6px;">annual estimate</div>
+          </div>
+        </div>
+        <div class="ui-card">
+          <div class="ui-analytics-content">
+            <div class="ui-analytics-title">Total Paid to Date</div>
+            <div class="ui-analytics-value" style="margin-top:8px;">€1.49K</div>
+            <div class="ui-pill ui-pill--success" style="margin-top:8px;">+19% vs prev</div>
+          </div>
+        </div>
+        <div class="ui-card">
+          <div class="ui-analytics-content">
+            <div class="ui-analytics-title">Net Profit</div>
+            <div class="ui-analytics-value" style="margin-top:8px;">€77.64K</div>
+            <div class="ui-pill ui-pill--info" style="margin-top:8px;">+197%</div>
+          </div>
+        </div>
+        <div class="ui-card">
+          <div class="ui-analytics-content">
+            <div class="ui-analytics-title">Total Hours</div>
+            <div class="ui-analytics-value" style="margin-top:8px;">184</div>
+            <div class="ui-analytics-meta" style="margin-top:6px;">all subscriptions</div>
+          </div>
+        </div>
+        <div class="ui-card">
+          <div class="ui-analytics-content">
+            <div class="ui-analytics-title">Work Logged</div>
+            <div class="ui-analytics-value" style="margin-top:8px;">13.0h</div>
+            <div class="ui-analytics-meta" style="margin-top:6px;">Hours from completed tasks</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Table</h2>
+      <div class="ui-card">
+        <div class="ui-card-content">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Project</th>
+                <th>Status</th>
+                <th>Hours</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>UX Map Flow</td>
+                <td>Onboarding</td>
+                <td><span class="ui-pill ui-pill--info">In Progress</span></td>
+                <td>5h</td>
+              </tr>
+              <tr>
+                <td>Landing page banner</td>
+                <td>Time & Materials</td>
+                <td><span class="ui-pill ui-pill--success">Completed</span></td>
+                <td>3h</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Proposed Fixes Summary</h2>
+      <div class="ui-card">
+        <div class="ui-card-content">
+          <ul>
+            <li>Remove hover states from pills/badges (no hover effect).</li>
+            <li>Add `whitespace-nowrap` to status pills to prevent wrapping.</li>
+            <li>Standardize card padding to `p-4` / `p-6` and typography scale.</li>
+            <li>Ensure table headers and row typography align across admin/client views.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

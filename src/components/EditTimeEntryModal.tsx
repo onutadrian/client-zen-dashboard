@@ -134,10 +134,10 @@ const EditTimeEntryModal = ({ isOpen, onClose, timeEntry }: EditTimeEntryModalPr
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button 
+            <Button variant="primary" 
               type="submit" 
               disabled={isUpdating}
-              className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+             
             >
               <Save className="w-4 h-4 mr-2" />
               {isUpdating ? 'Saving...' : 'Save Changes'}

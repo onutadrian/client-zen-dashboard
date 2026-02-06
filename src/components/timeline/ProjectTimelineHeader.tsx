@@ -1,33 +1,21 @@
 
 import React from 'react';
-import { Calendar, Clock, ZoomIn, ZoomOut } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Project } from '@/hooks/useProjects';
-
-type ZoomLevel = 'daily' | 'weekly' | 'monthly';
 
 interface ProjectTimelineHeaderProps {
   projects: Project[];
   selectedProject: string;
   onProjectChange: (projectId: string) => void;
-  zoomLevel: ZoomLevel;
-  onZoomChange: (level: ZoomLevel) => void;
 }
 
 const ProjectTimelineHeader = ({
   projects,
   selectedProject,
-  onProjectChange,
-  zoomLevel,
-  onZoomChange
+  onProjectChange
 }: ProjectTimelineHeaderProps) => {
-  const handleZoomClick = () => {
-    const nextLevel = zoomLevel === 'daily' ? 'weekly' : zoomLevel === 'weekly' ? 'monthly' : 'daily';
-    onZoomChange(nextLevel);
-  };
-
   return (
     <div className="flex items-center justify-between">
       <CardTitle className="flex items-center">
@@ -49,19 +37,6 @@ const ProjectTimelineHeader = ({
             ))}
           </SelectContent>
         </Select>
-        
-        <div className="flex items-center space-x-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleZoomClick}
-          >
-            {zoomLevel === 'daily' && <ZoomOut className="w-4 h-4 mr-1" />}
-            {zoomLevel === 'weekly' && <Clock className="w-4 h-4 mr-1" />}
-            {zoomLevel === 'monthly' && <ZoomIn className="w-4 h-4 mr-1" />}
-            {zoomLevel}
-          </Button>
-        </div>
       </div>
     </div>
   );

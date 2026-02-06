@@ -51,9 +51,9 @@ const ProjectsSection = ({
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Projects ({projects.length})</CardTitle>
-            <Button 
+            <Button variant="primary" 
               onClick={() => setShowAddModal(true)}
-              className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 rounded-sm transition-colors"
+             
             >
               Add Project
             </Button>

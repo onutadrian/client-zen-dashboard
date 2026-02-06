@@ -4,6 +4,9 @@
 -- Drop the existing problematic policies
 DROP POLICY IF EXISTS "Authenticated users can view invites" ON public.user_invites;
 DROP POLICY IF EXISTS "Authenticated users can update invites" ON public.user_invites;
+DROP POLICY IF EXISTS "Users can view their own created invites" ON public.user_invites;
+DROP POLICY IF EXISTS "Users can update their own created invites" ON public.user_invites;
+DROP POLICY IF EXISTS "System can update invite usage" ON public.user_invites;
 
 -- Create secure policies that restrict access appropriately
 -- 1. Users can only view invites they created

@@ -12,8 +12,13 @@ import SearchBar from '@/components/contract-templates/SearchBar';
 import TemplatesGrid from '@/components/contract-templates/TemplatesGrid';
 import DocumentsGrid from '@/components/contract-templates/DocumentsGrid';
 import { ContractTemplate } from '@/services/contractTemplateService';
+import { useAuth } from '@/hooks/useAuth';
 
 const ContractTemplatesPage = () => {
+  const { profile, user } = useAuth();
+  const role =
+    profile?.role ??
+    (user?.user_metadata?.role as string | undefined);
   const { templates, generatedDocuments, loading, deleteTemplate, deleteGeneratedDocument } = useContractTemplates();
   const { downloadDocument } = useDocumentDownload();
   const [showAddModal, setShowAddModal] = useState(false);
@@ -48,6 +53,16 @@ const ContractTemplatesPage = () => {
   const handleDeleteGeneratedDocument = async (documentId: string) => {
     await deleteGeneratedDocument(documentId);
   };
+
+  if (role === 'client') {
+    return (
+      <AuthenticatedLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-slate-600">Clients cannot access this page.</div>
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
 
   if (loading) {
     return (

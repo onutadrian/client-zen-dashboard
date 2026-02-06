@@ -34,9 +34,8 @@ const VariableManager = ({
           <Button
             type="button"
             onClick={onSaveAndUpdatePreview}
-            variant={hasUnsavedChanges ? "default" : "outline"}
+            variant={hasUnsavedChanges ? "success" : "outline"}
             size="sm"
-            className={hasUnsavedChanges ? "bg-green-600 hover:bg-green-700" : ""}
           >
             <Save className="w-4 h-4 mr-2" />
             Save & Update Preview

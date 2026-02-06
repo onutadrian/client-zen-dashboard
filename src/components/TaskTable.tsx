@@ -32,10 +32,11 @@ interface TaskTableProps {
   clients: Client[];
   projects?: Project[];
   onTaskClick: (task: Task) => void;
-  onUpdateTask: (taskId: number, status: Task['status'], actualHours?: number) => void;
-  onDeleteTask: (taskId: number) => void;
-  onEditTask: (task: Task) => void;
+  onUpdateTask?: (taskId: number, status: Task['status'], actualHours?: number) => void;
+  onDeleteTask?: (taskId: number) => void;
+  onEditTask?: (task: Task) => void;
   onAddTaskClick?: () => void;
+  readOnly?: boolean;
 }
 
 const TaskTable = ({ 
@@ -46,12 +47,16 @@ const TaskTable = ({
   onUpdateTask, 
   onDeleteTask, 
   onEditTask,
-  onAddTaskClick
+  onAddTaskClick,
+  readOnly = false
 }: TaskTableProps) => {
   const [showHoursModal, setShowHoursModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const handleStatusChange = (task: Task, newStatus: Task['status']) => {
+    if (readOnly || !onUpdateTask) {
+      return;
+    }
     if (newStatus === 'completed' && task.status !== 'completed') {
       setSelectedTask(task);
       setShowHoursModal(true);
@@ -61,7 +66,7 @@ const TaskTable = ({
   };
 
   const handleWorkedHoursSubmit = (workedHours: number) => {
-    if (selectedTask) {
+    if (selectedTask && onUpdateTask) {
       onUpdateTask(selectedTask.id, 'completed', workedHours);
     }
     setSelectedTask(null);
@@ -70,10 +75,10 @@ const TaskTable = ({
   return (
     <>
       <div className="space-y-4">
-        {onAddTaskClick && (
+        {!readOnly && onAddTaskClick && (
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Tasks ({tasks.length})</h3>
-            <Button onClick={onAddTaskClick} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
+            <Button variant="primary" onClick={onAddTaskClick}>
               <Plus className="w-4 h-4 mr-2" />
               Add Task
             </Button>
@@ -113,6 +118,7 @@ const TaskTable = ({
                     onDeleteTask={onDeleteTask}
                     onEditTask={onEditTask}
                     onStatusChange={handleStatusChange}
+                    readOnly={readOnly}
                   />
                 ))
               )}
@@ -121,15 +127,17 @@ const TaskTable = ({
         </div>
       </div>
 
-      <CaptureWorkedHoursModal
-        isOpen={showHoursModal}
-        onClose={() => {
-          setShowHoursModal(false);
-          setSelectedTask(null);
-        }}
-        task={selectedTask}
-        onComplete={handleWorkedHoursSubmit}
-      />
+      {!readOnly && (
+        <CaptureWorkedHoursModal
+          isOpen={showHoursModal}
+          onClose={() => {
+            setShowHoursModal(false);
+            setSelectedTask(null);
+          }}
+          task={selectedTask}
+          onComplete={handleWorkedHoursSubmit}
+        />
+      )}
     </>
   );
 };

@@ -260,7 +260,7 @@ const AddClientModal = ({ isOpen, onClose, onAdd }) => {
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" variant="primary">
               Add Client
             </Button>
           </div>

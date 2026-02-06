@@ -77,7 +77,7 @@ const CaptureWorkedHoursModal = ({
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-green-600 hover:bg-green-700">
+            <Button type="submit" variant="success">
               Complete Task
             </Button>
           </div>

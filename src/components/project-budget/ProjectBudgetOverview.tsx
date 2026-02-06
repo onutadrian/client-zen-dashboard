@@ -54,8 +54,8 @@ const ProjectBudgetOverview = ({ project, budgetMetrics, displayCurrency }: Proj
         <div className="flex items-center space-x-2 mb-4">
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
             isFixedPrice 
-              ? 'bg-blue-100 text-blue-800' 
-              : 'bg-green-100 text-green-800'
+              ? 'ui-pill ui-pill--info' 
+              : 'ui-pill ui-pill--success'
           }`}>
             {isFixedPrice ? 'Fixed Price Project' : 'Hourly Project'}
           </span>

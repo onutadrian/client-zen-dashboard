@@ -17,6 +17,9 @@ import UsersPage from '@/pages/UsersPage';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ContractTemplatesPage from '@/pages/ContractTemplatesPage';
+import ClientDashboardPage from '@/pages/ClientDashboardPage';
+import ClientProjectsPage from '@/pages/ClientProjectsPage';
+import ClientProjectDetailsPage from '@/pages/ClientProjectDetailsPage';
 
 
 function App() {
@@ -64,6 +67,21 @@ function App() {
                   <Route path="/users" element={
                     <ProtectedRoute>
                       <UsersPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/client" element={
+                    <ProtectedRoute>
+                      <ClientDashboardPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/client/projects" element={
+                    <ProtectedRoute>
+                      <ClientProjectsPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/client/projects/:id" element={
+                    <ProtectedRoute>
+                      <ClientProjectDetailsPage />
                     </ProtectedRoute>
                   } />
                   <Route path="/contracts" element={

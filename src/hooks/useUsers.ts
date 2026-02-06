@@ -23,7 +23,7 @@ export const useUsers = () => {
       // Type assertion to ensure role is properly typed
       const typedUsers = (data || []).map(user => ({
         ...user,
-        role: user.role as 'admin' | 'standard'
+        role: user.role as 'admin' | 'standard' | 'client'
       }));
       
       setUsers(typedUsers);
@@ -45,7 +45,7 @@ export const useUsers = () => {
     }
   };
 
-  const updateUserRole = async (userId: string, role: 'admin' | 'standard') => {
+  const updateUserRole = async (userId: string, role: 'admin' | 'standard' | 'client') => {
     try {
       // Use the secure admin-only function to update roles
       const { error } = await supabase.rpc('update_user_role', {
@@ -77,6 +77,31 @@ export const useUsers = () => {
     }
   };
 
+  const deleteUser = async (userId: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('delete-user', {
+        body: { user_id: userId }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "User deleted successfully",
+      });
+
+      await fetchUsers();
+    } catch (error: any) {
+      console.error('Delete user error:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to delete user",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -85,6 +110,7 @@ export const useUsers = () => {
     users,
     loading,
     updateUserRole,
+    deleteUser,
     refreshUsers: fetchUsers
   };
 };

@@ -37,3 +37,10 @@ Agent Memory (Concise, Append‑Only)
 2026-01-26 – Recent schema/UX deltas
 - Added `use_milestones` on projects; urgent hourly rate support
 - Iterated milestone billing/status logic; fixed task assignment flows
+2026-02-05 – RLS: Client access policies
+- Added `public.get_client_id_for_user()` helper for email->client mapping
+- Client RLS: clients/projects/tasks/milestones/hour_entries select policies
+- Migration: `supabase/migrations/20260205120000_client_access_policies.sql`
+2026-02-05 – Realtime: Temporary disable toggle
+- `VITE_DISABLE_REALTIME=true` disables realtime subscriptions in dev
+- Re-enable once Supabase Realtime is stable; check `status.supabase.com`

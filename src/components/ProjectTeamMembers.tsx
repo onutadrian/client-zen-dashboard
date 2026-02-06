@@ -85,10 +85,10 @@ const ProjectTeamMembers = ({
               <Users className="w-5 h-5 mr-2" />
               Team Members ({project.team?.length || 0})
             </CardTitle>
-            <Button 
+            <Button variant="primary" 
               onClick={() => setIsAdding(!isAdding)} 
               size="sm" 
-              className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+             
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Member
@@ -126,14 +126,10 @@ const ProjectTeamMembers = ({
                 />
               </div>
               <div className="flex space-x-2">
-                <Button onClick={handleAddMember} size="sm">
+                <Button variant="primary" onClick={handleAddMember} size="sm">
                   Add Member
                 </Button>
-                <Button 
-                  onClick={() => setIsAdding(false)} 
-                  variant="outline" 
-                  size="sm"
-                >
+                <Button variant="outline" onClick={() => setIsAdding(false)} size="sm">
                   Cancel
                 </Button>
               </div>
@@ -161,13 +157,8 @@ const ProjectTeamMembers = ({
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Badge variant="secondary">Active</Badge>
-                      <Button
-                        onClick={() => handleRemoveMember(index)}
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-600 hover:text-red-700"
-                      >
+                      <Badge className="ui-pill ui-pill--success">Active</Badge>
+                      <Button variant="danger" onClick={() => handleRemoveMember(index)} size="sm">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>

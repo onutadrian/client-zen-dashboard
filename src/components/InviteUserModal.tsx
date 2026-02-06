@@ -79,12 +79,15 @@ const InviteUserModal = ({ isOpen, onClose, onInvite }: InviteUserModalProps) =>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="standard">Standard User</SelectItem>
+                <SelectItem value="client">Client User</SelectItem>
                 <SelectItem value="admin">Admin User</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-slate-500 mt-1">
               {role === 'admin' 
                 ? 'Admin users have full access to all features' 
+                : role === 'client'
+                  ? 'Client users can only view their own projects and tasks'
                 : 'Standard users can only add tasks and view limited dashboard data'}
             </p>
           </div>

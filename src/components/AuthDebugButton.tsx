@@ -38,17 +38,15 @@ const AuthDebugButton = () => {
     <div className="fixed bottom-4 right-4 z-50 flex gap-2">
       <Button 
         onClick={handleAuthCleanup}
-        variant="outline"
+        variant="danger"
         size="sm"
-        className="bg-red-50 hover:bg-red-100 border-red-200"
       >
         Clean Auth State
       </Button>
       <Button 
         onClick={handleForceCleanup}
-        variant="outline"
+        variant="danger"
         size="sm"
-        className="bg-orange-50 hover:bg-orange-100 border-orange-200"
       >
         Force Cleanup
       </Button>

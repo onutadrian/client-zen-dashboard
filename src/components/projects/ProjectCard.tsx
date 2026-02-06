@@ -32,15 +32,15 @@ const ProjectCard = ({ project, clients, onEditProject }: ProjectCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'ui-pill ui-pill--success';
       case 'completed':
-        return 'bg-blue-100 text-blue-800';
+        return 'ui-pill ui-pill--info';
       case 'paused':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'ui-pill ui-pill--warning';
       case 'canceled':
-        return 'bg-red-100 text-red-800';
+        return 'ui-pill ui-pill--danger';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'ui-pill ui-pill--neutral';
     }
   };
 
@@ -49,7 +49,7 @@ const ProjectCard = ({ project, clients, onEditProject }: ProjectCardProps) => {
       return {
         type: project.pricingType === 'fixed' ? 'Fixed' : 'Hourly',
         amount: '—',
-        color: project.pricingType === 'fixed' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+        color: project.pricingType === 'fixed' ? 'ui-pill ui-pill--info' : 'ui-pill ui-pill--success'
       };
     }
 
@@ -57,13 +57,13 @@ const ProjectCard = ({ project, clients, onEditProject }: ProjectCardProps) => {
       return {
         type: 'Fixed',
         amount: project.fixedPrice ? formatCurrency(project.fixedPrice, project.currency) : 'TBD',
-        color: 'bg-blue-100 text-blue-800'
+        color: 'ui-pill ui-pill--info'
       };
     } else {
       return {
         type: 'Hourly',
         amount: project.hourlyRate ? `${formatCurrency(project.hourlyRate, project.currency)}/hr` : 'TBD',
-        color: 'bg-green-100 text-green-800'
+        color: 'ui-pill ui-pill--success'
       };
     }
   };

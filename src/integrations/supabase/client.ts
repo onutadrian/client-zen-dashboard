@@ -8,4 +8,19 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const realtimeDisabled =
+  import.meta.env.VITE_DISABLE_REALTIME === 'true';
+
+const realtimeOptions =
+  !realtimeDisabled && typeof window !== 'undefined' && 'WebSocket' in window
+    ? { transport: WebSocket }
+    : undefined;
+
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  realtime: realtimeOptions
+});
+
+// Expose for debugging in devtools.
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  (window as any).supabase = supabase;
+}

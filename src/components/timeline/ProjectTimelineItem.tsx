@@ -26,20 +26,20 @@ const ProjectTimelineItem = ({ project, tasks, milestones, clients }: ProjectTim
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed':
-        return 'bg-green-500';
       case 'active':
-        return 'bg-blue-500';
+        return 'ui-pill ui-pill--success';
+      case 'completed':
+        return 'ui-pill ui-pill--info';
       case 'paused':
-        return 'bg-yellow-500';
+        return 'ui-pill ui-pill--warning';
       case 'canceled':
-        return 'bg-red-500';
+        return 'ui-pill ui-pill--danger';
       case 'in-progress':
-        return 'bg-blue-500';
+        return 'ui-pill ui-pill--info';
       case 'pending':
-        return 'bg-gray-400';
+        return 'ui-pill ui-pill--neutral';
       default:
-        return 'bg-gray-400';
+        return 'ui-pill ui-pill--neutral';
     }
   };
 

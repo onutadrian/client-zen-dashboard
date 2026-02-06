@@ -20,7 +20,7 @@ const TaskTableHeader = ({ taskCount, onAddTaskClick }: TaskTableHeaderProps) =>
       {taskCount !== undefined && onAddTaskClick && (
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Tasks ({taskCount})</h3>
-          <Button onClick={onAddTaskClick} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
+          <Button variant="primary" onClick={onAddTaskClick}>
             <Plus className="w-4 h-4 mr-2" />
             Add Task
           </Button>

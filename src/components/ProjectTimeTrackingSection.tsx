@@ -85,9 +85,9 @@ const ProjectTimeTrackingSection = ({
           {client && (
             <div className="flex items-center gap-2">
               {!isFixedPrice && (
-                <Button
+                <Button variant="primary"
                   onClick={() => isActive && setShowLogHoursModal(true)}
-                  className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+                 
                   disabled={!isActive}
                 >
                   <Clock className="w-4 h-4 mr-2" />

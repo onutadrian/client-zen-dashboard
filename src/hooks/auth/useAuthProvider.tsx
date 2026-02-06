@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -26,8 +26,49 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const profileChannelUserId = useRef<string | null>(null);
 
   useEffect(() => {
+    let profileChannel: ReturnType<typeof supabase.channel> | null = null;
+
+    const setupProfileChannel = async (userId: string, accessToken?: string | null) => {
+      if (profileChannelUserId.current === userId && profileChannel) {
+        return;
+      }
+      if (profileChannel) {
+        supabase.removeChannel(profileChannel);
+        profileChannel = null;
+      }
+      if (!accessToken) {
+        return;
+      }
+      if (import.meta.env.VITE_DISABLE_REALTIME === 'true') {
+        return;
+      }
+      profileChannelUserId.current = userId;
+      try {
+        await supabase.realtime.setAuth(accessToken);
+      } catch (error) {
+        console.warn('Realtime setAuth error:', error);
+      }
+      profileChannel = supabase
+        .channel('profile_changes')
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${userId}` },
+          (payload) => {
+            if (payload.new) {
+              setProfile(payload.new as UserProfile);
+            }
+          }
+        )
+        .subscribe((status) => {
+          if (status !== 'SUBSCRIBED') {
+            console.warn('Realtime channel status:', status);
+          }
+        });
+    };
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -49,6 +90,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Defer profile fetching to avoid recursion
         if (session?.user) {
+          setupProfileChannel(session.user.id, session.access_token);
           setTimeout(async () => {
             try {
               const userProfile = await fetchUserProfile(session.user.id);
@@ -67,6 +109,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         } else {
           setProfile(null);
           setLoading(false);
+          profileChannelUserId.current = null;
         }
 
         // Handle authentication events with proper error handling
@@ -75,6 +118,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         } else if (event === 'SIGNED_OUT') {
           console.log('User signed out');
           setProfile(null);
+          profileChannelUserId.current = null;
           // Clean up any remaining auth state
           cleanupAuthState();
         } else if (event === 'TOKEN_REFRESHED') {
@@ -106,6 +150,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
+        setupProfileChannel(session.user.id, session.access_token);
         try {
           const userProfile = await fetchUserProfile(session.user.id);
           setProfile(userProfile);
@@ -127,7 +172,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      if (profileChannel) {
+        supabase.removeChannel(profileChannel);
+      }
+      profileChannelUserId.current = null;
+    };
   }, []);
 
   const signOut = async () => {
@@ -152,7 +203,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const isAdmin = profile?.role === 'admin';
+  const isAdmin =
+    profile?.role === 'admin' ||
+    (session?.user?.user_metadata?.role as string | undefined) === 'admin';
 
   const value: AuthContextType = {
     user,

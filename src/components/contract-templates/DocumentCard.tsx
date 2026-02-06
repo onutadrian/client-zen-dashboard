@@ -46,7 +46,7 @@ const DocumentCard = ({ document, onDownload, onDelete }: DocumentCardProps) => 
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDelete(document.id)}>
+                <AlertDialogAction onClick={() => onDelete(document.id)} className="bg-red-100 text-red-800 hover:bg-red-200">
                   Delete
                 </AlertDialogAction>
               </AlertDialogFooter>

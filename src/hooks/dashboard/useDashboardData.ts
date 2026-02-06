@@ -8,7 +8,7 @@ import { useMilestones } from '@/hooks/useMilestones';
 import { useClients } from '@/hooks/useClients';
 
 export const useDashboardData = () => {
-  const { loading: authLoading, profile, isAdmin } = useAuth();
+  const { loading: authLoading, profile, isAdmin, user, session } = useAuth();
   
   const {
     selectedPeriod,
@@ -28,6 +28,8 @@ export const useDashboardData = () => {
     authLoading,
     profile,
     isAdmin,
+    user,
+    session,
     selectedPeriod,
     setSelectedPeriod,
     customDateRange,

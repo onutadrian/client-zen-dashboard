@@ -254,7 +254,7 @@ const AddTaskModal = ({ isOpen, onClose, onAdd, clients, projects, task }: AddTa
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={clients.length === 0}>
+            <Button type="submit" variant="primary" disabled={clients.length === 0}>
               {task ? 'Update Task' : 'Add Task'}
             </Button>
           </div>

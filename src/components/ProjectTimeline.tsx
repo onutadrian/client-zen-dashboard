@@ -20,10 +20,7 @@ interface ProjectTimelineProps {
   clients: Client[];
 }
 
-type ZoomLevel = 'daily' | 'weekly' | 'monthly';
-
 const ProjectTimeline = ({ projects, tasks, milestones, clients }: ProjectTimelineProps) => {
-  const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('weekly');
   const [selectedProject, setSelectedProject] = useState<string>('all');
 
   const filteredProjects = useMemo(() => {
@@ -39,8 +36,6 @@ const ProjectTimeline = ({ projects, tasks, milestones, clients }: ProjectTimeli
           projects={projects}
           selectedProject={selectedProject}
           onProjectChange={setSelectedProject}
-          zoomLevel={zoomLevel}
-          onZoomChange={setZoomLevel}
         />
       </CardHeader>
       

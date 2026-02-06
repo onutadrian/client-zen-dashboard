@@ -12,13 +12,13 @@ const ClientCardHeader = ({ client, demoMode }: ClientCardHeaderProps) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800 hover:bg-green-100';
+        return 'ui-pill ui-pill--success';
       case 'inactive':
-        return 'bg-red-100 text-red-800 hover:bg-red-100';
+        return 'ui-pill ui-pill--danger';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
+        return 'ui-pill ui-pill--neutral';
       default:
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+        return 'ui-pill ui-pill--neutral';
     }
   };
 

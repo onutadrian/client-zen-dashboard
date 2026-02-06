@@ -112,7 +112,7 @@ const SubscriptionMetrics = ({ subscriptions, displayCurrency }: SubscriptionMet
           
           return (
             <Card key={index} className="hover:shadow-none transition-all duration-200 shadow-none w-full min-w-0">
-              <CardContent className="p-4 lg:p-6 flex flex-col justify-between h-full min-h-[200px] lg:min-h-[231px]">
+              <CardContent className="ui-card-content lg:p-6 flex flex-col justify-between h-full min-h-[200px] lg:min-h-[231px]">
                 {/* Section 1: Top content */}
                 <div className="space-y-2 lg:space-y-3">
                   <div className="space-y-1 lg:space-y-2">

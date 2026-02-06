@@ -93,7 +93,7 @@ const DashboardTasksTimeline = ({
           </CardTitle>
           <Button 
             onClick={onAddTaskClick}
-            className="bg-blue-600 hover:bg-blue-700"
+            variant="primary"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Task
@@ -160,7 +160,7 @@ const DashboardTasksTimeline = ({
                 <div className="space-y-2">
                   {upcomingMilestones.map((milestone) => (
                     <Card key={milestone.id} className="border border-slate-200">
-                      <CardContent className="p-4">
+                      <CardContent className="ui-card-content">
                         <div className="flex items-start justify-between">
                           <div>
                             <h4 className="font-medium text-slate-900">{milestone.title}</h4>
@@ -177,7 +177,7 @@ const DashboardTasksTimeline = ({
                               )}
                             </div>
                           </div>
-                          <Badge className="bg-amber-100 text-amber-800">
+                          <Badge className="ui-pill ui-pill--warning">
                             {milestone.status}
                           </Badge>
                         </div>

@@ -118,7 +118,7 @@ const EditClientModal = ({ isOpen, onClose, client, onSave }: EditClientModalPro
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={handleSave} variant="primary">
             Save Changes
           </Button>
         </div>

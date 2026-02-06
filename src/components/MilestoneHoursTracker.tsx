@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Clock, Target } from 'lucide-react';
 import { HourEntry, useHourEntries } from '@/hooks/useHourEntries';
@@ -89,9 +90,9 @@ const MilestoneHoursTracker = ({ milestones, hourEntries, onAddTimeEntry }: Mile
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-medium">{milestone.title}</h4>
                   <span className={`px-2 py-1 rounded text-xs ${
-                    milestone.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    milestone.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                    'bg-gray-100 text-gray-800'
+                    milestone.status === 'completed' ? 'ui-pill ui-pill--success' :
+                    milestone.status === 'in-progress' ? 'ui-pill ui-pill--info' :
+                    'ui-pill ui-pill--neutral'
                   }`}>
                     {milestone.status.replace('-', ' ')}
                   </span>
@@ -196,9 +197,9 @@ const MilestoneHoursTracker = ({ milestones, hourEntries, onAddTimeEntry }: Mile
             <div className="border-2 border-dashed border-orange-200 rounded-lg p-4 bg-orange-50">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium text-orange-800">Unassigned Hours</h4>
-                <span className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-800">
+                <Badge className="ui-pill ui-pill--warning">
                   {totalUnassignedHours.toFixed(1)} hours
-                </span>
+                </Badge>
               </div>
               <p className="text-sm text-orange-700 mb-3">
                 These hours are not assigned to any milestone. Consider assigning them to track progress accurately.

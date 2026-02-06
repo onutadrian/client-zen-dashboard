@@ -132,9 +132,9 @@ const ProjectSettings = ({
             />
           </div>
 
-          <Button
+          <Button variant="primary"
             onClick={handleSave}
-            className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+           
           >
             Save Changes
           </Button>
@@ -157,7 +157,7 @@ const ProjectSettings = ({
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" className="border-yellow-600 text-yellow-600">
+                <Button variant="outline">
                   <Archive className="w-4 h-4 mr-2" />
                   Archive
                 </Button>
@@ -184,7 +184,7 @@ const ProjectSettings = ({
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">
+                <Button variant="danger">
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete
                 </Button>
@@ -198,7 +198,7 @@ const ProjectSettings = ({
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+                  <AlertDialogAction onClick={handleDelete} className="bg-red-100 text-red-800 hover:bg-red-200">
                     Delete Project
                   </AlertDialogAction>
                 </AlertDialogFooter>

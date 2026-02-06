@@ -35,10 +35,11 @@ interface TaskTableRowProps {
   clients: Client[];
   projects: Project[];
   onTaskClick: (task: Task) => void;
-  onUpdateTask: (taskId: number, status: Task['status'], actualHours?: number) => void;
-  onDeleteTask: (taskId: number) => void;
-  onEditTask: (task: Task) => void;
-  onStatusChange: (task: Task, newStatus: Task['status']) => void;
+  onUpdateTask?: (taskId: number, status: Task['status'], actualHours?: number) => void;
+  onDeleteTask?: (taskId: number) => void;
+  onEditTask?: (task: Task) => void;
+  onStatusChange?: (task: Task, newStatus: Task['status']) => void;
+  readOnly?: boolean;
 }
 
 const TaskTableRow = ({
@@ -48,7 +49,8 @@ const TaskTableRow = ({
   onTaskClick,
   onDeleteTask,
   onEditTask,
-  onStatusChange
+  onStatusChange,
+  readOnly = false
 }: TaskTableRowProps) => {
   const { isAdmin } = useAuth();
   const { hourEntries } = useHourEntries();
@@ -87,6 +89,19 @@ const TaskTableRow = ({
     [taskHourEntries]
   );
 
+  const getStatusBadgeClass = (status: Task['status']) => {
+    switch (status) {
+      case 'completed':
+        return 'ui-pill ui-pill--success';
+      case 'in-progress':
+        return 'ui-pill ui-pill--info';
+      case 'pending':
+        return 'ui-pill ui-pill--neutral';
+      default:
+        return 'ui-pill ui-pill--neutral';
+    }
+  };
+
   return (
     <TableRow 
       className="cursor-pointer hover:bg-slate-50" 
@@ -97,18 +112,18 @@ const TaskTableRow = ({
           {(task.urgent || (isAdmin && task.status === 'completed')) && (
             <div className="mb-1 flex flex-wrap items-center gap-2">
               {task.urgent && (
-                <Badge variant="destructive" className="text-xs">Urgent</Badge>
+              <Badge className="ui-pill ui-pill--danger">Urgent</Badge>
               )}
               {isAdmin && task.status === 'completed' && (
                 <>
                   {demoMode ? (
-                    <Badge variant="secondary" className="text-xs">—</Badge>
+                    <Badge className="ui-pill ui-pill--neutral">—</Badge>
                   ) : isFixedPriceProject ? (
-                    <Badge variant="secondary" className="text-xs">Fixed price</Badge>
+                    <Badge className="ui-pill ui-pill--info">Fixed price</Badge>
                   ) : (
                     <Badge
-                      variant={isBilled ? "default" : "secondary"}
-                      className={isBilled ? "bg-green-100 text-green-800 text-xs" : "text-xs"}
+                      variant="secondary"
+                      className={isBilled ? "ui-pill ui-pill--success" : "ui-pill ui-pill--neutral"}
                     >
                       {isBilled ? "Billed" : "Not Billed"}
                     </Badge>
@@ -145,10 +160,16 @@ const TaskTableRow = ({
       </TableCell>
       <TableCell>
         <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
-          <TaskStatusSelect
-            status={task.status}
-            onStatusChange={(newStatus) => onStatusChange(task, newStatus)}
-          />
+          {readOnly ? (
+            <Badge className={getStatusBadgeClass(task.status)}>
+              {task.status.replace('-', ' ')}
+            </Badge>
+          ) : (
+            <TaskStatusSelect
+              status={task.status}
+              onStatusChange={(newStatus) => onStatusChange?.(task, newStatus)}
+            />
+          )}
         </div>
       </TableCell>
       <TableCell>
@@ -164,13 +185,15 @@ const TaskTableRow = ({
         {new Date(task.createdDate).toLocaleDateString()}
       </TableCell>
       <TableCell className="text-right">
-        <div onClick={(e) => e.stopPropagation()}>
-          <TaskActionButtons
-            task={task}
-            onEditTask={onEditTask}
-            onDeleteTask={onDeleteTask}
-          />
-        </div>
+        {!readOnly && (
+          <div onClick={(e) => e.stopPropagation()}>
+            <TaskActionButtons
+              task={task}
+              onEditTask={onEditTask}
+              onDeleteTask={onDeleteTask}
+            />
+          </div>
+        )}
       </TableCell>
     </TableRow>
   );

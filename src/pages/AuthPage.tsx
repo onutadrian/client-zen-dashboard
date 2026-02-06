@@ -25,6 +25,10 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [inviteData, setInviteData] = useState<any>(null);
   const [inviteToken, setInviteToken] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>(() => {
+    const mode = searchParams.get('mode');
+    return mode === 'signup' ? 'signup' : 'signin';
+  });
 
   useEffect(() => {
     const token = searchParams.get('invite');
@@ -33,6 +37,19 @@ const AuthPage = () => {
       validateInvite(token);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    if (inviteData) {
+      setActiveTab('signup');
+      return;
+    }
+    if (mode === 'signup') {
+      setActiveTab('signup');
+    } else {
+      setActiveTab('signin');
+    }
+  }, [searchParams, inviteData]);
 
   const validateInvite = async (token: string) => {
     try {
@@ -117,6 +134,11 @@ const AuthPage = () => {
         };
       }
 
+      signUpData.options = {
+        ...signUpData.options,
+        emailRedirectTo: `${window.location.origin}/auth?mode=signup`
+      };
+
       const { data, error } = await supabase.auth.signUp(signUpData);
 
       if (error) throw error;
@@ -168,7 +190,7 @@ const AuthPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue={inviteData ? "signup" : "signin"} className="w-full">
+            <Tabs value={inviteData ? "signup" : activeTab} onValueChange={(v) => setActiveTab(v as 'signin' | 'signup')} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin" disabled={!!inviteData}>Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>

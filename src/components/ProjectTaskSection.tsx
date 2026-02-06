@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Plus } from 'lucide-react';
 import AddProjectTaskModal from './AddProjectTaskModal';
 import { Project } from '@/hooks/useProjects';
@@ -33,9 +34,9 @@ const ProjectTaskSection = ({
           {!isActive && (
             <span className="text-sm text-slate-500">Project is inactive</span>
           )}
-          <Button
+          <Button variant="primary"
             onClick={() => setShowAddTaskModal(true)}
-            className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+           
             disabled={!isActive}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -49,9 +50,9 @@ const ProjectTaskSection = ({
           {tasks.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-slate-500 mb-4">No tasks yet for this project</p>
-              <Button
+              <Button variant="primary"
                 onClick={() => setShowAddTaskModal(true)}
-                className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+               
                 disabled={!isActive}
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -66,7 +67,7 @@ const ProjectTaskSection = ({
                     <div className="flex-1">
                       {task.urgent && (
                         <div className="mb-1">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-red-100 text-red-800">Urgent</span>
+                          <Badge className="ui-pill ui-pill--danger">Urgent</Badge>
                         </div>
                       )}
                       <h4 className="font-medium">{task.title}</h4>
@@ -80,13 +81,17 @@ const ProjectTaskSection = ({
                       )}
                     </div>
                     <div className="text-right ml-4">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        task.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                      <Badge
+                        className={
+                          task.status === 'completed'
+                            ? 'ui-pill ui-pill--success'
+                            : task.status === 'in-progress'
+                              ? 'ui-pill ui-pill--info'
+                              : 'ui-pill ui-pill--neutral'
+                        }
+                      >
                         {task.status.replace('-', ' ')}
-                      </span>
+                      </Badge>
                     </div>
                   </div>
                 </div>

@@ -70,7 +70,7 @@ const TemplateCard = ({ template, onEdit, onGenerate, onDelete }: TemplateCardPr
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDelete(template.id)}>
+                <AlertDialogAction onClick={() => onDelete(template.id)} className="bg-red-100 text-red-800 hover:bg-red-200">
                   Delete
                 </AlertDialogAction>
               </AlertDialogFooter>

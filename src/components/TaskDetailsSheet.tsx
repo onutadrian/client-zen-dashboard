@@ -28,7 +28,6 @@ interface TaskDetailsSheetProps {
 }
 
 const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsSheetProps) => {
-  if (!task) return null;
   const { isAdmin } = useAuth();
   const { demoMode } = useCurrency();
   const { hourEntries, updateHourEntry } = useHourEntries();
@@ -36,13 +35,13 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-100';
+        return 'ui-pill ui-pill--success ';
       case 'in-progress':
-        return 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100';
+        return 'ui-pill ui-pill--info ';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100';
+        return 'ui-pill ui-pill--neutral ';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100';
+        return 'ui-pill ui-pill--neutral ';
     }
   };
 
@@ -53,16 +52,16 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
   };
 
   const projectPricingType = React.useMemo(() => {
-    if (!task.projectId) return undefined;
+    if (!task?.projectId) return undefined;
     const project = projects.find(p => p.id === task.projectId);
     return project?.pricingType;
-  }, [projects, task.projectId]);
+  }, [projects, task?.projectId]);
 
   const isFixedPriceProject = projectPricingType === 'fixed';
 
   const taskHourEntries = React.useMemo(
-    () => hourEntries.filter((entry) => entry.taskId === task.id),
-    [hourEntries, task.id]
+    () => hourEntries.filter((entry) => entry.taskId === task?.id),
+    [hourEntries, task?.id]
   );
 
   const isBilled = React.useMemo(
@@ -78,13 +77,15 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
     );
   };
 
+  if (!task) return null;
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
         <SheetHeader>
           {task.urgent && (
             <div className="mb-2">
-              <Badge variant="destructive" className="text-xs">Urgent</Badge>
+              <Badge className="ui-pill ui-pill--danger">Urgent</Badge>
             </div>
           )}
           <SheetTitle>{task.title}</SheetTitle>
@@ -132,19 +133,14 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
               <h3 className="text-sm font-medium text-slate-700">Billing</h3>
               <div className="flex items-center justify-between text-sm text-slate-600">
                 {demoMode ? (
-                  <Badge variant="secondary">
-                    —
-                  </Badge>
+                  <Badge className="ui-pill ui-pill--neutral">—</Badge>
                 ) : isFixedPriceProject ? (
-                  <Badge variant="secondary">
-                    Fixed price
-                  </Badge>
+                  <Badge className="ui-pill ui-pill--info">Fixed price</Badge>
                 ) : (
                   <>
                     <div className="flex items-center gap-2">
                       <Badge
-                        variant={isBilled ? "default" : "secondary"}
-                        className={isBilled ? "bg-green-100 text-green-800" : ""}
+                        className={isBilled ? "ui-pill ui-pill--success" : "ui-pill ui-pill--neutral"}
                       >
                         {isBilled ? "Billed" : "Not Billed"}
                       </Badge>

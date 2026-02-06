@@ -16,12 +16,15 @@ import InviteTable from '@/components/users/InviteTable';
 import DashboardContainer from '@/components/dashboard/DashboardContainer';
 import { SecurityAuditDashboard } from '@/components/security/SecurityAuditDashboard';
 import { UserProfile } from '@/types/auth';
+import { useToast } from '@/hooks/use-toast';
 
 const UsersPage = () => {
   const {
     users,
     loading: usersLoading,
-    refreshUsers
+    refreshUsers,
+    updateUserRole,
+    deleteUser
   } = useUsers();
   const {
     invites,
@@ -33,11 +36,13 @@ const UsersPage = () => {
     projects
   } = useProjects();
   const {
-    clients
+    clients,
+    updateClient
   } = useClients();
   const {
     isAdmin
   } = useAuth();
+  const { toast } = useToast();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
@@ -69,8 +74,87 @@ const UsersPage = () => {
     refreshUsers();
   };
 
+  const handleRoleChange = async (user: UserProfile, role: 'admin' | 'standard' | 'client') => {
+    await updateUserRole(user.id, role);
+    if (role !== 'client') {
+      await handleClientLink(user, null);
+    }
+  };
+
+  const normalizeEmail = (email?: string | null) => (email || '').trim().toLowerCase();
+
+  const handleClientLink = async (user: UserProfile, clientId: number | null) => {
+    if (!user.email) {
+      toast({
+        title: "Missing email",
+        description: "User must have an email to link to a client.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const email = normalizeEmail(user.email);
+    const clientsWithEmail = clients.filter((client) =>
+      (client.people || []).some((person) => normalizeEmail(person.email) === email)
+    );
+
+    // Remove from all existing clients first
+    for (const client of clientsWithEmail) {
+      const updatedPeople = (client.people || []).filter(
+        (person) => normalizeEmail(person.email) !== email
+      );
+      await updateClient(client.id, { ...client, people: updatedPeople });
+    }
+
+    if (clientId === null) {
+      return;
+    }
+
+    const targetClient = clients.find((client) => client.id === clientId);
+    if (!targetClient) {
+      toast({
+        title: "Client not found",
+        description: "Unable to link user to the selected client.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const updatedPeople = [...(targetClient.people || [])];
+    if (!updatedPeople.some((person) => normalizeEmail(person.email) === email)) {
+      updatedPeople.push({
+        name: user.full_name || user.email || 'Client User',
+        email: user.email,
+        title: 'Client'
+      });
+    }
+
+    await updateClient(targetClient.id, { ...targetClient, people: updatedPeople });
+  };
+
+  const handleDeleteUser = async (user: UserProfile) => {
+    if (!confirm(`Delete user ${user.email || user.full_name || user.id}? This cannot be undone.`)) {
+      return;
+    }
+    await deleteUser(user.id);
+  };
+
   const activeInvites = invites.filter(invite => !invite.used && new Date(invite.expires_at) > new Date());
   const expiredOrUsedInvites = invites.filter(invite => invite.used || new Date(invite.expires_at) <= new Date());
+  const clientAssignments = users.reduce<Record<string, number | null>>((acc, user) => {
+    if (!user.email) {
+      acc[user.id] = null;
+      return acc;
+    }
+
+    const email = normalizeEmail(user.email);
+    const linkedClient = clients.find((client) =>
+      (client.people || []).some((person) => normalizeEmail(person.email) === email)
+    );
+
+    acc[user.id] = linkedClient ? linkedClient.id : null;
+    return acc;
+  }, {});
 
   return (
     <DashboardContainer>
@@ -83,7 +167,7 @@ const UsersPage = () => {
                 User Management
               </h1>
             </div>
-            <Button onClick={() => setShowInviteModal(true)} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 rounded-sm transition-colors">
+            <Button variant="primary" onClick={() => setShowInviteModal(true)}>
               <UserPlus className="w-4 h-4 mr-2" />
               Invite User
             </Button>
@@ -102,7 +186,16 @@ const UsersPage = () => {
                   <CardTitle>Registered Users</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <UserTable users={users} loading={usersLoading} onEditUser={handleEditUser} />
+                  <UserTable
+                    users={users}
+                    loading={usersLoading}
+                    onEditUser={handleEditUser}
+                    onRoleChange={handleRoleChange}
+                    clients={clients}
+                    clientAssignments={clientAssignments}
+                    onClientChange={handleClientLink}
+                    onDeleteUser={handleDeleteUser}
+                  />
                 </CardContent>
               </Card>
             </TabsContent>

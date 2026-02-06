@@ -78,7 +78,7 @@ const ClientsSection = ({
                 <Users className="w-12 h-12 text-slate-400 mb-4" />
                 <h3 className="text-lg font-medium text-slate-600 mb-2">No clients yet</h3>
                 <p className="text-slate-500 text-center mb-4">Add your first client to get started with project management</p>
-                <Button onClick={onAddClient} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={onAddClient} variant="primary">
                   <Plus className="w-4 h-4 mr-2" />
                   Add First Client
                 </Button>

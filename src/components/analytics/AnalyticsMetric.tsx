@@ -38,39 +38,30 @@ const AnalyticsMetric = ({ stat, displayCurrency }: AnalyticsMetricProps) => {
     (!demoMode && typeof stat.value === 'string' && parseFloat(stat.value.replace(/[^0-9.-]/g, '')) >= 1000);
 
   return (
-    <Card className="hover:shadow-none transition-all duration-200 shadow-none w-full min-w-0">
-      <CardContent className="p-4 lg:p-6 flex flex-col justify-between h-full min-h-[200px] lg:min-h-[231px]">
+    <Card className="ui-analytics-card w-full min-w-0">
+      <CardContent className="ui-analytics-content p-6">
         {/* Section 1: Top content */}
         <div className="space-y-2 lg:space-y-3">
           <div className="space-y-1 lg:space-y-2">
-            <h3 
-              className="font-satoshi font-normal text-sm lg:text-lg xl:text-xl leading-tight"
-              style={{
-                color: 'var(--Dark-color, #081735)',
-              }}
-            >
+            <h3 className="ui-analytics-title">
               {stat.title}
             </h3>
             
             <div className="flex items-center space-x-1 lg:space-x-2">
-              <Badge 
-                className={`text-xs px-1.5 lg:px-2 py-0.5 lg:py-1 flex items-center space-x-1 ${
-                  trend.isIncrease 
-                    ? 'bg-green-100 text-green-800 hover:bg-green-100' 
-                    : 'bg-red-100 text-red-800 hover:bg-red-100'
-                }`}
+              <Badge
+                className={`ui-pill ${trend.isIncrease ? 'ui-pill--success' : 'ui-pill--danger'} flex items-center gap-1`}
               >
                 <TrendIcon className="w-2.5 h-2.5 lg:w-3 lg:h-3" />
-                <span className="text-xs">{trend.change}%</span>
+                <span>{trend.change}%</span>
               </Badge>
-              <span className="text-xs text-slate-500 hidden sm:inline">{stat.comparisonText || "vs prev 30d"}</span>
+              <span className="ui-analytics-meta hidden sm:inline">{stat.comparisonText || "vs prev 30d"}</span>
             </div>
           </div>
 
           <div className="space-y-1">
             {stat.statusRows.map((statusRow, rowIndex) => (
               <div key={rowIndex} className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 truncate">{statusRow}</span>
+                <span className="ui-analytics-meta truncate">{statusRow}</span>
                 {stat.details && stat.details.length > 0 && rowIndex === 0 && (
                   <span className="text-xs text-slate-600 truncate max-w-16 lg:max-w-20">
                     {typeof stat.details[0] === 'string' ? stat.details[0] : stat.details[0]?.name}
@@ -80,7 +71,7 @@ const AnalyticsMetric = ({ stat, displayCurrency }: AnalyticsMetricProps) => {
             ))}
             {stat.statusRows.length === 0 && (
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 truncate">{stat.subtitle}</span>
+                <span className="ui-analytics-meta truncate">{stat.subtitle}</span>
                 {stat.details && stat.details.length > 0 && (
                   <span className="text-xs text-slate-600 truncate max-w-16 lg:max-w-20">
                     {typeof stat.details[0] === 'string' ? stat.details[0] : stat.details[0]?.name}
@@ -96,12 +87,7 @@ const AnalyticsMetric = ({ stat, displayCurrency }: AnalyticsMetricProps) => {
           {needsTooltip && !stat.isTime ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <p 
-                  className="font-satoshi font-normal cursor-help text-xl sm:text-2xl lg:text-3xl xl:text-5xl leading-tight"
-                  style={{
-                    color: 'var(--Dark-color, #081735)',
-                  }}
-                >
+                <p className="ui-analytics-value cursor-help">
                   {formattedValue}
                 </p>
               </TooltipTrigger>
@@ -110,12 +96,7 @@ const AnalyticsMetric = ({ stat, displayCurrency }: AnalyticsMetricProps) => {
               </TooltipContent>
             </Tooltip>
           ) : (
-            <p 
-              className="font-satoshi font-normal text-xl sm:text-2xl lg:text-3xl xl:text-5xl leading-tight"
-              style={{
-                color: 'var(--Dark-color, #081735)',
-              }}
-            >
+            <p className="ui-analytics-value">
               {formattedValue}
             </p>
           )}

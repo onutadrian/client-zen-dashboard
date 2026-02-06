@@ -12,23 +12,23 @@ interface ProjectStatusFilterProps {
 const STATUS_CONFIG: Record<ProjectStatus, { label: string; activeClass: string; inactiveClass: string }> = {
   active: {
     label: 'Active',
-    activeClass: 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200',
-    inactiveClass: 'bg-muted text-muted-foreground border-border hover:bg-muted/80',
+    activeClass: 'ui-pill ui-pill--success',
+    inactiveClass: 'bg-muted text-muted-foreground border-border',
   },
   paused: {
     label: 'Paused',
-    activeClass: 'bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200',
-    inactiveClass: 'bg-muted text-muted-foreground border-border hover:bg-muted/80',
+    activeClass: 'ui-pill ui-pill--warning',
+    inactiveClass: 'bg-muted text-muted-foreground border-border',
   },
   completed: {
     label: 'Completed',
-    activeClass: 'bg-blue-100 text-blue-800 border-blue-300 hover:bg-blue-200',
-    inactiveClass: 'bg-muted text-muted-foreground border-border hover:bg-muted/80',
+    activeClass: 'ui-pill ui-pill--info',
+    inactiveClass: 'bg-muted text-muted-foreground border-border',
   },
   canceled: {
     label: 'Canceled',
-    activeClass: 'bg-red-100 text-red-800 border-red-300 hover:bg-red-200',
-    inactiveClass: 'bg-muted text-muted-foreground border-border hover:bg-muted/80',
+    activeClass: 'ui-pill ui-pill--danger',
+    inactiveClass: 'bg-muted text-muted-foreground border-border',
   },
 };
 

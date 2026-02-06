@@ -66,27 +66,27 @@ const SubscriptionCard = ({
     if (subscription.status === 'canceled') {
       return {
         text: 'Canceled',
-        color: 'bg-red-100 text-red-800 hover:bg-red-100'
+        color: 'ui-pill ui-pill--danger'
       };
     }
     
     if (daysUntilBilling === null) {
       return {
         text: 'Unknown',
-        color: 'bg-gray-100 text-gray-800 hover:bg-gray-100'
+        color: 'ui-pill ui-pill--neutral'
       };
     }
     
     if (isUpcoming) {
       return {
         text: `${daysUntilBilling} days`,
-        color: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+        color: 'ui-pill ui-pill--neutral'
       };
     }
     
     return {
       text: `${daysUntilBilling} days`,
-      color: 'bg-green-100 text-green-800 hover:bg-green-100'
+      color: 'ui-pill ui-pill--success'
     };
   };
   
@@ -94,13 +94,13 @@ const SubscriptionCard = ({
     const status = subscription.status || 'active';
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800 hover:bg-green-100';
+        return 'ui-pill ui-pill--success';
       case 'paused':
-        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
+        return 'ui-pill ui-pill--warning';
       case 'canceled':
-        return 'bg-red-100 text-red-800 hover:bg-red-100';
+        return 'ui-pill ui-pill--danger';
       default:
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+        return 'ui-pill ui-pill--neutral';
     }
   };
   
@@ -123,7 +123,7 @@ const SubscriptionCard = ({
 
   return (
     <Card className="transition-all duration-200">
-      <CardContent className="p-4">
+      <CardContent className="ui-card-content">
         <div className="space-y-3">
           {/* Header */}
           <div className="flex items-start justify-between">

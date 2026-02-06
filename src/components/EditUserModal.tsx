@@ -115,6 +115,14 @@ const EditUserModal = ({ isOpen, onClose, user, projects, clients = [], onUserUp
               </p>
             </div>
           )}
+
+          {currentUser.role === 'client' && (
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <p className="text-blue-800">
+                <strong>Client users</strong> can only access their own projects and tasks (matched by email).
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end space-x-2 pt-4">

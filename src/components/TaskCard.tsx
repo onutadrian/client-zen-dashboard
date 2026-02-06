@@ -50,17 +50,17 @@ const TaskCard = ({
   const getStatusColor = () => {
     switch (task.status) {
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'ui-pill ui-pill--success';
       case 'in-progress':
-        return 'bg-blue-100 text-blue-800';
+        return 'ui-pill ui-pill--info';
       default:
-        return 'bg-slate-100 text-slate-800';
+        return 'ui-pill ui-pill--neutral';
     }
   };
 
   return (
     <Card className="border border-slate-200 hover:shadow-sm transition-shadow">
-      <CardContent className="p-4">
+      <CardContent className="ui-card-content">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-2">
@@ -99,7 +99,7 @@ const TaskCard = ({
                 size="sm"
                 variant="outline"
                 onClick={() => handleStatusUpdate('in-progress')}
-                className="text-blue-600 hover:text-blue-700"
+                className="text-blue-600"
               >
                 <PlayCircle className="w-4 h-4" />
               </Button>
@@ -111,15 +111,14 @@ const TaskCard = ({
                   size="sm"
                   variant="outline"
                   onClick={() => handleStatusUpdate('pending')}
-                  className="text-amber-600 hover:text-amber-700"
+                  className="text-amber-600"
                 >
                   <PauseCircle className="w-4 h-4" />
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="success"
                   onClick={() => handleStatusUpdate('completed')}
-                  className="text-green-600 hover:text-green-700"
                 >
                   <CheckCircle className="w-4 h-4" />
                 </Button>
@@ -128,7 +127,7 @@ const TaskCard = ({
             
             <Button
               size="sm"
-              variant="ghost"
+              variant="outline"
               onClick={() => onEditTask(task)}
             >
               <Edit2 className="w-4 h-4" />
@@ -136,9 +135,8 @@ const TaskCard = ({
             
             <Button
               size="sm"
-              variant="ghost"
+              variant="danger"
               onClick={() => onDeleteTask(task.id)}
-              className="text-red-600 hover:text-red-700"
             >
               <Trash2 className="w-4 h-4" />
             </Button>

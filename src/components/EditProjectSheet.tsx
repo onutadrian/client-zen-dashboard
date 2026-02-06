@@ -275,7 +275,7 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500">
+            <Button variant="primary" type="submit">
               Update Project
             </Button>
           </div>

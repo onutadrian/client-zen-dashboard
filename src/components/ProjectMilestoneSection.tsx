@@ -45,9 +45,9 @@ const ProjectMilestoneSection = ({
           {!isActive && (
             <span className="text-sm text-slate-500">Project is inactive</span>
           )}
-          <Button
+          <Button variant="primary"
             onClick={() => setShowAddMilestoneModal(true)}
-            className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+           
             disabled={!isActive}
           >
             <Plus className="w-4 h-4 mr-2" />

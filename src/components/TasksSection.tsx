@@ -111,7 +111,7 @@ const TasksSection = ({
             <CardTitle className="flex items-center">
               Tasks ({taskStats.total})
             </CardTitle>
-            <Button onClick={() => setShowAddModal(true)} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 rounded-sm transition-colors">
+            <Button variant="primary" onClick={() => setShowAddModal(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Task
             </Button>
@@ -139,7 +139,7 @@ const TasksSection = ({
               <p className="text-slate-500 mb-4">
                 {tasks.length === 0 ? "Create your first task to get started" : "Try adjusting your filters or create a new task"}
               </p>
-              <Button onClick={() => setShowAddModal(true)} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
+              <Button variant="primary" onClick={() => setShowAddModal(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Task
               </Button>

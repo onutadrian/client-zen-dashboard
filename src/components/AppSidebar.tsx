@@ -27,10 +27,22 @@ const items = [
     roles: ['admin', 'standard']
   },
   {
+    title: "Client Dashboard",
+    url: "/client",
+    icon: Home,
+    roles: ['client']
+  },
+  {
     title: "Projects",
     url: "/projects",
     icon: Briefcase,
     roles: ['admin'] // Only admin can see projects (financial data)
+  },
+  {
+    title: "My Projects",
+    url: "/client/projects",
+    icon: Briefcase,
+    roles: ['client']
   },
   {
     title: "Clients",
@@ -59,10 +71,13 @@ const items = [
 ];
 
 export default function AppSidebar() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { displayCurrency, updateCurrency, demoMode, toggleDemoMode } = useCurrency();
   const location = useLocation();
-  const userRole = profile?.role || 'standard';
+  const userRole =
+    profile?.role ??
+    (user?.user_metadata?.role as string | undefined) ??
+    'standard';
 
   const filteredItems = items.filter(item => item.roles.includes(userRole));
 
@@ -132,7 +147,7 @@ export default function AppSidebar() {
             Signed in as: {profile?.email || 'Loading...'}
           </div>
           <div className="text-xs text-sidebar-foreground/50">
-            Role: {profile?.role || 'Loading...'}
+            Role: {userRole || 'Loading...'}
           </div>
           <LogoutButton />
         </div>

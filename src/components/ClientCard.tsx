@@ -66,7 +66,7 @@ const ClientCard = ({
                     <span className="text-sm font-medium">{formatDisplayAmount(totalInvoiceAmount)}</span>
                   </div>
                 </div>
-                <Button size="sm" onClick={handleLogTimeClick} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
+                <Button variant="primary" size="sm" onClick={handleLogTimeClick}>
                   <Plus className="w-3 h-3 mr-1" />
                   Log Time
                 </Button>

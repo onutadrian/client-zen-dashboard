@@ -26,9 +26,9 @@ const MilestonesList = ({
     return (
       <div className="text-center py-8">
         <p className="text-slate-500 mb-4">No milestones yet for this project</p>
-        <Button
+        <Button variant="primary"
           onClick={onAddMilestone}
-          className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors"
+         
           disabled={!canAdd}
         >
           <Plus className="w-4 h-4 mr-2" />

@@ -223,7 +223,7 @@ const AddSubscriptionModal = ({ isOpen, onClose, onAdd }) => {
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-green-600 hover:bg-green-700">
+            <Button type="submit" variant="success">
               Add Subscription
             </Button>
           </div>

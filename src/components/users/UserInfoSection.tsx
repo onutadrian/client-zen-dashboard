@@ -112,7 +112,15 @@ const UserInfoSection = ({ user, onUserUpdate }: UserInfoSectionProps) => {
           )}
         </div>
         <p className="text-sm text-slate-600">{demoMode ? '—' : user.email}</p>
-        <Badge className={user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}>
+        <Badge
+          className={
+            user.role === 'admin'
+              ? 'ui-pill ui-pill--info'
+              : user.role === 'client'
+                ? 'ui-pill ui-pill--warning'
+                : 'ui-pill ui-pill--info'
+          }
+        >
           {user.role}
         </Badge>
       </div>

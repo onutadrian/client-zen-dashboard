@@ -61,7 +61,7 @@ const InviteTable = ({ invites, onDeleteInvite, showActions = true }: InviteTabl
             <TableRow key={invite.id} className={!showActions ? 'opacity-60' : ''}>
               <TableCell className="font-medium">{demoMode ? '—' : invite.email}</TableCell>
               <TableCell>
-                <Badge className={invite.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}>
+                <Badge className={invite.role === 'admin' ? 'ui-pill ui-pill--info' : 'ui-pill ui-pill--info'}>
                   {invite.role}
                 </Badge>
               </TableCell>
@@ -77,10 +77,9 @@ const InviteTable = ({ invites, onDeleteInvite, showActions = true }: InviteTabl
               {showActions && (
                 <TableCell className="text-right">
                   <Button
-                    variant="ghost"
+                    variant="danger"
                     size="sm"
                     onClick={() => onDeleteInvite(invite.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

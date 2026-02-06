@@ -99,7 +99,7 @@ const ClientInvoiceEditSection = ({
               <div className="text-sm text-slate-600">{new Date(invoice.date).toLocaleDateString()}</div>
             </div>
             <div className="flex items-center space-x-2">
-              <Badge className={invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+              <Badge className={invoice.status === 'paid' ? 'ui-pill ui-pill--success' : 'ui-pill ui-pill--neutral'}>
                 {invoice.status}
               </Badge>
               <Button

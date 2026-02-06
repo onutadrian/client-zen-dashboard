@@ -56,7 +56,7 @@ const AddDocumentModal = ({ isOpen, onClose, onAdd, type }: AddDocumentModalProp
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
+            <Button variant="primary" type="submit">
               Add {type === 'document' ? 'Document' : 'Link'}
             </Button>
           </div>

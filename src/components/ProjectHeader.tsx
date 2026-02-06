@@ -20,15 +20,15 @@ const ProjectHeader = ({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'ui-pill ui-pill--success';
       case 'completed':
-        return 'bg-blue-100 text-blue-800';
+        return 'ui-pill ui-pill--info';
       case 'paused':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'ui-pill ui-pill--warning';
       case 'canceled':
-        return 'bg-red-100 text-red-800';
+        return 'ui-pill ui-pill--danger';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'ui-pill ui-pill--neutral';
     }
   };
   const completedTasks = tasks.filter(task => task.status === 'completed').length;

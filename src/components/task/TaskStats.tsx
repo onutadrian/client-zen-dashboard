@@ -14,13 +14,13 @@ interface TaskStatsProps {
 const TaskStats = ({ stats }: TaskStatsProps) => {
   return (
     <div className="flex items-center space-x-4 pt-2">
-      <Badge variant="secondary" className="hover:bg-secondary">
+      <Badge className="ui-pill ui-pill--neutral">
         {stats.pending} Pending
       </Badge>
-      <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+      <Badge className="ui-pill ui-pill--info">
         {stats.inProgress} In Progress
       </Badge>
-      <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+      <Badge className="ui-pill ui-pill--success">
         {stats.completed} Completed
       </Badge>
     </div>

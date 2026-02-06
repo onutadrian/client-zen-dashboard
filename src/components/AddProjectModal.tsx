@@ -407,7 +407,7 @@ const AddProjectModal = ({ isOpen, onClose, onAdd, clients }: AddProjectModalPro
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-purple-500 hover:bg-purple-600">
+            <Button type="submit" variant="primary">
               Add Project
             </Button>
           </div>

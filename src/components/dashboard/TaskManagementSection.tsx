@@ -14,12 +14,13 @@ interface TaskManagementSectionProps {
   clients: Client[];
   projects: Project[];
   onTaskClick: (task: any) => void;
-  onUpdateTask: (taskId: number, status: Task['status'], actualHours?: number) => void;
-  onDeleteTask: (taskId: number) => void;
-  onEditTask: (task: any) => void;
-  onAddTask: (task: Omit<Task, 'id' | 'createdDate'>) => void;
+  onUpdateTask?: (taskId: number, status: Task['status'], actualHours?: number) => void;
+  onDeleteTask?: (taskId: number) => void;
+  onEditTask?: (task: any) => void;
+  onAddTask?: (task: Omit<Task, 'id' | 'createdDate'>) => void;
   selectedStatuses: ProjectStatus[];
   onStatusChange: (statuses: ProjectStatus[]) => void;
+  readOnly?: boolean;
 }
 
 const TaskManagementSection = ({
@@ -32,7 +33,8 @@ const TaskManagementSection = ({
   onEditTask,
   onAddTask,
   selectedStatuses,
-  onStatusChange
+  onStatusChange,
+  readOnly = false
 }: TaskManagementSectionProps) => {
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -61,6 +63,7 @@ const TaskManagementSection = ({
   });
 
   const handleEditTask = (task: Task) => {
+    if (readOnly || !onEditTask) return;
     setEditingTask(task);
     setShowAddTaskModal(true);
   };
@@ -71,6 +74,10 @@ const TaskManagementSection = ({
   };
 
   const handleTaskSubmit = (taskData: Omit<Task, 'id' | 'createdDate'>) => {
+    if (!onAddTask || !onEditTask) {
+      handleModalClose();
+      return;
+    }
     if (editingTask) {
       onEditTask({ ...taskData, id: editingTask.id });
     } else {
@@ -91,7 +98,15 @@ const TaskManagementSection = ({
 
   // Filter tasks to only include those linked to filtered projects
   const filteredTasks = useMemo(() => {
-    return tasks.filter(task => task.projectId && filteredProjectIds.has(task.projectId));
+    const statusOrder: Record<Task['status'], number> = {
+      'in-progress': 0,
+      'pending': 1,
+      'completed': 2
+    };
+    return tasks
+      .filter(task => task.projectId && filteredProjectIds.has(task.projectId))
+      .slice()
+      .sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
   }, [tasks, filteredProjectIds]);
 
   const transformedTasks = useMemo(() => {
@@ -135,48 +150,54 @@ const TaskManagementSection = ({
           onUpdateTask={onUpdateTask}
           onDeleteTask={onDeleteTask}
           onEditTask={handleEditTask}
-          onAddTaskClick={() => setShowAddTaskModal(true)}
+          onAddTaskClick={readOnly ? undefined : () => setShowAddTaskModal(true)}
+          readOnly={readOnly}
         />
       </div>
 
       <div className="sm:hidden mt-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Tasks ({transformedTasks.length})</h3>
-          <Button onClick={() => setShowAddTaskModal(true)} className="bg-yellow-500 hover:bg-neutral-950 text-neutral-950 hover:text-yellow-500 transition-colors">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Task
-          </Button>
+          {!readOnly && (
+            <Button variant="primary" onClick={() => setShowAddTaskModal(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Task
+            </Button>
+          )}
         </div>
         <TaskMobileCards
           tasks={transformedTasks}
           projects={transformedProjects}
           onTaskClick={onTaskClick}
-          onStatusChange={(task, status) => onUpdateTask(task.id, status)}
+          onStatusChange={(task, status) => onUpdateTask?.(task.id, status)}
           onEditTask={handleEditTask}
           onDeleteTask={onDeleteTask}
+          readOnly={readOnly}
         />
       </div>
 
-      <AddTaskModal
-        isOpen={showAddTaskModal}
-        onClose={handleModalClose}
-        onAdd={handleTaskSubmit}
-        clients={clients.map(client => ({
-          id: client.id,
-          name: client.name,
-          priceType: client.priceType || 'hour'
-        }))}
-        projects={projects
-          .filter(project => project.status === 'active')
-          .map(project => ({
-            id: project.id,
-            name: project.name,
-            clientId: project.clientId,
-            useMilestones: project.useMilestones,
-            status: project.status
-        }))}
-        task={editingTask}
-      />
+      {!readOnly && (
+        <AddTaskModal
+          isOpen={showAddTaskModal}
+          onClose={handleModalClose}
+          onAdd={handleTaskSubmit}
+          clients={clients.map(client => ({
+            id: client.id,
+            name: client.name,
+            priceType: client.priceType || 'hour'
+          }))}
+          projects={projects
+            .filter(project => project.status === 'active')
+            .map(project => ({
+              id: project.id,
+              name: project.name,
+              clientId: project.clientId,
+              useMilestones: project.useMilestones,
+              status: project.status
+          }))}
+          task={editingTask}
+        />
+      )}
     </>
   );
 };

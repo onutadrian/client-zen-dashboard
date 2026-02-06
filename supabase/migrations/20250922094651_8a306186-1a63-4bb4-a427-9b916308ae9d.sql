@@ -1,12 +1,14 @@
 -- Add task assignment functionality for contractors
 -- Add assigned_to column to tasks table
 ALTER TABLE public.tasks 
-ADD COLUMN assigned_to UUID REFERENCES public.profiles(id);
+ADD COLUMN IF NOT EXISTS assigned_to UUID REFERENCES public.profiles(id);
 
 -- Create index for better performance on assignment queries
-CREATE INDEX idx_tasks_assigned_to ON public.tasks(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_tasks_assigned_to ON public.tasks(assigned_to);
 
 -- Update RLS policies to allow assigned users to view and update their assigned tasks
+DROP POLICY IF EXISTS "Assigned users can view their assigned tasks" ON public.tasks;
+DROP POLICY IF EXISTS "Assigned users can update their assigned tasks" ON public.tasks;
 CREATE POLICY "Assigned users can view their assigned tasks" 
 ON public.tasks 
 FOR SELECT 
@@ -20,6 +22,7 @@ TO authenticated
 USING (assigned_to = auth.uid());
 
 -- Allow assigned users to create hour entries for their assigned tasks
+DROP POLICY IF EXISTS "Assigned users can create hour entries for assigned tasks" ON public.hour_entries;
 CREATE POLICY "Assigned users can create hour entries for assigned tasks" 
 ON public.hour_entries 
 FOR INSERT 
@@ -34,6 +37,7 @@ WITH CHECK (
 );
 
 -- Allow assigned users to view hour entries for their assigned tasks
+DROP POLICY IF EXISTS "Assigned users can view hour entries for assigned tasks" ON public.hour_entries;
 CREATE POLICY "Assigned users can view hour entries for assigned tasks" 
 ON public.hour_entries 
 FOR SELECT 

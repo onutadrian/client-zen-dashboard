@@ -1,5 +1,6 @@
 -- Remove the overly permissive public policy that exposes email addresses
 DROP POLICY IF EXISTS "Public can validate invite tokens" ON public.user_invites;
+DROP POLICY IF EXISTS "Secure token validation" ON public.user_invites;
 
 -- Create a more secure policy that only allows token validation without exposing sensitive data
 -- This policy will be used by a secure edge function instead
