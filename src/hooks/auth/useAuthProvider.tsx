@@ -30,6 +30,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const realtimeDisabled = useRef(false);
   const realtimeSetupInFlight = useRef(false);
   const realtimeNotified = useRef(false);
+  const realtimeDisconnected = useRef(false);
+  const realtimeRetryTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let profileChannel: ReturnType<typeof supabase.channel> | null = null;
@@ -85,12 +87,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
             realtimeDisabled.current = true;
             realtimeSetupInFlight.current = false;
+            if (!realtimeDisconnected.current) {
+              realtimeDisconnected.current = true;
+              try {
+                supabase.realtime.disconnect();
+              } catch {
+                // ignore disconnect errors
+              }
+            }
             if (!realtimeNotified.current) {
               realtimeNotified.current = true;
               toast({
                 title: 'Realtime unavailable',
                 description: 'Live updates are temporarily paused. Data will refresh on reload.',
               });
+            }
+            if (!realtimeRetryTimeout.current) {
+              realtimeRetryTimeout.current = setTimeout(() => {
+                realtimeRetryTimeout.current = null;
+                realtimeDisabled.current = false;
+                realtimeDisconnected.current = false;
+                setupProfileChannel(userId, accessToken);
+              }, 60 * 60 * 1000);
             }
           }
         });
@@ -204,9 +222,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (profileChannel) {
         supabase.removeChannel(profileChannel);
       }
+      if (realtimeRetryTimeout.current) {
+        clearTimeout(realtimeRetryTimeout.current);
+        realtimeRetryTimeout.current = null;
+      }
       profileChannelUserId.current = null;
       realtimeSetupInFlight.current = false;
       realtimeNotified.current = false;
+      realtimeDisconnected.current = false;
     };
   }, []);
 
