@@ -4,6 +4,11 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
+if (import.meta.env.PROD && import.meta.env.VITE_DEBUG !== 'true') {
+  console.log = () => {};
+  console.warn = () => {};
+}
+
 const container = document.getElementById("root");
 if (!container) throw new Error('Failed to find the root element');
 

@@ -5,6 +5,7 @@ import type { Project } from '@/hooks/useProjects';
 import type { Task } from '@/types/task';
 import { useCurrency } from '@/hooks/useCurrency';
 import { formatCurrency } from '@/lib/currency';
+import { useHourEntries } from '@/hooks/useHourEntries';
 
 interface ClientProjectSummaryProps {
   project: Project;
@@ -13,30 +14,32 @@ interface ClientProjectSummaryProps {
 
 const ClientProjectSummary = ({ project, tasks }: ClientProjectSummaryProps) => {
   const { displayCurrency, convert } = useCurrency();
-  const completedTasks = tasks.filter(t => t.status === 'completed');
-
-  const totalWorkedHours = completedTasks.reduce((sum, t) => sum + (t.workedHours || 0), 0);
-  const urgentWorkedHours = completedTasks.reduce((sum, t) => sum + (t.urgent ? (t.workedHours || 0) : 0), 0);
+  const { hourEntries } = useHourEntries();
+  const projectEntries = hourEntries.filter(entry => entry.projectId === project.id);
+  const totalWorkedHours = projectEntries.reduce((sum, entry) => sum + entry.hours, 0);
+  const urgentWorkedHours = projectEntries.reduce((sum, entry) => {
+    const linkedTask = tasks.find(t => t.id === entry.taskId);
+    return sum + (linkedTask?.urgent ? entry.hours : 0);
+  }, 0);
 
   let billableTotal = 0;
   let dailyDays = 0;
 
   if (project.pricingType === 'hourly') {
-    completedTasks.forEach(t => {
-      const rate = t.urgent && project.urgentHourlyRate
+    projectEntries.forEach(entry => {
+      const linkedTask = tasks.find(t => t.id === entry.taskId);
+      const rate = linkedTask?.urgent && project.urgentHourlyRate
         ? project.urgentHourlyRate
         : (project.hourlyRate || 0);
       const convertedRate = convert(rate, project.currency, displayCurrency);
-      billableTotal += (t.workedHours || 0) * convertedRate;
+      billableTotal += entry.hours * convertedRate;
     });
   }
 
   if (project.pricingType === 'daily' && project.dailyRate) {
     const dayKeys = new Set<string>();
-    completedTasks.forEach(t => {
-      const dateStr = t.completedDate || t.endDate || t.startDate || t.createdDate;
-      if (!dateStr) return;
-      const d = new Date(dateStr);
+    projectEntries.forEach(entry => {
+      const d = new Date(entry.date);
       if (Number.isNaN(d.getTime())) return;
       dayKeys.add(d.toISOString().slice(0, 10));
     });
@@ -102,4 +105,3 @@ const ClientProjectSummary = ({ project, tasks }: ClientProjectSummaryProps) => 
 };
 
 export default ClientProjectSummary;
-

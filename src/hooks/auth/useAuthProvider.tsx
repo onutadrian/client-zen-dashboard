@@ -27,6 +27,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const profileChannelUserId = useRef<string | null>(null);
+  const realtimeRetryCount = useRef(0);
+  const realtimeDisabled = useRef(false);
+  const realtimeRetryTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let profileChannel: ReturnType<typeof supabase.channel> | null = null;
@@ -45,11 +48,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (import.meta.env.VITE_DISABLE_REALTIME === 'true') {
         return;
       }
+      if (realtimeDisabled.current) {
+        return;
+      }
+      if (realtimeRetryTimeout.current) {
+        clearTimeout(realtimeRetryTimeout.current);
+        realtimeRetryTimeout.current = null;
+      }
       profileChannelUserId.current = userId;
       try {
         await supabase.realtime.setAuth(accessToken);
       } catch (error) {
-        console.warn('Realtime setAuth error:', error);
+        if (import.meta.env.VITE_DEBUG === 'true') {
+          console.warn('Realtime setAuth error:', error);
+        }
       }
       profileChannel = supabase
         .channel('profile_changes')
@@ -63,8 +75,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }
         )
         .subscribe((status) => {
-          if (status !== 'SUBSCRIBED') {
+          if (status === 'SUBSCRIBED') {
+            realtimeRetryCount.current = 0;
+            return;
+          }
+          if (import.meta.env.VITE_DEBUG === 'true') {
             console.warn('Realtime channel status:', status);
+          }
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            if (profileChannel) {
+              supabase.removeChannel(profileChannel);
+              profileChannel = null;
+            }
+            realtimeRetryCount.current += 1;
+            if (realtimeRetryCount.current > 3) {
+              realtimeDisabled.current = true;
+              return;
+            }
+            const delayMs = Math.min(5000 * realtimeRetryCount.current, 30000);
+            realtimeRetryTimeout.current = setTimeout(() => {
+              setupProfileChannel(userId, accessToken);
+            }, delayMs);
           }
         });
     };
@@ -176,6 +207,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       subscription.unsubscribe();
       if (profileChannel) {
         supabase.removeChannel(profileChannel);
+      }
+      if (realtimeRetryTimeout.current) {
+        clearTimeout(realtimeRetryTimeout.current);
+        realtimeRetryTimeout.current = null;
       }
       profileChannelUserId.current = null;
     };

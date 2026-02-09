@@ -13,12 +13,11 @@ export const loadClientsFromSupabase = async (): Promise<Client[]> => {
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (profileError) {
     throw profileError;
   }
-
   const { data, error } = await supabase
     .from('clients')
     .select('*')
