@@ -26,7 +26,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     // Use APP_URL environment variable if set, otherwise fall back to production URL
     const appUrl = Deno.env.get("APP_URL") || "https://studiomanager.furtuna.ro";
-    const inviteUrl = `${appUrl}/auth?invite=${token}`;
+    const inviteUrl = `${appUrl}/auth?invite=${token}&email=${encodeURIComponent(email)}`;
 
     const emailResponse = await resend.emails.send({
       from: "Project Manager <noreply@furtuna.ro>",

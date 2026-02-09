@@ -32,9 +32,13 @@ const AuthPage = () => {
 
   useEffect(() => {
     const token = searchParams.get('invite');
+    const emailParam = searchParams.get('email');
     if (token) {
       setInviteToken(token);
       validateInvite(token);
+    }
+    if (emailParam) {
+      setEmail(emailParam);
     }
   }, [searchParams]);
 
@@ -56,7 +60,9 @@ const AuthPage = () => {
       const invite = await validateInviteToken(token);
       if (invite) {
         setInviteData(invite);
-        setEmail(invite.email);
+        if (invite.email) {
+          setEmail(invite.email);
+        }
         toast({
           title: "Valid Invite",
           description: `You've been invited as a ${invite.role} user`,
@@ -106,6 +112,15 @@ const AuthPage = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Email is required",
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (password !== confirmPassword) {
       toast({
@@ -240,7 +255,7 @@ const AuthPage = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      disabled={!!inviteData}
+                      disabled={!!inviteData && !!email}
                     />
                   </div>
                   <div>
