@@ -74,6 +74,10 @@ serve(async (req) => {
 
     // Clean related data
     await supabaseAdmin.from("user_project_assignments").delete().eq("user_id", targetUserId);
+    await supabaseAdmin
+      .from("user_invites")
+      .delete()
+      .or(`invited_by.eq.${targetUserId},used_by.eq.${targetUserId}`);
 
     // Delete profile row
     await supabaseAdmin.from("profiles").delete().eq("id", targetUserId);
