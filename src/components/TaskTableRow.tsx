@@ -83,6 +83,12 @@ const TaskTableRow = ({
     () => hourEntries.filter((entry) => entry.taskId === task.id),
     [hourEntries, task.id]
   );
+  const taskHoursTotal = React.useMemo(() => {
+    if (taskHourEntries.length > 0) {
+      return taskHourEntries.reduce((sum, entry) => sum + entry.hours, 0);
+    }
+    return task.workedHours || 0;
+  }, [taskHourEntries, task.workedHours]);
 
   const isBilled = React.useMemo(
     () => taskHourEntries.some((entry) => entry.billed === true),
@@ -174,8 +180,8 @@ const TaskTableRow = ({
       </TableCell>
       <TableCell>
         <div className="text-sm">
-          {task.workedHours && task.workedHours > 0 ? (
-            <div className="text-green-600 font-medium">{task.workedHours}h</div>
+          {taskHoursTotal > 0 ? (
+            <div className="text-green-600 font-medium">{taskHoursTotal}h</div>
           ) : (
             <div className="text-slate-400">-</div>
           )}

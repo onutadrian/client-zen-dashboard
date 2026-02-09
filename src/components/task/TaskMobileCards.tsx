@@ -68,6 +68,9 @@ const TaskMobileCards = ({
         const taskHourEntries = hourEntries.filter((entry) => entry.taskId === task.id);
         const isBilled = taskHourEntries.some((entry) => entry.billed === true);
         const isFixedPriceProject = getProjectPricingType(task.projectId) === 'fixed';
+        const taskHoursTotal = taskHourEntries.length > 0
+          ? taskHourEntries.reduce((sum, entry) => sum + entry.hours, 0)
+          : (task.workedHours || 0);
 
         return (
           <Card key={`task-card-${task.id}`} className="cursor-pointer hover:shadow-sm transition-shadow" onClick={() => onTaskClick(task)}>
@@ -119,10 +122,10 @@ const TaskMobileCards = ({
                 <span>{getProjectName(task.projectId)}</span>
                 <span>•</span>
                 <span>{new Date(task.createdDate).toLocaleDateString()}</span>
-                {task.workedHours && task.workedHours > 0 && (
+                {taskHoursTotal > 0 && (
                   <>
                     <span>•</span>
-                    <span className="text-green-700">{task.workedHours}h</span>
+                    <span className="text-green-700">{taskHoursTotal}h</span>
                   </>
                 )}
               </div>
