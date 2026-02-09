@@ -16,6 +16,7 @@ const ClientProjectSummary = ({ project, tasks }: ClientProjectSummaryProps) => 
   const { displayCurrency, convert } = useCurrency();
   const { hourEntries } = useHourEntries();
   const projectEntries = hourEntries.filter(entry => entry.projectId === project.id);
+  const unbilledEntries = projectEntries.filter(entry => !entry.billed);
   const totalWorkedHours = projectEntries.reduce((sum, entry) => sum + entry.hours, 0);
   const urgentWorkedHours = projectEntries.reduce((sum, entry) => {
     const linkedTask = tasks.find(t => t.id === entry.taskId);
@@ -26,7 +27,7 @@ const ClientProjectSummary = ({ project, tasks }: ClientProjectSummaryProps) => 
   let dailyDays = 0;
 
   if (project.pricingType === 'hourly') {
-    projectEntries.forEach(entry => {
+    unbilledEntries.forEach(entry => {
       const linkedTask = tasks.find(t => t.id === entry.taskId);
       const rate = linkedTask?.urgent && project.urgentHourlyRate
         ? project.urgentHourlyRate
@@ -38,7 +39,7 @@ const ClientProjectSummary = ({ project, tasks }: ClientProjectSummaryProps) => 
 
   if (project.pricingType === 'daily' && project.dailyRate) {
     const dayKeys = new Set<string>();
-    projectEntries.forEach(entry => {
+    unbilledEntries.forEach(entry => {
       const d = new Date(entry.date);
       if (Number.isNaN(d.getTime())) return;
       dayKeys.add(d.toISOString().slice(0, 10));
