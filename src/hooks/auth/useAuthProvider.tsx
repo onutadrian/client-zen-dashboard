@@ -85,10 +85,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
             realtimeDisabled.current = true;
             realtimeSetupInFlight.current = false;
-            if (profileChannel) {
-              supabase.removeChannel(profileChannel);
-              profileChannel = null;
-            }
             if (!realtimeNotified.current) {
               realtimeNotified.current = true;
               toast({
