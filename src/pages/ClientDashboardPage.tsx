@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import TaskManagementSection from '@/components/dashboard/TaskManagementSection';
 import { ProjectStatus } from '@/components/dashboard/ProjectStatusFilter';
 import { useCurrency } from '@/hooks/useCurrency';
+import { useHourEntries } from '@/hooks/useHourEntries';
 import type { Task } from '@/types/task';
 import type { Project } from '@/hooks/useProjects';
 
@@ -18,6 +19,7 @@ const ClientDashboardPage = () => {
     (user?.user_metadata?.role as string | undefined);
   const [selectedStatuses, setSelectedStatuses] = useState<ProjectStatus[]>(['active']);
   const { convert, displayCurrency: preferredCurrency } = useCurrency();
+  const { hourEntries } = useHourEntries();
   const {
     client,
     projects,
@@ -69,11 +71,14 @@ const ClientDashboardPage = () => {
     const pendingTasks = filteredTasks.filter(t => t.status === 'pending');
     const completedTasks = filteredTasks.filter(t => t.status === 'completed');
 
-    const totalWorkedHours = completedTasks.reduce((sum, t) => sum + (t.workedHours || 0), 0);
-    const urgentWorkedHours = completedTasks.reduce(
-      (sum, t) => sum + (t.urgent ? (t.workedHours || 0) : 0),
-      0
+    const filteredProjectEntries = hourEntries.filter(
+      entry => entry.projectId && filteredProjectIds.has(entry.projectId)
     );
+    const totalWorkedHours = filteredProjectEntries.reduce((sum, entry) => sum + entry.hours, 0);
+    const urgentWorkedHours = filteredProjectEntries.reduce((sum, entry) => {
+      const linkedTask = tasks.find(t => t.id === entry.taskId);
+      return sum + (linkedTask?.urgent ? entry.hours : 0);
+    }, 0);
     const standardWorkedHours = totalWorkedHours - urgentWorkedHours;
 
     const projectMap = new Map<string, Project>();
@@ -85,35 +90,43 @@ const ClientDashboardPage = () => {
     let standardBillableTotal = 0;
     let dailyDaysTotal = 0;
     const dailyProjectDayKeys = new Map<string, Set<string>>();
+    const dailyUnbilledProjectDayKeys = new Map<string, Set<string>>();
 
-    completedTasks.forEach(task => {
-      const project = task.projectId ? projectMap.get(task.projectId) : undefined;
+    filteredProjectEntries.forEach(entry => {
+      const project = entry.projectId ? projectMap.get(entry.projectId) : undefined;
       if (!project) return;
 
       if (project.pricingType === 'hourly') {
-        const rate = task.urgent && project.urgentHourlyRate
+        const linkedTask = tasks.find(t => t.id === entry.taskId);
+        const rate = linkedTask?.urgent && project.urgentHourlyRate
           ? project.urgentHourlyRate
           : (project.hourlyRate || 0);
         const convertedRate = convert(rate, project.currency, preferredCurrency);
-        const taskValue = (task.workedHours || 0) * convertedRate;
-        billableTotal += taskValue;
-        if (!task.billed) {
-          unbilledValue += taskValue;
+        const entryValue = entry.hours * convertedRate;
+        billableTotal += entryValue;
+        if (!entry.billed) {
+          unbilledValue += entryValue;
         }
-        if (task.urgent) {
-          urgentBillableTotal += taskValue;
+        if (linkedTask?.urgent) {
+          urgentBillableTotal += entryValue;
         } else {
-          standardBillableTotal += taskValue;
+          standardBillableTotal += entryValue;
         }
       }
 
       if (project.pricingType === 'daily') {
-        const dayKey = getTaskDateKey(task);
+        const dayKey = toDateKey(entry.date);
         if (!dayKey) return;
         if (!dailyProjectDayKeys.has(project.id)) {
           dailyProjectDayKeys.set(project.id, new Set());
         }
         dailyProjectDayKeys.get(project.id)!.add(dayKey);
+        if (!entry.billed) {
+          if (!dailyUnbilledProjectDayKeys.has(project.id)) {
+            dailyUnbilledProjectDayKeys.set(project.id, new Set());
+          }
+          dailyUnbilledProjectDayKeys.get(project.id)!.add(dayKey);
+        }
       }
     });
 
@@ -124,6 +137,15 @@ const ClientDashboardPage = () => {
       dailyDaysTotal += days.size;
       const value = days.size * convertedRate;
       billableTotal += value;
+      standardBillableTotal += value;
+    });
+
+    dailyUnbilledProjectDayKeys.forEach((days, projectId) => {
+      const project = projectMap.get(projectId);
+      if (!project || project.pricingType !== 'daily' || !project.dailyRate) return;
+      const convertedRate = convert(project.dailyRate, project.currency, preferredCurrency);
+      const value = days.size * convertedRate;
+      unbilledValue += value;
       standardBillableTotal += value;
     });
 
@@ -143,7 +165,7 @@ const ClientDashboardPage = () => {
       unbilledValue,
       hasBillableProjects
     };
-  }, [filteredTasks, filteredProjects, convert, preferredCurrency]);
+  }, [filteredTasks, filteredProjects, hourEntries, tasks, convert, preferredCurrency]);
 
   const filteredNextUpTasks = useMemo(() => {
     const pending = filteredMetrics.pendingTasks.slice();
