@@ -19,7 +19,7 @@ const AuthPage = () => {
   const { validateInviteToken } = useUserInvites();
   const { toast } = useToast();
   
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => searchParams.get('email') || '');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,15 +32,18 @@ const AuthPage = () => {
 
   useEffect(() => {
     const token = searchParams.get('invite');
-    const emailParam = searchParams.get('email');
     if (token) {
       setInviteToken(token);
       validateInvite(token);
     }
-    if (emailParam) {
+  }, [searchParams]);
+
+  useEffect(() => {
+    const emailParam = searchParams.get('email');
+    if (emailParam && !email) {
       setEmail(emailParam);
     }
-  }, [searchParams]);
+  }, [searchParams, email]);
 
   useEffect(() => {
     const mode = searchParams.get('mode');
@@ -60,7 +63,7 @@ const AuthPage = () => {
       const invite = await validateInviteToken(token);
       if (invite) {
         setInviteData(invite);
-        if (invite.email) {
+        if (invite.email && !email) {
           setEmail(invite.email);
         }
         toast({
@@ -255,7 +258,7 @@ const AuthPage = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      disabled={!!inviteData && !!email}
+                      disabled={!!inviteData && !!searchParams.get('email')}
                     />
                   </div>
                   <div>
