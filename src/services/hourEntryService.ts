@@ -3,6 +3,31 @@ import { supabase } from '@/integrations/supabase/client';
 import { HourEntry } from '@/types/hourEntry';
 
 export const hourEntryService = {
+  async recomputeTaskWorkedHours(taskId: number | null | undefined): Promise<void> {
+    if (!taskId) return;
+    try {
+      const { data, error } = await supabase
+        .from('hour_entries')
+        .select('hours')
+        .eq('task_id', taskId);
+
+      if (error) throw error;
+
+      const total = (data || []).reduce((sum, entry) => sum + Number(entry.hours || 0), 0);
+
+      const { error: updateError } = await supabase
+        .from('tasks')
+        .update({ worked_hours: total })
+        .eq('id', taskId);
+
+      if (updateError) throw updateError;
+    } catch (error) {
+      if (import.meta.env.VITE_DEBUG === 'true') {
+        console.warn('hourEntryService: Failed to recompute task worked hours:', error);
+      }
+    }
+  },
+
   async loadAll(): Promise<HourEntry[]> {
     console.log('hourEntryService: Loading hour entries from Supabase...');
     
@@ -121,10 +146,23 @@ export const hourEntryService = {
       taskId: data.task_id || undefined
     };
 
+    await hourEntryService.recomputeTaskWorkedHours(transformedEntry.taskId);
     return transformedEntry;
   },
 
   async update(entryId: number, updatedEntry: Partial<HourEntry>): Promise<void> {
+    let existingTaskId: number | null | undefined = undefined;
+    try {
+      const { data } = await supabase
+        .from('hour_entries')
+        .select('task_id')
+        .eq('id', entryId)
+        .maybeSingle();
+      existingTaskId = data?.task_id ?? undefined;
+    } catch {
+      existingTaskId = undefined;
+    }
+
     // Transform to Supabase format
     const supabaseUpdate: any = {};
     if (updatedEntry.projectId) supabaseUpdate.project_id = updatedEntry.projectId;
@@ -143,6 +181,12 @@ export const hourEntryService = {
       .eq('id', entryId);
 
     if (error) throw error;
+
+    const nextTaskId = updatedEntry.taskId ?? existingTaskId;
+    await hourEntryService.recomputeTaskWorkedHours(nextTaskId);
+    if (existingTaskId && updatedEntry.taskId && updatedEntry.taskId !== existingTaskId) {
+      await hourEntryService.recomputeTaskWorkedHours(existingTaskId);
+    }
   },
 
   async delete(entryId: number): Promise<void> {
@@ -163,6 +207,18 @@ export const hourEntryService = {
 
     console.log('Authenticated user confirmed, proceeding with delete for user:', user.id);
 
+    let taskId: number | null | undefined = undefined;
+    try {
+      const { data } = await supabase
+        .from('hour_entries')
+        .select('task_id')
+        .eq('id', entryId)
+        .maybeSingle();
+      taskId = data?.task_id ?? undefined;
+    } catch {
+      taskId = undefined;
+    }
+
     // For admin users, don't restrict by user_id - let RLS policies handle the authorization
     const { error } = await supabase
       .from('hour_entries')
@@ -175,5 +231,6 @@ export const hourEntryService = {
     }
 
     console.log('Supabase delete successful');
+    await hourEntryService.recomputeTaskWorkedHours(taskId);
   }
 };

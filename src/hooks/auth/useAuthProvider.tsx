@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const profileChannelUserId = useRef<string | null>(null);
   const realtimeDisabled = useRef(false);
   const realtimeSetupInFlight = useRef(false);
+  const realtimeNotified = useRef(false);
 
   useEffect(() => {
     let profileChannel: ReturnType<typeof supabase.channel> | null = null;
@@ -87,6 +88,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             if (profileChannel) {
               supabase.removeChannel(profileChannel);
               profileChannel = null;
+            }
+            if (!realtimeNotified.current) {
+              realtimeNotified.current = true;
+              toast({
+                title: 'Realtime unavailable',
+                description: 'Live updates are temporarily paused. Data will refresh on reload.',
+              });
             }
           }
         });
@@ -202,6 +210,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
       profileChannelUserId.current = null;
       realtimeSetupInFlight.current = false;
+      realtimeNotified.current = false;
     };
   }, []);
 
