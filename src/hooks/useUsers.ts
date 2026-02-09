@@ -28,12 +28,7 @@ export const useUsers = () => {
       
       setUsers(typedUsers);
       
-      if (typedUsers.length === 0) {
-        toast({
-          title: "No Users",
-          description: "No users found in the system",
-        });
-      }
+      // Avoid noisy empty-state toasts; UI handles empty state.
     } catch (error) {
       toast({
         title: "Error",

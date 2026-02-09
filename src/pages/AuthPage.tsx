@@ -166,6 +166,8 @@ const AuthPage = () => {
           title: "Success",
           description: "Please check your email to confirm your account",
         });
+        navigate('/auth?mode=signin', { replace: true });
+        setActiveTab('signin');
       }
     } catch (error: any) {
       toast({

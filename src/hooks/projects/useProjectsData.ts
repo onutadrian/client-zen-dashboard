@@ -19,16 +19,17 @@ export const useProjectsData = () => {
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
+      const role = profile?.role || 'standard';
 
       let projectsQuery = supabase
         .from('projects')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (profile.role !== 'admin') {
+      if (role !== 'admin') {
         const { data: assignments, error: assignmentError } = await supabase
           .from('user_project_assignments')
           .select('project_id')

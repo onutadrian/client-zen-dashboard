@@ -22,13 +22,14 @@ export const useTasksData = () => {
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
+      const role = profile?.role || 'standard';
 
       let allTasks = await loadTasksFromDatabase();
 
-      if (profile.role !== 'admin') {
+      if (role !== 'admin') {
         const { data: assignments, error: assignmentError } = await supabase
           .from('user_project_assignments')
           .select('project_id')
