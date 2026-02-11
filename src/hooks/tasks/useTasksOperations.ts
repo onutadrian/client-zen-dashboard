@@ -10,6 +10,8 @@ import {
 } from '@/services/taskService';
 import { createHourEntryForCompletedTask } from '@/services/taskCompletionService';
 
+const inFlightTaskStatusUpdates = new Set<string>();
+
 export const useTasksOperations = (
   tasks: Task[],
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>,
@@ -51,18 +53,27 @@ export const useTasksOperations = (
   };
 
   const updateTask = async (taskId: number, status: Task['status'], workedHours?: number) => {
+    const updateKey = `${taskId}:${status}`;
+    if (inFlightTaskStatusUpdates.has(updateKey)) {
+      return null;
+    }
+
     try {
+      inFlightTaskStatusUpdates.add(updateKey);
       await updateTaskInDatabase(taskId, status, workedHours);
 
       const completedTask = tasks.find(t => t.id === taskId);
       
       if (status === 'completed' && workedHours && completedTask?.projectId) {
         try {
-          await createHourEntryForCompletedTask(completedTask, workedHours);
-          console.log('Hour entry created successfully for task:', taskId);
-          
-          if (onHourEntryCreated) {
-            onHourEntryCreated();
+          const createdEntry = await createHourEntryForCompletedTask(completedTask, workedHours);
+          if (createdEntry) {
+            console.log('Hour entry created successfully for task:', taskId);
+            if (onHourEntryCreated) {
+              onHourEntryCreated();
+            }
+          } else {
+            console.log('Skipped completion hour entry because task already has logged hours:', taskId);
           }
         } catch (hourError) {
           console.error('Error creating hour entry:', hourError);
@@ -108,6 +119,8 @@ export const useTasksOperations = (
         variant: "destructive"
       });
       return null;
+    } finally {
+      inFlightTaskStatusUpdates.delete(updateKey);
     }
   };
 

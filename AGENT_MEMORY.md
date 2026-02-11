@@ -44,3 +44,13 @@ Agent Memory (Concise, Append‑Only)
 2026-02-05 – Realtime: Temporary disable toggle
 - `VITE_DISABLE_REALTIME=true` disables realtime subscriptions in dev
 - Re-enable once Supabase Realtime is stable; check `status.supabase.com`
+2026-02-09 – Client view & UI consistency
+- UI kit reference: `public/ui-kit.html` (shared card/pill/button/table styles in `src/index.css`)
+- Client dashboard/project metrics now use `hour_entries` (not `tasks.worked_hours`) for hours & billable totals
+- Task list hours display prefers hour_entries; fallback to worked_hours
+- Hour entries now sync `tasks.worked_hours` on create/update/delete (`src/services/hourEntryService.ts`)
+2026-02-09 – Realtime fallback behavior
+- Auth provider disconnects realtime on failure, shows single toast, retries once per hour (`src/hooks/auth/useAuthProvider.tsx`)
+2026-02-09 – Invites & auth UX
+- Invite email link uses `APP_URL` with `&email=` param (edge fn `send-invite-email`)
+- Auth page pre-fills email from query, signup redirects to login
