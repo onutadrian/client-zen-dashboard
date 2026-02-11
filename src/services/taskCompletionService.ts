@@ -27,25 +27,20 @@ export const createHourEntryForCompletedTask = async (
       throw new Error('User not authenticated');
     }
 
-    // If hours were already logged manually for this task, do not create a duplicate.
     const { data: existingEntries, error: existingError } = await supabase
       .from('hour_entries')
       .select('id')
       .eq('task_id', task.id)
-      .limit(1);
+      .order('id', { ascending: true });
 
     if (existingError) throw existingError;
-    if (existingEntries && existingEntries.length > 0) {
-      return null;
-    }
 
     // Determine who should get credit for the hours:
     // If task is assigned to someone, they get the hours
     // Otherwise, the current user (who completed the task) gets the hours
     const hoursUserId = task.assignedTo || user.id;
-    
-    // Create hour entry directly in Supabase
-    const supabaseEntry = {
+
+    const completionPayload = {
       project_id: task.projectId,
       client_id: task.clientId,
       milestone_id: task.milestoneId,
@@ -57,9 +52,36 @@ export const createHourEntryForCompletedTask = async (
       user_id: hoursUserId
     };
 
+    // Override behavior: task completion hours represent the intended total.
+    // Keep exactly one task-linked hour entry for this task.
+    if (existingEntries && existingEntries.length > 0) {
+      const primaryId = existingEntries[0].id;
+      const duplicateIds = existingEntries.slice(1).map(entry => entry.id);
+
+      const { data: updatedData, error: updateError } = await supabase
+        .from('hour_entries')
+        .update(completionPayload)
+        .eq('id', primaryId)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      if (duplicateIds.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('hour_entries')
+          .delete()
+          .in('id', duplicateIds);
+
+        if (deleteError) throw deleteError;
+      }
+
+      return updatedData;
+    }
+
     const { data, error } = await supabase
       .from('hour_entries')
-      .insert([supabaseEntry])
+      .insert([completionPayload])
       .select()
       .single();
 
@@ -70,8 +92,10 @@ export const createHourEntryForCompletedTask = async (
       }
       throw error;
     }
-    
+
     return data;
+
+    // legacy no-op guard removed in favor of explicit override behavior
   } finally {
     inFlightCompletionLogs.delete(task.id);
   }
