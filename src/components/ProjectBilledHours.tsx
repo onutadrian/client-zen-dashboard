@@ -37,6 +37,43 @@ const ProjectBilledHours = ({ project, client, milestones, tasks }: ProjectBille
   const totalHours = projectHours.reduce((sum, entry) => sum + entry.hours, 0);
   const billedHours = projectHours.filter(entry => entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
   const unbilledHours = projectHours.filter(entry => !entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
+
+  // Hourly-only split: standard vs urgent hours (derived from linked task urgency)
+  const hourlyBreakdown = React.useMemo(() => {
+    if (project.pricingType !== 'hourly') {
+      return null;
+    }
+
+    const all = projectHours.reduce(
+      (acc, entry) => {
+        const linkedTask = tasks.find(t => t.id === entry.taskId);
+        if (linkedTask?.urgent) {
+          acc.urgent += entry.hours;
+        } else {
+          acc.standard += entry.hours;
+        }
+        return acc;
+      },
+      { standard: 0, urgent: 0 }
+    );
+
+    const unbilled = projectHours
+      .filter(entry => !entry.billed)
+      .reduce(
+        (acc, entry) => {
+          const linkedTask = tasks.find(t => t.id === entry.taskId);
+          if (linkedTask?.urgent) {
+            acc.urgent += entry.hours;
+          } else {
+            acc.standard += entry.hours;
+          }
+          return acc;
+        },
+        { standard: 0, urgent: 0 }
+      );
+
+    return { all, unbilled };
+  }, [project.pricingType, projectHours, tasks]);
   
   // Calculate paid invoiced revenue (from paid invoices) with currency conversion
   const paidInvoicedRevenue = demoMode ? 0 : projectInvoices
@@ -151,6 +188,7 @@ const ProjectBilledHours = ({ project, client, milestones, tasks }: ProjectBille
             fixedProjectValue={fixedProjectValue}
             fixedBilledRevenue={fixedBilledRevenue}
             fixedUnbilledRevenue={fixedUnbilledRevenue}
+            hourlyBreakdownAll={hourlyBreakdown?.all ?? null}
             displayCurrency={displayCurrency}
             demoMode={demoMode}
           />
