@@ -54,3 +54,7 @@ Agent Memory (Concise, Append‑Only)
 2026-02-09 – Invites & auth UX
 - Invite email link uses `APP_URL` with `&email=` param (edge fn `send-invite-email`)
 - Auth page pre-fills email from query, signup redirects to login
+2026-04-27 – Task list V2 rollout path
+- Feature flag: `VITE_ENABLE_TASK_LIST_V2` toggles month-grouped shared task filtering UI
+- Shared V2 path covers admin/client dashboard + project task views; old task list remains as fallback
+- V2 derives billing state from `hour_entries` (`billed` / `unbilled` / `unknown`) and shows client billing badges

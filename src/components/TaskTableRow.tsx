@@ -9,6 +9,7 @@ import { useUsers } from '@/hooks/useUsers';
 import { useCurrency } from '@/hooks/useCurrency';
 import TaskStatusSelect from './TaskStatusSelect';
 import TaskActionButtons from './TaskActionButtons';
+import type { TaskBillingState } from '@/components/task/useTaskListViewModel';
 
 interface Client {
   id: number;
@@ -40,6 +41,9 @@ interface TaskTableRowProps {
   onEditTask?: (task: Task) => void;
   onStatusChange?: (task: Task, newStatus: Task['status']) => void;
   readOnly?: boolean;
+  taskHoursTotalOverride?: number;
+  billingStateOverride?: TaskBillingState;
+  showBillingBadge?: boolean;
 }
 
 const TaskTableRow = ({
@@ -50,7 +54,10 @@ const TaskTableRow = ({
   onDeleteTask,
   onEditTask,
   onStatusChange,
-  readOnly = false
+  readOnly = false,
+  taskHoursTotalOverride,
+  billingStateOverride,
+  showBillingBadge = false,
 }: TaskTableRowProps) => {
   const { isAdmin } = useAuth();
   const { hourEntries } = useHourEntries();
@@ -84,16 +91,24 @@ const TaskTableRow = ({
     [hourEntries, task.id]
   );
   const taskHoursTotal = React.useMemo(() => {
+    if (typeof taskHoursTotalOverride === 'number') {
+      return taskHoursTotalOverride;
+    }
     if (taskHourEntries.length > 0) {
       return taskHourEntries.reduce((sum, entry) => sum + entry.hours, 0);
     }
     return task.workedHours || 0;
-  }, [taskHourEntries, task.workedHours]);
+  }, [taskHourEntries, task.workedHours, taskHoursTotalOverride]);
 
-  const isBilled = React.useMemo(
-    () => taskHourEntries.some((entry) => entry.billed === true),
-    [taskHourEntries]
-  );
+  const billingState = React.useMemo<TaskBillingState>(() => {
+    if (billingStateOverride) {
+      return billingStateOverride;
+    }
+    if (taskHourEntries.length === 0) {
+      return 'unknown';
+    }
+    return taskHourEntries.some((entry) => entry.billed === false) ? 'unbilled' : 'billed';
+  }, [billingStateOverride, taskHourEntries]);
 
   const getStatusBadgeClass = (status: Task['status']) => {
     switch (status) {
@@ -108,6 +123,11 @@ const TaskTableRow = ({
     }
   };
 
+  const shouldShowBillingBadge =
+    showBillingBadge
+      ? billingState !== 'unknown'
+      : isAdmin && task.status === 'completed';
+
   return (
     <TableRow 
       className="cursor-pointer hover:bg-slate-50" 
@@ -115,12 +135,12 @@ const TaskTableRow = ({
     >
       <TableCell className="font-medium">
         <div>
-          {(task.urgent || (isAdmin && task.status === 'completed')) && (
+          {(task.urgent || shouldShowBillingBadge) && (
             <div className="mb-1 flex flex-wrap items-center gap-2">
               {task.urgent && (
               <Badge className="ui-pill ui-pill--danger">Urgent</Badge>
               )}
-              {isAdmin && task.status === 'completed' && (
+              {shouldShowBillingBadge && (
                 <>
                   {demoMode ? (
                     <Badge className="ui-pill ui-pill--neutral">—</Badge>
@@ -129,9 +149,9 @@ const TaskTableRow = ({
                   ) : (
                     <Badge
                       variant="secondary"
-                      className={isBilled ? "ui-pill ui-pill--success" : "ui-pill ui-pill--neutral"}
+                      className={billingState === 'billed' ? "ui-pill ui-pill--success" : "ui-pill ui-pill--neutral"}
                     >
-                      {isBilled ? "Billed" : "Not Billed"}
+                      {billingState === 'billed' ? "Billed" : "Unbilled"}
                     </Badge>
                   )}
                 </>

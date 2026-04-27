@@ -12,6 +12,8 @@ import { useClientData } from '@/hooks/client/useClientData';
 import { useAuth } from '@/hooks/useAuth';
 import TaskManagementSection from '@/components/dashboard/TaskManagementSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import TaskManagementSectionV2 from '@/components/dashboard/TaskManagementSectionV2';
+import { ENABLE_TASK_LIST_V2 } from '@/lib/features';
 
 const ClientProjectDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -81,15 +83,26 @@ const ClientProjectDetailsPage = () => {
                 <TabsContent value="overview" className="mt-4 space-y-6">
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Tasks</h3>
-                    <TaskManagementSection
-                      tasks={projectTasks}
-                      clients={client ? [client] : []}
-                      projects={[project]}
-                      onTaskClick={(task) => setSelectedTask(task)}
-                      selectedStatuses={[project.status as any]}
-                      onStatusChange={() => {}}
-                      readOnly
-                    />
+                    {ENABLE_TASK_LIST_V2 ? (
+                      <TaskManagementSectionV2
+                        mode="project"
+                        tasks={projectTasks}
+                        clients={client ? [client] : []}
+                        projects={[project]}
+                        onTaskClick={(task) => setSelectedTask(task)}
+                        readOnly
+                      />
+                    ) : (
+                      <TaskManagementSection
+                        tasks={projectTasks}
+                        clients={client ? [client] : []}
+                        projects={[project]}
+                        onTaskClick={(task) => setSelectedTask(task)}
+                        selectedStatuses={[project.status as any]}
+                        onStatusChange={() => {}}
+                        readOnly
+                      />
+                    )}
                   </div>
 
                   <div className="space-y-4">

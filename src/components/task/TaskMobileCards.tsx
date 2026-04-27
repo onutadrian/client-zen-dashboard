@@ -7,6 +7,7 @@ import { Task } from '@/types/task';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useHourEntries } from '@/hooks/useHourEntries';
+import type { TaskBillingState } from '@/components/task/useTaskListViewModel';
 
 interface Project {
   id: string;
@@ -22,6 +23,8 @@ interface TaskMobileCardsProps {
   onEditTask?: (task: Task) => void;
   onDeleteTask?: (taskId: number) => void;
   readOnly?: boolean;
+  taskMetaById?: Record<number, { taskHoursTotal: number; billingState: TaskBillingState }>;
+  showBillingBadges?: boolean;
 }
 
 const TaskMobileCards = ({
@@ -31,7 +34,9 @@ const TaskMobileCards = ({
   onStatusChange,
   onEditTask,
   onDeleteTask,
-  readOnly = false
+  readOnly = false,
+  taskMetaById,
+  showBillingBadges = false,
 }: TaskMobileCardsProps) => {
   const { isAdmin } = useAuth();
   const { demoMode } = useCurrency();
@@ -66,23 +71,35 @@ const TaskMobileCards = ({
     <div className="space-y-3">
       {tasks.map((task) => {
         const taskHourEntries = hourEntries.filter((entry) => entry.taskId === task.id);
-        const isBilled = taskHourEntries.some((entry) => entry.billed === true);
         const isFixedPriceProject = getProjectPricingType(task.projectId) === 'fixed';
-        const taskHoursTotal = taskHourEntries.length > 0
-          ? taskHourEntries.reduce((sum, entry) => sum + entry.hours, 0)
-          : (task.workedHours || 0);
+        const taskMeta = taskMetaById?.[task.id];
+        const taskHoursTotal = taskMeta
+          ? taskMeta.taskHoursTotal
+          : taskHourEntries.length > 0
+            ? taskHourEntries.reduce((sum, entry) => sum + entry.hours, 0)
+            : (task.workedHours || 0);
+        const billingState: TaskBillingState = taskMeta
+          ? taskMeta.billingState
+          : taskHourEntries.length === 0
+            ? 'unknown'
+            : taskHourEntries.some((entry) => entry.billed === false)
+              ? 'unbilled'
+              : 'billed';
+        const shouldShowBillingBadge = showBillingBadges
+          ? billingState !== 'unknown'
+          : isAdmin && task.status === 'completed';
 
         return (
           <Card key={`task-card-${task.id}`} className="cursor-pointer hover:shadow-sm transition-shadow" onClick={() => onTaskClick(task)}>
             <CardContent className="ui-card-content space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
-                  {(task.urgent || (isAdmin && task.status === 'completed')) && (
+                  {(task.urgent || shouldShowBillingBadge) && (
                     <div className="mb-1 flex flex-wrap items-center gap-2">
                       {task.urgent && (
                         <Badge className="ui-pill ui-pill--danger">Urgent</Badge>
                       )}
-                      {isAdmin && task.status === 'completed' && (
+                      {shouldShowBillingBadge && (
                         <>
                           {demoMode ? (
                             <Badge className="ui-pill ui-pill--neutral">—</Badge>
@@ -90,10 +107,10 @@ const TaskMobileCards = ({
                             <Badge className="ui-pill ui-pill--info">Fixed price</Badge>
                           ) : (
                             <Badge
-                              variant={isBilled ? "default" : "secondary"}
-                              className={isBilled ? "ui-pill ui-pill--success" : "ui-pill ui-pill--neutral"}
+                              variant={billingState === 'billed' ? "default" : "secondary"}
+                              className={billingState === 'billed' ? "ui-pill ui-pill--success" : "ui-pill ui-pill--neutral"}
                             >
-                              {isBilled ? "Billed" : "Not Billed"}
+                              {billingState === 'billed' ? "Billed" : "Unbilled"}
                             </Badge>
                           )}
                         </>

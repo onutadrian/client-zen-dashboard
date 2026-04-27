@@ -8,23 +8,57 @@ import AddProjectTaskModal from './AddProjectTaskModal';
 import { Project } from '@/hooks/useProjects';
 import { Client } from '@/types/client';
 import { Task } from '@/types/task';
+import TaskManagementSectionV2 from '@/components/dashboard/TaskManagementSectionV2';
+import { ENABLE_TASK_LIST_V2 } from '@/lib/features';
+import TaskDetailsSheet from './TaskDetailsSheet';
 
 interface ProjectTaskSectionProps {
   project: Project;
   client?: Client;
   tasks: Task[];
   onAddTask: (task: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => void;
+  onUpdateTask?: (taskId: number, status: Task['status'], actualHours?: number) => void;
+  onDeleteTask?: (taskId: number) => void;
+  onEditTask?: (taskId: number, updatedTask: Partial<Task>) => void;
 }
 
 const ProjectTaskSection = ({
   project,
   client,
   tasks,
-  onAddTask
+  onAddTask,
+  onUpdateTask,
+  onDeleteTask,
+  onEditTask,
 }: ProjectTaskSectionProps) => {
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const isActive = project.status === 'active';
   const [viewTask, setViewTask] = useState<Task | null>(null);
+
+  if (ENABLE_TASK_LIST_V2) {
+    return (
+      <>
+        <TaskManagementSectionV2
+          mode="project"
+          tasks={tasks}
+          clients={client ? [client] : []}
+          projects={[project]}
+          onTaskClick={(task) => setViewTask(task)}
+          onUpdateTask={onUpdateTask}
+          onDeleteTask={onDeleteTask}
+          onEditTask={task => onEditTask?.(task.id, task)}
+          onAddTask={onAddTask as any}
+        />
+
+        <TaskDetailsSheet
+          task={viewTask}
+          isOpen={!!viewTask}
+          onClose={() => setViewTask(null)}
+          projects={[{ id: project.id, name: project.name, pricingType: project.pricingType }]}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -122,4 +156,3 @@ const ProjectTaskSection = ({
 };
 
 export default ProjectTaskSection;
-import TaskDetailsSheet from './TaskDetailsSheet';

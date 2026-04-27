@@ -11,6 +11,8 @@ import { useCurrency } from '@/hooks/useCurrency';
 import { useHourEntries } from '@/hooks/useHourEntries';
 import type { Task } from '@/types/task';
 import type { Project } from '@/hooks/useProjects';
+import TaskManagementSectionV2 from '@/components/dashboard/TaskManagementSectionV2';
+import { ENABLE_TASK_LIST_V2 } from '@/lib/features';
 
 const ClientDashboardPage = () => {
   const { profile, user } = useAuth();
@@ -223,15 +225,28 @@ const ClientDashboardPage = () => {
               />
 
               <div className="space-y-4">
-                <TaskManagementSection
-                  tasks={tasks}
-                  clients={client ? [client] : []}
-                  projects={projects}
-                  onTaskClick={(task) => setSelectedTask(task)}
-                  selectedStatuses={selectedStatuses}
-                  onStatusChange={setSelectedStatuses}
-                  readOnly
-                />
+                {ENABLE_TASK_LIST_V2 ? (
+                  <TaskManagementSectionV2
+                    mode="dashboard"
+                    tasks={tasks}
+                    clients={client ? [client] : []}
+                    projects={projects}
+                    onTaskClick={(task) => setSelectedTask(task)}
+                    selectedStatuses={selectedStatuses}
+                    onStatusChange={setSelectedStatuses}
+                    readOnly
+                  />
+                ) : (
+                  <TaskManagementSection
+                    tasks={tasks}
+                    clients={client ? [client] : []}
+                    projects={projects}
+                    onTaskClick={(task) => setSelectedTask(task)}
+                    selectedStatuses={selectedStatuses}
+                    onStatusChange={setSelectedStatuses}
+                    readOnly
+                  />
+                )}
               </div>
 
               <div className="space-y-4">

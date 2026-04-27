@@ -29,6 +29,9 @@ const ProjectOverview = ({
   tasks,
   milestones,
   onAddTask,
+  onUpdateTask,
+  onDeleteTask,
+  onEditTask,
   onAddMilestone,
   onUpdateMilestone,
   onDeleteMilestone
@@ -62,6 +65,9 @@ const ProjectOverview = ({
         client={client}
         tasks={tasks}
         onAddTask={onAddTask}
+        onUpdateTask={onUpdateTask}
+        onDeleteTask={onDeleteTask}
+        onEditTask={onEditTask}
       />
     </div>
   );

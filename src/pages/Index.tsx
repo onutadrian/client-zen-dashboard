@@ -9,10 +9,12 @@ import TaskDetailsSheet from '@/components/TaskDetailsSheet';
 import TimelineSection from '@/components/dashboard/TimelineSection';
 import CardListSkeleton from '@/components/skeletons/CardListSkeleton';
 import AnalyticsSkeleton from '@/components/analytics/AnalyticsSkeleton';
+import TaskManagementSectionV2 from '@/components/dashboard/TaskManagementSectionV2';
 import { useDashboardData } from '@/hooks/dashboard/useDashboardData';
 import type { Task as HookTask } from '@/types/task';
 import type { ProjectStatus } from '@/components/dashboard/ProjectStatusFilter';
 import { useNavigate } from 'react-router-dom';
+import { ENABLE_TASK_LIST_V2 } from '@/lib/features';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -217,18 +219,34 @@ const Index = () => {
           {(tasksLoading || clientsLoading || projectsLoading) ? (
             <CardListSkeleton count={3} lines={5} />
           ) : (
-            <TaskManagementSection
-              tasks={tasks}
-              clients={clients}
-              projects={projects}
-              onTaskClick={handleTaskClick}
-              onUpdateTask={handleUpdateTask}
-              onDeleteTask={handleDeleteTask}
-              onEditTask={handleEditTask}
-              onAddTask={handleAddTask}
-              selectedStatuses={selectedStatuses}
-              onStatusChange={setSelectedStatuses}
-            />
+            ENABLE_TASK_LIST_V2 ? (
+              <TaskManagementSectionV2
+                mode="dashboard"
+                tasks={tasks}
+                clients={clients}
+                projects={projects}
+                onTaskClick={handleTaskClick}
+                onUpdateTask={handleUpdateTask}
+                onDeleteTask={handleDeleteTask}
+                onEditTask={handleEditTask}
+                onAddTask={handleAddTask}
+                selectedStatuses={selectedStatuses}
+                onStatusChange={setSelectedStatuses}
+              />
+            ) : (
+              <TaskManagementSection
+                tasks={tasks}
+                clients={clients}
+                projects={projects}
+                onTaskClick={handleTaskClick}
+                onUpdateTask={handleUpdateTask}
+                onDeleteTask={handleDeleteTask}
+                onEditTask={handleEditTask}
+                onAddTask={handleAddTask}
+                selectedStatuses={selectedStatuses}
+                onStatusChange={setSelectedStatuses}
+              />
+            )
           )}
 
           {(projectsLoading || tasksLoading || milestonesLoading || clientsLoading) ? (
