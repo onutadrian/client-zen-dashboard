@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Project } from './types';
+import { deriveFixedProjectBillingStatus } from '@/utils/projectBilling';
 
 export const useProjectsOperations = (setProjects: React.Dispatch<React.SetStateAction<Project[]>>) => {
   const { toast } = useToast();
@@ -10,6 +11,16 @@ export const useProjectsOperations = (setProjects: React.Dispatch<React.SetState
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
+
+      const fixedPrice = newProject.fixedPrice || null;
+      const billedAmount =
+        newProject.pricingType === 'fixed'
+          ? (newProject.billedAmount ?? 0)
+          : null;
+      const billingStatus =
+        newProject.pricingType === 'fixed'
+          ? deriveFixedProjectBillingStatus(fixedPrice, billedAmount)
+          : null;
 
       const supabaseProject = {
         name: newProject.name,
@@ -23,7 +34,9 @@ export const useProjectsOperations = (setProjects: React.Dispatch<React.SetState
         team: newProject.team || [],
         archived: false,
         pricing_type: newProject.pricingType,
-        fixed_price: newProject.fixedPrice || null,
+        fixed_price: fixedPrice,
+        billed_amount: billedAmount,
+        billing_status: billingStatus,
         hourly_rate: newProject.hourlyRate || null,
         urgent_hourly_rate: newProject.urgentHourlyRate || null,
         daily_rate: newProject.dailyRate || null,
@@ -56,6 +69,8 @@ export const useProjectsOperations = (setProjects: React.Dispatch<React.SetState
         archived: data.archived || false,
         pricingType: data.pricing_type as 'fixed' | 'hourly' | 'daily',
         fixedPrice: data.fixed_price || undefined,
+        billedAmount: data.billed_amount ?? undefined,
+        billingStatus: (data.billing_status as Project['billingStatus'] | null) || undefined,
         hourlyRate: data.hourly_rate || undefined,
         urgentHourlyRate: data.urgent_hourly_rate || undefined,
         dailyRate: data.daily_rate || undefined,
@@ -89,6 +104,16 @@ export const useProjectsOperations = (setProjects: React.Dispatch<React.SetState
 
   const updateProject = async (projectId: string, updatedProject: any) => {
     try {
+      const fixedPrice = updatedProject.fixedPrice || null;
+      const billedAmount =
+        updatedProject.pricingType === 'fixed'
+          ? (updatedProject.billedAmount ?? 0)
+          : null;
+      const billingStatus =
+        updatedProject.pricingType === 'fixed'
+          ? deriveFixedProjectBillingStatus(fixedPrice, billedAmount)
+          : null;
+
       const supabaseUpdate = {
         name: updatedProject.name,
         client_id: updatedProject.clientId,
@@ -101,7 +126,9 @@ export const useProjectsOperations = (setProjects: React.Dispatch<React.SetState
         team: updatedProject.team,
         archived: updatedProject.archived,
         pricing_type: updatedProject.pricingType,
-        fixed_price: updatedProject.fixedPrice || null,
+        fixed_price: fixedPrice,
+        billed_amount: billedAmount,
+        billing_status: billingStatus,
         hourly_rate: updatedProject.hourlyRate || null,
         urgent_hourly_rate: updatedProject.urgentHourlyRate || null,
         daily_rate: updatedProject.dailyRate || null,
@@ -118,8 +145,15 @@ export const useProjectsOperations = (setProjects: React.Dispatch<React.SetState
 
       if (error) throw error;
 
+      const normalizedProject: Project = {
+        ...updatedProject,
+        fixedPrice: updatedProject.pricingType === 'fixed' ? fixedPrice || undefined : undefined,
+        billedAmount: updatedProject.pricingType === 'fixed' ? billedAmount ?? undefined : undefined,
+        billingStatus: updatedProject.pricingType === 'fixed' ? billingStatus : undefined,
+      };
+
       setProjects(prev => prev.map(project => 
-        project.id === projectId ? updatedProject : project
+        project.id === projectId ? normalizedProject : project
       ));
 
       toast({

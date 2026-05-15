@@ -59,3 +59,7 @@ Agent Memory (Concise, Append‑Only)
 - Shared V2 path covers admin/client dashboard + project task views; old task list remains as fallback
 - V2 derives billing state from `hour_entries` (`billed` / `unbilled` / `unknown`) and shows client billing badges
 - `.env.production` sets `VITE_ENABLE_TASK_LIST_V2=true` so production builds include V2 by default
+2026-05-15 – Fixed project billing model
+- Added project-level `billed_amount` + derived `billing_status` (`unbilled` / `partial` / `billed`) for fixed-price projects
+- Fixed project revenue cards now use project billing fields, not invoice `project_id`
+- UI editing path: `ProjectSettings.tsx`, `EditProjectSheet.tsx`; helper: `src/utils/projectBilling.ts`

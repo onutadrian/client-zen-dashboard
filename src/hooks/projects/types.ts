@@ -13,6 +13,8 @@ export interface Project {
   archived: boolean;
   pricingType: 'fixed' | 'hourly' | 'daily';
   fixedPrice?: number;
+  billedAmount?: number;
+  billingStatus?: 'unbilled' | 'partial' | 'billed';
   hourlyRate?: number;
   urgentHourlyRate?: number;
   dailyRate?: number;

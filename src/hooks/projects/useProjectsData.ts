@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Project } from './types';
+import { deriveFixedProjectBillingStatus } from '@/utils/projectBilling';
 
 export const useProjectsData = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -37,7 +38,7 @@ export const useProjectsData = () => {
 
         if (assignmentError) throw assignmentError;
 
-        const assignedProjectIds = assignments.map(a => a.project_id);
+        const assignedProjectIds = (assignments ?? []).map(a => a.project_id);
         
         if (assignedProjectIds.length === 0) {
           setProjects([]);
@@ -50,34 +51,46 @@ export const useProjectsData = () => {
       const { data, error } = await projectsQuery;
       if (error) throw error;
 
-      const transformedProjects: Project[] = data.map((project: any) => ({
-        id: project.id,
-        name: project.name,
-        clientId: project.client_id,
-        startDate: project.start_date,
-        estimatedEndDate: project.estimated_end_date,
-        endDate: project.end_date || undefined,
-        status: project.status,
-        notes: project.notes || '',
-        documents: project.documents || [],
-        team: project.team || [],
-        archived: project.archived || false,
-        pricingType: project.pricing_type as 'fixed' | 'hourly' | 'daily',
-        fixedPrice: project.fixed_price || undefined,
-        hourlyRate: project.hourly_rate || undefined,
-        urgentHourlyRate: project.urgent_hourly_rate || undefined,
-        dailyRate: project.daily_rate || undefined,
-        estimatedHours: project.estimated_hours || undefined,
-        currency: project.currency || 'USD',
-        useMilestones: project.use_milestones !== false, // default to true if not present
-        invoices: Array.isArray(project.invoices) ? project.invoices as Array<{
-          id: string;
-          amount: number;
-          date: string;
-          status: 'paid' | 'pending' | 'overdue';
-          description?: string;
-        }> : []
-      }));
+      const transformedProjects: Project[] = data.map((project: any) => {
+        const fixedPrice = project.fixed_price || undefined;
+        const billedAmount = project.billed_amount ?? undefined;
+        const pricingType = project.pricing_type as 'fixed' | 'hourly' | 'daily';
+
+        return {
+          id: project.id,
+          name: project.name,
+          clientId: project.client_id,
+          startDate: project.start_date,
+          estimatedEndDate: project.estimated_end_date,
+          endDate: project.end_date || undefined,
+          status: project.status,
+          notes: project.notes || '',
+          documents: project.documents || [],
+          team: project.team || [],
+          archived: project.archived || false,
+          pricingType,
+          fixedPrice,
+          billedAmount,
+          billingStatus:
+            pricingType === 'fixed'
+              ? (project.billing_status as Project['billingStatus'] | null) ||
+                deriveFixedProjectBillingStatus(fixedPrice, billedAmount)
+              : undefined,
+          hourlyRate: project.hourly_rate || undefined,
+          urgentHourlyRate: project.urgent_hourly_rate || undefined,
+          dailyRate: project.daily_rate || undefined,
+          estimatedHours: project.estimated_hours || undefined,
+          currency: project.currency || 'USD',
+          useMilestones: project.use_milestones !== false,
+          invoices: Array.isArray(project.invoices) ? project.invoices as Array<{
+            id: string;
+            amount: number;
+            date: string;
+            status: 'paid' | 'pending' | 'overdue';
+            description?: string;
+          }> : []
+        };
+      });
 
       setProjects(transformedProjects);
     } catch (error) {

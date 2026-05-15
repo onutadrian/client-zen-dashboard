@@ -11,6 +11,7 @@ import { useHourEntries } from '@/hooks/useHourEntries';
 import { useInvoices } from '@/hooks/useInvoices';
 import { useCurrency } from '@/hooks/useCurrency';
 import { formatCurrency } from '@/lib/currency';
+import { deriveFixedProjectBillingStatus } from '@/utils/projectBilling';
 
 interface ProjectBilledHoursProps {
   project: Project;
@@ -143,10 +144,12 @@ const ProjectBilledHours = ({ project, client, milestones, tasks }: ProjectBille
   const isFixedPrice = project.pricingType === 'fixed';
   const hasMilestones = milestones.length > 0;
   
-  // For fixed price projects: calculate billed/unbilled based on invoices vs fixed price
+  // For fixed price projects: calculate billed/remaining based on manual project billing state
   const fixedProjectValue = demoMode ? 0 : convert(project.fixedPrice || 0, project.currency, displayCurrency);
-  const fixedBilledRevenue = paidInvoicedRevenue; // What's been paid
-  const fixedUnbilledRevenue = Math.max(0, fixedProjectValue - paidInvoicedRevenue);
+  const fixedBilledRevenue = demoMode ? 0 : convert(project.billedAmount || 0, project.currency, displayCurrency);
+  const fixedUnbilledRevenue = Math.max(0, fixedProjectValue - fixedBilledRevenue);
+  const fixedBillingStatus =
+    project.billingStatus || deriveFixedProjectBillingStatus(project.fixedPrice, project.billedAmount);
 
   if (!client) {
     return (
@@ -188,6 +191,7 @@ const ProjectBilledHours = ({ project, client, milestones, tasks }: ProjectBille
             fixedProjectValue={fixedProjectValue}
             fixedBilledRevenue={fixedBilledRevenue}
             fixedUnbilledRevenue={fixedUnbilledRevenue}
+            fixedBillingStatus={fixedBillingStatus}
             hourlyBreakdownAll={hourlyBreakdown?.all ?? null}
             displayCurrency={displayCurrency}
             demoMode={demoMode}

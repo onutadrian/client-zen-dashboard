@@ -2,6 +2,7 @@
 import React from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency } from '@/lib/currency';
+import { getFixedProjectBillingStatusLabel, type FixedProjectBillingStatus } from '@/utils/projectBilling';
 
 interface ProjectMetricsCardsProps {
   isFixedPrice: boolean;
@@ -17,6 +18,7 @@ interface ProjectMetricsCardsProps {
   fixedProjectValue?: number;
   fixedBilledRevenue?: number;
   fixedUnbilledRevenue?: number;
+  fixedBillingStatus?: FixedProjectBillingStatus;
   hourlyBreakdownAll?: {
     standard: number;
     urgent: number;
@@ -39,6 +41,7 @@ const ProjectMetricsCards = ({
   fixedProjectValue = 0,
   fixedBilledRevenue = 0,
   fixedUnbilledRevenue = 0,
+  fixedBillingStatus = 'unbilled',
   hourlyBreakdownAll = null,
   displayCurrency,
   demoMode = false
@@ -70,7 +73,7 @@ const ProjectMetricsCards = ({
   // Calculate percentages for fixed price projects
   const billedPercentage = fixedProjectValue > 0 ? (fixedBilledRevenue / fixedProjectValue) * 100 : 0;
 
-  // FIXED PRICE PROJECTS: Simple billed/unbilled revenue view
+  // FIXED PRICE PROJECTS: Contract value vs paid/remaining value view
   if (isFixedPrice) {
     return (
       <TooltipProvider>
@@ -105,7 +108,10 @@ const ProjectMetricsCards = ({
                 <p>{demoMode ? '—' : formatCurrency(fixedBilledRevenue, displayCurrency)}</p>
               </TooltipContent>
             </Tooltip>
-            <p className="text-muted-foreground py-[16px] text-base">Billed Revenue</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {getFixedProjectBillingStatusLabel(fixedBillingStatus)}
+            </p>
+            <p className="text-muted-foreground py-[16px] text-base">Billed Amount</p>
           </div>
 
           <div className="flex-1 text-center p-4 rounded-lg bg-muted">
@@ -124,7 +130,7 @@ const ProjectMetricsCards = ({
                 <p>{demoMode ? '—' : formatCurrency(fixedUnbilledRevenue, displayCurrency)}</p>
               </TooltipContent>
             </Tooltip>
-            <p className="text-muted-foreground py-[16px] text-base">Unbilled Revenue</p>
+            <p className="text-muted-foreground py-[16px] text-base">Remaining Value</p>
           </div>
 
           {totalHours > 0 && (

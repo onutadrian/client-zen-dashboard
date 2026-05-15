@@ -8,7 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { Project } from '@/hooks/useProjects';
+import { deriveFixedProjectBillingStatus, getFixedProjectBillingStatusLabel } from '@/utils/projectBilling';
 
 interface Client {
   id: number;
@@ -45,6 +47,14 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
   };
 
   if (!project) return null;
+
+  const fixedBillingStatus = deriveFixedProjectBillingStatus(formData.fixedPrice, formData.billedAmount);
+  const fixedBillingBadgeClass =
+    fixedBillingStatus === 'billed'
+      ? 'ui-pill ui-pill--success'
+      : fixedBillingStatus === 'partial'
+        ? 'ui-pill ui-pill--warning'
+        : 'ui-pill ui-pill--neutral';
 
   const getCurrencySymbol = (currency: string) => {
     switch (currency) {
@@ -145,16 +155,42 @@ const EditProjectSheet = ({ project, isOpen, onClose, onUpdate, clients }: EditP
 
           {/* Conditional Pricing Fields */}
           {formData.pricingType === 'fixed' ? (
-            <div className="space-y-2">
-              <Label htmlFor="fixedPrice">Fixed Price ({getCurrencySymbol(formData.currency || 'USD')})</Label>
-              <Input
-                id="fixedPrice"
-                type="number"
-                step="0.01"
-                value={formData.fixedPrice || ''}
-                onChange={(e) => handleInputChange('fixedPrice', e.target.value ? parseFloat(e.target.value) : undefined)}
-                placeholder="Enter fixed price"
-              />
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="fixedPrice">Fixed Price ({getCurrencySymbol(formData.currency || 'USD')})</Label>
+                <Input
+                  id="fixedPrice"
+                  type="number"
+                  step="0.01"
+                  value={formData.fixedPrice || ''}
+                  onChange={(e) => handleInputChange('fixedPrice', e.target.value ? parseFloat(e.target.value) : undefined)}
+                  placeholder="Enter fixed price"
+                />
+              </div>
+
+              <div className="rounded-lg border border-border/70 bg-slate-50 p-4 space-y-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <h4 className="font-medium text-slate-900">Billing Progress</h4>
+                    <p className="text-sm text-slate-500">Track how much of the fixed project value has already been billed.</p>
+                  </div>
+                  <Badge className={fixedBillingBadgeClass}>
+                    {getFixedProjectBillingStatusLabel(fixedBillingStatus)}
+                  </Badge>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="billedAmount">Billed Amount ({getCurrencySymbol(formData.currency || 'USD')})</Label>
+                  <Input
+                    id="billedAmount"
+                    type="number"
+                    step="0.01"
+                    value={formData.billedAmount || 0}
+                    onChange={(e) => handleInputChange('billedAmount', e.target.value ? parseFloat(e.target.value) : 0)}
+                    placeholder="Amount already billed"
+                  />
+                </div>
+              </div>
             </div>
           ) : formData.pricingType === 'hourly' ? (
             <div className="space-y-4">

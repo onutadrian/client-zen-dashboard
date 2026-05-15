@@ -6,11 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Archive, Trash2 } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
 import ProjectExportOptions from '@/components/ProjectExportOptions';
 import { useNavigate } from 'react-router-dom';
+import { deriveFixedProjectBillingStatus, getFixedProjectBillingStatusLabel } from '@/utils/projectBilling';
 
 interface ProjectSettingsProps {
   project: Project;
@@ -32,13 +34,25 @@ const ProjectSettings = ({
     notes: project.notes || '',
     startDate: project.startDate,
     estimatedEndDate: project.estimatedEndDate,
-    endDate: project.endDate || ''
+    endDate: project.endDate || '',
+    billedAmount: project.billedAmount ?? 0
   });
+
+  const fixedBillingStatus = deriveFixedProjectBillingStatus(project.fixedPrice, projectData.billedAmount);
+
+  const fixedBillingBadgeClass =
+    fixedBillingStatus === 'billed'
+      ? 'ui-pill ui-pill--success'
+      : fixedBillingStatus === 'partial'
+        ? 'ui-pill ui-pill--warning'
+        : 'ui-pill ui-pill--neutral';
 
   const handleSave = () => {
     onUpdateProject(project.id, {
       ...project,
-      ...projectData
+      ...projectData,
+      billedAmount: project.pricingType === 'fixed' ? projectData.billedAmount : undefined,
+      billingStatus: project.pricingType === 'fixed' ? fixedBillingStatus : undefined,
     });
   };
 
@@ -131,6 +145,34 @@ const ProjectSettings = ({
               rows={4}
             />
           </div>
+
+          {project.pricingType === 'fixed' && (
+            <div className="rounded-lg border border-border/70 bg-slate-50 p-4 space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-medium text-slate-900">Fixed Project Billing</h4>
+                  <p className="text-sm text-slate-500">Manually track how much of the fixed project value has been billed.</p>
+                </div>
+                <Badge className={fixedBillingBadgeClass}>
+                  {getFixedProjectBillingStatusLabel(fixedBillingStatus)}
+                </Badge>
+              </div>
+
+              <div>
+                <Label htmlFor="project-billed-amount">Billed Amount</Label>
+                <Input
+                  id="project-billed-amount"
+                  type="number"
+                  step="0.01"
+                  value={projectData.billedAmount}
+                  onChange={e => setProjectData({
+                    ...projectData,
+                    billedAmount: e.target.value ? parseFloat(e.target.value) : 0
+                  })}
+                />
+              </div>
+            </div>
+          )}
 
           <Button variant="primary"
             onClick={handleSave}

@@ -380,6 +380,8 @@ export type Database = {
       projects: {
         Row: {
           archived: boolean | null
+          billed_amount: number | null
+          billing_status: string | null
           client_id: number
           created_at: string
           currency: string
@@ -405,6 +407,8 @@ export type Database = {
         }
         Insert: {
           archived?: boolean | null
+          billed_amount?: number | null
+          billing_status?: string | null
           client_id: number
           created_at?: string
           currency?: string
@@ -430,6 +434,8 @@ export type Database = {
         }
         Update: {
           archived?: boolean | null
+          billed_amount?: number | null
+          billing_status?: string | null
           client_id?: number
           created_at?: string
           currency?: string
