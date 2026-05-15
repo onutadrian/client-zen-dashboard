@@ -53,11 +53,22 @@ const TaskTable = ({
   const [showHoursModal, setShowHoursModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
+  const getProjectPricingType = (projectId?: string) => {
+    if (!projectId) return undefined;
+    const project = projects.find((item) => item.id === projectId);
+    return project?.pricingType;
+  };
+
   const handleStatusChange = (task: Task, newStatus: Task['status']) => {
     if (readOnly || !onUpdateTask) {
       return;
     }
+    const isFixedPriceProject = getProjectPricingType(task.projectId) === 'fixed';
     if (newStatus === 'completed' && task.status !== 'completed') {
+      if (isFixedPriceProject) {
+        onUpdateTask(task.id, newStatus);
+        return;
+      }
       setSelectedTask(task);
       setShowHoursModal(true);
     } else {

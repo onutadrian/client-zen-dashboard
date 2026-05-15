@@ -304,6 +304,12 @@ const TaskManagementSectionV2 = ({
     }));
   }, [projects]);
 
+  const getProjectPricingType = (projectId?: string) => {
+    if (!projectId) return undefined;
+    const project = projects.find((item) => item.id === projectId);
+    return project?.pricingType;
+  };
+
   const handleEditTask = (task: Task) => {
     if (readOnly || !onEditTask) return;
     setEditingTask(task);
@@ -333,7 +339,13 @@ const TaskManagementSectionV2 = ({
       return;
     }
 
+    const isFixedPriceProject = getProjectPricingType(task.projectId) === 'fixed';
+
     if (newStatus === 'completed' && task.status !== 'completed') {
+      if (isFixedPriceProject) {
+        onUpdateTask(task.id, newStatus);
+        return;
+      }
       setSelectedTaskForHours(task);
       setShowHoursModal(true);
       return;

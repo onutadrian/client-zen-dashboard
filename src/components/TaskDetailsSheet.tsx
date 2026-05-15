@@ -96,9 +96,14 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
           {/* Status and Client Info */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Badge className={getStatusColor(task.status)}>
-                {task.status.replace('-', ' ')}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge className={getStatusColor(task.status)}>
+                  {task.status.replace('-', ' ')}
+                </Badge>
+                <Badge variant="outline" className="ui-pill ui-pill--neutral">
+                  Task #{task.id}
+                </Badge>
+              </div>
             </div>
             
             <div className="flex items-center space-x-2">

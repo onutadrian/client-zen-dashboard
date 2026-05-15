@@ -58,3 +58,4 @@ Agent Memory (Concise, Append‑Only)
 - Feature flag: `VITE_ENABLE_TASK_LIST_V2` toggles month-grouped shared task filtering UI
 - Shared V2 path covers admin/client dashboard + project task views; old task list remains as fallback
 - V2 derives billing state from `hour_entries` (`billed` / `unbilled` / `unknown`) and shows client billing badges
+- `.env.production` sets `VITE_ENABLE_TASK_LIST_V2=true` so production builds include V2 by default
