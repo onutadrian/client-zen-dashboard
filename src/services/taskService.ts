@@ -1,7 +1,29 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Task, CreateTaskData, UpdateTaskData } from '@/types/task';
+import { Task, CreateTaskData, UpdateTaskData, TaskTimeLog } from '@/types/task';
 import { retryOperation } from '@/utils/taskUtils';
+
+const normalizeTaskTimeLogs = (value: unknown): TaskTimeLog[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.flatMap((entry) => {
+    if (!entry || typeof entry !== 'object') {
+      return [];
+    }
+
+    const candidate = entry as { hoursText?: unknown; loggedAt?: unknown };
+    if (typeof candidate.hoursText !== 'string' || typeof candidate.loggedAt !== 'string') {
+      return [];
+    }
+
+    return [{
+      hoursText: candidate.hoursText,
+      loggedAt: candidate.loggedAt,
+    }];
+  });
+};
 
 export const loadTasksFromDatabase = async (): Promise<Task[]> => {
   const result = await retryOperation(async () => {
@@ -46,6 +68,7 @@ export const loadTasksFromDatabase = async (): Promise<Task[]> => {
     assignedTo: task.assigned_to || undefined,
     assignedToName: (() => { const p = userMap.get(task.assigned_to); return p?.full_name || p?.email || undefined; })(),
     urgent: task.urgent || false,
+    timeLogs: normalizeTaskTimeLogs(task.time_logs),
   }));
 };
 
@@ -75,6 +98,7 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
     end_date: newTask.endDate || null,
     assigned_to: newTask.assignedTo || null,
     urgent: newTask.urgent || false,
+    time_logs: newTask.timeLogs || [],
     user_id: user.id // Add the user_id to satisfy RLS policy
   };
 
@@ -121,6 +145,7 @@ export const createTaskInDatabase = async (newTask: CreateTaskData): Promise<Tas
     assignedTo: result.assigned_to || undefined,
     assignedToName,
     urgent: result.urgent || false,
+    timeLogs: normalizeTaskTimeLogs(result.time_logs),
   };
 };
 
@@ -189,6 +214,7 @@ export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTask
   if (updatedTask.startDate !== undefined) supabaseUpdate.start_date = updatedTask.startDate || null;
   if (updatedTask.endDate !== undefined) supabaseUpdate.end_date = updatedTask.endDate || null;
   if (updatedTask.workedHours !== undefined) supabaseUpdate.worked_hours = updatedTask.workedHours;
+  if (updatedTask.timeLogs !== undefined) supabaseUpdate.time_logs = updatedTask.timeLogs;
   if (updatedTask.assignedTo !== undefined) supabaseUpdate.assigned_to = updatedTask.assignedTo || null;
   if (updatedTask.urgent !== undefined) supabaseUpdate.urgent = updatedTask.urgent;
 
@@ -240,5 +266,6 @@ export const editTaskInDatabase = async (taskId: number, updatedTask: UpdateTask
     assignedTo: data.assigned_to || undefined,
     assignedToName,
     urgent: data.urgent || false,
+    timeLogs: normalizeTaskTimeLogs(data.time_logs),
   };
 };

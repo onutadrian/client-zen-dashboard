@@ -15,6 +15,7 @@ interface ProjectOverviewProps {
   milestones: Milestone[];
   onAddTask: (task: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => void;
   onUpdateTask: (taskId: number, status: Task['status'], actualHours?: number) => void;
+  onAddTaskTimeLog?: (taskId: number, hoursText: string) => Promise<Task | void | null> | Task | void | null;
   onDeleteTask: (taskId: number) => void;
   onEditTask: (taskId: number, updatedTask: Partial<Task>) => void;
   onAddMilestone: (milestone: Omit<Milestone, 'id' | 'createdAt' | 'updatedAt' | 'completionPercentage' | 'paymentStatus'>) => void;
@@ -30,6 +31,7 @@ const ProjectOverview = ({
   milestones,
   onAddTask,
   onUpdateTask,
+  onAddTaskTimeLog,
   onDeleteTask,
   onEditTask,
   onAddMilestone,
@@ -66,6 +68,7 @@ const ProjectOverview = ({
         tasks={tasks}
         onAddTask={onAddTask}
         onUpdateTask={onUpdateTask}
+        onAddTaskTimeLog={onAddTaskTimeLog}
         onDeleteTask={onDeleteTask}
         onEditTask={onEditTask}
       />

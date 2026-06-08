@@ -44,7 +44,7 @@ const ProjectDetailsPage = () => {
     refreshHourEntries();
   };
   
-  const { tasks, addTask, updateTask, deleteTask, editTask } = useTasks(refreshHourEntries, handleDataChange);
+  const { tasks, addTask, updateTask, deleteTask, editTask, addTaskTimeLog } = useTasks(refreshHourEntries, handleDataChange);
   const { milestones, addMilestone, updateMilestone, deleteMilestone } = useMilestones();
 
   const project = projects.find(p => p.id === id);
@@ -168,6 +168,7 @@ const ProjectDetailsPage = () => {
                 milestones={projectMilestones}
                 onAddTask={addTask}
                 onUpdateTask={updateTask}
+                onAddTaskTimeLog={addTaskTimeLog}
                 onDeleteTask={deleteTask}
                 onEditTask={editTask}
                 onAddMilestone={addMilestone}

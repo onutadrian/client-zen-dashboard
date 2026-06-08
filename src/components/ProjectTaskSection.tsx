@@ -18,6 +18,7 @@ interface ProjectTaskSectionProps {
   tasks: Task[];
   onAddTask: (task: Omit<Task, 'id' | 'status' | 'createdDate' | 'completedDate'>) => void;
   onUpdateTask?: (taskId: number, status: Task['status'], actualHours?: number) => void;
+  onAddTaskTimeLog?: (taskId: number, hoursText: string) => Promise<Task | void | null> | Task | void | null;
   onDeleteTask?: (taskId: number) => void;
   onEditTask?: (taskId: number, updatedTask: Partial<Task>) => void;
 }
@@ -28,12 +29,21 @@ const ProjectTaskSection = ({
   tasks,
   onAddTask,
   onUpdateTask,
+  onAddTaskTimeLog,
   onDeleteTask,
   onEditTask,
 }: ProjectTaskSectionProps) => {
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const isActive = project.status === 'active';
   const [viewTask, setViewTask] = useState<Task | null>(null);
+
+  React.useEffect(() => {
+    if (!viewTask) return;
+    const latestTask = tasks.find(task => task.id === viewTask.id);
+    if (latestTask) {
+      setViewTask(latestTask);
+    }
+  }, [tasks, viewTask]);
 
   if (ENABLE_TASK_LIST_V2) {
     return (
@@ -55,6 +65,7 @@ const ProjectTaskSection = ({
           isOpen={!!viewTask}
           onClose={() => setViewTask(null)}
           projects={[{ id: project.id, name: project.name, pricingType: project.pricingType }]}
+          onAddTimeLog={onAddTaskTimeLog}
         />
       </>
     );
@@ -150,6 +161,7 @@ const ProjectTaskSection = ({
         isOpen={!!viewTask}
         onClose={() => setViewTask(null)}
         projects={[{ id: project.id, name: project.name, pricingType: project.pricingType }]}
+        onAddTimeLog={onAddTaskTimeLog}
       />
     </>
   );

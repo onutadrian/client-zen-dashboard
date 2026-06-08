@@ -206,10 +206,60 @@ export const useTasksOperations = (
     }
   };
 
+  const addTaskTimeLog = async (taskId: number, hoursText: string) => {
+    const trimmedHoursText = hoursText.trim();
+    if (!trimmedHoursText) {
+      return null;
+    }
+
+    try {
+      const existingTask = tasks.find(task => task.id === taskId);
+      if (!existingTask) {
+        throw new Error('Task not found');
+      }
+
+      const nextTimeLogs = [
+        ...(existingTask.timeLogs || []),
+        {
+          hoursText: trimmedHoursText,
+          loggedAt: new Date().toISOString(),
+        },
+      ];
+
+      const updatedTaskFromDb = await editTaskInDatabase(taskId, {
+        timeLogs: nextTimeLogs,
+      });
+
+      setTasks(prev =>
+        prev.map(task =>
+          task.id === taskId
+            ? updatedTaskFromDb
+            : task
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "Time logged successfully"
+      });
+
+      return updatedTaskFromDb;
+    } catch (error) {
+      console.error('Error adding task time log:', error);
+      toast({
+        title: "Error",
+        description: "Failed to log time",
+        variant: "destructive"
+      });
+      return null;
+    }
+  };
+
   return {
     addTask,
     updateTask,
     deleteTask,
-    editTask
+    editTask,
+    addTaskTimeLog,
   };
 };

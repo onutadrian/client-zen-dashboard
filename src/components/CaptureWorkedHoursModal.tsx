@@ -1,14 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TaskTimeLog } from '@/types/task';
 
 interface Task {
   id: number;
   title: string;
   clientName: string;
+  timeLogs?: TaskTimeLog[];
 }
 
 interface CaptureWorkedHoursModalProps {
@@ -25,6 +27,13 @@ const CaptureWorkedHoursModal = ({
   onComplete 
 }: CaptureWorkedHoursModalProps) => {
   const [workedHours, setWorkedHours] = useState<number>(1);
+  const sortedTimeLogs = useMemo(
+    () =>
+      (task?.timeLogs || [])
+        .slice()
+        .sort((a, b) => new Date(b.loggedAt).getTime() - new Date(a.loggedAt).getTime()),
+    [task?.timeLogs]
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +81,25 @@ const CaptureWorkedHoursModal = ({
               required
             />
           </div>
+
+          {sortedTimeLogs.length > 0 && (
+            <div className="space-y-2 rounded-lg border border-border/70 bg-slate-50 p-3">
+              <p className="text-sm font-medium text-slate-700">Previously logged time</p>
+              <div className="space-y-2">
+                {sortedTimeLogs.map((entry, index) => (
+                  <div
+                    key={`${entry.loggedAt}-${index}`}
+                    className="flex items-center justify-between gap-3 text-sm"
+                  >
+                    <span className="font-medium text-slate-700">Logged time: {entry.hoursText}h</span>
+                    <span className="text-xs text-slate-500 text-right">
+                      {new Date(entry.loggedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>

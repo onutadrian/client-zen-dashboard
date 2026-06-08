@@ -20,7 +20,7 @@ export const useDashboardData = () => {
   
   const analytics = useAnalytics({ dateRange });
   const { projects, loading: projectsLoading } = useProjects();
-  const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, editTask } = useTasks();
+  const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, editTask, addTaskTimeLog } = useTasks();
   const { milestones, loading: milestonesLoading } = useMilestones();
   const { clients, loading: clientsLoading } = useClients();
 
@@ -41,6 +41,7 @@ export const useDashboardData = () => {
     updateTask,
     deleteTask,
     editTask,
+    addTaskTimeLog,
     milestones,
     clients,
     // loading flags for skeletons

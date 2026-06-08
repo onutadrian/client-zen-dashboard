@@ -60,6 +60,7 @@ const TaskManagementSection = ({
     assignedTo: task.assignedTo,
     assignedToName: task.assignedToName,
     urgent: task.urgent,
+    timeLogs: task.timeLogs || [],
   });
 
   const handleEditTask = (task: Task) => {

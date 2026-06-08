@@ -8,6 +8,8 @@ import {
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Clock, User, FileText, Link as LinkIcon, Calendar, FolderOpen } from 'lucide-react';
 import { Task } from '@/types/task';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,12 +27,16 @@ interface TaskDetailsSheetProps {
   isOpen: boolean;
   onClose: () => void;
   projects?: Project[];
+  onAddTimeLog?: (taskId: number, hoursText: string) => Promise<Task | void | null> | Task | void | null;
 }
 
-const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsSheetProps) => {
+const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [], onAddTimeLog }: TaskDetailsSheetProps) => {
   const { isAdmin } = useAuth();
   const { demoMode } = useCurrency();
   const { hourEntries, updateHourEntry } = useHourEntries();
+  const [timeLogInput, setTimeLogInput] = React.useState('');
+  const [isSavingTimeLog, setIsSavingTimeLog] = React.useState(false);
+  const [localTimeLogs, setLocalTimeLogs] = React.useState<Task['timeLogs']>(task?.timeLogs || []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -64,6 +70,11 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
     [hourEntries, task?.id]
   );
 
+  React.useEffect(() => {
+    setTimeLogInput('');
+    setLocalTimeLogs(task?.timeLogs || []);
+  }, [task?.id, task?.timeLogs, isOpen]);
+
   const isBilled = React.useMemo(
     () => taskHourEntries.some((entry) => entry.billed === true),
     [taskHourEntries]
@@ -75,6 +86,31 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
     await Promise.all(
       taskHourEntries.map((entry) => updateHourEntry(entry.id, { billed: nextBilledState }))
     );
+  };
+
+  const handleAddTimeLog = async () => {
+    if (!task || !onAddTimeLog || !timeLogInput.trim()) {
+      return;
+    }
+
+    try {
+      setIsSavingTimeLog(true);
+      const result = await onAddTimeLog(task.id, timeLogInput);
+      if (result?.timeLogs) {
+        setLocalTimeLogs(result.timeLogs);
+      } else {
+        setLocalTimeLogs(prev => [
+          ...(prev || []),
+          {
+            hoursText: timeLogInput.trim(),
+            loggedAt: new Date().toISOString(),
+          },
+        ]);
+      }
+      setTimeLogInput('');
+    } finally {
+      setIsSavingTimeLog(false);
+    }
   };
 
   if (!task) return null;
@@ -161,6 +197,54 @@ const TaskDetailsSheet = ({ task, isOpen, onClose, projects = [] }: TaskDetailsS
                   </>
                 )}
               </div>
+
+              {onAddTimeLog && (
+                <div className="space-y-3 rounded-lg border border-border/70 bg-slate-50 p-3">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-slate-700">Add time</p>
+                    <p className="text-xs text-slate-500">
+                      Log reference time here. It will appear in the completion modal and does not affect billed hours.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      value={timeLogInput}
+                      onChange={(event) => setTimeLogInput(event.target.value)}
+                      placeholder="e.g. 1.5"
+                      disabled={demoMode || isSavingTimeLog}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddTimeLog}
+                      disabled={demoMode || isSavingTimeLog || !timeLogInput.trim()}
+                    >
+                      Add
+                    </Button>
+                  </div>
+
+                  {localTimeLogs && localTimeLogs.length > 0 && (
+                    <div className="space-y-2">
+                      {localTimeLogs
+                        .slice()
+                        .sort((a, b) => new Date(b.loggedAt).getTime() - new Date(a.loggedAt).getTime())
+                        .map((entry, index) => (
+                          <div
+                            key={`${entry.loggedAt}-${index}`}
+                            className="flex items-center justify-between gap-3 text-sm"
+                          >
+                            <span className="font-medium text-slate-700">Logged time: {entry.hoursText}h</span>
+                            <span className="text-xs text-slate-500 text-right">
+                              {new Date(entry.loggedAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

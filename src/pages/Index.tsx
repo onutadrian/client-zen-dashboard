@@ -32,6 +32,7 @@ const Index = () => {
     updateTask,
     deleteTask,
     editTask,
+    addTaskTimeLog,
     milestones,
     clients,
     profile,
@@ -117,6 +118,7 @@ const Index = () => {
       notes: task.notes,
       assets: task.assets,
       urgent: task.urgent,
+      timeLogs: task.timeLogs || [],
     });
   };
 
@@ -143,6 +145,7 @@ const Index = () => {
         notes: latest.notes,
         assets: latest.assets,
         urgent: latest.urgent,
+        timeLogs: latest.timeLogs || [],
       } as any);
     }
   }, [tasks, selectedTask?.id]);
@@ -265,6 +268,7 @@ const Index = () => {
             isOpen={!!selectedTask}
             onClose={() => setSelectedTask(null)}
             projects={projects as any}
+            onAddTimeLog={addTaskTimeLog}
           />
         </div>
       </div>

@@ -588,6 +588,7 @@ export type Database = {
           project_id: string
           start_date: string | null
           status: string
+          time_logs: Json[] | null
           title: string
           urgent: boolean | null
           user_id: string
@@ -610,6 +611,7 @@ export type Database = {
           project_id: string
           start_date?: string | null
           status?: string
+          time_logs?: Json[] | null
           title: string
           urgent?: boolean | null
           user_id?: string
@@ -632,6 +634,7 @@ export type Database = {
           project_id?: string
           start_date?: string | null
           status?: string
+          time_logs?: Json[] | null
           title?: string
           urgent?: boolean | null
           user_id?: string

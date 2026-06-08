@@ -1,4 +1,9 @@
 
+export interface TaskTimeLog {
+  hoursText: string;
+  loggedAt: string;
+}
+
 export interface Task {
   id: number;
   title: string;
@@ -20,6 +25,7 @@ export interface Task {
   assignedTo?: string;
   assignedToName?: string;
   urgent?: boolean;
+  timeLogs?: TaskTimeLog[];
 }
 
 export type TaskStatus = Task['status'];

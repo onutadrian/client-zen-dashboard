@@ -4,7 +4,7 @@ import { useTasksOperations } from './tasks/useTasksOperations';
 
 export const useTasks = (onHourEntryCreated?: () => void, onTaskDeleted?: () => void) => {
   const { tasks, setTasks, loadTasks, loading } = useTasksData();
-  const { addTask, updateTask, deleteTask, editTask } = useTasksOperations(
+  const { addTask, updateTask, deleteTask, editTask, addTaskTimeLog } = useTasksOperations(
     tasks,
     setTasks,
     loadTasks,
@@ -18,7 +18,8 @@ export const useTasks = (onHourEntryCreated?: () => void, onTaskDeleted?: () => 
     addTask,
     updateTask,
     deleteTask,
-    editTask
+    editTask,
+    addTaskTimeLog,
   };
 };
 
