@@ -27,12 +27,12 @@ Agent Memory (Concise, Append‑Only)
 - Budget tab hidden when project.pricingType = fixed or `use_milestones` = false
 
 2026-01-26 – Currency & “demo mode”
-- `useCurrency`: fetches via edge fn `fetch-exchange-rates` (fallback + cache), events: `currencyChanged`
+- `useCurrency`: fetches BNR XML via edge fn `fetch-exchange-rates` (fallback + daily 13:30 Bucharest cache), events: `currencyChanged`
 - Demo mode toggled in sidebar; event `demoModeChanged` to hide/show financials
 
 2026-01-26 – Edge functions & env
 - `fetch-exchange-rates`, `validate-invite-token` (RPC), `send-invite-email` (Resend)
-- Env keys (functions): `CURRENCYLAYER_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `APP_URL`
+- Env keys (functions): `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `APP_URL`; BNR rates need no API key
 
 2026-01-26 – Recent schema/UX deltas
 - Added `use_milestones` on projects; urgent hourly rate support

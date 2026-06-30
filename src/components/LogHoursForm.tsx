@@ -13,6 +13,7 @@ import { Milestone } from '@/hooks/useMilestones';
 import type { Task } from '@/types/task';
 import { useHourEntries } from '@/hooks/useHourEntries';
 import { getTimeLabel, getStepValue, getPlaceholder, getButtonText, convertToHours } from '@/utils/pricingUtils';
+import { useToast } from '@/hooks/use-toast';
 
 interface LogHoursFormProps {
   project: Project;
@@ -38,6 +39,7 @@ const LogHoursForm = ({
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string>('unassigned');
   const [selectedTaskId, setSelectedTaskId] = useState<string>('unassigned');
   const { addHourEntry } = useHourEntries();
+  const { toast } = useToast();
 
   // Filter milestones that are not completed
   const availableMilestones = milestones.filter(m => 
@@ -46,10 +48,20 @@ const LogHoursForm = ({
   const usesMilestones = project.useMilestones !== false;
   // Filter tasks in this project only
   const availableTasks = tasks.filter(t => t.projectId === project.id);
+  const requiresTask = project.pricingType === 'hourly' || project.pricingType === 'daily';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!hours || isNaN(Number(hours)) || Number(hours) <= 0) {
+      return;
+    }
+
+    if (requiresTask && selectedTaskId === 'unassigned') {
+      toast({
+        title: 'Task required',
+        description: 'Select a task before logging time for hourly or daily projects.',
+        variant: 'destructive'
+      });
       return;
     }
     
@@ -137,13 +149,17 @@ const LogHoursForm = ({
       )}
 
       <div>
-        <Label htmlFor="task">Task (Optional)</Label>
+        <Label htmlFor="task">Task{requiresTask ? '' : ' (Optional)'}</Label>
         <Select value={selectedTaskId} onValueChange={setSelectedTaskId}>
           <SelectTrigger>
-            <SelectValue placeholder="Select task or leave unassigned" />
+            <SelectValue placeholder={requiresTask ? 'Select task' : 'Select task or leave unassigned'} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="unassigned">No task (unassigned)</SelectItem>
+            {requiresTask ? (
+              <SelectItem value="unassigned" disabled>Select task</SelectItem>
+            ) : (
+              <SelectItem value="unassigned">No task (unassigned)</SelectItem>
+            )}
             {availableTasks.map((task) => (
               <SelectItem key={task.id} value={String(task.id)}>
                 {task.title}{task.urgent ? ' (urgent)' : ''}

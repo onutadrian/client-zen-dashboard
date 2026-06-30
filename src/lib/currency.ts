@@ -2,9 +2,10 @@
 // Exchange rates will be dynamically fetched from the API
 // These are fallback rates in case the API fails
 export const fallbackExchangeRates = {
-  USD: { USD: 1, EUR: 0.85, RON: 4.5 },
-  EUR: { USD: 1.18, EUR: 1, RON: 5.3 },
-  RON: { USD: 0.22, EUR: 0.19, RON: 1 }
+  USD: { USD: 1, EUR: 0.87, RON: 4.35, GBP: 0.74 },
+  EUR: { USD: 1.15, EUR: 1, RON: 5, GBP: 0.85 },
+  RON: { USD: 0.23, EUR: 0.2, RON: 1, GBP: 0.17 },
+  GBP: { USD: 1.34, EUR: 1.17, RON: 5.85, GBP: 1 }
 };
 
 export const convertCurrency = (

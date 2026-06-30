@@ -6,6 +6,46 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const BNR_RATES_URL = 'https://curs.bnr.ro/nbrfxrates.xml';
+const SUPPORTED_CURRENCIES = ['RON', 'EUR', 'USD', 'GBP'];
+
+const parseBnrRates = (xml: string) => {
+  const cubeDate = xml.match(/<Cube[^>]*date="([^"]+)"/)?.[1] ?? null;
+  const ronPerUnit: Record<string, number> = { RON: 1 };
+  const ratePattern = /<Rate\s+([^>]*)>([^<]+)<\/Rate>/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = ratePattern.exec(xml)) !== null) {
+    const attributes = match[1];
+    const rawValue = match[2].trim().replace(',', '.');
+    const currency = attributes.match(/currency="([^"]+)"/)?.[1];
+    const multiplier = Number(attributes.match(/multiplier="([^"]+)"/)?.[1] ?? '1');
+    const value = Number(rawValue);
+
+    if (!currency || !Number.isFinite(value) || !Number.isFinite(multiplier) || multiplier <= 0) {
+      continue;
+    }
+
+    ronPerUnit[currency] = value / multiplier;
+  }
+
+  const missingCurrencies = SUPPORTED_CURRENCIES.filter(currency => !ronPerUnit[currency]);
+  if (missingCurrencies.length > 0) {
+    throw new Error(`BNR feed missing currencies: ${missingCurrencies.join(', ')}`);
+  }
+
+  const rates = SUPPORTED_CURRENCIES.reduce<Record<string, Record<string, number>>>((matrix, fromCurrency) => {
+    matrix[fromCurrency] = SUPPORTED_CURRENCIES.reduce<Record<string, number>>((row, toCurrency) => {
+      row[toCurrency] = ronPerUnit[fromCurrency] / ronPerUnit[toCurrency];
+      return row;
+    }, {});
+
+    return matrix;
+  }, {});
+
+  return { rates, sourceDate: cubeDate };
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -13,69 +53,24 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Fetching exchange rates from currencylayer API...');
-    
-    const apiKey = Deno.env.get('CURRENCYLAYER_API_KEY');
-    if (!apiKey) {
-      console.error('CURRENCYLAYER_API_KEY not configured');
-      throw new Error('API key not configured');
-    }
-
-    // Use the correct currencylayer API endpoint
-    const response = await fetch(`https://api.currencylayer.com/live?access_key=${apiKey}&source=EUR&currencies=USD,RON,GBP`);
+    console.log('Fetching exchange rates from BNR XML feed...');
+    const response = await fetch(BNR_RATES_URL);
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('API Response Error:', response.status, errorText);
-      throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+      console.error('BNR feed response error:', response.status, errorText);
+      throw new Error(`BNR feed request failed with status ${response.status}: ${errorText}`);
     }
-    
-    const data = await response.json();
-    
-    if (!data.success) {
-      console.error('API Error Response:', data);
-      throw new Error(`API request failed: ${data.error?.info || JSON.stringify(data)}`);
-    }
-    
-    console.log('Successfully fetched exchange rates:', data);
-    
-    // Format the rates into our expected structure
-    // The API returns rates relative to EUR, so we need to calculate cross-rates
-    const eurToUsd = data.quotes.EURUSD;
-    const eurToRon = data.quotes.EURRON;
-    const eurToGbp = data.quotes.EURGBP || 0.85; // Fallback if GBP not available
-    
-    const rates = {
-      EUR: {
-        EUR: 1,
-        USD: eurToUsd,
-        RON: eurToRon,
-        GBP: eurToGbp
-      },
-      USD: {
-        EUR: 1 / eurToUsd,
-        USD: 1,
-        RON: eurToRon / eurToUsd,
-        GBP: eurToGbp / eurToUsd
-      },
-      RON: {
-        EUR: 1 / eurToRon,
-        USD: eurToUsd / eurToRon,
-        RON: 1,
-        GBP: eurToGbp / eurToRon
-      },
-      GBP: {
-        EUR: 1 / eurToGbp,
-        USD: eurToUsd / eurToGbp,
-        RON: eurToRon / eurToGbp,
-        GBP: 1
-      }
-    };
+
+    const xml = await response.text();
+    const { rates, sourceDate } = parseBnrRates(xml);
     
     return new Response(JSON.stringify({ 
       success: true, 
       rates,
-      timestamp: data.timestamp 
+      source: 'BNR',
+      sourceDate,
+      fetchedAt: new Date().toISOString()
     }), {
       headers: { 
         'Content-Type': 'application/json',

@@ -8,7 +8,6 @@ import { Client } from '@/types/client';
 import { Milestone } from '@/hooks/useMilestones';
 import type { Task } from '@/types/task';
 import { useHourEntries } from '@/hooks/useHourEntries';
-import { useInvoices } from '@/hooks/useInvoices';
 import { useCurrency } from '@/hooks/useCurrency';
 import { formatCurrency } from '@/lib/currency';
 import { deriveFixedProjectBillingStatus } from '@/utils/projectBilling';
@@ -23,7 +22,6 @@ interface ProjectBilledHoursProps {
 
 const ProjectBilledHours = ({ project, client, milestones, tasks }: ProjectBilledHoursProps) => {
   const { hourEntries } = useHourEntries();
-  const { invoices } = useInvoices();
   const { displayCurrency, convert, demoMode } = useCurrency();
   
   const projectHours = hourEntries.filter(entry => {
@@ -32,8 +30,6 @@ const ProjectBilledHours = ({ project, client, milestones, tasks }: ProjectBille
     if (entry.milestoneId && typeof entry.milestoneId === 'object') return false;
     return true;
   });
-  const projectInvoices = invoices.filter(invoice => invoice.projectId === project.id);
-  
   // Calculate time metrics
   const totalHours = projectHours.reduce((sum, entry) => sum + entry.hours, 0);
   const billedHours = projectHours.filter(entry => entry.billed).reduce((sum, entry) => sum + entry.hours, 0);
@@ -75,14 +71,6 @@ const ProjectBilledHours = ({ project, client, milestones, tasks }: ProjectBille
 
     return { all, unbilled };
   }, [project.pricingType, projectHours, tasks]);
-  
-  // Calculate paid invoiced revenue (from paid invoices) with currency conversion
-  const paidInvoicedRevenue = demoMode ? 0 : projectInvoices
-    .filter(invoice => invoice.status === 'paid')
-    .reduce((sum, invoice) => {
-      const convertedAmount = convert(invoice.amount, invoice.currency, displayCurrency);
-      return sum + convertedAmount;
-    }, 0);
   
   // Calculate value of billed hours (this is the actual "Billed Revenue" for hourly/daily projects)
   let valueFromBilledHours = 0;
@@ -183,7 +171,6 @@ const ProjectBilledHours = ({ project, client, milestones, tasks }: ProjectBille
             totalHours={totalHours}
             billedHours={billedHours}
             unbilledHours={unbilledHours}
-            paidInvoicedRevenue={paidInvoicedRevenue}
             valueFromBilledHours={valueFromBilledHours}
             unbilledRevenue={unbilledRevenue}
             totalMilestoneValue={totalMilestoneValue}
@@ -193,6 +180,7 @@ const ProjectBilledHours = ({ project, client, milestones, tasks }: ProjectBille
             fixedUnbilledRevenue={fixedUnbilledRevenue}
             fixedBillingStatus={fixedBillingStatus}
             hourlyBreakdownAll={hourlyBreakdown?.all ?? null}
+            hourlyBreakdownUnbilled={hourlyBreakdown?.unbilled ?? null}
             displayCurrency={displayCurrency}
             demoMode={demoMode}
           />

@@ -22,6 +22,50 @@ interface ExchangeRates {
   };
 }
 
+const BNR_REFRESH_HOUR = 13;
+const BNR_REFRESH_MINUTE = 30;
+
+const getBucharestParts = (date: Date) => {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Bucharest',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).formatToParts(date);
+
+  const value = (type: string) => parts.find(part => part.type === type)?.value ?? '';
+
+  return {
+    dateKey: `${value('year')}-${value('month')}-${value('day')}`,
+    minutesSinceMidnight: Number(value('hour')) * 60 + Number(value('minute'))
+  };
+};
+
+const isAfterBnrRefreshWindow = (date: Date) => {
+  const { minutesSinceMidnight } = getBucharestParts(date);
+  return minutesSinceMidnight >= (BNR_REFRESH_HOUR * 60) + BNR_REFRESH_MINUTE;
+};
+
+const shouldUseCachedExchangeRates = (cachedTimestamp: string | null) => {
+  if (!cachedTimestamp) return false;
+
+  const cachedDate = new Date(cachedTimestamp);
+  if (Number.isNaN(cachedDate.getTime())) return false;
+
+  const now = new Date();
+  const nowParts = getBucharestParts(now);
+  const cachedParts = getBucharestParts(cachedDate);
+
+  if (!isAfterBnrRefreshWindow(now)) {
+    return true;
+  }
+
+  return cachedParts.dateKey === nowParts.dateKey && isAfterBnrRefreshWindow(cachedDate);
+};
+
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -40,31 +84,21 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [loadingRates, setLoadingRates] = useState(true);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
 
-  // Fetch exchange rates from our edge function
+  // Fetch exchange rates from BNR through our edge function.
   const fetchExchangeRates = useCallback(async () => {
     try {
       setLoadingRates(true);
       
-      // Check if we have a cached version less than 24 hours old
       const cachedRates = localStorage.getItem('exchangeRates');
       const cachedTimestamp = localStorage.getItem('exchangeRatesTimestamp');
       
-      if (cachedRates && cachedTimestamp) {
+      if (cachedRates && shouldUseCachedExchangeRates(cachedTimestamp)) {
         const timestamp = new Date(cachedTimestamp);
-        const now = new Date();
-        const hoursSinceLastFetch = (now.getTime() - timestamp.getTime()) / (1000 * 60 * 60);
-        
-        if (hoursSinceLastFetch < 24) {
-          console.log('Using cached exchange rates from', timestamp);
-          setLiveExchangeRates(JSON.parse(cachedRates));
-          setLastFetched(timestamp);
-          setLoadingRates(false);
-          return;
-        }
+        setLiveExchangeRates(JSON.parse(cachedRates));
+        setLastFetched(timestamp);
+        setLoadingRates(false);
+        return;
       }
-      
-      // Try to fetch new rates from our edge function
-      console.log('Attempting to fetch fresh exchange rates from edge function...');
       
       try {
         const { data, error } = await supabase.functions.invoke('fetch-exchange-rates');
@@ -79,11 +113,11 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           throw new Error(`API error: ${data?.error || 'No data received'}`);
         }
         
-        console.log('Successfully fetched live exchange rates:', data.rates);
-        
-        // Cache the rates
         localStorage.setItem('exchangeRates', JSON.stringify(data.rates));
         localStorage.setItem('exchangeRatesTimestamp', new Date().toISOString());
+        if (data.sourceDate) {
+          localStorage.setItem('exchangeRatesSourceDate', data.sourceDate);
+        }
         
         setLiveExchangeRates(data.rates);
         setLastFetched(new Date());
@@ -98,7 +132,6 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (error) {
       console.error('Error in fetchExchangeRates:', error);
       // Final fallback to static rates
-      console.log('Using fallback exchange rates due to error');
       setLiveExchangeRates(fallbackExchangeRates);
     } finally {
       setLoadingRates(false);
@@ -109,8 +142,8 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     fetchExchangeRates();
     
-    // Refresh rates every 24 hours
-    const interval = setInterval(fetchExchangeRates, 24 * 60 * 60 * 1000);
+    // Local cache check only; Supabase is called once per Bucharest day after 13:30.
+    const interval = setInterval(fetchExchangeRates, 30 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, [fetchExchangeRates]);

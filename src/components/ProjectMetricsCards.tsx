@@ -10,7 +10,6 @@ interface ProjectMetricsCardsProps {
   totalHours: number;
   billedHours: number;
   unbilledHours: number;
-  paidInvoicedRevenue: number;
   valueFromBilledHours: number;
   unbilledRevenue: number;
   totalMilestoneValue?: number;
@@ -20,6 +19,10 @@ interface ProjectMetricsCardsProps {
   fixedUnbilledRevenue?: number;
   fixedBillingStatus?: FixedProjectBillingStatus;
   hourlyBreakdownAll?: {
+    standard: number;
+    urgent: number;
+  } | null;
+  hourlyBreakdownUnbilled?: {
     standard: number;
     urgent: number;
   } | null;
@@ -33,7 +36,6 @@ const ProjectMetricsCards = ({
   totalHours,
   billedHours,
   unbilledHours,
-  paidInvoicedRevenue,
   valueFromBilledHours,
   unbilledRevenue,
   totalMilestoneValue = 0,
@@ -43,6 +45,7 @@ const ProjectMetricsCards = ({
   fixedUnbilledRevenue = 0,
   fixedBillingStatus = 'unbilled',
   hourlyBreakdownAll = null,
+  hourlyBreakdownUnbilled = null,
   displayCurrency,
   demoMode = false
 }: ProjectMetricsCardsProps) => {
@@ -199,20 +202,6 @@ const ProjectMetricsCards = ({
             </Tooltip>
             <p className="text-muted-foreground py-[24px] text-base">Earned Value</p>
           </div>
-
-          <div className="flex-1 text-center p-4 rounded-lg bg-muted">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <p className="text-foreground text-4xl font-normal cursor-help">
-                  {formatMetric(paidInvoicedRevenue, true)}
-                </p>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{demoMode ? '—' : formatCurrency(paidInvoicedRevenue, displayCurrency)}</p>
-              </TooltipContent>
-            </Tooltip>
-            <p className="text-muted-foreground py-[24px] text-base">Paid Invoices</p>
-          </div>
         </>
       </TooltipProvider>
     );
@@ -284,8 +273,27 @@ const ProjectMetricsCards = ({
 
         <div className="ui-analytics-card flex-1 min-w-0">
           <div className="ui-analytics-content p-6">
-            <div className="space-y-1">
+            <div className="space-y-2 lg:space-y-3">
               <h3 className="ui-analytics-title">Unbilled Revenue</h3>
+
+              {hourlyBreakdownUnbilled && (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="ui-analytics-meta">standard hours:</span>
+                    <span className="inline-flex w-20 items-center justify-end gap-1 text-sm text-foreground tabular-nums">
+                      <span className="text-right">{Math.round(hourlyBreakdownUnbilled.standard)}</span>
+                      <span className="h-2 w-2 rounded-full bg-green-700 shrink-0" />
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="ui-analytics-meta">urgent hours:</span>
+                    <span className="inline-flex w-20 items-center justify-end gap-1 text-sm text-foreground tabular-nums">
+                      <span className="text-right">{Math.round(hourlyBreakdownUnbilled.urgent)}</span>
+                      <span className="h-2 w-2 rounded-full bg-red-700 shrink-0" />
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="mt-2 lg:mt-4">
               <Tooltip>
@@ -296,26 +304,6 @@ const ProjectMetricsCards = ({
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{demoMode ? '—' : formatCurrency(unbilledRevenue, displayCurrency)}</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
-        </div>
-
-        <div className="ui-analytics-card flex-1 min-w-0">
-          <div className="ui-analytics-content p-6">
-            <div className="space-y-1">
-              <h3 className="ui-analytics-title">Paid Invoices</h3>
-            </div>
-            <div className="mt-2 lg:mt-4">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <p className="ui-analytics-value cursor-help">
-                    {formatMetric(paidInvoicedRevenue, true)}
-                  </p>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{demoMode ? '—' : formatCurrency(paidInvoicedRevenue, displayCurrency)}</p>
                 </TooltipContent>
               </Tooltip>
             </div>
