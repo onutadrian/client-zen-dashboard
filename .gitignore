@@ -27,3 +27,4 @@ dist-ssr
 # Coverage and platform-specific
 coverage/
 .vercel/
+supabase/.temp/cli-latest
