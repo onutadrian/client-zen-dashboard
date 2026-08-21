@@ -63,3 +63,6 @@ Agent Memory (Concise, Append‑Only)
 - Added project-level `billed_amount` + derived `billing_status` (`unbilled` / `partial` / `billed`) for fixed-price projects
 - Fixed project revenue cards now use project billing fields, not invoice `project_id`
 - UI editing path: `ProjectSettings.tsx`, `EditProjectSheet.tsx`; helper: `src/utils/projectBilling.ts`
+2026-08-21 – Standard user task visibility
+- Standard users fetch/select/update only tasks where `tasks.assigned_to = auth.uid()` (`src/hooks/tasks/useTasksData.ts`, RLS migration `20260821120000`)
+- Client task views query by client project IDs; admin remains unrestricted

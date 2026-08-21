@@ -27,22 +27,14 @@ export const useTasksData = () => {
       if (profileError) throw profileError;
       const role = profile?.role || 'standard';
 
-      let allTasks = await loadTasksFromDatabase();
-
-      if (role !== 'admin') {
-        const { data: assignments, error: assignmentError } = await supabase
-          .from('user_project_assignments')
-          .select('project_id')
-          .eq('user_id', user.id);
-
-        if (assignmentError) throw assignmentError;
-
-        const assignedProjectIds = assignments.map(a => a.project_id);
-        
-        allTasks = allTasks.filter(task => 
-          task.projectId && assignedProjectIds.includes(task.projectId)
-        );
+      if (role === 'client') {
+        setTasks([]);
+        return;
       }
+
+      const allTasks = await loadTasksFromDatabase(
+        role === 'standard' ? { assignedTo: user.id } : undefined
+      );
 
       setTasks(allTasks);
     } catch (error) {

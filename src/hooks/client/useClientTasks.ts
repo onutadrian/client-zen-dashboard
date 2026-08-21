@@ -20,8 +20,7 @@ export const useClientTasks = (projects: Project[]) => {
       }
       try {
         setLoading(true);
-        const allTasks = await loadTasksFromDatabase();
-        const filtered = allTasks.filter(t => t.projectId && projectIds.includes(t.projectId));
+        const filtered = await loadTasksFromDatabase({ projectIds });
         setTasks(filtered);
       } catch (error) {
         console.error('Error loading client tasks:', error);
@@ -41,4 +40,3 @@ export const useClientTasks = (projects: Project[]) => {
 
   return { tasks, loading };
 };
-

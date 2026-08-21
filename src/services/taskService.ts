@@ -25,12 +25,31 @@ const normalizeTaskTimeLogs = (value: unknown): TaskTimeLog[] => {
   });
 };
 
-export const loadTasksFromDatabase = async (): Promise<Task[]> => {
+interface LoadTasksOptions {
+  assignedTo?: string;
+  projectIds?: string[];
+}
+
+export const loadTasksFromDatabase = async (options: LoadTasksOptions = {}): Promise<Task[]> => {
+  if (options.projectIds && options.projectIds.length === 0) {
+    return [];
+  }
+
   const result = await retryOperation(async () => {
-    const { data, error } = await supabase
+    let query = supabase
       .from('tasks')
       .select('*')
       .order('created_date', { ascending: false });
+
+    if (options.assignedTo) {
+      query = query.eq('assigned_to', options.assignedTo);
+    }
+
+    if (options.projectIds) {
+      query = query.in('project_id', options.projectIds);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     return data;
